@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Strona Domowa :)</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    
+  </head>
+  <body onload="updateClock()">
+
+
+    <header>
+      <nav class="nav2">
+          <ul>
+            <li><a href="index.html">Strona główna</a></li>
+            <li class="dropdown">
+              <a href="programy/programy.html">Programy</a>
+              <ul>
+                <li><a href="Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
+                <li><a href="Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
+                <li><a href="Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
+              </ul>
+            </li>
+          </li>
+          <li class="dropdown">
+      <a href="gothic 2 new balance/gothic2.html">Gothic 2 New Balance</a>
+     <ul>
+        <li><a href="gothic 2 new balance/spis wszystkiego/spis.html">Spis Wszystkiego</a></li>
+        <li><a href="gothic 2 new balance/solucja/solucja.html">Solucja</a></li>
+        <li><a href="gothic 2 new balance/faq/faq.html">FAQ</a></li>
+      </ul>
+    </li>
+            <li><a href="gry/gry.html">Gry</a></li>
+            <li><a href="filmy/filmy glowna.html">Strona do filmów</a></li>
+            <li><a href="zmiany.html">Zmiany na stronie</a></li>
+          </ul>
+        </nav>
+    </header>
+  
+    <main>
+      <h1>Witamy na głównej stronie</h1>
+      <p></p>
+      <div id="clock" onload="updateClock()"></div>
+      <div id="data"></div>
+      
+
+      <section class="odstep2_25">
+        
+        <div class="container">
+          <div class="box">
+            <a href="Programy/programy.html" rel="nofollow">
+              <div class="img-box" style="background-image: url('https://adwokat-kurczab.pl/wp-content/uploads/2017/01/code-1839877_960_720.jpg');">
+                <p>Programy</p>
+              </div>
+            </a>
+          </div>
+        
+          <div class="box">
+            <a href="gothic 2 new balance/gothic2.html" rel="nofollow">
+              <div class="img-box" style="background-image: url('https://media.tenor.com/glFiRFAWLQQAAAAC/bezimienny-gothicgame.gif');">
+                <p>Gothic 2 New Balance</p>
+              </div>
+            </a>
+          </div>
+        
+          <div class="box">
+            <a href="gry/gry.html" rel="nofollow">
+              <div class="img-box" style="background-image: url('https://img-ovh-cloud.zszywka.pl/0/0255/7791-tank-moja-ulubiona-gra--gif.gif');">
+                <p>Gry</p>
+              </div>
+            </a>         
+          </div>
+        
+          <div class="box">
+            <a href="filmy/filmy glowna.html" rel="nofollow">
+              <div class="img-box" style="background-image: url('https://i.gifer.com/1qMJ.gif');">
+                <p>Strona do Filmów</p>
+              </div>
+            </a>
+          
+        
+        </div>
+
+        <div class="box">
+          <a href="zmiany.html" rel="nofollow">
+            <div class="img-box" style="background-image: url('https://i.imgflip.com/5x41k9.gif');">
+              <p>Zmiany na stronie</p>
+            </div>
+          </a>
+        </div>
+        
+        </section>
+
+
+
+    </main>
+    <footer>
+      <p>Copyright © 2023 Max i Domi</p>
+    </footer>
+      <script>
+//zegar
+function updateClock() {
+    var date = new Date();
+    var hour = date.getHours();
+    var minute = date.getMinutes();
+    var second = date.getSeconds();
+    var clock = document.getElementById("clock");
+    clock.innerHTML = "";
+
+    var hourDiv = document.createElement("div");
+    hourDiv.classList.add("clock-element");
+    hourDiv.innerHTML = hour;
+    clock.appendChild(hourDiv);
+
+    var dot1 = document.createElement("span");
+    dot1.innerHTML = ":";
+    clock.appendChild(dot1);
+
+    var minuteDiv = document.createElement("div");
+    minuteDiv.classList.add("clock-element");
+    minuteDiv.innerHTML = minute;
+    clock.appendChild(minuteDiv);
+
+    var dot2 = document.createElement("span");
+    dot2.innerHTML = ":";
+    clock.appendChild(dot2);
+
+    var secondDiv = document.createElement("div");
+    secondDiv.classList.add("clock-element");
+    secondDiv.innerHTML = second;
+    clock.appendChild(secondDiv);
+   
+}
+setInterval(updateClock, 1000);
+
+// utworzenie nowego obiektu XMLHttpRequest
+var xhr = new XMLHttpRequest();
+
+// otwarcie połączenia z adresem URL
+xhr.open("GET", "https://api.abalin.net/", true);
+
+// wysłanie żądania
+xhr.send(); 
+
+// nasłuchiwanie na zmianę stanu połączenia
+xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+        // pobranie odpowiedzi serwera jako tekstu
+        var responseText = xhr.responseText;
+
+        // parsowanie tekstu na obiekt JavaScript
+        var data = JSON.parse(responseText);
+
+        // wyświetlenie danych na stronie
+        document.getElementById("imieniny").innerHTML = "Dzisiejsze imieniny: " + data.data;
+    }
+}
+
+var today = new Date();
+    var days = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+    var dayName = days[today.getDay()];
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    today = dayName + ' ' + dd + '-' + mm + '-' + yyyy;
+    document.getElementById("data").innerHTML = today;
+    </script>
+  </body>
+</html>
