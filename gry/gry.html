@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteka Gier</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        
+        .nav2 {
+            background-color: #333;
+        }
+        
+        .nav2 ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        
+        .nav2 li {
+            margin-right: 20px;
+        }
+        
+        .nav2 a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+        }
+        
+        .nav2 a:hover {
+            background-color: #555;
+        }
+        
+        .nav2 .dropdown ul {
+            display: none;
+            position: absolute;
+            background-color: #555;
+        }
+        
+        .nav2 .dropdown:hover ul {
+            display: block;
+        }
+        
+        .nav2 .dropdown ul li {
+            margin: 0;
+            padding: 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .nav2 .dropdown ul li:last-child {
+            border-bottom: none;
+        }
+        
+        .nav2 .dropdown ul li a {
+            padding: 10px;
+        }
+        
+        .center {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .lista_malych_przyciskow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .rzad_przyciskow {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            /* Pozwala elementom przechodzić do nowej linii */
+            width: 100%;
+            margin: 0 auto;
+            /* Centruje rzędy w kontenerze */
+        }
+        
+        .maly_przycisk {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+            flex: 1 0 18%;
+            /* Procent szerokości przycisku */
+            margin: 10px 5px;
+            /* Dostosowanie marginesów dla lepszego wykorzystania przestrzeni */
+            min-width: 150px;
+            /* Minimalna szerokość, zapewnia, że elementy są czytelne */
+            max-width: 220px;
+            /* Maksymalna szerokość, zapewnia jednolitość rozmiarów */
+        }
+        /* Dostosowanie dla mniejszych ekranów, jeśli to potrzebne */
+        
+        @media (max-width: 768px) {
+            .maly_przycisk {
+                flex: 1 0 46%;
+                /* Dwa przyciski na rząd na mniejszych ekranach */
+                margin: 10px 2%;
+                /* Zmniejszone marginesy */
+            }
+        }
+        
+        .maly_przycisk:hover {
+            background-color: #eee;
+        }
+        
+        .maly_przycisk img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body class="body1">
+    <header>
+        <nav class="nav2">
+            <ul>
+                <li><a href="../index.html">Strona główna</a></li>
+                <li class="dropdown">
+                    <a href="../Programy/programy.html">Programy</a>
+                    <ul>
+                        <li><a href="../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
+                        <li><a href="../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
+                        <li><a href="../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
+                    </ul>
+                </li>
+                <li><a href="../filmy/filmy glowna.html">Strona do filmów</a></li>
+                <li><a href="../muzyka/muzyka.html">Muzyka</a></li>
+            </ul>
+        </nav>
+    </header>
+    <h1 class="center">Biblioteka Gier</h1>
+    <div class="lista_malych_przyciskow">
+        <a class="maly_przycisk" href="gra zapamietywanie/gra zapamietywanie.html" rel="nofollow">
+            <img src="gra zapamietywanie/zdjęcie gry na zapamiętywanie.JPG" alt="Gra na zapamiętywanie">
+            <span>Gra na zapamiętywanie</span>
+        </a>
+        <a class="maly_przycisk" href="2048/2048.html" rel="nofollow">
+            <img src="2048/2048.JPG" alt="2048">
+            <span>2048</span>
+        </a>
+        <a class="maly_przycisk" href="chess/chess.html" rel="nofollow">
+            <img src="https://zegaryszachowe.pl/userdata/public/gfx/9560/Szachy-Turniejowe-4.jpg" alt="Szachy">
+            <span>Szachy</span>
+        </a>
+        <a class="maly_przycisk" href="wisielec/wisielec.html" rel="nofollow">
+            <img src="https://play-lh.googleusercontent.com/j3fSpmOuYo8M43ZldLXybNIEc6B9xQ25jy_OlIqx0loPB_lomyQlkXdwBFhYWi7-GA=w240-h480-rw" alt="Wisielec">
+            <span>Wisielec</span>
+        </a>
+        <a class="maly_przycisk" href="tetris/tetris.html" rel="nofollow">
+            <img src="tetris/tetris.JPG" alt="Tetris">
+            <span>Tetris</span>
+        </a>
+        <a class="maly_przycisk" href="spaceinvaders/spaceinvaders.html" rel="nofollow">
+            <img src="https://i.ytimg.com/vi/D1jZaIPeD5w/maxresdefault.jpg" alt="Space Invaders">
+            <span>Space Invaders</span>
+        </a>
+        <a class="maly_przycisk" href="pongcoop/pongcoop.html" rel="nofollow">
+            <img src="pongcoop/pong(coop).JPG" alt="Pong Coop lokalny">
+            <span>Pong (Coop lokalny)</span>
+        </a>
+        <a class="maly_przycisk" href="kolkos/kolkos.html" rel="nofollow">
+            <img src="kolkokrzyrzykc/kókokrzyżyk.JPG" alt="Kółko Krzyżyk Solo">
+            <span>Kółko Krzyżyk (Solo)</span>
+        </a>
+        <a class="maly_przycisk" href="kolo_fortuny/kolo_fortuny.html" rel="nofollow">
+            <img src="kolo_fortuny/Kolo-fortuny-suchoscieralne-157cm.jpg" alt="Koło Fortuny">
+            <span>Koło Fortuny</span>
+        </a>
+        <a class="maly_przycisk" href="quiz/quiz.html" rel="nofollow">
+            <img src="quiz/CEIk9kuTURBXy9jNmFjZDg1MS1jM2JjLTQ2M2EtOTE2Zi1hOWVmMjRjNTUxNzIuanBlZ5DeAAGhMAU.webp" alt="Quiz o podzespołach komputerowych">
+            <span>Quiz o podzespołach komputerowych</span>
+        </a>
+
+
+
+
+
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const games = document.querySelectorAll('.maly_przycisk');
+            const gridContainer = document.querySelector('.lista_malych_przyciskow');
+            const numberOfGames = games.length;
+
+            const columns = Math.ceil(numberOfGames / Math.ceil(numberOfGames / 5)); // Liczba kolumn zależna od liczby gier
+
+            // Tworzenie i zarządzanie rzędami
+            let currentRow = document.createElement('div');
+            currentRow.className = 'rzad_przyciskow';
+            gridContainer.appendChild(currentRow);
+
+            games.forEach((game, index) => {
+                currentRow.appendChild(game);
+                if ((index + 1) % columns === 0 && index + 1 < numberOfGames) {
+                    currentRow = document.createElement('div');
+                    currentRow.className = 'rzad_przyciskow';
+                    gridContainer.appendChild(currentRow);
+                }
+            });
+        });
+    </script>
+</body>
+
+
+</html>
