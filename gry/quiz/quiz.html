@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <nav class="nav2">
+            <ul>
+                <li><a href="../../index.html">Strona główna</a></li>
+
+                <li class="dropdown">
+                    <a href="../../Programy/programy.html">Programy</a>
+                    <ul>
+                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
+                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
+                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
+                    </ul>
+                </li>
+                <li><a href="../../gry/gry.html">Gry</a></li>
+                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
+                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="quiz-container">
+        <div id="start-page">
+            <h1>Wybierz tryb quizu</h1>
+            <button id="single-question">Jedno pytanie</button>
+            <button id="multiple-questions">Wiele pytań</button>
+        </div>
+        <div id="quiz-page" class="hidden">
+            <!-- Tutaj będą pytania -->
+        </div>
+        <div id="result-page" class="hidden">
+            <!-- Tutaj będą wyniki -->
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

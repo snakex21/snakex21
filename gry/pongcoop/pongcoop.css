@@ -1,0 +1,95 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #6b1a1a59;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    width: 100%;
+    background-color: #333;
+}
+
+.nav2 {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.nav2 ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.nav2 li {
+    margin-right: 20px;
+}
+
+.nav2 a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.nav2 a:hover {
+    background-color: #555;
+}
+
+.nav2 .dropdown ul {
+    display: none;
+    position: absolute;
+    background-color: #555;
+}
+
+.nav2 .dropdown:hover ul {
+    display: block;
+}
+
+.nav2 .dropdown ul li {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #444;
+}
+
+.nav2 .dropdown ul li:last-child {
+    border-bottom: none;
+}
+
+.nav2 .dropdown ul li a {
+    padding: 10px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    width: 100%;
+    max-width: 640px;
+    margin-top: 20px;
+}
+
+canvas {
+    outline: 1px solid white;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.instructions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.instructions h1,
+.instructions h2,
+.instructions h3 {
+    color: #ffc468;
+}
