@@ -1,0 +1,218 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+
+.nav2 {
+    background-color: #333;
+}
+
+.nav2 ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.nav2 li {
+    margin-right: 20px;
+}
+
+.nav2 a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+}
+
+.nav2 a:hover {
+    background-color: #555;
+}
+
+.nav2 .dropdown ul {
+    display: none;
+    position: absolute;
+    background-color: #555;
+}
+
+.nav2 .dropdown:hover ul {
+    display: block;
+}
+
+.nav2 .dropdown ul li {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #444;
+}
+
+.nav2 .dropdown ul li:last-child {
+    border-bottom: none;
+}
+
+.nav2 .dropdown ul li a {
+    padding: 10px;
+}
+
+main {
+    display: flex;
+}
+
+.sidebar {
+    width: 20%;
+    padding: 20px;
+    background-color: #1c1c1c;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: white;
+}
+
+.random-tracks {
+    margin-top: 20px;
+}
+
+.random-tracks h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.track-item {
+    background-color: #1DB954;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.content h1 {
+    text-align: center;
+}
+
+.music-section {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.playlist-item {
+    background-color: #1DB954;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.playlist-item img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.player {
+    background-color: #333;
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+
+.track-info {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.controls button img {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.controls button:hover {
+    color: #1DB954;
+}
+
+.controls button.active {
+    color: #1DB954;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+#progress {
+    flex: 1;
+    margin: 0 10px;
+}
+
+#progress::-webkit-slider-thumb {
+    background: #1DB954;
+    border-radius: 50%;
+}
+
+#progress::-webkit-slider-runnable-track {
+    background: #555;
+}
+
+.progress-container span {
+    font-size: 14px;
+}
+
+.speed-control,
+.volume-control {
+    display: flex;
+    align-items: center;
+}
+
+.speed-control select,
+.volume-control input {
+    background: #555;
+    color: white;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+.volume-control img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    margin-right: 5px;
+}
