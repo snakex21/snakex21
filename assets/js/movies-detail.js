@@ -510,6 +510,10 @@ const formatCountLabel = (count) => {
   return `${count} tytułów`;
 };
 
+const formatCollectionLabel = (count) => {
+  return count === 1 ? "1 kolekcji" : `${count} kolekcjach`;
+};
+
 const computeDominantGenre = (items) => {
   const genreCounts = new Map();
   items.forEach(({ genre }) => {
@@ -540,17 +544,46 @@ const getSeriesMeta = (id) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
-  let seriesId = params.get("series") ?? fallbackSeriesId;
+  const requestedSeriesId = params.get("series");
+  const normalizedRequest = requestedSeriesId?.toLowerCase();
+  let seriesId = requestedSeriesId ?? "";
   let isFallback = false;
+  let isAllView = false;
 
-  if (!moviesData[seriesId]) {
+  if (!requestedSeriesId) {
+    isAllView = true;
+    seriesId = "all";
+  } else if (normalizedRequest === "all" || normalizedRequest === "wszystkie") {
+    isAllView = true;
+    seriesId = "all";
+  } else if (!moviesData[seriesId]) {
     seriesId = fallbackSeriesId;
     isFallback = true;
   }
 
-  const movies = moviesData[seriesId] ?? [];
-  const meta = getSeriesMeta(seriesId);
-  const friendlyName = formatSeriesName(seriesId);
+  const friendlyName = isAllView ? "Wszystkie filmy Maxa" : formatSeriesName(seriesId);
+  const meta = isAllView
+    ? {
+        description: "Pełna biblioteka filmów ze wszystkich kolekcji Maxa.",
+        mood: "Miks gatunków",
+        highlight: "Przeglądaj wszystkie kolekcje w jednym miejscu i filtruj po tytułach.",
+      }
+    : getSeriesMeta(seriesId);
+  const movies = isAllView
+    ? Object.entries(moviesData).flatMap(([id, items = []]) => {
+        const seriesName = formatSeriesName(id);
+        return items.map((item) => ({
+          ...item,
+          seriesId: id,
+          seriesName,
+        }));
+      })
+    : (moviesData[seriesId] ?? []).map((movie) => ({
+        ...movie,
+        seriesId,
+        seriesName: friendlyName,
+      }));
+  const collectionCount = Object.keys(moviesData).length;
 
   const heroTitle = document.querySelector("[data-series-title]");
   const heroDescription = document.querySelector("[data-series-description]");
@@ -578,17 +611,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (heroDescription) {
     if (isFallback) {
       heroDescription.textContent = "Nie znaleźliśmy takiej kolekcji, dlatego proponujemy sprawdzony zestaw Top Gun.";
+    } else if (isAllView) {
+      heroDescription.textContent = `Przeglądasz ${formatCountLabel(movies.length)} w ${formatCollectionLabel(collectionCount)}. Użyj wyszukiwarki, aby szybko odnaleźć ulubione tytuły.`;
     } else {
       heroDescription.textContent = `${meta.description} Liczba tytułów: ${formatCountLabel(movies.length)}.`;
     }
   }
 
   if (sectionTitle) {
-    sectionTitle.textContent = `Tytuły z kolekcji ${friendlyName}`;
+    sectionTitle.textContent = isAllView ? "Pełny katalog filmów" : `Tytuły z kolekcji ${friendlyName}`;
   }
 
   if (sectionDescription) {
-    sectionDescription.textContent = 'Kliknij w przycisk „Oglądaj”, aby uruchomić film w nowym oknie. Możesz też filtrować po tytułach i gatunkach.';
+    sectionDescription.textContent = isAllView
+      ? "Cała biblioteka filmów Maxa w jednym miejscu. Filtruj po tytułach, gatunkach lub nazwach kolekcji."
+      : 'Kliknij w przycisk „Oglądaj”, aby uruchomić film w nowym oknie. Możesz też filtrować po tytułach i gatunkach.';
   }
 
   const baseHighlight = isFallback
@@ -604,7 +641,9 @@ document.addEventListener("DOMContentLoaded", () => {
   applySeriesMessage(baseHighlight);
 
   if (heroMeta) {
-    heroMeta.textContent = formatCountLabel(movies.length);
+    heroMeta.textContent = isAllView
+      ? `${formatCountLabel(movies.length)} w ${formatCollectionLabel(collectionCount)}`
+      : formatCountLabel(movies.length);
   }
 
   if (heroCount) {
@@ -640,7 +679,8 @@ document.addEventListener("DOMContentLoaded", () => {
   container.innerHTML = "";
 
   const applyMovieHighlight = (movie) => {
-    applySeriesMessage(`Włącz ${movie.title} (${movie.year}) – ${movie.genre}.`);
+    const seriesMessage = isAllView && movie.seriesName ? ` z kolekcji ${movie.seriesName}` : "";
+    applySeriesMessage(`Włącz ${movie.title} (${movie.year})${seriesMessage} – ${movie.genre}.`);
   };
 
   const cardEntries = movies.map((movie) => {
@@ -648,6 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
     card.className = "media-card media-card--compact";
     card.dataset.title = movie.title.toLowerCase();
     card.dataset.tags = (movie.genre ?? "").toLowerCase();
+    card.dataset.series = (movie.seriesName ?? "").toLowerCase();
     card.setAttribute("data-film-card", "");
     card.innerHTML = `
       <figure class="media-card__poster media-card__poster--compact">
@@ -659,6 +700,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span>${movie.year}</span>
           <span>${movie.genre}</span>
         </div>
+        ${isAllView ? `<div class="media-card__tags"><span>${movie.seriesName}</span></div>` : ""}
         <a class="btn btn-primary" href="${movie.link}" target="_blank" rel="noopener">Oglądaj</a>
       </div>
     `;
@@ -672,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const query = filterInput?.value.trim().toLowerCase() ?? "";
     let visibleCount = 0;
     cardEntries.forEach(({ card }) => {
-      const haystack = `${card.dataset.title ?? ""} ${card.dataset.tags ?? ""}`;
+      const haystack = `${card.dataset.title ?? ""} ${card.dataset.tags ?? ""} ${card.dataset.series ?? ""}`;
       const isVisible = haystack.includes(query);
       card.classList.toggle("is-hidden", !isVisible);
       if (isVisible) {
@@ -712,6 +754,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const renderSuggestions = () => {
     if (!suggestionsContainer) return;
+    if (isAllView) {
+      const suggestionsSection = suggestionsContainer.closest("section");
+      suggestionsSection?.classList.add("is-hidden");
+      return;
+    }
     suggestionsContainer.innerHTML = "";
     const availableSeries = Object.keys(moviesData).filter((id) => id !== seriesId);
     availableSeries.sort(() => Math.random() - 0.5);
