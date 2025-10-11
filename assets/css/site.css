@@ -890,11 +890,13 @@ footer a {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
 }
 
+
 .media-grid {
   margin-top: 2.5rem;
   display: grid;
   gap: 1.6rem;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: stretch;
 }
 
 .media-grid--compact {
@@ -913,6 +915,7 @@ footer a {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100%;
   transition: transform var(--transition-medium), box-shadow var(--transition-medium);
 }
 
@@ -947,6 +950,11 @@ footer a {
   flex-direction: column;
   gap: 0.85rem;
   padding: 1.5rem;
+  flex: 1;
+}
+
+.media-card__body .btn:last-child {
+  margin-top: auto;
 }
 
 .media-card--mini .media-card__body {
