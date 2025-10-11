@@ -1,10 +1,10 @@
-export const difficultyScale = {
+const difficultyScale = {
   casual: { label: "Łatwa", weight: 1, description: "Lekki relaks, zero presji." },
   classic: { label: "Średnia", weight: 2, description: "Klasyczne tempo i równy poziom wyzwań." },
   intense: { label: "Trudna", weight: 3, description: "Solidna próba dla najbardziej wytrwałych." }
 };
 
-export const durationScale = {
+const durationScale = {
   quick: {
     label: "Szybka (5–10 min)",
     order: 1,
@@ -22,7 +22,7 @@ export const durationScale = {
   }
 };
 
-export const gamesCatalog = [
+const gamesCatalog = [
   {
     slug: "memory",
     title: "Gra na zapamiętywanie",
@@ -200,3 +200,7 @@ export const gamesCatalog = [
       "Rozgrzewka dla refleksu – sprawdzi się na start wieczoru z grami lub w przerwie między innymi tytułami."
   }
 ];
+
+window.gamesDifficultyScale = difficultyScale;
+window.gamesDurationScale = durationScale;
+window.gamesCatalog = gamesCatalog;

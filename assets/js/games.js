@@ -1,5 +1,3 @@
-import { gamesCatalog, difficultyScale, durationScale } from "./games-data.js";
-
 const escapeHtml = (value = "") =>
   String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -16,6 +14,10 @@ const escapeForSelector = (value) => {
   }
   return String(value ?? "").replace(/([.*+?^${}()|\[\]\\])/g, "\\$1");
 };
+
+const gamesCatalog = Array.isArray(window.gamesCatalog) ? window.gamesCatalog : [];
+const difficultyScale = window.gamesDifficultyScale ?? {};
+const durationScale = window.gamesDurationScale ?? {};
 
 document.addEventListener("DOMContentLoaded", () => {
   const gameGrid = document.querySelector("[data-game-grid]");
