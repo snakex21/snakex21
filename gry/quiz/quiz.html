@@ -66,14 +66,17 @@
                 </ul>
             </aside>
         </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-quiz-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="Quiz wiedzy – zagraj" loading="lazy"></iframe>
                 </div>
                 <p class="game-note">Spróbuj rozwiązać quiz bez błędnej odpowiedzi. Po uzyskaniu 100% wyników zwiększ tempo lub poproś znajomych o wspólne rozgrywki.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-quiz-instructions" data-instructions-panel hidden tabindex="-1">
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
