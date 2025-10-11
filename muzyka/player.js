@@ -413,9 +413,19 @@ const searchBar = document.getElementById('search-bar');
 const randomTracks = document.getElementById('random-tracks');
 const musicSection = document.getElementById('music-section');
 const autoplayButton = document.getElementById('autoplay');
+const trackCountDisplay = document.getElementById('track-count');
+const autoplayStatus = document.getElementById('autoplay-status');
+const lastPlayedDisplay = document.getElementById('last-played');
+const SIDEBAR_RANDOM_LIMIT = 12;
 
 // Zaktualizuj przycisk autoplay na początkowym stanie
 autoplayButton.textContent = 'Wyłącz autoodtwarzanie';
+if (trackCountDisplay) {
+    trackCountDisplay.textContent = tracks.length.toLocaleString('pl-PL');
+}
+if (autoplayStatus) {
+    autoplayStatus.textContent = isAutoplayEnabled ? 'Włączony' : 'Wyłączony';
+}
 
 audio.addEventListener('timeupdate', updateProgress);
 audio.addEventListener('ended', () => {
@@ -571,11 +581,17 @@ function toggleMute() {
 function toggleAutoplay() {
     isAutoplayEnabled = !isAutoplayEnabled;
     autoplayButton.textContent = isAutoplayEnabled ? 'Wyłącz autoodtwarzanie' : 'Włącz autoodtwarzanie';
+    if (autoplayStatus) {
+        autoplayStatus.textContent = isAutoplayEnabled ? 'Włączony' : 'Wyłączony';
+    }
 }
 
 function updateTrackInfo(title, artist) {
     trackTitle.textContent = title;
     trackArtist.textContent = artist;
+    if (lastPlayedDisplay) {
+        lastPlayedDisplay.textContent = `${title} – ${artist}`;
+    }
 }
 
 function updateProgress() {
@@ -639,21 +655,23 @@ function generateTrackElements() {
     randomTracks.innerHTML = '';
     musicSection.innerHTML = '';
 
-    tracks.forEach((track, index) => {
-        // Tworzenie elementu dla bocznego paska
+    const sidebarSample = tracks.slice(0, SIDEBAR_RANDOM_LIMIT);
+
+    sidebarSample.forEach((track, index) => {
         const trackItem = document.createElement('div');
         trackItem.className = 'track-item';
         trackItem.textContent = `${track.title} - ${track.artist}`;
         trackItem.onclick = () => loadTrack(index);
         randomTracks.appendChild(trackItem);
+    });
 
-        // Tworzenie elementu dla sekcji z obrazkami
+    tracks.forEach((track, index) => {
         const playlistItem = document.createElement('div');
         playlistItem.className = 'playlist-item';
         playlistItem.onclick = () => loadTrack(index);
         const img = document.createElement('img');
         img.src = track.imgSrc; // Ścieżka do obrazu dla każdego utworu
-        img.alt = 'Cover Image';
+        img.alt = `Okładka utworu ${track.title}`;
         playlistItem.appendChild(img);
         const titleDiv = document.createElement('div');
         titleDiv.textContent = track.title;

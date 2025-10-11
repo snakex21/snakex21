@@ -1,0 +1,207 @@
+.music-layout {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+}
+
+.music-sidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.music-random h2 {
+  margin: 0 0 0.5rem;
+}
+
+.music-random__hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.music-random__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.track-item {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.track-item:hover,
+.track-item:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px -24px rgba(99, 102, 241, 0.45);
+}
+
+.music-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.music-content h2 {
+  margin: 0;
+}
+
+.music-section {
+  display: grid;
+  gap: 1.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.playlist-item {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+}
+
+.playlist-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 46px -32px rgba(99, 102, 241, 0.5);
+}
+
+.playlist-item img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.playlist-item div {
+  font-weight: 600;
+}
+
+.music-footer {
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding-bottom: 2.5rem;
+}
+
+.music-player {
+  max-width: min(960px, calc(100% - 3rem));
+  margin: 0 auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  padding: 1.75rem 2rem;
+  display: grid;
+  gap: 1.4rem;
+}
+
+.music-player .track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.music-player .track-info #track-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.music-player .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.music-player .controls button {
+  background: rgba(148, 163, 184, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.9rem;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+}
+
+.music-player .controls button:hover,
+.music-player .controls button:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(99, 102, 241, 0.16);
+}
+
+.music-player .controls img {
+  width: 20px;
+  height: 20px;
+}
+
+.music-player .speed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.music-player select,
+.music-player input[type="range"] {
+  accent-color: var(--color-accent);
+}
+
+.music-player .progress-container,
+.music-player .volume-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.music-player .volume-control img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 960px) {
+  .music-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .music-player {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .music-player .controls {
+    justify-content: flex-start;
+  }
+
+  .music-player {
+    gap: 1rem;
+  }
+
+  .music-player .progress-container,
+  .music-player .volume-control {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
