@@ -41,32 +41,8 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Gra dla dwóch osób</span>
-                <h1>Kółko i krzyżyk – hot seat</h1>
-                <p>Idealna mini-gra na szybką rywalizację obok jednego ekranu. Kolejne ruchy zapisują się automatycznie, a jednym kliknięciem rozpoczniesz nową partię.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Dwóch graczy przy jednym urządzeniu</div>
-                    <div class="game-meta__item"><strong>Czas rundy:</strong><br/>1–3 minuty</div>
-                    <div class="game-meta__item"><strong>Mechanika:</strong><br/>Tura po turze</div>
-                    <div class="game-meta__item"><strong>Opcje:</strong><br/>Przycisk Restart na dole planszy</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Zacznij rozgrywkę</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Domowe turnieje</h2>
-                <ul>
-                    <li>Liczycie punkty? 1 za zwycięstwo, 0 za remis – zobaczcie, kto pierwszy zdobędzie 5.</li>
-                    <li>Zmiana symbolu po każdej partii pozwala wyrównać szanse.</li>
-                    <li>Spróbujcie grać na czas, aby ćwiczyć szybkie decyzje.</li>
-                </ul>
-            </aside>
-        </section>
         <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Kółko i krzyżyk – hot seat</h1>
             <div class="game-layout__main">
                 <div class="game-layout__controls">
                     <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolkokrzyzykc-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
@@ -74,9 +50,34 @@
                 <div class="game-frame">
                     <iframe src="play.html" title="Kółko i krzyżyk dla dwóch osób" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Gra automatycznie informuje o zwycięstwie lub remisie. Wybierz „Restart”, gdy tylko będziecie gotowi na rewanż.</p>
             </div>
             <aside class="game-layout__aside" id="game-kolkokrzyzykc-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Idealna mini-gra na szybką rywalizację obok jednego ekranu. Kolejne ruchy zapisują się automatycznie, a jednym kliknięciem rozpoczniesz nową partię.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Dwóch graczy przy jednym urządzeniu</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Czas rundy</dt>
+                            <dd>1–3 minuty</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Mechanika</dt>
+                            <dd>Tura po turze</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Opcje</dt>
+                            <dd>Przycisk Restart na dole planszy</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -84,13 +85,16 @@
                         <li>Gracze wykonują ruchy naprzemiennie – brak dodatkowych ustawień.</li>
                         <li>Komunikaty nad planszą informują, kto wygrał bieżącą partię.</li>
                     </ul>
+                    <p>Gra automatycznie informuje o zwycięstwie lub remisie. Wybierz „Restart”, gdy tylko będziecie gotowi na rewanż.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Szybkie scenariusze</h2>
+                    <h2>Domowe turnieje</h2>
+                    <ul class="game-list">
+                        <li>Liczycie punkty? 1 za zwycięstwo, 0 za remis – zobaczcie, kto pierwszy zdobędzie 5.</li>
+                        <li>Zmiana symbolu po każdej partii pozwala wyrównać szanse.</li>
+                        <li>Spróbujcie grać na czas, aby ćwiczyć szybkie decyzje.</li>
+                    </ul>
                     <p>Ustalcie dodatkowe zasady: np. po remisie kolejna partia toczy się bez pola środkowego albo tylko na krawędziach.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
                 </div>
             </aside>
         </section>
