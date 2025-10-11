@@ -41,40 +41,43 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Gra logiczna</span>
-                <h1>2048</h1>
-                <p>Przesuwaj planszę, łącz identyczne liczby i twórz coraz większe wartości. Każdy ruch ma znaczenie – buduj łańcuchy i zarządzaj wolnymi polami, aby dotrzeć do magicznej płytki 2048.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo, offline</div>
-                    <div class="game-meta__item"><strong>Poziom:</strong><br/>Strategiczna łamigłówka</div>
-                    <div class="game-meta__item"><strong>Sesja:</strong><br/>5–10 minut</div>
-                    <div class="game-meta__item"><strong>Cel:</strong><br/>Zdobywaj kolejne rekordy punktowe</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Zagraj teraz</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Szybkie wskazówki</h2>
-                <p>Zapanuj nad planszą dzięki prostym strategiom:</p>
-                <ul>
-                    <li>Trzymaj największe liczby w jednym rogu.</li>
-                    <li>Układaj wartości w malejące rzędy lub kolumny.</li>
-                    <li>Ogranicz losowe ruchy, aby nie zapełnić planszy.</li>
-                </ul>
-            </aside>
-        </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">2048</h1>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-2048-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="2048 – graj teraz" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Wskazówka: Zacznij od ustawienia największej liczby w jednym z narożników i trzymaj się wybranej strategii do końca rundy.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-2048-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Przesuwaj planszę, łącz identyczne liczby i twórz coraz większe wartości. Każdy ruch ma znaczenie – buduj łańcuchy i zarządzaj wolnymi polami, aby dotrzeć do magicznej płytki 2048.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo, offline</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Poziom</dt>
+                            <dd>Strategiczna łamigłówka</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Sesja</dt>
+                            <dd>5–10 minut</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Cel</dt>
+                            <dd>Zdobywaj kolejne rekordy punktowe</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Otwórz w nowej karcie</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -84,11 +87,15 @@
                     </ul>
                 </div>
                 <div class="game-card">
-                    <h2>Chcesz więcej?</h2>
+                    <h2>Szybkie wskazówki</h2>
+                    <p>Zapanuj nad planszą dzięki prostym strategiom:</p>
+                    <ul class="game-list">
+                        <li>Trzymaj największe liczby w jednym rogu.</li>
+                        <li>Układaj wartości w malejące rzędy lub kolumny.</li>
+                        <li>Ogranicz losowe ruchy, aby nie zapełnić planszy.</li>
+                    </ul>
+                    <p>Wskazówka: Zacznij od ustawienia największej liczby w jednym z narożników i trzymaj się wybranej strategii do końca rundy.</p>
                     <p>Spróbuj pobić swój poprzedni wynik, a gdy osiągniesz 2048, kontynuuj dalej, aby zobaczyć, jak wysoko potrafisz dojść.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Otwórz w nowej karcie</a>
-                    </div>
                 </div>
             </aside>
         </section>

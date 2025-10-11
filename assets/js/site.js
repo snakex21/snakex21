@@ -202,4 +202,55 @@ document.addEventListener("DOMContentLoaded", () => {
     applyHighlight(activeHighlightIndex);
   });
 
+  /* Game instructions layout */
+  const instructionLayouts = document.querySelectorAll("[data-instructions-layout]");
+
+  instructionLayouts.forEach((layout) => {
+    const toggle = layout.querySelector("[data-instructions-toggle]");
+    const panel = layout.querySelector("[data-instructions-panel]");
+    if (!toggle || !panel) return;
+
+    const closedLabel = toggle.getAttribute("data-open-label") || toggle.textContent || "Pokaż instrukcje";
+    const openLabel = toggle.getAttribute("data-close-label") || "Ukryj instrukcje";
+
+    const applyState = (isOpen) => {
+      layout.setAttribute("data-instructions-open", isOpen ? "true" : "false");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.textContent = isOpen ? openLabel : closedLabel;
+      if (isOpen) {
+        panel.removeAttribute("hidden");
+        if (typeof panel.scrollTop === "number") {
+          panel.scrollTop = 0;
+        }
+      } else {
+        panel.setAttribute("hidden", "");
+      }
+    };
+
+    applyState(false);
+
+    toggle.addEventListener("click", () => {
+      const shouldOpen = layout.getAttribute("data-instructions-open") !== "true";
+      applyState(shouldOpen);
+      if (shouldOpen) {
+        window.requestAnimationFrame(() => {
+          if (typeof panel.focus === "function") {
+            try {
+              panel.focus({ preventScroll: true });
+            } catch (error) {
+              panel.focus();
+            }
+          }
+        });
+      }
+    });
+
+    panel.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        applyState(false);
+        toggle.focus();
+      }
+    });
+  });
+
 });

@@ -41,39 +41,43 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Słowna klasyka</span>
-                <h1>Wisielec</h1>
-                <p>Odgadnij ukryte słowo, zanim postać wisielca zostanie narysowana. Korzystaj z alfabetu i podpowiedzi, aby odkryć hasło przed czasem.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo lub wspólnie z przyjaciółmi</div>
-                    <div class="game-meta__item"><strong>Cel:</strong><br/>Odgadnij hasło, zanim skończą się próby</div>
-                    <div class="game-meta__item"><strong>Pomoc:</strong><br/>Dostępna podpowiedź</div>
-                    <div class="game-meta__item"><strong>Umiejętności:</strong><br/>Słownictwo i skojarzenia</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Zacznij zgadywać</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Jak grać skuteczniej?</h2>
-                <ul>
-                    <li>Najpierw wybieraj najczęstsze samogłoski – zwiększają szanse na odkrycie słowa.</li>
-                    <li>Zwróć uwagę na długość słowa i powtarzające się litery.</li>
-                    <li>W razie trudności skorzystaj z podpowiedzi, by zawęzić możliwości.</li>
-                </ul>
-            </aside>
-        </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Wisielec</h1>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-wisielec-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="Wisielec – zagraj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Spróbuj odgadnąć hasło bez używania podpowiedzi, a następnie zwiększ poziom trudności, zgadując na czas.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-wisielec-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Odgadnij ukryte słowo, zanim postać wisielca zostanie narysowana. Korzystaj z alfabetu i podpowiedzi, aby odkryć hasło przed czasem.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo lub wspólnie z przyjaciółmi</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Cel</dt>
+                            <dd>Odgadnij hasło, zanim skończą się próby</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Pomoc</dt>
+                            <dd>Dostępna podpowiedź</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Umiejętności</dt>
+                            <dd>Słownictwo i skojarzenia</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -81,13 +85,16 @@
                         <li>Przycisk „Podpowiedź” odsłania wskazówkę – używaj go rozsądnie.</li>
                         <li>Po zakończeniu gry wybierz nowy temat i zacznij od początku.</li>
                     </ul>
+                    <p>Spróbuj odgadnąć hasło bez używania podpowiedzi, a następnie zwiększ poziom trudności, zgadując na czas.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Gra zespołowa</h2>
+                    <h2>Jak grać skuteczniej?</h2>
+                    <ul class="game-list">
+                        <li>Najpierw wybieraj najczęstsze samogłoski – zwiększają szanse na odkrycie słowa.</li>
+                        <li>Zwróć uwagę na długość słowa i powtarzające się litery.</li>
+                        <li>W razie trudności skorzystaj z podpowiedzi, by zawęzić możliwości.</li>
+                    </ul>
                     <p>Podzielcie się na drużyny i zgadujcie na zmianę. Każda pomyłka to punkt dla przeciwnika – kto pierwszy odgadnie trzy hasła, wygrywa.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
                 </div>
             </aside>
         </section>

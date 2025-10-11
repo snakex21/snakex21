@@ -41,39 +41,43 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Generator zabawy</span>
-                <h1>Koło Fortuny</h1>
-                <p>Dodaj dowolne imiona lub zadania i obserwuj kolorowe losowanie. Idealne do wyboru kolejności w grach, przydziału zadań czy zabaw podczas spotkań.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Dowolna liczba graczy</div>
-                    <div class="game-meta__item"><strong>Czas:</strong><br/>Losowanie w kilka sekund</div>
-                    <div class="game-meta__item"><strong>Personalizacja:</strong><br/>Własne wpisy, reset i ponowne losowanie</div>
-                    <div class="game-meta__item"><strong>Zastosowanie:</strong><br/>Losowanie zadań, nagród, kolejności</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Rozkręć koło</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Pomysły na użycie</h2>
-                <ul>
-                    <li>Wpisz ulubione przekąski i wylosuj menu filmowego seansu.</li>
-                    <li>Przydziel zadania domowe w losowy sposób – sprawiedliwie i zabawnie.</li>
-                    <li>Wprowadź wyzwania dnia i daj się zaskoczyć ruletce.</li>
-                </ul>
-            </aside>
-        </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Koło Fortuny</h1>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolofortuny-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="Koło Fortuny – losuj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Wpisz dowolną liczbę uczestników, wciśnij „Add”, a potem naciśnij „Spin”, aby uruchomić kolorową animację losowania.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-kolofortuny-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Dodaj dowolne imiona lub zadania i obserwuj kolorowe losowanie. Idealne do wyboru kolejności w grach, przydziału zadań czy zabaw podczas spotkań.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Dowolna liczba graczy</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Czas</dt>
+                            <dd>Losowanie w kilka sekund</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Personalizacja</dt>
+                            <dd>Własne wpisy, reset i ponowne losowanie</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Zastosowanie</dt>
+                            <dd>Losowanie zadań, nagród, kolejności</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Tryb pełnoekranowy</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -81,13 +85,16 @@
                         <li>Przycisk „Spin” rozpoczyna losowanie, a „Reset” czyści listę uczestników.</li>
                         <li>Koło automatycznie zatrzymuje się na zwycięskiej sekcji.</li>
                     </ul>
+                    <p>Wpisz dowolną liczbę uczestników, wciśnij „Add”, a potem naciśnij „Spin”, aby uruchomić kolorową animację losowania.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Pro tip</h2>
+                    <h2>Pomysły na użycie</h2>
+                    <ul class="game-list">
+                        <li>Wpisz ulubione przekąski i wylosuj menu filmowego seansu.</li>
+                        <li>Przydziel zadania domowe w losowy sposób – sprawiedliwie i zabawnie.</li>
+                        <li>Wprowadź wyzwania dnia i daj się zaskoczyć ruletce.</li>
+                    </ul>
                     <p>Przygotuj kilka list i zapisuj je w notatniku, by móc szybko przełączać się między różnymi losowaniami – np. zadania domowe, zagadki czy aktywności ruchowe.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Tryb pełnoekranowy</a>
-                    </div>
                 </div>
             </aside>
         </section>
