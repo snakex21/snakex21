@@ -23,7 +23,7 @@ const gamesCatalog = Array.isArray(window.gamesCatalog) ? window.gamesCatalog : 
 const difficultyScale = window.gamesDifficultyScale || {};
 const durationScale = window.gamesDurationScale || {};
 
-document.addEventListener("DOMContentLoaded", function () {
+const initializeGameLibrary = function () {
   const gameGrid = document.querySelector("[data-game-grid]");
   if (!gameGrid) return;
 
@@ -450,4 +450,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   applyFilters();
-});
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeGameLibrary);
+} else {
+  initializeGameLibrary();
+}
