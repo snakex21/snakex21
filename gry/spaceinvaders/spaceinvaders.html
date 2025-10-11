@@ -1,39 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <title>Space Invaders</title>
-    <link rel="stylesheet" href="spaceinvaders.css">
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Space Invaders – Max Playground</title>
+    <meta name="description" content="Klasyczna kosmiczna strzelanka. Zestrzel najeźdźców, unikaj pocisków i ratuj planetę." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <script defer src="../../assets/js/site.js"></script>
 </head>
-
-<body>
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../../index.html">Strona główna</a></li>
-
-                <li class="dropdown">
-                    <a href="../../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../../gry/gry.html">Gry</a></li>
-                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body class="game-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="../gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-    <!-- partial:index.partial.html -->
-    <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
-    <canvas id="game-canvas" width="640" height="640"></canvas>
-    <!-- partial -->
-    <script src="spaceinvaders.js"></script>
-
+    <main>
+        <section class="game-hero">
+            <div class="game-hero__content">
+                <span class="badge">Retro arcade</span>
+                <h1>Space Invaders</h1>
+                <p>Wrogie statki zbliżają się falami – zestrzel je wszystkie, zanim dotrą do dolnej krawędzi ekranu. Używaj osłon i unikaj serii pocisków.</p>
+                <div class="game-meta">
+                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo</div>
+                    <div class="game-meta__item"><strong>Cel:</strong><br/>Zestrzel każdą falę najeźdźców</div>
+                    <div class="game-meta__item"><strong>Poziom trudności:</strong><br/>Rosnące tempo ataku</div>
+                    <div class="game-meta__item"><strong>Styl gry:</strong><br/>Zręcznościowa strzelanka</div>
+                </div>
+                <div class="game-hero__actions">
+                    <a class="btn btn-primary" href="#play">Start</a>
+                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                </div>
+            </div>
+            <aside class="game-hero__aside">
+                <h2>Wskazówki pilota</h2>
+                <ul>
+                    <li>Zachowaj osłony na późniejsze fale – nie marnuj ich na pierwsze strzały.</li>
+                    <li>Strzelaj, gdy wrogowie są na jednej linii, aby trafiać kilka celów po kolei.</li>
+                    <li>Nie stój w miejscu – ruch w bok zmniejsza szanse na trafienie.</li>
+                </ul>
+            </aside>
+        </section>
+        <section class="game-layout" id="play">
+            <div class="game-layout__main">
+                <div class="game-frame">
+                    <iframe src="play.html" title="Space Invaders – zagraj" loading="lazy"></iframe>
+                </div>
+                <p class="game-note">Zestrzel wszystkie statki i pobij swój rekord punktowy. Każda kolejna fala przyspiesza!</p>
+            </div>
+            <aside class="game-layout__aside">
+                <div class="game-card">
+                    <h2>Sterowanie</h2>
+                    <ul class="game-list">
+                        <li>Strzałki w lewo i w prawo – ruch statku.</li>
+                        <li>Klawisz spacji – strzał laserem.</li>
+                        <li>Utrzymuj dystans od dolnej krawędzi, aby mieć czas na reakcję.</li>
+                    </ul>
+                </div>
+                <div class="game-card">
+                    <h2>Tryb wyzwania</h2>
+                    <p>Spróbuj przejść trzy fale bez utraty życia. Zapisz wynik i powtarzaj, aby poprawić swoje osiągnięcia.</p>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Max Playground · Powodzenia w obronie planety!</p>
+    </footer>
 </body>
-
 </html>
