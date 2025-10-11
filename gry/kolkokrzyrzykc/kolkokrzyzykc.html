@@ -1,66 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kółko i krzyżyk (2 osoby) – Max Playground</title>
+    <meta name="description" content="Rozegraj klasyczne kółko i krzyżyk z kolegą obok. Szybkie partie, proste sterowanie i natychmiastowy restart." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <script defer src="../../assets/js/site.js"></script>
 </head>
-<title>Kółko Krzyżyk (Dwie osoby)</title>
-<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
-<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Ubuntu'>
-<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
-<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Lobster'>
-<link rel="stylesheet" href="kolkokrzyzykc.css">
-
-</head>
-
-<body>
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../../index.html">Strona główna</a></li>
-
-                <li class="dropdown">
-                    <a href="../../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../../gry/gry.html">Gry</a></li>
-                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body class="game-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="../gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-    <!-- partial:index.partial.html -->
-    <div class="container">
-
-        <h1 id="title">Ping Pong dla 2 osób</h1>
-        <div id="message">Messages will go here</div>
-        <div class="row">
-            <div id="one" class="col-xs-4"></div>
-            <div id="two" class="col-xs-4"></div>
-            <div id="three" class="col-xs-4"></div>
-        </div>
-        <div class="row">
-            <div id="four" class="col-xs-4"></div>
-            <div id="five" class="col-xs-4"></div>
-            <div id="six" class="col-xs-4"></div>
-        </div>
-        <div class="row">
-            <div id="seven" class="col-xs-4"></div>
-            <div id="eight" class="col-xs-4"></div>
-            <div id="nine" class="col-xs-4"></div>
-        </div>
-        <div id="over"><a href="#" id="start" class="btn btn-primary">Restart</a></div>
-
-    </div>
-    <!-- partial -->
-    <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
-    <script src="kolkokrzyzykc.js"></script>
-
+    <main>
+        <section class="game-hero">
+            <div class="game-hero__content">
+                <span class="badge">Gra dla dwóch osób</span>
+                <h1>Kółko i krzyżyk – hot seat</h1>
+                <p>Idealna mini-gra na szybką rywalizację obok jednego ekranu. Kolejne ruchy zapisują się automatycznie, a jednym kliknięciem rozpoczniesz nową partię.</p>
+                <div class="game-meta">
+                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Dwóch graczy przy jednym urządzeniu</div>
+                    <div class="game-meta__item"><strong>Czas rundy:</strong><br/>1–3 minuty</div>
+                    <div class="game-meta__item"><strong>Mechanika:</strong><br/>Tura po turze</div>
+                    <div class="game-meta__item"><strong>Opcje:</strong><br/>Przycisk Restart na dole planszy</div>
+                </div>
+                <div class="game-hero__actions">
+                    <a class="btn btn-primary" href="#play">Zacznij rozgrywkę</a>
+                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                </div>
+            </div>
+            <aside class="game-hero__aside">
+                <h2>Domowe turnieje</h2>
+                <ul>
+                    <li>Liczycie punkty? 1 za zwycięstwo, 0 za remis – zobaczcie, kto pierwszy zdobędzie 5.</li>
+                    <li>Zmiana symbolu po każdej partii pozwala wyrównać szanse.</li>
+                    <li>Spróbujcie grać na czas, aby ćwiczyć szybkie decyzje.</li>
+                </ul>
+            </aside>
+        </section>
+        <section class="game-layout" id="play">
+            <div class="game-layout__main">
+                <div class="game-frame">
+                    <iframe src="play.html" title="Kółko i krzyżyk dla dwóch osób" loading="lazy"></iframe>
+                </div>
+                <p class="game-note">Gra automatycznie informuje o zwycięstwie lub remisie. Wybierz „Restart”, gdy tylko będziecie gotowi na rewanż.</p>
+            </div>
+            <aside class="game-layout__aside">
+                <div class="game-card">
+                    <h2>Sterowanie</h2>
+                    <ul class="game-list">
+                        <li>Kliknij na wybrane pole planszy, aby postawić symbol.</li>
+                        <li>Gracze wykonują ruchy naprzemiennie – brak dodatkowych ustawień.</li>
+                        <li>Komunikaty nad planszą informują, kto wygrał bieżącą partię.</li>
+                    </ul>
+                </div>
+                <div class="game-card">
+                    <h2>Szybkie scenariusze</h2>
+                    <p>Ustalcie dodatkowe zasady: np. po remisie kolejna partia toczy się bez pola środkowego albo tylko na krawędziach.</p>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Max Playground · Miłej rywalizacji!</p>
+    </footer>
 </body>
-
 </html>

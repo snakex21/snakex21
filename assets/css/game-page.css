@@ -1,0 +1,214 @@
+.game-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(220px, 1fr);
+  gap: clamp(1.5rem, 3vw, 3.5rem);
+  padding: clamp(2rem, 4vw, 3.25rem);
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.game-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), transparent 55%),
+    linear-gradient(225deg, rgba(56, 189, 248, 0.14), transparent 60%);
+  opacity: 0.65;
+}
+
+.game-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.game-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.game-hero__content .badge {
+  align-self: flex-start;
+}
+
+.game-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.game-meta {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.game-meta__item {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-background-muted);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+body.theme-dark .game-meta__item {
+  border-color: rgba(148, 163, 184, 0.16);
+  background: rgba(30, 41, 59, 0.55);
+}
+
+.game-hero__aside {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+body.theme-dark .game-hero__aside {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(168, 85, 247, 0.45);
+}
+
+.game-hero__aside h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.game-hero__aside p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.game-hero__aside ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--color-text);
+}
+
+.game-layout {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  align-items: flex-start;
+}
+
+.game-layout__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.game-frame {
+  width: 100%;
+  background: var(--color-background-muted);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.game-frame iframe {
+  width: 100%;
+  height: clamp(420px, 72vh, 760px);
+  border: none;
+  display: block;
+  background: #000;
+}
+
+.game-note {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--color-text);
+  border: 1px solid rgba(14, 165, 233, 0.22);
+}
+
+body.theme-dark .game-note {
+  background: rgba(14, 165, 233, 0.18);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.game-layout__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.game-card {
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.game-card h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.game-card p {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  color: var(--color-text-muted);
+}
+
+.game-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--color-text);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.game-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.game-shortcuts .btn {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .game-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .game-hero__aside {
+    padding: 1.25rem;
+  }
+
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .game-hero {
+    padding: 1.75rem;
+  }
+
+  .game-frame iframe {
+    height: clamp(380px, 75vh, 640px);
+  }
+
+  .game-note {
+    font-size: 0.95rem;
+  }
+}
