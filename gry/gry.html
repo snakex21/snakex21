@@ -8,6 +8,7 @@
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <script defer src="../assets/js/site.js"></script>
+    <script type="module" defer src="../assets/js/games.js"></script>
 </head>
 <body>
     <header class="site-header">
@@ -46,195 +47,66 @@
             <div class="hero-stats">
                 <div class="hero-stat">
                     <span>Łączna liczba gier</span>
-                    <strong>11</strong>
+                    <strong data-games-count>11</strong>
+                    <small>Wszystkie działają bez instalacji.</small>
                 </div>
                 <div class="hero-stat">
                     <span>Tryby rozgrywki</span>
-                    <strong>Solo &amp; Multiplayer</strong>
+                    <strong><span data-games-solo>0</span> solo · <span data-games-multi>0</span> wspólne</strong>
+                    <small>Aktywuj filtr, by zobaczyć tylko swój tryb.</small>
                 </div>
                 <div class="hero-stat">
-                    <span>Poziomy trudności</span>
-                    <strong>Casual · Klasyczne · Retro</strong>
+                    <span>Średni poziom trudności</span>
+                    <strong data-games-difficulty>Średnia</strong>
+                    <small data-games-difficulty-note>Klasyczne tempo i równy poziom wyzwań.</small>
+                </div>
+                <div class="hero-stat">
+                    <span>Najczęstsza długość sesji</span>
+                    <strong data-games-duration>Standardowa (10–20 min)</strong>
+                    <small data-games-duration-note>Świetne na krótką sesję po lekcjach.</small>
                 </div>
             </div>
         </section>
 
         <section class="game-toolbar" aria-label="Panel wyszukiwania gier">
-            <label class="game-search">
-                <span role="img" aria-hidden="true">🔍</span>
-                <span class="sr-only">Szukaj gier</span>
-                <input type="search" placeholder="Wpisz nazwę lub gatunek..." data-game-search-input />
-            </label>
-            <button class="btn btn-secondary" type="button" data-random-game>Losuj grę dla mnie</button>
-            <a class="btn btn-ghost" href="../zmiany.html">Zobacz, co dodaliśmy ostatnio</a>
+            <div class="game-toolbar__row">
+                <label class="game-search">
+                    <span role="img" aria-hidden="true">🔍</span>
+                    <span class="sr-only">Szukaj gier</span>
+                    <input type="search" placeholder="Wpisz nazwę, tryb lub gatunek..." data-game-search-input />
+                </label>
+                <button class="btn btn-secondary" type="button" data-random-game>Losuj grę dla mnie</button>
+            </div>
+            <div class="game-toolbar__filters" data-game-filters></div>
+            <div class="game-toolbar__row game-toolbar__row--footer">
+                <p class="game-toolbar__meta" data-game-active-count>Pokazujemy wszystkie 11 gier</p>
+                <a class="btn btn-ghost" href="../zmiany.html">Zobacz, co dodaliśmy ostatnio</a>
+            </div>
         </section>
 
-        <section class="game-grid">
-            <article class="game-card" data-game-card data-title="Gra na zapamiętywanie" data-tags="pamiec logiczna rodzinne">
-                <img src="gra zapamietywanie/zdjęcie gry na zapamiętywanie.JPG" alt="Plansza z gry na zapamiętywanie" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Gra na zapamiętywanie</h3>
-                    <p class="game-card__description">Trenuj pamięć, zapamiętując coraz dłuższe sekwencje symboli i pobijaj swój rekord.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Pamięć</span>
-                        <span class="tag">Solo</span>
-                    </div>
+        <section class="section game-featured" aria-label="Polecane gry">
+            <div class="section-header">
+                <div>
+                    <p class="section-eyebrow">Na dobry start</p>
+                    <h2 class="section-title">Polecane tytuły na dziś</h2>
                 </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="gra zapamietywanie/gra zapamietywanie.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="2048" data-tags="logiczne puzzle liczby">
-                <img src="2048/2048.JPG" alt="Plansza gry 2048" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">2048</h3>
-                    <p class="game-card__description">Łącz kafelki z liczbami w dynamicznej układance i spróbuj dojść do magicznej liczby 2048.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Logiczna</span>
-                        <span class="tag">Klasyk</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="2048/2048.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Szachy" data-tags="strategia klasyk planszowe">
-                <img src="https://zegaryszachowe.pl/userdata/public/gfx/9560/Szachy-Turniejowe-4.jpg" alt="Figury szachowe ustawione na planszy" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Szachy</h3>
-                    <p class="game-card__description">Sprawdź swoje strategiczne myślenie i rozegraj partię online przeciwko komputerowi.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Strategia</span>
-                        <span class="tag">Klasyk</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="chess/chess.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Wisielec" data-tags="slowne rodzina klasyk">
-                <img src="https://play-lh.googleusercontent.com/j3fSpmOuYo8M43ZldLXybNIEc6B9xQ25jy_OlIqx0loPB_lomyQlkXdwBFhYWi7-GA=w240-h480-rw" alt="Ekran gry Wisielec" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Wisielec</h3>
-                    <p class="game-card__description">Odgadnij ukryte słowo zanim bohater trafi na szubienicę. Idealne na szybkie pojedynki.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Słowne</span>
-                        <span class="tag">Rodzinne</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="wisielec/wisielec.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Tetris" data-tags="refleks retro puzzle">
-                <img src="tetris/tetris.JPG" alt="Rozgrywka w Tetrisa" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Tetris</h3>
-                    <p class="game-card__description">Układaj spadające klocki, twórz linie i walcz o jak najwyższy wynik w klasyku gatunku.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Retro</span>
-                        <span class="tag">Refleks</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="tetris/tetris.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Space Invaders" data-tags="arcade retro refleks">
-                <img src="https://i.ytimg.com/vi/D1jZaIPeD5w/maxresdefault.jpg" alt="Statek kosmiczny w grze Space Invaders" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Space Invaders</h3>
-                    <p class="game-card__description">Broń Ziemię przed falami kosmitów i zdobywaj punkty w kultowej grze zręcznościowej.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Arcade</span>
-                        <span class="tag">Retro</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="spaceinvaders/spaceinvaders.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Pong (Co-op)" data-tags="multiplayer arcade reflex">
-                <img src="pongcoop/pong(coop).JPG" alt="Zrzut ekranu z gry Pong w trybie współpracy" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Pong (Co-op)</h3>
-                    <p class="game-card__description">Klasyczny Pong w wersji kooperacyjnej. Graj z przyjacielem na jednym ekranie.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Multiplayer</span>
-                        <span class="tag">Arcade</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="pongcoop/pongcoop.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Kółko i krzyżyk" data-tags="logic solo klasyk">
-                <img src="kolkokrzyrzykc/kókokrzyżyk.JPG" alt="Plansza gry kółko i krzyżyk" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Kółko i krzyżyk</h3>
-                    <p class="game-card__description">Szybkie pojedynki z komputerem. Idealne na przerwę, gdy potrzebujesz krótkiej łamigłówki.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Logiczna</span>
-                        <span class="tag">Szybka gra</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="kolkos/kolkos.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Koło fortuny" data-tags="quiz rodzinne slowne">
-                <img src="kolo_fortuny/Kolo-fortuny-suchoscieralne-157cm.jpg" alt="Koło fortuny" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Koło fortuny</h3>
-                    <p class="game-card__description">Zakreć kołem, zgaduj hasła i rywalizuj ze znajomymi o tytuł mistrza zgadywanek.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Rodzinne</span>
-                        <span class="tag">Quiz</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="kolo_fortuny/kolo_fortuny.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Quiz o podzespołach" data-tags="quiz wiedza edukacyjne">
-                <img src="quiz/CEIk9kuTURBXy9jNmFjZDg1MS1jM2JjLTQ2M2EtOTE2Zi1hOWVmMjRjNTUxNzIuanBlZ5DeAAGhMAU.webp" alt="Plansza quizu komputerowego" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Quiz o podzespołach</h3>
-                    <p class="game-card__description">Sprawdź swoją wiedzę o sprzęcie komputerowym i poznaj nowe ciekawostki techniczne.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Quiz</span>
-                        <span class="tag">Edukacyjne</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="quiz/quiz.html">Graj teraz</a>
-                </div>
-            </article>
-
-            <article class="game-card" data-game-card data-title="Ping Pong" data-tags="refleks multiplayer sport">
-                <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=800&q=80" alt="Piłeczka ping pong na stole" loading="lazy" />
-                <div class="game-card__body">
-                    <h3 class="game-card__title">Ping Pong</h3>
-                    <p class="game-card__description">Szybki pojedynek tenisowy inspirowany klasycznym Pongiem. Idealny na rozgrzewkę.</p>
-                    <div class="game-card__tags">
-                        <span class="tag">Sport</span>
-                        <span class="tag">Dwóch graczy</span>
-                    </div>
-                </div>
-                <div class="game-card__footer">
-                    <a class="btn btn-primary" href="pingpong/Ping-pong.html">Graj teraz</a>
-                </div>
-            </article>
+                <p>Wybieramy różne kombinacje gatunków i poziomów trudności przy każdym odświeżeniu strony.</p>
+            </div>
+            <div class="game-featured__list" data-game-featured></div>
         </section>
+
+        <section class="section game-collections" aria-label="Szybkie kolekcje">
+            <div class="section-header">
+                <div>
+                    <p class="section-eyebrow">Szybkie skróty</p>
+                    <h2 class="section-title">Zestawy dobrane do Twojego nastroju</h2>
+                </div>
+                <p>Jednym kliknięciem wskakujesz do gier solo, kooperacyjnych lub klasyków retro.</p>
+            </div>
+            <div class="game-collections__grid" data-game-collections></div>
+        </section>
+
+        <section class="game-grid" data-game-grid></section>
 
         <div class="empty-state" data-empty-state>
             <strong>Brak wyników wyszukiwania.</strong>
