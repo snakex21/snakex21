@@ -67,10 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const highlightLinkEl = document.querySelector("[data-highlight-link]");
   const highlightRefresh = document.querySelector("[data-highlight-refresh]");
   const nameDayEl = document.querySelector("[data-name-day]");
-  const searchInput = document.querySelector("[data-game-search-input]");
-  const randomGameButton = document.querySelector("[data-random-game]");
-  const gameCards = Array.from(document.querySelectorAll("[data-game-card]"));
-  const emptyState = document.querySelector("[data-empty-state]");
 
   /* Theme handling */
   const storedTheme = localStorage.getItem("site-theme");
@@ -206,43 +202,4 @@ document.addEventListener("DOMContentLoaded", () => {
     applyHighlight(activeHighlightIndex);
   });
 
-  /* Game search & interactions */
-  if (searchInput) {
-    const filterGames = () => {
-      const query = searchInput.value.trim().toLowerCase();
-      let visibleCount = 0;
-      gameCards.forEach((card) => {
-        const haystack = `${card.dataset.title ?? ""} ${card.dataset.tags ?? ""}`.toLowerCase();
-        const isVisible = haystack.includes(query);
-        card.classList.toggle("is-hidden", !isVisible);
-        if (isVisible) {
-          visibleCount += 1;
-        } else {
-          card.classList.remove("is-highlighted");
-        }
-      });
-      emptyState?.classList.toggle("is-visible", visibleCount === 0);
-    };
-
-    searchInput.addEventListener("input", filterGames);
-    filterGames();
-  }
-
-  randomGameButton?.addEventListener("click", () => {
-    const visibleCards = gameCards.filter((card) => !card.classList.contains("is-hidden"));
-    if (!visibleCards.length) {
-      randomGameButton.classList.add("shake");
-      window.setTimeout(() => randomGameButton.classList.remove("shake"), 600);
-      return;
-    }
-    gameCards.forEach((card) => card.classList.remove("is-highlighted"));
-    const picked = visibleCards[Math.floor(Math.random() * visibleCards.length)];
-    picked.classList.add("is-highlighted");
-    picked.scrollIntoView({ behavior: "smooth", block: "center" });
-    const link = picked.querySelector("a");
-    if (link) {
-      link.focus({ preventScroll: true });
-    }
-    window.setTimeout(() => picked.classList.remove("is-highlighted"), 2600);
-  });
 });
