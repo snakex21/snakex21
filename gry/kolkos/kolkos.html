@@ -66,14 +66,17 @@
                 </ul>
             </aside>
         </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolkos-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="Kółko i krzyżyk solo – zagraj" loading="lazy"></iframe>
                 </div>
                 <p class="game-note">Podczas gry przełączaj trudność, aby od razu zobaczyć różnicę w stylu prowadzenia partii przez komputer.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-kolkos-instructions" data-instructions-panel hidden tabindex="-1">
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
