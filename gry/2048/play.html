@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <title>2048 – nowa odsłona</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="../../assets/css/game-embed.css" />
+    <link rel="stylesheet" href="2048.css" />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script src="2048.js" defer></script>
+</head>
+<body class="arcade-embed">
+    <div class="arcade-shell">
+        <header class="arcade-header">
+            <div>
+                <span class="arcade-eyebrow">Gra logiczna</span>
+                <h1>2048</h1>
+                <p>Przesuwaj planszę i łącz identyczne liczby, aby zdobywać coraz większe wartości. Kontroluj przestrzeń i bij kolejne rekordy.</p>
+            </div>
+            <div class="arcade-scoreboard">
+                <div class="arcade-score">
+                    <span>Wynik</span>
+                    <strong id="value">0</strong>
+                </div>
+                <button id="repeat" class="arcade-button arcade-button--primary" type="button">↻ Restart</button>
+            </div>
+        </header>
+        <div class="arcade-main">
+            <div class="arcade-stage">
+                <div class="game" data-game-root></div>
+                <div class="status" id="status" aria-live="polite"></div>
+            </div>
+            <aside class="arcade-sidebar">
+                <h2>Jak grać</h2>
+                <p>Steruj strzałkami na klawiaturze (lub gestami na ekranie dotykowym), aby przesuwać wszystkie kafelki jednocześnie.</p>
+                <ul>
+                    <li>Łącz takie same liczby, żeby tworzyć coraz większe wartości i zwiększać wynik.</li>
+                    <li>Trzymaj najwyższe liczby w jednym rogu, by nie zablokować planszy.</li>
+                    <li>Planuj ruchy naprzód, zostawiając wolne miejsce na pojawiające się kafelki.</li>
+                </ul>
+                <footer>Wskazówka: sesja trwa ok. 5 minut – po udanym podejściu od razu spróbuj przebić własny rekord.</footer>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,56 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <title>Generator Czcionek</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generator czcionek – Max Playground</title>
+    <meta name="description" content="Przekształcaj tekst w dziesiątki stylów Unicode i kopiuj go jednym kliknięciem. Idealne podpisy i dekoracje do social mediów." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <script defer src="../../assets/js/site.js"></script>
 </head>
-
-<body>
-
-
-
-    <!DOCTYPE html>
-    <html>
-
-    <head>
-        <meta charset="utf-8">
-        <title>Generator Czcionek</title>
-
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <link rel="stylesheet" href="style.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    </head>
-
-    <body>
-        <header>
-            <nav class="nav2">
-                <ul>
-                    <li><a href="../../index.html">Strona główna</a></li>
-                    <li class="dropdown">
-                        <a href="../programy.html">Programy</a>
-
-                        <li><a href="../generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../generator emoji/generator emoji.html">Generator Emoji</a></li>
-
-                    </li>
-                    <li><a href="../../gry/gry.html">Gry</a></li>
-                    <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                    <li><a href="../../muzyka/muzyka.html ">Muzyka</a></li>
-                </ul>
-            </nav>
-        </header>
-
-        <h1 style="text-align:center;">Generator Czcionek</h1>
-
-        <textarea type="text" class="form-control fancytext" style="width:100%; margin-top:5px; background-color:#333333 !important; color:#ffffff" required="required" name="text" placeholder="Tu wpisz lub wklej.." value=""></textarea>
-        <br />
-        <div id="result">
+<body class="app-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../programy.html">Przegląd wszystkich programów</a>
+                        <a href="../generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a class="is-current" href="generator czcionek.html">Generator czcionek</a>
+                        <a href="../generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../../gry/gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="standalone-app standalone-app--light">
+        <section class="app-hero">
+            <div class="app-hero__content">
+                <span class="badge">Generator</span>
+                <h1>Generator czcionek</h1>
+                <p>Wpisz tekst i zobacz, jak prezentuje się w kilkudziesięciu kreatywnych stylach. Kopiuj ulubione warianty, aby wyróżnić podpisy i wiadomości.</p>
+            </div>
+            <div class="app-hero__actions">
+                <a class="btn btn-secondary" href="../programy.html">← Wróć do listy programów</a>
+            </div>
+        </section>
+        <div class="standalone-app__inner standalone-app__inner--column">
+            <section class="font-generator card">
+                <h2>Wprowadź swój tekst</h2>
+                <textarea class="form-control fancytext" placeholder="Tu wpisz lub wklej swój tekst…" required="required" name="text" style="width:100%; margin-top:5px; background-color:#333333 !important; color:#ffffff"></textarea>
+            </section>
+            <section class="font-generator card">
+                <h2>Wyniki</h2>
+<div id="result">
             <div class="input-group mb-3"><input type="text" class="form-control text-1" value="𝔓𝔯𝔢𝔳𝔦𝔢𝔴 𝔗𝔢𝔵𝔱" id="copy_0" readonly="readonly">
                 <div class="input-group-append"><span class="input-group-text copybutton" style="cursor:pointer;" data-clipboard-action="copy" data-clipboard-target="#copy_0">Copy</span></div>
             </div>
@@ -322,13 +332,16 @@
                 <div class="input-group-append"><span class="input-group-text copybutton" style="cursor:pointer;" data-clipboard-action="copy" data-clipboard-target="#copy_88">Copy</span></div>
             </div>
         </div>
-        <center>
-            <button class="btn btn-primary loadmore">Pokaż więcej</button>
-        </center>
-
-        <hr/>
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary loadmore">Pokaż więcej</button>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
+    </footer>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
         <script>
             ! function(t, e) {
@@ -4134,4 +4147,6 @@
 
 </body>
 
+</html>
+</body>
 </html>

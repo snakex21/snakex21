@@ -1,70 +1,100 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pl">
 <head>
-    <link rel="stylesheet" href="2048.css" />
-    <script src="2048.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,400,800" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <title>2048</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2048 – Max Playground</title>
+    <meta name="description" content="Połącz kafelki z liczbami i dotrzyj do płytki 2048. Udoskonalaj strategię, obserwuj wynik i śrubuj własne rekordy." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <script defer src="../../assets/js/site.js"></script>
 </head>
-
-<body>
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../../index.html">Strona główna</a></li>
-
-                <li class="dropdown">
-                    <a href="../../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../../gry/gry.html">Gry</a></li>
-                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body class="game-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="../gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-    <div class="game">
-        <div class="head">
-            <div class="a">2048 <button id="repeat" class="info repeat" onClick='reset()'>↻</button></div>
-            <div class="score">Wynik<br/><span id="value"></span></div>
-        </div>
-
-        <div class="field">
-
-            <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
+    <main>
+        <section class="game-hero">
+            <div class="game-hero__content">
+                <span class="badge">Gra logiczna</span>
+                <h1>2048</h1>
+                <p>Przesuwaj planszę, łącz identyczne liczby i twórz coraz większe wartości. Każdy ruch ma znaczenie – buduj łańcuchy i zarządzaj wolnymi polami, aby dotrzeć do magicznej płytki 2048.</p>
+                <div class="game-meta">
+                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo, offline</div>
+                    <div class="game-meta__item"><strong>Poziom:</strong><br/>Strategiczna łamigłówka</div>
+                    <div class="game-meta__item"><strong>Sesja:</strong><br/>5–10 minut</div>
+                    <div class="game-meta__item"><strong>Cel:</strong><br/>Zdobywaj kolejne rekordy punktowe</div>
+                </div>
+                <div class="game-hero__actions">
+                    <a class="btn btn-primary" href="#play">Zagraj teraz</a>
+                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                </div>
             </div>
-            <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
+            <aside class="game-hero__aside">
+                <h2>Szybkie wskazówki</h2>
+                <p>Zapanuj nad planszą dzięki prostym strategiom:</p>
+                <ul>
+                    <li>Trzymaj największe liczby w jednym rogu.</li>
+                    <li>Układaj wartości w malejące rzędy lub kolumny.</li>
+                    <li>Ogranicz losowe ruchy, aby nie zapełnić planszy.</li>
+                </ul>
+            </aside>
+        </section>
+        <section class="game-layout" id="play">
+            <div class="game-layout__main">
+                <div class="game-frame">
+                    <iframe src="play.html" title="2048 – graj teraz" loading="lazy"></iframe>
+                </div>
+                <p class="game-note">Wskazówka: Zacznij od ustawienia największej liczby w jednym z narożników i trzymaj się wybranej strategii do końca rundy.</p>
             </div>
-            <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
-            </div>
-            <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
-            </div>
-        </div>
-
-    </div>
-    <div class='' id='status'>
-    </div>
+            <aside class="game-layout__aside">
+                <div class="game-card">
+                    <h2>Sterowanie</h2>
+                    <ul class="game-list">
+                        <li>Strzałki na klawiaturze – przesuwanie całej planszy.</li>
+                        <li>Dotyk na urządzeniach mobilnych – przesunięcia palcem w czterech kierunkach.</li>
+                        <li>Przycisk ↻ w grze – szybki restart partii.</li>
+                    </ul>
+                </div>
+                <div class="game-card">
+                    <h2>Chcesz więcej?</h2>
+                    <p>Spróbuj pobić swój poprzedni wynik, a gdy osiągniesz 2048, kontynuuj dalej, aby zobaczyć, jak wysoko potrafisz dojść.</p>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Otwórz w nowej karcie</a>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Max Playground · Powodzenia w zdobywaniu kolejnych rekordów!</p>
+    </footer>
 </body>
-<html>
+</html>

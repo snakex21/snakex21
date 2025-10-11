@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Koło Fortuny</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <div id="main">
+        <div id="left-column">
+            <form class="iform" action="#" method="get">
+                <label for="joiner"></label>
+                <input id="joiner" name="joiner" class="joiner" placeholder="Please Enter your name" />
+                <button class="add">Add</button>
+                <button class="spin-trigger">Spin</button>
+                <button class="reset">Reset</button>
+            </form>
+            <canvas class="canvas" width="500" height="500"></canvas>
+        </div>
+        <div id="right-column">
+            <p class="winner">The Winner is ... <span>&nbsp;</span></p>
+            <ul class="participants">
+            </ul>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <script src="./script.js"></script>
+</body>
+
+</html>

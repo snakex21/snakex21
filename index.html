@@ -1,166 +1,201 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pl">
 <head>
-    <title>Strona Domowa :)</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Max Playground – gry, programy i inspiracje</title>
+    <meta name="description" content="Nowoczesna strona domowa Maxa. Odkrywaj gry, generatory i multimedia zebrane w jednym miejscu." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="assets/css/site.css" />
+    <script defer src="assets/js/site.js"></script>
 </head>
-
-<body onload="updateClock()">
-
-
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="index.html">Strona główna</a></li>
-                <li class="dropdown">
-                    <a href="programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                </li>
-                <li><a href="gry/gry.html">Gry</a></li>
-                <li><a href="filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="muzyka/muzyka.html">Muzyka</a></li>
-                <li><a href="zmiany.html">Zmiany na stronie</a></li>
-            </ul>
-
+<body>
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link is-active" href="index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="gry/gry.html">Gry</a>
+                <a class="nav-link" href="filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-
     <main>
-        <h1>Witamy na głównej stronie</h1>
-        <p></p>
-        <div id="clock" onload="updateClock()"></div>
-        <div id="data"></div>
-
-
-        <section class="odstep2_25">
-
-            <div class="container">
-                <div class="box">
-                    <a href="Programy/programy.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://adwokat-kurczab.pl/wp-content/uploads/2017/01/code-1839877_960_720.jpg');">
-                            <p>Programy</p>
-                        </div>
-                    </a>
+        <section class="hero" id="start">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Witaj na stronie Maxa</span>
+                <h1>Twoje centrum gier, muzyki i kreatywnych narzędzi</h1>
+                <p class="hero-lead">Odkrywaj gry, eksperymentuj z generatorami i buduj własne kolekcje treści. Wszystko w jednym nowoczesnym miejscu zaprojektowanym specjalnie dla Ciebie.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="Programy/programy.html">Odkryj programy</a>
+                    <a class="btn btn-secondary" href="gry/gry.html">Przeglądaj gry</a>
                 </div>
-
-                <div class="box">
-                    <a href="gry/gry.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://img-ovh-cloud.zszywka.pl/0/0255/7791-tank-moja-ulubiona-gra--gif.gif');">
-                            <p>Gry</p>
-                        </div>
-                    </a>
+                <div class="hero-highlight">
+                    <span class="badge">Nowość tygodnia</span>
+                    <span data-hero-highlight>Znajdź swój ulubiony projekt.</span>
                 </div>
-
-                <div class="box">
-                    <a href="filmy/filmy glowna.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://i.gifer.com/1qMJ.gif');">
-                            <p>Strona do Filmów</p>
-                        </div>
-                    </a>
-
-
+            </div>
+            <div class="hero-illustration">
+                <div class="hero-panel">
+                    <h2>Panel aktywności</h2>
+                    <p>Monitoruj, co jest teraz najpopularniejsze i wracaj do ulubionych zakładek jednym kliknięciem.</p>
+                    <div class="panel-metrics">
+                        <div class="metric"><span>Aktywne gry</span><strong>10</strong></div>
+                        <div class="metric"><span>Ulubione narzędzie</span><strong>Generator kolorów</strong></div>
+                        <div class="metric"><span>Dzisiejszy klimat</span><strong>Chill &amp; kreatywność</strong></div>
+                    </div>
+                    <div class="badge" data-name-day>Ładowanie imienin…</div>
                 </div>
-
-                <div class="box">
-                    <a href="muzyka/muzyka.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('muzyka/wallpapersden.com_spotify-logo_2998x2248.jpg');">
-                            <p>Muzyka</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="zmiany.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://i.imgflip.com/5x41k9.gif');">
-                            <p>Zmiany na stronie</p>
-                        </div>
-                    </a>
-                </div>
-
+            </div>
         </section>
 
+        <section class="section" id="skroty">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Na skróty</span>
+                    <h2 class="section-title">Najważniejsze zakładki</h2>
+                    <p class="section-description">Skorzystaj z szybkich kart, aby błyskawicznie przejść do wybranej sekcji serwisu.</p>
+                </div>
+                <a class="btn btn-secondary" href="zmiany.html">Zobacz najnowsze zmiany</a>
+            </div>
+            <div class="cards-grid">
+                <article class="card">
+                    <span class="badge">Programy</span>
+                    <h3>Laboratorium narzędzi</h3>
+                    <p>Generatory kolorów, czcionek i emoji pomagają tworzyć nowe projekty w kilka chwil.</p>
+                    <a class="btn btn-primary" href="Programy/programy.html">Odwiedź laboratorium</a>
+                </article>
+                <article class="card">
+                    <span class="badge">Gry</span>
+                    <h3>Biblioteka gier</h3>
+                    <p>Klasyki i autorskie mini-gry. Łatwo filtruj i odkrywaj tytuły, które poprawią Ci humor.</p>
+                    <a class="btn btn-primary" href="gry/gry.html">Wejdź do gry</a>
+                </article>
+                <article class="card">
+                    <span class="badge">Filmy</span>
+                    <h3>Wieczór filmowy</h3>
+                    <p>Zbuduj własne playlisty i zapisuj pomysły na wspólne seanse z rodziną i znajomymi.</p>
+                    <a class="btn btn-primary" href="filmy/filmy glowna.html">Znajdź inspirację</a>
+                </article>
+                <article class="card">
+                    <span class="badge">Muzyka</span>
+                    <h3>Strefa muzyczna</h3>
+                    <p>Zanurz się w playlistach dopasowanych do różnych nastrojów i odkryj coś nowego.</p>
+                    <a class="btn btn-primary" href="muzyka/muzyka.html">Posłuchaj teraz</a>
+                </article>
+                <article class="card">
+                    <span class="badge">Społeczność</span>
+                    <h3>Historia zmian</h3>
+                    <p>Śledź rozwój projektu i zobacz, co ostatnio zostało ulepszone lub dodane.</p>
+                    <a class="btn btn-primary" href="zmiany.html">Przeczytaj dziennik</a>
+                </article>
+            </div>
+        </section>
 
+        <section class="section" id="polecane">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Polecane</span>
+                    <h2 class="section-title">Na co masz ochotę dziś?</h2>
+                    <p class="section-description">Wybieramy dla Ciebie najciekawsze elementy strony. Kliknij, aby zanurzyć się w nowej aktywności.</p>
+                </div>
+                <button class="btn btn-secondary" type="button" data-highlight-refresh>Losuj kolejną propozycję</button>
+            </div>
+            <article class="highlight-card">
+                <span class="badge" data-highlight-meta>10 gier gotowych do gry</span>
+                <h3 data-highlight-title>Nowa kolekcja gier</h3>
+                <p data-highlight-description>Sprawdź bibliotekę pełną klasyków i autorskich mini-gier. Każdy tytuł działa od razu w przeglądarce i ma krótki opis mechaniki.</p>
+                <div class="highlight-actions">
+                    <a class="btn btn-primary" data-highlight-link href="gry/gry.html">Przejdź do biblioteki</a>
+                    <span class="badge">💡 Podpowiedź: zapisz ulubione tytuły na później!</span>
+                </div>
+            </article>
+        </section>
 
+        <section class="section" id="narzedzia">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Narzędzia twórcy</span>
+                    <h2 class="section-title">Zestaw kreatywnych dodatków</h2>
+                    <p class="section-description">Usprawnij swoją zabawę dzięki mini-modułom, które pomagają planować, organizować i inspirować.</p>
+                </div>
+            </div>
+            <div class="toolkit-grid">
+                <article class="toolkit-card">
+                    <span class="badge">🎨 Kolory</span>
+                    <h3>Generator palet</h3>
+                    <p>Losuj palety kolorów i kopiuj je jednym kliknięciem, aby tworzyć spójne projekty graficzne.</p>
+                    <a class="btn btn-secondary" href="Programy/generator kolorow/generator kolorow.html">Uruchom generator</a>
+                </article>
+                <article class="toolkit-card">
+                    <span class="badge">🖋 Typografia</span>
+                    <h3>Eksperyment z czcionkami</h3>
+                    <p>Mieszaj style i rozmiary, poznaj nowe kroje i zobacz, jak prezentują się Twoje teksty.</p>
+                    <a class="btn btn-secondary" href="Programy/generator czcionek/generator czcionek.html">Testuj czcionki</a>
+                </article>
+                <article class="toolkit-card">
+                    <span class="badge">😀 Emocje</span>
+                    <h3>Studio emoji</h3>
+                    <p>Twórz wyjątkowe wiadomości, korzystając z dynamicznego generatora emoji.</p>
+                    <a class="btn btn-secondary" href="Programy/generator emoji/generator emoji.html">Dodaj emoji</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="aktualnosci">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Aktualności</span>
+                    <h2 class="section-title">Co ostatnio się zmieniło?</h2>
+                    <p class="section-description">Szybki przegląd najnowszych aktualizacji i pomysłów na rozwój strony.</p>
+                </div>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>Nowy layout strony głównej</h4>
+                    <p>Przeprojektowaliśmy stronę główną, aby była bardziej przejrzysta, nowoczesna i przyjazna na urządzeniach mobilnych.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Interaktywna biblioteka gier</h4>
+                    <p>Dodaliśmy wyszukiwarkę i inteligentne losowanie gry, dzięki czemu szybciej znajdziesz coś dla siebie.</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Tryb jasny i ciemny</h4>
+                    <p>Wybierz wygląd, który lepiej pasuje do Twojego nastroju. Przeglądarka zapamięta Twój wybór.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="callout" id="dolacz">
+            <h2>Gotowy na kolejną przygodę?</h2>
+            <p>Zapisz stronę w ulubionych, wracaj kiedy tylko chcesz i dziel się swoimi pomysłami na następne ulepszenia. Ten projekt rośnie razem z Tobą!</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="gry/gry.html">Zagraj teraz</a>
+                <a class="btn btn-secondary" href="Programy/programy.html">Przetestuj narzędzia</a>
+            </div>
+        </section>
     </main>
     <footer>
-        <p>Copyright © 2024 Max</p>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
     </footer>
-    <script>
-        //zegar
-        function updateClock() {
-            var date = new Date();
-            var hour = date.getHours();
-            var minute = date.getMinutes();
-            var second = date.getSeconds();
-            var clock = document.getElementById("clock");
-            clock.innerHTML = "";
-
-            var hourDiv = document.createElement("div");
-            hourDiv.classList.add("clock-element");
-            hourDiv.innerHTML = hour;
-            clock.appendChild(hourDiv);
-
-            var dot1 = document.createElement("span");
-            dot1.innerHTML = ":";
-            clock.appendChild(dot1);
-
-            var minuteDiv = document.createElement("div");
-            minuteDiv.classList.add("clock-element");
-            minuteDiv.innerHTML = minute;
-            clock.appendChild(minuteDiv);
-
-            var dot2 = document.createElement("span");
-            dot2.innerHTML = ":";
-            clock.appendChild(dot2);
-
-            var secondDiv = document.createElement("div");
-            secondDiv.classList.add("clock-element");
-            secondDiv.innerHTML = second;
-            clock.appendChild(secondDiv);
-
-        }
-        setInterval(updateClock, 1000);
-
-        // utworzenie nowego obiektu XMLHttpRequest
-        var xhr = new XMLHttpRequest();
-
-        // otwarcie połączenia z adresem URL
-        xhr.open("GET", "https://api.abalin.net/", true);
-
-        // wysłanie żądania
-        xhr.send();
-
-        // nasłuchiwanie na zmianę stanu połączenia
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                // pobranie odpowiedzi serwera jako tekstu
-                var responseText = xhr.responseText;
-
-                // parsowanie tekstu na obiekt JavaScript
-                var data = JSON.parse(responseText);
-
-                // wyświetlenie danych na stronie
-                document.getElementById("imieniny").innerHTML = "Dzisiejsze imieniny: " + data.data;
-            }
-        }
-
-        var today = new Date();
-        var days = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
-        var dayName = days[today.getDay()];
-        var dd = String(today.getDate()).padStart(2, '0');
-        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        var yyyy = today.getFullYear();
-        today = dayName + ' ' + dd + '-' + mm + '-' + yyyy;
-        document.getElementById("data").innerHTML = today;
-    </script>
 </body>
-
 </html>
