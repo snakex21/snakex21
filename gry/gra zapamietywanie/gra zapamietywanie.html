@@ -41,33 +41,8 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Ćwiczenie pamięci</span>
-                <h1>Gra w zapamiętywanie</h1>
-                <p>Znajdź wszystkie pary symboli, odkrywając po dwie karty naraz. Im mniej ruchów wykonasz, tym lepszy wynik – to świetny trening koncentracji i spostrzegawczości.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo, relaksacyjny</div>
-                    <div class="game-meta__item"><strong>Cel:</strong><br/>Odkryj wszystkie pary</div>
-                    <div class="game-meta__item"><strong>Sesja:</strong><br/>3–8 minut</div>
-                    <div class="game-meta__item"><strong>Umiejętności:</strong><br/>Pamięć robocza i skupienie</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Rozpocznij</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Wskazówki</h2>
-                <p>Zwiększ szanse na rekord, korzystając z prostych sztuczek:</p>
-                <ul>
-                    <li>Zapamiętuj położenie kart seriami – rzędem lub kolumną.</li>
-                    <li>Nie odkrywaj losowo – twórz krótkie sekwencje ruchów.</li>
-                    <li>Jeśli zapomnisz położenie, szybko wróć do wcześniej odkrytej pary.</li>
-                </ul>
-            </aside>
-        </section>
         <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Gra w zapamiętywanie</h1>
             <div class="game-layout__main">
                 <div class="game-layout__controls">
                     <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-memory-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
@@ -75,9 +50,34 @@
                 <div class="game-frame">
                     <iframe src="play.html" title="Gra w zapamiętywanie – zagraj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Spróbuj ukończyć rundę przy minimalnej liczbie pomyłek. Powtarzaj grę, aby sprawdzić, czy potrafisz skrócić czas reakcji.</p>
             </div>
             <aside class="game-layout__aside" id="game-memory-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Znajdź wszystkie pary symboli, odkrywając po dwie karty naraz. Im mniej ruchów wykonasz, tym lepszy wynik – to świetny trening koncentracji i spostrzegawczości.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo, relaksacyjny</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Cel</dt>
+                            <dd>Odkryj wszystkie pary</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Sesja</dt>
+                            <dd>3–8 minut</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Umiejętności</dt>
+                            <dd>Pamięć robocza i skupienie</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -87,11 +87,18 @@
                     </ul>
                 </div>
                 <div class="game-card">
+                    <h2>Wskazówki</h2>
+                    <p>Zwiększ szanse na rekord, korzystając z prostych sztuczek:</p>
+                    <ul class="game-list">
+                        <li>Zapamiętuj położenie kart seriami – rzędem lub kolumną.</li>
+                        <li>Nie odkrywaj losowo – twórz krótkie sekwencje ruchów.</li>
+                        <li>Jeśli zapomnisz położenie, szybko wróć do wcześniej odkrytej pary.</li>
+                    </ul>
+                    <p>Spróbuj ukończyć rundę przy minimalnej liczbie pomyłek. Powtarzaj grę, aby sprawdzić, czy potrafisz skrócić czas reakcji.</p>
+                </div>
+                <div class="game-card">
                     <h2>Pomysł na rywalizację</h2>
                     <p>Zaproś znajomych i zobaczcie, kto odkryje wszystkie pary w mniejszej liczbie ruchów. Możesz też zapisywać liczbę prób dla kolejnych podejść.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
                 </div>
             </aside>
         </section>

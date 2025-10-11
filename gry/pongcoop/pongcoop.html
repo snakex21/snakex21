@@ -41,32 +41,8 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Kooperacja</span>
-                <h1>Pong Coop</h1>
-                <p>Współpracujcie, aby utrzymać piłkę w grze jak najdłużej. Jeden gracz steruje lewą paletką, drugi prawą – liczy się komunikacja i szybki refleks.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Dwóch graczy przy jednej klawiaturze</div>
-                    <div class="game-meta__item"><strong>Cel:</strong><br/>Nie dopuśćcie, by piłka minęła którąkolwiek paletkę</div>
-                    <div class="game-meta__item"><strong>Tempo:</strong><br/>Coraz szybsza piłka</div>
-                    <div class="game-meta__item"><strong>Najlepiej działa:</strong><br/>Na pełnej klawiaturze</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Zagrajmy</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Drużynowe wskazówki</h2>
-                <ul>
-                    <li>Ustalcie z góry, kto odpowiada za dolne i górne strefy.</li>
-                    <li>Rozmawiajcie podczas gry – łatwiej zaplanować odbicia.</li>
-                    <li>Wprowadźcie system punktów za liczbę odbić w jednej serii.</li>
-                </ul>
-            </aside>
-        </section>
         <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Pong Coop</h1>
             <div class="game-layout__main">
                 <div class="game-layout__controls">
                     <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-pongcoop-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
@@ -74,9 +50,34 @@
                 <div class="game-frame">
                     <iframe src="play.html" title="Pong Coop – zagraj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Najlepsze efekty daje wspólna strategia – spróbujcie ustawić się tak, aby piłka odbijała się naprzemiennie między graczami.</p>
             </div>
             <aside class="game-layout__aside" id="game-pongcoop-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Współpracujcie, aby utrzymać piłkę w grze jak najdłużej. Jeden gracz steruje lewą paletką, drugi prawą – liczy się komunikacja i szybki refleks.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Dwóch graczy przy jednej klawiaturze</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Cel</dt>
+                            <dd>Nie dopuśćcie, by piłka minęła którąkolwiek paletkę</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Tempo</dt>
+                            <dd>Coraz szybsza piłka</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Najlepiej działa</dt>
+                            <dd>Na pełnej klawiaturze</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -84,13 +85,16 @@
                         <li>Gracz 2: strzałka w górę i strzałka w dół.</li>
                         <li>Piłka startuje automatycznie po wczytaniu gry.</li>
                     </ul>
+                    <p>Najlepsze efekty daje wspólna strategia – spróbujcie ustawić się tak, aby piłka odbijała się naprzemiennie między graczami.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Rozszerz zabawę</h2>
+                    <h2>Drużynowe wskazówki</h2>
+                    <ul class="game-list">
+                        <li>Ustalcie z góry, kto odpowiada za dolne i górne strefy.</li>
+                        <li>Rozmawiajcie podczas gry – łatwiej zaplanować odbicia.</li>
+                        <li>Wprowadźcie system punktów za liczbę odbić w jednej serii.</li>
+                    </ul>
                     <p>Ustalcie limit błędów, po których zmieniacie się miejscami, albo modyfikujcie zasady, dodając np. obowiązkowe podwójne odbicia.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
                 </div>
             </aside>
         </section>

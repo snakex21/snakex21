@@ -41,33 +41,8 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Gra strategiczna</span>
-                <h1>Szachy</h1>
-                <p>Rozstaw figury i spróbuj pokonać lekkiego przeciwnika AI. Możesz też włączyć tryb automatyczny, aby obserwować ruchy i analizować otwarcia oraz końcówki.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo lub automatyczna symulacja</div>
-                    <div class="game-meta__item"><strong>Tempo:</strong><br/>Własne, od 5 do 20 akcji na sekundę</div>
-                    <div class="game-meta__item"><strong>Perspektywa:</strong><br/>Biała lub czarna strona szachownicy</div>
-                    <div class="game-meta__item"><strong>Cel:</strong><br/>Mat i nauka podstawowych motywów</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Rozpocznij partię</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Jak wykorzystać grę?</h2>
-                <p>Idealna do krótkich treningów taktyki oraz poznawania planów strategicznych.</p>
-                <ul>
-                    <li>Testuj różne otwarcia i obserwuj reakcje AI.</li>
-                    <li>Ćwicz końcówki poprzez przyspieszanie rozgrywki.</li>
-                    <li>Analizuj pozycje z obu punktów widzenia.</li>
-                </ul>
-            </aside>
-        </section>
         <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Szachy</h1>
             <div class="game-layout__main">
                 <div class="game-layout__controls">
                     <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-chess-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
@@ -75,9 +50,34 @@
                 <div class="game-frame">
                     <iframe src="play.html" title="Szachy – zagraj teraz" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Włącz tryb „Auto” po obu stronach, aby obserwować symulowaną partię i znaleźć inspirację do kolejnych ruchów.</p>
             </div>
             <aside class="game-layout__aside" id="game-chess-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Rozstaw figury i spróbuj pokonać lekkiego przeciwnika AI. Możesz też włączyć tryb automatyczny, aby obserwować ruchy i analizować otwarcia oraz końcówki.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo lub automatyczna symulacja</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Tempo</dt>
+                            <dd>Własne, od 5 do 20 akcji na sekundę</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Perspektywa</dt>
+                            <dd>Biała lub czarna strona szachownicy</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Cel</dt>
+                            <dd>Mat i nauka podstawowych motywów</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Zagraj w osobnym oknie</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -87,11 +87,14 @@
                     </ul>
                 </div>
                 <div class="game-card">
-                    <h2>Wskazówki dla graczy</h2>
-                    <p>Stawiaj nacisk na kontrolę centrum i rozwijaj figury zanim rozpoczniesz atak. Małe cele w każdej partii pomagają poprawić styl gry.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Zagraj w osobnym oknie</a>
-                    </div>
+                    <h2>Jak wykorzystać grę?</h2>
+                    <p>Idealna do krótkich treningów taktyki oraz poznawania planów strategicznych.</p>
+                    <ul class="game-list">
+                        <li>Testuj różne otwarcia i obserwuj reakcje AI.</li>
+                        <li>Ćwicz końcówki poprzez przyspieszanie rozgrywki.</li>
+                        <li>Analizuj pozycje z obu punktów widzenia.</li>
+                    </ul>
+                    <p>Włącz tryb „Auto” po obu stronach, aby obserwować symulowaną partię i znaleźć inspirację do kolejnych ruchów. Stawiaj nacisk na kontrolę centrum i rozwijaj figury zanim rozpoczniesz atak.</p>
                 </div>
             </aside>
         </section>

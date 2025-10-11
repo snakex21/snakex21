@@ -41,32 +41,8 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Gra logiczna</span>
-                <h1>Kółko i krzyżyk – tryb solo</h1>
-                <p>Wybierz poziom trudności i sprawdź, czy potrafisz przechytrzyć algorytm. Gra natychmiast reaguje na Twoje decyzje, dzięki czemu w kilka minut możesz rozegrać całą serię pojedynków.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo vs AI</div>
-                    <div class="game-meta__item"><strong>Trudność:</strong><br/>Początkujący lub zaawansowany</div>
-                    <div class="game-meta__item"><strong>Sesja:</strong><br/>2–5 minut</div>
-                    <div class="game-meta__item"><strong>Strategia:</strong><br/>Zajmij środek i blokuj linie przeciwnika</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Zagraj</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Jak wygrać?</h2>
-                <ul>
-                    <li>Zacznij od zajęcia pola centralnego – to zapewnia najwięcej możliwości.</li>
-                    <li>Jeżeli komputer rozpoczyna, patrz na jego pierwszy ruch i planuj kontratak.</li>
-                    <li>Pilnuj dwóch linii jednocześnie – jedna ofensywna, druga defensywna.</li>
-                </ul>
-            </aside>
-        </section>
         <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Kółko i krzyżyk – tryb solo</h1>
             <div class="game-layout__main">
                 <div class="game-layout__controls">
                     <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolkos-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
@@ -74,9 +50,34 @@
                 <div class="game-frame">
                     <iframe src="play.html" title="Kółko i krzyżyk solo – zagraj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Podczas gry przełączaj trudność, aby od razu zobaczyć różnicę w stylu prowadzenia partii przez komputer.</p>
             </div>
             <aside class="game-layout__aside" id="game-kolkos-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Wybierz poziom trudności i sprawdź, czy potrafisz przechytrzyć algorytm. Gra natychmiast reaguje na Twoje decyzje, dzięki czemu w kilka minut możesz rozegrać całą serię pojedynków.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo vs AI</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Trudność</dt>
+                            <dd>Początkujący lub zaawansowany</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Sesja</dt>
+                            <dd>2–5 minut</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Strategia startowa</dt>
+                            <dd>Zajmij środek i blokuj linie przeciwnika</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Otwórz w nowym oknie</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -84,13 +85,16 @@
                         <li>Użyj przełączników, aby zdecydować kto zaczyna i jaki poziom trudności obowiązuje.</li>
                         <li>Przycisk Start na dole planszy rozpoczyna nową rundę.</li>
                     </ul>
+                    <p>Podczas gry przełączaj trudność, aby od razu zobaczyć różnicę w stylu prowadzenia partii przez komputer.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Szybkie wyzwanie</h2>
+                    <h2>Jak wygrać?</h2>
+                    <ul class="game-list">
+                        <li>Zacznij od zajęcia pola centralnego – to zapewnia najwięcej możliwości.</li>
+                        <li>Jeżeli komputer rozpoczyna, patrz na jego pierwszy ruch i planuj kontratak.</li>
+                        <li>Pilnuj dwóch linii jednocześnie – jedna ofensywna, druga defensywna.</li>
+                    </ul>
                     <p>Rozegraj serię pięciu partii i policz, ile razy udało Ci się wygrać bez remisu. Zapisuj rezultaty, aby porównać kolejne podejścia.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Otwórz w nowym oknie</a>
-                    </div>
                 </div>
             </aside>
         </section>
