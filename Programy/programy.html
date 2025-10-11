@@ -1,80 +1,152 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pl">
 <head>
-    <title>Filmy itp.</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <link rel="stylesheet" href="../styles.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Laboratorium narzędzi – Max Playground</title>
+    <meta name="description" content="Wszystkie programy Maxa w jednym miejscu. Generatory kolorów, czcionek i emoji wraz z opisami funkcji oraz szybkim dostępem." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../assets/css/site.css" />
+    <script defer src="../assets/js/site.js"></script>
+    <script defer src="../assets/js/programs-data.js"></script>
+    <script defer src="../assets/js/programs.js"></script>
 </head>
-
-<body class="tlo_kolor_bezowy2  ">
-    <header class="header2">
-
-        <nav class="nav2">
-            <ul>
-                <li><a href="../index.html">Strona główna</a></li>
-                <li class="dropdown">
-                    <a href="programy.html">Programy</a>
-                    <ul>
-                        <li><a href="generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                </li>
-                <li><a href="../gry/gry.html">Gry</a></li>
-                <li><a href="../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../muzyka/muzyka.html ">Muzyka</a></li>
-            </ul>
+<body data-root="../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a class="is-current" href="programy.html">Przegląd wszystkich programów</a>
+                        <a href="generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../gry/gry.html">Gry</a>
+                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
-
     </header>
-
-
-
-
-
-
-
-
-
-
-
-    <h1 class="center">Programy</h1>
-
-    <main class="filmy">
-        <section>
-
-            <div class="container">
-                <div class="box">
-                    <a href="generator czcionek/generator czcionek.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://www.mockofun.com/wp-content/uploads/2021/04/calligraphy-font-generator-36234.jpg');">
-                            <p>Generator Czcionek</p>
-                        </div>
-                    </a>
+    <main>
+        <section class="page-hero programs-hero">
+            <span class="hero-eyebrow">Laboratorium narzędzi</span>
+            <h1>Programy i generatory, które przyspieszą Twoje pomysły</h1>
+            <p>Eksperymentuj z kolorami, typografią i emoji. Każde narzędzie działa w przeglądarce i pozwala szybko kopiować efekty do własnych projektów.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="generator kolorow/generator kolorow.html">Uruchom generator kolorów</a>
+                <button class="btn btn-secondary" type="button" data-program-random="open">Losuj narzędzie</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span>Dostępne narzędzia</span>
+                    <strong data-program-count>3</strong>
                 </div>
-
-                <div class="box">
-                    <a href="generator emoji/generator emoji.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://lh3.googleusercontent.com/p_wzs1bmEwXvQrpf_CbIfb_SsOm341sg6O7C0jz3m5AjItrH2LTTV56Am0kfz04qn7S-Ftohkv5z2SPaIoXdk6IONQ=w640-h400-e365-rj-sc0x00ffffff');">
-                            <p>Generator Emoji</p>
-                        </div>
-                    </a>
+                <div class="hero-stat">
+                    <span>Obszary zastosowań</span>
+                    <strong data-program-category-count>0</strong>
                 </div>
-
-                <div class="box">
-                    <a href="generator kolorow/generator kolorow.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://bi.im-g.pl/im/95/18/1b/z28412309IER,Losowy-generator-kolorow-RGB-i-HEX--Zdjecie-ilustr.jpg');">
-                            <p>Generator Kolorów</p>
-                        </div>
-                    </a>
+                <div class="hero-stat">
+                    <span>Ostatnia aktualizacja</span>
+                    <strong data-program-last-update>Aktualne</strong>
                 </div>
+            </div>
+        </section>
 
+        <section class="section" id="przeglad">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Przegląd narzędzi</span>
+                    <h2 class="section-title">Wszystkie programy w jednym miejscu</h2>
+                    <p class="section-description">Wybierz narzędzie, które najlepiej pasuje do Twojego zadania. Możesz filtrować listę po kategoriach lub wyszukać konkretne funkcje.</p>
+                </div>
+                <div class="program-toolbar" role="search">
+                    <label class="program-search">
+                        <span role="img" aria-hidden="true">🔍</span>
+                        <span class="sr-only">Wyszukaj narzędzie</span>
+                        <input type="search" placeholder="Szukaj po nazwie lub funkcjach…" data-program-search />
+                    </label>
+                    <div class="program-filters" data-program-filters>
+                        <button class="btn btn-chip is-active" type="button" data-program-filter="all">Wszystkie</button>
+                    </div>
+                </div>
+            </div>
+            <div class="programs-grid" data-programs-grid aria-live="polite"></div>
+            <p class="program-empty" data-program-empty hidden>Nie znaleziono narzędzia spełniającego kryteria. Spróbuj zmienić filtr lub wyszukiwane hasło.</p>
+        </section>
 
+        <section class="section programs-highlight" id="polecane-programy">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Polecane</span>
+                    <h2 class="section-title">Sprawdź wyróżnione narzędzie</h2>
+                    <p class="section-description">Losowo podpowiadamy moduł, który może Cię zainspirować. Zobacz, do czego służy i jakie funkcje oferuje.</p>
+                </div>
+                <button class="btn btn-secondary" type="button" data-program-random="refresh">Losuj inne</button>
+            </div>
+            <article class="highlight-card" data-program-highlight>
+                <span class="badge" data-program-highlight-meta>Ulubione narzędzie społeczności</span>
+                <h3 data-program-highlight-title>Generator kolorów</h3>
+                <p data-program-highlight-description>Losuj palety barw, zapisuj ulubione kombinacje i kopiuj kody HEX albo RGB jednym kliknięciem.</p>
+                <ul class="program-highlight-list" data-program-highlight-features></ul>
+                <div class="highlight-actions">
+                    <a class="btn btn-primary" data-program-highlight-link href="generator kolorow/generator kolorow.html">Uruchom narzędzie</a>
+                    <span class="badge" data-program-highlight-tags>Kolory • HEX • RGB</span>
+                </div>
+            </article>
+        </section>
+
+        <section class="section programs-tips" id="jak-korzystac">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Porady</span>
+                    <h2 class="section-title">Jak najlepiej wykorzystać programy</h2>
+                    <p class="section-description">Każde narzędzie ma kilka trików, które pozwolą Ci szybciej osiągnąć cel. Oto nasze ulubione kombinacje.</p>
+                </div>
+            </div>
+            <div class="cards-grid cards-grid--three">
+                <article class="card card--tip">
+                    <span class="badge">🎨 Palety</span>
+                    <h3>Łącz kolory w zestawy</h3>
+                    <p>Skopiuj kilka barw z generatora i wklej je do notatnika projektu. Dzięki temu zawsze wrócisz do wybranego motywu.</p>
+                </article>
+                <article class="card card--tip">
+                    <span class="badge">🅰 Typografia</span>
+                    <h3>Przygotuj podpisy w różnych stylach</h3>
+                    <p>Generator czcionek pozwala zapisać tekst w wielu wariantach. Wybierz ulubione i dodaj do biblioteki, aby móc je szybko wklejać.</p>
+                </article>
+                <article class="card card--tip">
+                    <span class="badge">😀 Emoji</span>
+                    <h3>Twórz gotowe wiadomości</h3>
+                    <p>Skorzystaj z sekcji emoji, aby przygotować szablony reakcji do wysyłki w komunikatorach i mediach społecznościowych.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="callout">
+            <h2>Masz pomysł na nowe narzędzie?</h2>
+            <p>Daj znać, czego brakuje w laboratorium Maxa. Dodajemy kolejne programy i chętnie wprowadzimy Twoją sugestię do planu rozwoju.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="mailto:kontakt@example.com">Wyślij propozycję</a>
+                <a class="btn btn-secondary" href="../zmiany.html">Sprawdź plan zmian</a>
             </div>
         </section>
     </main>
-    <script src="../script.js"></script>
+    <footer>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
+    </footer>
 </body>
-
 </html>
