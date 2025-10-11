@@ -1,140 +1,96 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pl">
 <head>
-    <title>Historia Zmian Strony</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <style>
-        /* Improved Typography */
-        
-        body,
-        h1,
-        h2,
-        p {
-            font-family: 'Arial', sans-serif;
-            /* Modern and readable font */
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #004225;
-            /* Dark green for better visibility */
-        }
-        
-        h2 {
-            font-size: 1.75em;
-            font-weight: bold;
-            color: #005244;
-        }
-        
-        p {
-            font-size: 1.2em;
-            color: #333333;
-            /* Dark grey for better readability */
-        }
-        /* Enhanced Link Interaction */
-        
-        a:hover {
-            text-decoration: underline;
-            /* Gold color to highlight on hover */
-        }
-        /* Navigation Links Style */
-        
-        nav a,
-        nav a:visited,
-        nav a:hover,
-        nav a:active,
-        nav a:focus {
-            text-decoration: none;
-            /* No underline for nav links in all states */
-        }
-        /* Content Layout Adjustments */
-        
-        .wysrodkuj {
-            text-align: center;
-            padding: 20px;
-            margin: auto;
-        }
-        /* Responsive Grid Layout */
-        
-        .kolumna1 {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        /* Subtle animations for interactive elements */
-        
-        button,
-        .button-like {
-            transition: background-color 0.3s, transform 0.3s;
-        }
-        
-        button:hover,
-        .button-like:hover {
-            background-color: #f0e68c;
-            /* Light khaki background on hover */
-            transform: scale(1.05);
-        }
-        /* Improved Border Styles for Visual Interest */
-        
-        .ramka_zokraglona_brzoskwiniowa,
-        .ramka_zokraglona_czekoladowa {
-            border-width: 3px;
-            border-style: solid;
-            border-radius: 15px;
-        }
-        /* Enhancing specific section visibility */
-        
-        .wysrodkuj_liste_nienumerowana li {
-            padding: 10px;
-            background-color: #f5f5f5;
-            /* Light grey background for list items */
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-    </style>
-
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dziennik zmian – Max Playground</title>
+    <meta name="description" content="Historia rozwoju Max Playground. Sprawdź, jakie nowości pojawiły się na stronie i jakie aktualizacje są planowane." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="assets/css/site.css" />
+    <script defer src="assets/js/site.js"></script>
 </head>
-
-<body class="tlo_kolor_brazowy">
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="index.html">Strona główna</a></li>
-                <li class="dropdown">
-                    <a href="../programy">Programy</a>
-                    <ul>
-                        <li><a href="Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="gothic 2 new balance/gothic2.html ">Gothic 2 New Balance</a>
-                    <ul>
-                        <li><a href="gothic 2 new balance/spis wszystkiego/spis.html">Spis Wszystkiego</a></li>
-                        <li><a href="gothic 2 new balance/solucja/solucja.html">Solucja</a></li>
-                        <li><a href="gothic 2 new balance/faq/faq.html">FAQ</a></li>
-                    </ul>
-                </li>
-                <li><a href="gry/gry.html">Gry</a></li>
-                <li><a href="filmy/filmy glowna.html">Strona do filmów</a></li>
-            </ul>
+<body>
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="gry/gry.html">Gry</a>
+                <a class="nav-link" href="filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link is-active" href="zmiany.html" aria-current="page">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
 
-    <div class="wysrodkuj">
-        <h1>Historia zmian strony snakex21.github.io (nowa wersja)</h1>
-        <h2>04.04.24</h2>
-        <p>Bazowa wersja</p>
+    <main>
+        <section class="hero hero--subpage">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Historia projektu</span>
+                <h1>Dziennik zmian Max Playground</h1>
+                <p class="hero-lead">Śledź, jak rozwija się centrum gier, filmów i muzyki Maxa. Dodaj własne pomysły, aby kolejne aktualizacje były jeszcze lepsze.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="filmy/filmy glowna.html">Zobacz nowe kolekcje filmowe</a>
+                    <a class="btn btn-secondary" href="muzyka/muzyka.html">Włącz odświeżony odtwarzacz</a>
+                </div>
+            </div>
+        </section>
 
-        <h2>23.05.24</h2>
-        <p>Przemodelowano filmy i dodano muzykę</p>
+        <section class="section" id="timeline">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Ostatnie aktualizacje</span>
+                    <h2 class="section-title">Najważniejsze kamienie milowe</h2>
+                    <p class="section-description">Notujemy wszystkie większe zmiany interfejsu oraz treści, aby łatwo wrócić do poprzednich wersji.</p>
+                </div>
+            </div>
+            <div class="changelog-timeline">
+                <article class="changelog-entry">
+                    <time datetime="2024-11-29">29 listopada 2024</time>
+                    <h3>Nowa odsłona działów Filmy, Muzyka i Dziennik</h3>
+                    <p>Wprowadzono spójny wygląd podstron, dodano wyszukiwarki, losowe propozycje oraz czytelne karty z opisami kolekcji.</p>
+                    <ul>
+                        <li>Przebudowano stronę główną filmów oraz widok pojedynczych kolekcji.</li>
+                        <li>Dodano muzyczny panel z wyszukiwarką, licznikiem utworów i odświeżonym odtwarzaczem.</li>
+                        <li>Przygotowano nowy dziennik zmian z osią czasu.</li>
+                    </ul>
+                </article>
+                <article class="changelog-entry">
+                    <time datetime="2024-05-23">23 maja 2024</time>
+                    <h3>Przebudowa sekcji filmów i start strefy muzycznej</h3>
+                    <p>Dodano pierwsze kolekcje filmowe oraz podstawową wersję odtwarzacza audio z losowaniem utworów.</p>
+                </article>
+                <article class="changelog-entry">
+                    <time datetime="2024-04-04">4 kwietnia 2024</time>
+                    <h3>Start projektu</h3>
+                    <p>Udostępniono bazową wersję strony Maxa z katalogiem gier i narzędziami.</p>
+                </article>
+            </div>
+        </section>
+    </main>
 
-
-    </div>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>Masz pomysł na nową funkcję? Zapisz ją w dzienniku zmian lub wyślij wiadomość do Maxa.</p>
+            <a class="btn btn-ghost" href="mailto:max-playground@example.com">Napisz wiadomość</a>
+        </div>
+    </footer>
 </body>
-
 </html>

@@ -1,62 +1,116 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moja Muzyka</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="ikona.png" type="image/png">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Strefa muzyczna – Max Playground</title>
+    <meta name="description" content="Dynamiczny odtwarzacz Maxa z setkami utworów, wyszukiwarką i losowymi propozycjami dopasowanymi do Twojego nastroju." />
+    <link rel="icon" href="ikona.png" type="image/png" />
+    <link rel="stylesheet" href="../assets/css/site.css" />
+    <link rel="stylesheet" href="../assets/css/music.css" />
+    <script defer src="../assets/js/site.js"></script>
 </head>
-
 <body>
-    <nav class="nav2">
-        <ul>
-            <li><a href="../index.html">Strona główna</a></li>
-            <li class="dropdown">
-                <a href="../Programy/programy.html">Programy</a>
-                <ul>
-                    <li><a href="../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                    <li><a href="../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                    <li><a href="../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                </ul>
-            </li>
-            <li><a href="../gry/gry.html">Gry</a></li>
-            <li><a href="../filmy/filmy glowna.html">Strona do filmów</a></li>
-        </ul>
-    </nav>
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../gry/gry.html">Gry</a>
+                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link is-active" href="muzyka.html" aria-current="page">Muzyka</a>
+                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
+        </nav>
+    </header>
 
     <main>
-        <div class="sidebar">
-            <input type="text" placeholder="Szukaj utworów..." class="search-bar" id="search-bar">
-            <div class="random-tracks" id="random-tracks">
-                <h2>Losowe Utwory</h2>
-                <!-- Losowe utwory będą generowane dynamicznie tutaj -->
+        <section class="hero hero--subpage hero--media">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Strefa muzyczna</span>
+                <h1>Kolekcja dźwięków Maxa</h1>
+                <p class="hero-lead">Losuj utwory, buduj playlisty i miksuj tempo od chilloutu po epickie soundtracki. Jeden interfejs – setki inspiracji.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#playlists">Przejdź do playlist</a>
+                    <a class="btn btn-secondary" href="../filmy/filmy glowna.html">Włącz seans filmowy</a>
+                </div>
+                <div class="hero-highlight">
+                    <span class="badge">Aktualna playlista</span>
+                    <span>Wyszukaj ulubiony utwór lub zdaj się na losowanie w panelu poniżej.</span>
+                </div>
             </div>
-        </div>
-        <div class="content">
-            <h1>Witaj w Mojej Muzyce</h1>
-            <div class="music-section" id="music-section">
-                <!-- Utwory będą generowane dynamicznie tutaj -->
+            <div class="hero-illustration hero-illustration--media">
+                <div class="hero-panel">
+                    <h2>Panel dźwiękowy</h2>
+                    <p>Śledź co ostatnio grało i eksperymentuj z prędkością odtwarzania oraz trybem loop/autoplay.</p>
+                    <div class="panel-metrics">
+                        <div class="metric"><span>Liczba utworów</span><strong id="track-count">∞</strong></div>
+                        <div class="metric"><span>Tryb autoplay</span><strong id="autoplay-status">Włączony</strong></div>
+                        <div class="metric"><span>Ostatnio odtworzone</span><strong id="last-played">Jeszcze nic</strong></div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section class="section" id="playlists">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Twoje playlisty</span>
+                    <h2 class="section-title">Szukaj, losuj i odkrywaj nowe brzmienia</h2>
+                    <p class="section-description">Filtruj po tytułach lub artystach, klikaj w okładki, aby w jednej chwili uruchomić wybrany utwór.</p>
+                </div>
+            </div>
+            <div class="music-layout">
+                <aside class="music-sidebar">
+                    <label class="visually-hidden" for="search-bar">Szukaj utworów</label>
+                    <input class="input" type="search" id="search-bar" placeholder="Wpisz tytuł lub wykonawcę" />
+                    <div class="music-random">
+                        <h2>Losowe utwory</h2>
+                        <p class="music-random__hint">Kliknij w propozycję, by natychmiast ją odtworzyć.</p>
+                        <div class="music-random__list" id="random-tracks"></div>
+                    </div>
+                </aside>
+                <div class="music-content">
+                    <h2>Galeria okładek</h2>
+                    <div class="music-section" id="music-section"></div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <footer>
-        <div class="player">
+    <footer class="music-footer">
+        <div class="music-player" id="player">
             <div class="track-info">
-                <span id="track-title">Tytuł utworu</span> - <span id="track-artist">Artysta</span>
+                <span id="track-title">Tytuł utworu</span>
+                <span id="track-artist">Artysta</span>
             </div>
             <div class="controls">
-                <button id="prev" onclick="prevTrack()">&#9664;&#9664;</button>
-                <button id="rewind" onclick="rewind15()">&#8630; 15s</button>
-                <button id="play-pause" onclick="togglePlay()">&#9654;</button>
-                <button id="forward" onclick="forward15()">15s &#8631;</button>
-                <button id="next" onclick="nextTrack()">&#9654;&#9654;</button>
-                <button id="loop" onclick="toggleLoop()"><img src="loop_off.png" id="loop-icon" alt="Loop"></button>
+                <button id="prev" onclick="prevTrack()" aria-label="Poprzedni utwór">&#9664;&#9664;</button>
+                <button id="rewind" onclick="rewind15()" aria-label="Przewiń 15 sekund do tyłu">&#8630; 15s</button>
+                <button id="play-pause" onclick="togglePlay()" aria-label="Odtwórz lub wstrzymaj">&#9654;</button>
+                <button id="forward" onclick="forward15()" aria-label="Przewiń 15 sekund do przodu">15s &#8631;</button>
+                <button id="next" onclick="nextTrack()" aria-label="Następny utwór">&#9654;&#9654;</button>
+                <button id="loop" onclick="toggleLoop()" aria-label="Przełącz pętlę"><img src="loop_off.png" id="loop-icon" alt="Loop"></button>
                 <button id="autoplay" onclick="toggleAutoplay()">Włącz autoodtwarzanie</button>
                 <div class="speed-control">
-                    <label for="speed">Speed:</label>
+                    <label for="speed">Tempo:</label>
                     <select id="speed" onchange="changeSpeed(event)">
                         <option value="0.25">0.25x</option>
                         <option value="0.5">0.5x</option>
@@ -71,17 +125,16 @@
             </div>
             <div class="progress-container">
                 <span id="current-time">0:00</span>
-                <input type="range" id="progress" value="0" max="100" onchange="seek(event)">
+                <input type="range" id="progress" value="0" max="100" onchange="seek(event)" aria-label="Postęp odtwarzania">
                 <span id="total-time">0:00</span>
             </div>
             <div class="volume-control">
-                <img src="volume_on.png" id="volume-icon" onclick="toggleMute()" alt="Volume">
-                <input type="range" id="volume" value="100" max="100" onchange="changeVolume(event)">
+                <img src="volume_on.png" id="volume-icon" onclick="toggleMute()" alt="Głośność">
+                <input type="range" id="volume" value="100" max="100" onchange="changeVolume(event)" aria-label="Ustaw głośność">
             </div>
         </div>
     </footer>
 
     <script src="player.js"></script>
 </body>
-
 </html>
