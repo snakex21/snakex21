@@ -52,9 +52,24 @@
                 </div>
             </header>
             <div class="game-stage__board">
-                <div class="memory-game">
-                    <div class="memory-summary">Ostatni wynik: <span class="score">--</span>% · Czas: <span class="time">--</span>s</div>
-                    <div class="memory-grid" data-memory-grid>
+                <div class="game-board">
+                    <div class="game-board__inner memory-game">
+                        <div class="memory-hud">
+                            <div class="memory-hud__item">
+                                <span>Ruchy</span>
+                                <strong class="memory-hud__value" data-memory-moves>0</strong>
+                            </div>
+                            <div class="memory-hud__item">
+                                <span>Czas</span>
+                                <strong class="memory-hud__value" data-memory-time>0:00</strong>
+                            </div>
+                            <div class="memory-hud__item">
+                                <span>Skuteczność</span>
+                                <strong class="memory-hud__value" data-memory-accuracy>100%</strong>
+                            </div>
+                            <button class="memory-hud__button" type="button" data-memory-reset>🔄 Zagraj ponownie</button>
+                        </div>
+                        <div class="memory-grid" data-memory-grid>
                         <div class="memory-card" data-card></div>
                         <div class="memory-card" data-card></div>
                         <div class="memory-card" data-card></div>
@@ -73,8 +88,11 @@
                         <div class="memory-card" data-card></div>
                         <div class="memory-card" data-card></div>
                         <div class="memory-card" data-card></div>
+                        </div>
+                        <p class="memory-message" data-memory-message></p>
+                        <div class="memory-summary">Najlepszy wynik: <span data-memory-best-score>--</span>% · Czas: <span data-memory-best-time>--</span>s · Ruchy: <span data-memory-best-moves>--</span></div>
+                        <p class="memory-legend">Zapisujemy Twój najlepszy wynik w pamięci przeglądarki – spróbuj ukończyć planszę jak najszybciej i z jak najmniejszą liczbą pomyłek.</p>
                     </div>
-                    <p class="memory-legend">Zapisujemy Twój najlepszy wynik w pamięci przeglądarki – spróbuj ukończyć planszę jak najszybciej i z jak najmniejszą liczbą pomyłek.</p>
                 </div>
             </div>
         </section>
