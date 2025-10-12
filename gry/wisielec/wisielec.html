@@ -4,10 +4,192 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Wisielec – Max Playground</title>
-    <meta name="description" content="Zgaduj litery, odkrywaj hasła i korzystaj z podpowiedzi. Klasyczny wisielec w nowoczesnej oprawie." />
+    <meta name="description" content="Zgaduj litery, odsłaniaj hasła i korzystaj z podpowiedzi w odświeżonej wersji gry wisielec na pełnym ekranie." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <style>
+        .game-stage--hangman {
+            --hangman-surface: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.96));
+            --hangman-border: rgba(148, 163, 184, 0.35);
+            --hangman-highlight: #38bdf8;
+            --hangman-success: #34d399;
+            --hangman-danger: #f87171;
+            --hangman-muted: rgba(148, 163, 184, 0.45);
+            --hangman-text: #e2e8f0;
+        }
+
+        .game-stage--hangman .game-stage__board {
+            justify-content: center;
+        }
+
+        .hangman-app {
+            width: min(960px, 100%);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: clamp(1.25rem, 4vw, 2rem);
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+            border-radius: 26px;
+            background: var(--hangman-surface);
+            border: 1px solid var(--hangman-border);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 28px 65px rgba(8, 47, 73, 0.5);
+            color: var(--hangman-text);
+        }
+
+        .hangman-figure {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hangman-figure svg {
+            width: clamp(220px, 32vw, 320px);
+            height: auto;
+            stroke: var(--hangman-text);
+            stroke-width: 6;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .hangman-figure [data-figure-part] {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .hangman-figure [data-figure-part].is-visible {
+            opacity: 1;
+        }
+
+        .hangman-panel {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1rem, 3vw, 1.75rem);
+        }
+
+        .hangman-word {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(0.4rem, 1.4vw, 0.75rem);
+            font-size: clamp(1.6rem, 4vw, 2.3rem);
+            letter-spacing: 0.18em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .hangman-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.6rem;
+            padding: 0.1rem 0.35rem;
+            border-bottom: 3px solid rgba(148, 163, 184, 0.35);
+        }
+
+        .hangman-letter.is-revealed {
+            color: #f8fafc;
+            border-color: var(--hangman-highlight);
+        }
+
+        .hangman-hint {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: rgba(226, 232, 240, 0.75);
+        }
+
+        .hangman-keyboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+            gap: clamp(0.4rem, 1.6vw, 0.6rem);
+        }
+
+        .hangman-keyboard button {
+            padding: 0.6rem 0.4rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(30, 64, 175, 0.25);
+            color: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .hangman-keyboard button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: rgba(56, 189, 248, 0.25);
+            border-color: rgba(56, 189, 248, 0.45);
+        }
+
+        .hangman-keyboard button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .hangman-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.5rem;
+        }
+
+        .hangman-status__item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            font-size: 0.95rem;
+            color: rgba(226, 232, 240, 0.78);
+        }
+
+        .hangman-status__item strong {
+            font-size: 1.4rem;
+            color: #f8fafc;
+        }
+
+        .hangman-message {
+            min-height: 1.4rem;
+            font-weight: 600;
+            color: var(--hangman-success);
+        }
+
+        .hangman-message.is-lost {
+            color: var(--hangman-danger);
+        }
+
+        .hangman-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .hangman-actions button {
+            border-radius: 999px;
+            padding: 0.6rem 1.4rem;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.18);
+            color: #f1f5f9;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+
+        .hangman-actions button:hover:not(:disabled) {
+            background: rgba(56, 189, 248, 0.28);
+            transform: translateY(-1px);
+        }
+
+        .hangman-actions button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        @media (max-width: 720px) {
+            .hangman-app {
+                grid-template-columns: 1fr;
+            }
+
+            .hangman-figure svg {
+                width: min(260px, 70vw);
+            }
+        }
+    </style>
     <script defer src="../../assets/js/site.js"></script>
 </head>
 <body class="game-page" data-root="../../">
@@ -41,66 +223,242 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Wisielec</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-wisielec-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--hangman">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Klasyczna gra słowna</span>
+                    <h1>Wisielec</h1>
+                    <p>Wybieraj litery, odkrywaj hasła i w razie potrzeby korzystaj z podpowiedzi – cała rozgrywka mieści się teraz tuż pod paskiem nawigacji.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Wisielec – zagraj" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-wisielec-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Odgadnij ukryte słowo, zanim postać wisielca zostanie narysowana. Korzystaj z alfabetu i podpowiedzi, aby odkryć hasło przed czasem.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo lub wspólnie z przyjaciółmi</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Odgadnij hasło, zanim skończą się próby</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Pomoc</dt>
-                            <dd>Dostępna podpowiedź</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Umiejętności</dt>
-                            <dd>Słownictwo i skojarzenia</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                <div class="game-hud">
+                    <div class="game-score">
+                        <span>Pozostałe próby</span>
+                        <strong data-hangman-tries>6</strong>
+                    </div>
+                    <div class="game-score">
+                        <span>Hasła odgadnięte</span>
+                        <strong data-hangman-wins>0</strong>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Kliknij literę na klawiaturze ekranowej, aby sprawdzić, czy należy do hasła.</li>
-                        <li>Przycisk „Podpowiedź” odsłania wskazówkę – używaj go rozsądnie.</li>
-                        <li>Po zakończeniu gry wybierz nowy temat i zacznij od początku.</li>
-                    </ul>
-                    <p>Spróbuj odgadnąć hasło bez używania podpowiedzi, a następnie zwiększ poziom trudności, zgadując na czas.</p>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board">
+                    <div class="game-board__inner hangman-app">
+                        <div class="hangman-figure" aria-hidden="true">
+                            <svg viewBox="0 0 240 320" role="presentation">
+                                <line x1="20" y1="300" x2="220" y2="300" stroke-width="12" />
+                                <line x1="60" y1="300" x2="60" y2="30" stroke-width="12" />
+                                <line x1="60" y1="30" x2="180" y2="30" stroke-width="12" />
+                                <line x1="180" y1="30" x2="180" y2="70" stroke-width="12" />
+                                <circle cx="180" cy="95" r="28" data-figure-part="head" />
+                                <line x1="180" y1="123" x2="180" y2="200" data-figure-part="body" />
+                                <line x1="180" y1="150" x2="150" y2="180" data-figure-part="arm-left" />
+                                <line x1="180" y1="150" x2="210" y2="180" data-figure-part="arm-right" />
+                                <line x1="180" y1="200" x2="160" y2="250" data-figure-part="leg-left" />
+                                <line x1="180" y1="200" x2="200" y2="250" data-figure-part="leg-right" />
+                            </svg>
+                        </div>
+                        <div class="hangman-panel">
+                            <div class="hangman-word" data-hangman-word aria-live="polite"></div>
+                            <p class="hangman-hint" data-hangman-hint hidden></p>
+                            <div class="hangman-status">
+                                <div class="hangman-status__item">
+                                    <span>Błędne litery</span>
+                                    <strong data-hangman-mistakes>0</strong>
+                                </div>
+                                <div class="hangman-status__item">
+                                    <span>Łącznie prób</span>
+                                    <strong data-hangman-max>6</strong>
+                                </div>
+                            </div>
+                            <p class="hangman-message" data-hangman-message aria-live="assertive"></p>
+                            <div class="hangman-keyboard" data-hangman-keyboard></div>
+                            <div class="hangman-actions">
+                                <button type="button" data-hangman-hint-button>Podpowiedź</button>
+                                <button type="button" data-hangman-reset>Nowe hasło</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="game-card">
-                    <h2>Jak grać skuteczniej?</h2>
-                    <ul class="game-list">
-                        <li>Najpierw wybieraj najczęstsze samogłoski – zwiększają szanse na odkrycie słowa.</li>
-                        <li>Zwróć uwagę na długość słowa i powtarzające się litery.</li>
-                        <li>W razie trudności skorzystaj z podpowiedzi, by zawęzić możliwości.</li>
-                    </ul>
-                    <p>Podzielcie się na drużyny i zgadujcie na zmianę. Każda pomyłka to punkt dla przeciwnika – kto pierwszy odgadnie trzy hasła, wygrywa.</p>
-                </div>
-            </aside>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Udanego zgadywania!</p>
-    </footer>
 </body>
+<script>
+    (() => {
+        const words = [
+            { word: "PROGRAMISTA", hint: "Tworzy aplikacje i rozwiązania w kodzie" },
+            { word: "KALAFIOR", hint: "Warzywo o kwiatostanie przypominającym drzewko" },
+            { word: "ASTRONOMIA", hint: "Nauka zajmująca się badaniem kosmosu" },
+            { word: "RZESZÓW", hint: "Miasto w południowo-wschodniej Polsce" },
+            { word: "INSTRUKCJA", hint: "Opis krok po kroku, jak coś zrobić" },
+            { word: "ORANŻADA", hint: "Musujący napój o owocowym smaku" },
+            { word: "KOPERNIK", hint: "Polski astronom, który ruszył Ziemię" },
+            { word: "SIEKIERA", hint: "Narzędzie do rąbania drewna" },
+            { word: "POZIOMKA", hint: "Leśna kuzynka truskawki" },
+            { word: "WIATRAK", hint: "Urządzenie napędzane wiatrem" },
+            { word: "LITERATURA", hint: "Świat książek i opowieści" },
+            { word: "GIMNASTYKA", hint: "Ćwiczenia dla ciała i równowagi" }
+        ];
+        const letters = Array.from("AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUVWYZŹŻ");
+        const keyboard = document.querySelector('[data-hangman-keyboard]');
+        const wordElement = document.querySelector('[data-hangman-word]');
+        const hintElement = document.querySelector('[data-hangman-hint]');
+        const hintButton = document.querySelector('[data-hangman-hint-button]');
+        const resetButton = document.querySelector('[data-hangman-reset]');
+        const messageElement = document.querySelector('[data-hangman-message]');
+        const triesElement = document.querySelector('[data-hangman-tries]');
+        const winsElement = document.querySelector('[data-hangman-wins]');
+        const mistakesElement = document.querySelector('[data-hangman-mistakes]');
+        const maxElement = document.querySelector('[data-hangman-max]');
+        const figureParts = Array.from(document.querySelectorAll('[data-figure-part]'));
+        const maxMistakes = figureParts.length;
+        let activeWord = null;
+        let guessed = new Set();
+        let wrongGuesses = new Set();
+        let gamesWon = 0;
+        let lastWord = null;
+        maxElement.textContent = String(maxMistakes);
+
+        function renderKeyboard() {
+            keyboard.innerHTML = letters
+                .map(
+                    (letter) =>
+                        `<button type="button" data-letter="${letter}">${letter}</button>`
+                )
+                .join("");
+        }
+
+        function chooseWord() {
+            let candidate = words[Math.floor(Math.random() * words.length)];
+            if (lastWord && words.length > 1) {
+                let safety = 0;
+                while (candidate.word === lastWord.word && safety < 10) {
+                    candidate = words[Math.floor(Math.random() * words.length)];
+                    safety += 1;
+                }
+            }
+            lastWord = candidate;
+            return candidate;
+        }
+
+        function revealWord() {
+            const display = activeWord.word.split("").map((char) => {
+                if (!letters.includes(char)) {
+                    return `<span class="hangman-letter is-revealed">${char}</span>`;
+                }
+                const isRevealed = guessed.has(char);
+                return `<span class="hangman-letter${isRevealed ? " is-revealed" : ""}">${isRevealed ? char : ""}</span>`;
+            });
+            wordElement.innerHTML = display.join("");
+        }
+
+        function updateFigure() {
+            figureParts.forEach((part, index) => {
+                part.classList.toggle("is-visible", index < wrongGuesses.size);
+            });
+        }
+
+        function updateHud() {
+            const triesLeft = maxMistakes - wrongGuesses.size;
+            triesElement.textContent = String(triesLeft);
+            winsElement.textContent = String(gamesWon);
+            mistakesElement.textContent = String(wrongGuesses.size);
+        }
+
+        function setKeyboardState(disabled) {
+            keyboard.querySelectorAll('button').forEach((button) => {
+                const letter = button.dataset.letter;
+                const isUsed = guessed.has(letter) || wrongGuesses.has(letter);
+                button.disabled = disabled || isUsed;
+            });
+        }
+
+        function endGame(won) {
+            setKeyboardState(true);
+            messageElement.classList.toggle('is-lost', !won);
+            if (won) {
+                messageElement.textContent = `Brawo! Hasło to "${activeWord.word}".`;
+                gamesWon += 1;
+            } else {
+                messageElement.textContent = `Niestety! Szukane słowo to "${activeWord.word}".`;
+            }
+            updateHud();
+        }
+
+        function checkState() {
+            const allLetters = new Set(activeWord.word.split("").filter((char) => letters.includes(char)));
+            const won = Array.from(allLetters).every((char) => guessed.has(char));
+            if (won) {
+                endGame(true);
+                return;
+            }
+            if (wrongGuesses.size >= maxMistakes) {
+                endGame(false);
+            }
+        }
+
+        function handleGuess(letter) {
+            if (!letters.includes(letter)) {
+                return;
+            }
+            if (guessed.has(letter) || wrongGuesses.has(letter)) {
+                return;
+            }
+            if (activeWord.word.includes(letter)) {
+                guessed.add(letter);
+            } else {
+                wrongGuesses.add(letter);
+            }
+            revealWord();
+            updateFigure();
+            updateHud();
+            checkState();
+            setKeyboardState(false);
+        }
+
+        function resetGame() {
+            activeWord = chooseWord();
+            guessed = new Set();
+            wrongGuesses = new Set();
+            messageElement.textContent = "";
+            messageElement.classList.remove('is-lost');
+            hintElement.hidden = true;
+            hintElement.textContent = "";
+            hintButton.disabled = false;
+            revealWord();
+            updateFigure();
+            updateHud();
+            setKeyboardState(false);
+        }
+
+        renderKeyboard();
+        resetButton.addEventListener('click', resetGame);
+        hintButton.addEventListener('click', () => {
+            hintElement.hidden = false;
+            hintElement.textContent = `Podpowiedź: ${activeWord.hint}`;
+            hintButton.disabled = true;
+        });
+        keyboard.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-letter]');
+            if (!button || button.disabled) {
+                return;
+            }
+            handleGuess(button.dataset.letter);
+        });
+        window.addEventListener('keydown', (event) => {
+            const letter = event.key.toUpperCase();
+            if (letters.includes(letter)) {
+                handleGuess(letter);
+            }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (messageElement.textContent) {
+                    resetGame();
+                }
+            }
+        });
+        resetGame();
+    })();
+</script>
 </html>
