@@ -464,3 +464,256 @@
     </script>
 </body>
 </html>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kółko i krzyżyk — Max Playground</title>
+  <meta name="description" content="Zagraj lokalnie z drugim graczem lub ze sztuczną inteligencją. Prosta plansza 3×3, szybkie partie." />
+  <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+  <link rel="stylesheet" href="../../assets/css/site.css" />
+  <link rel="stylesheet" href="../../assets/css/game-page.css" />
+  <style>
+    .game-stage--ttt {
+      --ttt-board-size: min(82vmin, 560px);
+      --ttt-accent: #38bdf8;
+      --ttt-border: rgba(148,163,184,.35);
+      --ttt-bg-panel: rgba(148,163,184,.12);
+      --ttt-tile: rgba(148,163,184,.20);
+      --ttt-tile-alt: rgba(100,116,139,.26);
+    }
+    .game-stage--ttt .game-stage__board { justify-content: center; }
+    .game-stage--ttt .ttt-app { width: 100%; max-width: 960px; display: flex; flex-direction: column; align-items: center; gap: clamp(1rem,2.5vw,1.6rem); }
+    .game-stage--ttt .ttt-toolbar { display: grid; gap: clamp(.75rem,2vw,1.25rem); width: min(100%, 720px); grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); }
+    .game-stage--ttt .ttt-toolbar fieldset { margin: 0; padding: clamp(.85rem,2vw,1.25rem); border-radius: 18px; border: 1px solid var(--ttt-border); background: var(--ttt-bg-panel); display: flex; flex-direction: column; gap: .6rem; color: var(--color-text,#e2e8f0); }
+    .game-stage--ttt .ttt-toolbar legend { font-size: .85rem; text-transform: uppercase; letter-spacing: .12em; color: rgba(226,232,240,.72); }
+    .game-stage--ttt .ttt-actions { display: flex; align-items: center; justify-content: center; }
+    .game-stage--ttt .ttt-board { inline-size: min(var(--ttt-board-size), 100%); aspect-ratio: 1/1; display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(.6rem, 1.8vw, .9rem); border-radius: clamp(18px,4vw,26px); padding: clamp(.85rem,2vw,1.35rem); background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.92)); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 28px 65px rgba(8, 47, 73, .55); border: 1px solid rgba(148,163,184,.2); }
+    .game-stage--ttt .ttt-cell { position: relative; display: grid; place-items: center; background: var(--ttt-tile); border-radius: clamp(8px,1.7vw,12px); border: 1px solid rgba(15,23,42,.35); color: #e2e8f0; font-weight: 800; font-size: clamp(3rem, 14vmin, 6rem); cursor: pointer; transition: background .2s ease, transform .08s ease; }
+    .game-stage--ttt .ttt-cell:nth-child(odd) { background: var(--ttt-tile-alt); }
+    .game-stage--ttt .ttt-cell:disabled { cursor: default; opacity: .9; }
+    .game-stage--ttt .ttt-cell.win { outline: 3px solid rgba(56,189,248,.75); }
+    .game-stage--ttt .ttt-legend { color: rgba(226,232,240,.65); text-align: center; max-width: min(60ch,100%); }
+  </style>
+  <script defer src="../../assets/js/site.js"></script>
+</head>
+<body class="game-page" data-root="../..//">
+  <header class="site-header">
+    <nav class="main-nav" aria-label="Główna nawigacja">
+      <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+      <div class="nav-menu" data-nav-menu id="primary-navigation">
+        <a class="nav-link" href="../../index.html">Strona główna</a>
+        <div class="nav-item nav-item--dropdown">
+          <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+          <div class="nav-dropdown" id="nav-programy" role="menu">
+            <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+            <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+            <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+            <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+          </div>
+        </div>
+        <a class="nav-link is-active" href="../gry.html">Gry</a>
+        <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+        <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+        <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">Tryb nocny</button>
+        <div class="header-clock">
+          <span class="clock-time" data-clock-time>--:--:--</span>
+          <span class="clock-date" data-clock-date>Ładowanie…</span>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <section class="game-stage game-stage--ttt">
+      <header class="game-stage__header">
+        <div>
+          <span class="game-eyebrow">Planszówka</span>
+          <h1>Kółko i krzyżyk</h1>
+          <p>Zagraj lokalnie z drugim graczem lub ze sztuczną inteligencją. Prosta plansza 3×3 i szybkie partie.</p>
+        </div>
+        <div class="game-hud">
+          <div class="game-score"><span>Tura</span> <strong data-ttt-turn>X</strong></div>
+          <div class="game-score"><span>Wynik</span> <strong><span data-ttt-score-x>0</span> : <span data-ttt-score-o>0</span> (<span data-ttt-draws>0</span>)</strong></div>
+        </div>
+      </header>
+      <div class="game-stage__board">
+        <div class="game-board">
+          <div class="game-board__inner ttt-app">
+            <div class="ttt-toolbar" role="group" aria-label="Sterowanie kółkiem i krzyżykiem">
+              <fieldset>
+                <legend>Tryb gry</legend>
+                <label><input type="radio" name="mode" value="pvp" checked> <span>Człowiek vs człowiek</span></label>
+                <label><input type="radio" name="mode" value="ai"> <span>Człowiek vs SI</span></label>
+              </fieldset>
+              <fieldset data-ttt-ai>
+                <legend>Poziom SI</legend>
+                <label><input type="radio" name="ai" value="easy" checked> <span>Łatwy</span></label>
+                <label><input type="radio" name="ai" value="normal"> <span>Normalny</span></label>
+                <label><input type="radio" name="ai" value="hard"> <span>Trudny</span></label>
+              </fieldset>
+              <fieldset>
+                <legend>Pierwszy ruch</legend>
+                <label><input type="radio" name="first" value="X" checked> <span>X</span></label>
+                <label><input type="radio" name="first" value="O"> <span>O</span></label>
+              </fieldset>
+              <div class="ttt-actions">
+                <button class="btn" type="button" data-ttt-new>Nowa partia</button>
+              </div>
+            </div>
+            <div class="ttt-board" role="application" aria-label="Plansza kółko i krzyżyk">
+              <button class="ttt-cell" data-idx="0" aria-label="Pole 1"></button>
+              <button class="ttt-cell" data-idx="1" aria-label="Pole 2"></button>
+              <button class="ttt-cell" data-idx="2" aria-label="Pole 3"></button>
+              <button class="ttt-cell" data-idx="3" aria-label="Pole 4"></button>
+              <button class="ttt-cell" data-idx="4" aria-label="Pole 5"></button>
+              <button class="ttt-cell" data-idx="5" aria-label="Pole 6"></button>
+              <button class="ttt-cell" data-idx="6" aria-label="Pole 7"></button>
+              <button class="ttt-cell" data-idx="7" aria-label="Pole 8"></button>
+              <button class="ttt-cell" data-idx="8" aria-label="Pole 9"></button>
+            </div>
+            <p class="ttt-legend">Kliknij puste pole, aby wykonać ruch. W trybie SI przeciwnik odpowie automatycznie.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const cells = Array.from(document.querySelectorAll('.ttt-cell'));
+      const turnEl = document.querySelector('[data-ttt-turn]');
+      const scoreXEl = document.querySelector('[data-ttt-score-x]');
+      const scoreOEl = document.querySelector('[data-ttt-score-o]');
+      const drawsEl = document.querySelector('[data-ttt-draws]');
+      const newBtn = document.querySelector('[data-ttt-new]');
+      const modeRadios = Array.from(document.querySelectorAll('input[name="mode"]'));
+      const aiRadios = Array.from(document.querySelectorAll('input[name="ai"]'));
+      const firstRadios = Array.from(document.querySelectorAll('input[name="first"]'));
+      const aiPanel = document.querySelector('[data-ttt-ai]');
+
+      const LINES = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+
+      const state = {
+        board: Array(9).fill(''),
+        turn: 'X',
+        mode: 'pvp',
+        aiLevel: 'easy',
+        first: 'X',
+        lock: false,
+        score: { X: 0, O: 0, D: 0 },
+      };
+
+      function checkWinner(board) {
+        for (const [a,b,c] of LINES) {
+          if (board[a] && board[a] === board[b] && board[a] === board[c]) return {win: board[a], line:[a,b,c]};
+        }
+        if (board.every(Boolean)) return {draw: true};
+        return null;
+      }
+
+      function emptyIndices(board){ return board.map((v,i)=>v?null:i).filter(i=>i!==null); }
+
+      function minimax(board, player){
+        const opponent = player === 'X' ? 'O' : 'X';
+        const res = checkWinner(board);
+        if (res?.win === 'O') return {score: +10};
+        if (res?.win === 'X') return {score: -10};
+        if (res?.draw) return {score: 0};
+        const moves = [];
+        for (const i of emptyIndices(board)){
+          const newB = board.slice(); newB[i] = player;
+          const next = minimax(newB, opponent);
+          moves.push({ index: i, score: next.score });
+        }
+        if (player === 'O'){
+          // maximize O
+          return moves.reduce((best,m)=> m.score>best.score?m:best, {score:-Infinity});
+        } else {
+          // minimize X
+          return moves.reduce((best,m)=> m.score<best.score?m:best, {score:Infinity});
+        }
+      }
+
+      function aiMove(){
+        const level = state.aiLevel;
+        const empties = emptyIndices(state.board);
+        if (!empties.length) return;
+        let idx;
+        if (level === 'easy'){
+          idx = empties[Math.floor(Math.random()*empties.length)];
+        } else if (level === 'normal'){
+          if (Math.random() < 0.5){
+            idx = empties[Math.floor(Math.random()*empties.length)];
+          } else {
+            idx = minimax(state.board, 'O').index;
+          }
+        } else {
+          idx = minimax(state.board, 'O').index;
+        }
+        placeMark(idx);
+      }
+
+      function render(){
+        cells.forEach((btn,i)=>{
+          btn.textContent = state.board[i];
+          btn.classList.toggle('win', false);
+          btn.disabled = !!state.board[i] || state.lock;
+        });
+        turnEl.textContent = state.turn;
+        scoreXEl.textContent = state.score.X;
+        scoreOEl.textContent = state.score.O;
+        drawsEl.textContent = state.score.D;
+        aiPanel.hidden = state.mode !== 'ai';
+      }
+
+      function placeMark(i){
+        if (state.board[i] || state.lock) return;
+        state.board[i] = state.turn;
+        const res = checkWinner(state.board);
+        if (res?.win){
+          state.lock = true;
+          state.score[res.win]++;
+          for (const k of res.line) cells[k].classList.add('win');
+          render();
+          return;
+        }
+        if (res?.draw){
+          state.lock = true; state.score.D++; render(); return;
+        }
+        state.turn = state.turn === 'X' ? 'O' : 'X';
+        render();
+        if (state.mode === 'ai' && state.turn === 'O'){
+          setTimeout(aiMove, 200);
+        }
+      }
+
+      cells.forEach(btn=> btn.addEventListener('click', ()=>{
+        placeMark(Number(btn.dataset.idx));
+      }));
+
+      newBtn.addEventListener('click', ()=>{
+        state.board.fill(''); state.lock=false; state.turn = state.first; render();
+        if (state.mode==='ai' && state.first==='O') setTimeout(aiMove, 200);
+      });
+
+      modeRadios.forEach(r=> r.addEventListener('change', ()=>{
+        state.mode = modeRadios.find(x=>x.checked).value; render();
+        if (state.mode==='ai' && state.turn==='O' && !state.lock) setTimeout(aiMove, 150);
+      }));
+      aiRadios.forEach(r=> r.addEventListener('change', ()=>{
+        state.aiLevel = aiRadios.find(x=>x.checked).value;
+      }));
+      firstRadios.forEach(r=> r.addEventListener('change', ()=>{
+        state.first = firstRadios.find(x=>x.checked).value;
+      }));
+
+      render();
+    })();
+  </script>
+</body>
+</html>
