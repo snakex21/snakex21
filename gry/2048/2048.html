@@ -8,10 +8,130 @@
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
-    <link rel="stylesheet" href="2048.css" />
+    <style>
+        .game-stage--2048 {
+            --board-padding: clamp(0.8rem, 1.8vw, 1.1rem);
+            --board-radius: 28px;
+            --cell-radius: 18px;
+            --shadow-strong: 0 28px 65px rgba(8, 47, 73, 0.55);
+            --shadow-soft: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .game-stage--2048 [data-game-root] {
+            position: relative;
+            width: min(420px, 100%);
+            aspect-ratio: 1 / 1;
+            padding: var(--board-padding);
+            border-radius: var(--board-radius);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.92));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: var(--shadow-soft), var(--shadow-strong);
+            overflow: hidden;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .game-stage--2048 .grid {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            gap: var(--board-padding);
+        }
+
+        .game-stage--2048 .grid_row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--board-padding);
+        }
+
+        .game-stage--2048 .grid_cell {
+            position: relative;
+            border-radius: var(--cell-radius);
+            background: rgba(148, 163, 184, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.35);
+        }
+
+        .game-stage--2048 .grid_cell.active {
+            border-color: rgba(56, 189, 248, 0.35);
+        }
+
+        .game-stage--2048 .tile {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            width: 100%;
+            height: 100%;
+            border-radius: calc(var(--cell-radius) - 4px);
+            font-weight: 700;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            letter-spacing: -0.02em;
+            color: #0f172a;
+            transform: scale(0.92);
+            opacity: 0;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.45);
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .game-stage--2048 .tile.appearing,
+        .game-stage--2048 .grid_cell.active .tile {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .game-stage--2048 .tile::after {
+            content: attr(data-value);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .game-stage--2048 .tile[data-value="2"],
+        .game-stage--2048 .tile.tile-2 { background: #fef3c7; }
+        .game-stage--2048 .tile[data-value="4"],
+        .game-stage--2048 .tile.tile-4 { background: #fde68a; }
+        .game-stage--2048 .tile[data-value="8"],
+        .game-stage--2048 .tile.tile-8 { background: #fbbf24; }
+        .game-stage--2048 .tile[data-value="16"],
+        .game-stage--2048 .tile.tile-16 { background: #fb923c; }
+        .game-stage--2048 .tile[data-value="32"],
+        .game-stage--2048 .tile.tile-32 { background: #f97316; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="64"],
+        .game-stage--2048 .tile.tile-64 { background: #ef4444; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="128"],
+        .game-stage--2048 .tile.tile-128 { background: #f472b6; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="256"],
+        .game-stage--2048 .tile.tile-256 { background: #c084fc; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="512"],
+        .game-stage--2048 .tile.tile-512 { background: #38bdf8; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="1024"],
+        .game-stage--2048 .tile.tile-1024 { background: #22d3ee; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="2048"],
+        .game-stage--2048 .tile.tile-2048 { background: #2dd4bf; color: #0f172a; }
+        .game-stage--2048 .tile[data-value="4096"],
+        .game-stage--2048 .tile.tile-4096 { background: #a855f7; color: #f8fafc; }
+
+        #repeat {
+            border: none;
+        }
+
+        #repeat:focus-visible {
+            outline: 2px solid rgba(14, 165, 233, 0.85);
+            outline-offset: 4px;
+        }
+
+        @media (max-width: 720px) {
+            .game-stage--2048 [data-game-root] {
+                width: 100%;
+            }
+        }
+    </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
     <script defer src="../../assets/js/site.js"></script>
-    <script defer src="2048.js"></script>
 </head>
 <body class="game-page" data-root="../../">
     <header class="site-header">
@@ -66,4 +186,288 @@
         </section>
     </main>
 </body>
+<script>
+    window.addEventListener("load", () => {
+        buildGridOverlay();
+        cellCreator(2, 0);
+        score(0);
+        const restartButton = document.getElementById("repeat");
+        if (restartButton) {
+            restartButton.addEventListener("click", reset);
+        }
+    });
+
+    function getGridElement() {
+        return document.querySelector('[data-game-root] .grid');
+    }
+
+    /* GENERATE GRID */
+    function buildGridOverlay() {
+        const root = document.querySelector('[data-game-root]');
+        if (!root) {
+            return null;
+        }
+        root.innerHTML = '';
+        const size = 4;
+        const table = document.createElement('DIV');
+
+        table.className = 'grid';
+        table.id = ' ';
+        table.dataset.value = 0;
+
+        for (let i = 0; i < size; i++) {
+            const tr = document.createElement('DIV');
+            table.appendChild(tr);
+            tr.id = 'row_' + (i + 1);
+            tr.className += 'grid_row';
+
+            for (let j = 0; j < size; j++) {
+                const td = document.createElement('DIV');
+                td.id = '' + (i + 1) + (j + 1);
+                td.className += 'grid_cell';
+                tr.appendChild(td);
+            }
+            root.appendChild(table);
+        }
+
+        return table;
+    }
+
+    /* RANDOM TILE CREATOR */
+    function cellCreator(c, timeOut) {
+        for (let i = 0; i < c; i++) {
+            let randomX;
+            let randomY;
+
+            for (let value = 1; value < 2; value++) {
+                randomX = Math.floor(Math.random() * 4 + 1);
+                randomY = Math.floor(Math.random() * 4 + 1);
+                const checker = document.getElementById('' + randomX + randomY);
+                if (checker.innerHTML !== '') {
+                    value = 0;
+                }
+            }
+
+            let randomValue = Math.floor(Math.random() * 4 + 1);
+            if (randomValue === 3) { randomValue = 4; }
+            if (randomValue === 1) { randomValue = 2; }
+            const position = document.getElementById('' + randomX + randomY);
+            const tile = document.createElement('DIV');
+            position.appendChild(tile);
+            tile.id = 'tile_' + randomX + randomY;
+            position.classList.add('active');
+
+            colorSet(randomValue, tile);
+            tile.classList.add('appearing');
+            setTimeout(() => {
+                tile.classList.remove('appearing');
+            }, 220);
+        }
+    }
+
+    /* MOVE TILES */
+    document.onkeydown = directions;
+
+    function directions(e) {
+        e = e || window.event;
+
+        if (e.keyCode == '38') {
+            let count = 2;
+
+            for (let x = 2; x > 1; x--) {
+                for (let y = 1; y < 5; y++) {
+                    moveTilesMain(x, y, -1, 0, 1, 0);
+                }
+                if (x == 2) {
+                    x += count;
+                    count++;
+                }
+                if (count > 4) { break; }
+            }
+            cellReset();
+        }
+
+        else if (e.keyCode == '40') {
+            let count = -2;
+            for (let x = 3; x < 4; x++) {
+                for (let y = 1; y < 5; y++) {
+                    moveTilesMain(x, y, 1, 0, 4, 0);
+                }
+                if (x == 3) {
+                    x += count;
+                    count--;
+                }
+                if (count < -4) { break; }
+            }
+            cellReset();
+        }
+
+        else if (e.keyCode == '37') {
+            let count = 2;
+            for (let x = 2; x > 1; x--) {
+                for (let y = 1; y < 5; y++) {
+                    moveTilesMain(y, x, 0, -1, 0, 1);
+                }
+                if (x == 2) {
+                    x += count;
+                    count++;
+                }
+                if (count > 4) { break; }
+            }
+            cellReset();
+        }
+
+        else if (e.keyCode == '39') {
+            let count = -2;
+
+            for (let x = 3; x < 4; x++) {
+                for (let y = 1; y < 5; y++) {
+                    moveTilesMain(y, x, 0, 1, 0, 4);
+                }
+                if (x == 3) {
+                    x += count;
+                    count--;
+                }
+                if (count < -4) { break; }
+            }
+            cellReset();
+        }
+    }
+
+    //--------------------------------------------------------
+
+    function moveTilesMain(x, y, X, Y, xBorder, yBorder, c, d) {
+
+        const tile = document.getElementById('tile_' + x + y);
+        const checker = document.getElementById('' + x + y);
+        const xAround = x + X;
+        const yAround = y + Y;
+
+        if (xAround > 0 && xAround < 5 && yAround > 0 && yAround < 5 && checker.className == 'grid_cell active') {
+            const around = document.getElementById('' + xAround + yAround);
+
+            if (around.className == 'grid_cell active') {
+                const aroundTile = document.getElementById('tile_' + xAround + yAround);
+                if (aroundTile.innerHTML == tile.innerHTML) {
+                    const value = tile.dataset.value * 2;
+                    aroundTile.dataset.value = '' + value;
+                    aroundTile.className = 'tile ' + value;
+                    aroundTile.innerHTML = '' + value;
+                    colorSet(value, aroundTile);
+                    checker.removeChild(tile);
+                    checker.className = 'grid_cell';
+                    around.className = 'grid_cell active merged';
+                    const gridElement = getGridElement();
+                    if (gridElement) {
+                        gridElement.dataset.value = parseInt(gridElement.dataset.value || '0', 10) + value;
+                    }
+                    score(value);
+                }
+            }
+
+            else if (around.className == 'grid_cell') {
+                around.className = 'grid_cell active';
+                around.appendChild(tile);
+                around.id = '' + xAround + yAround;
+                tile.id = 'tile_' + xAround + yAround;
+                checker.className = 'grid_cell';
+                checker.id = '' + x + y;
+            }
+        }
+    }
+
+    function colorSet(value, tile) {
+        tile.dataset.value = '' + value;
+        tile.className = 'tile tile-' + value;
+        tile.innerHTML = '' + value;
+    }
+
+    function cellReset() {
+        cellCreator(1, 200);
+        const merged = document.getElementsByClassName('merged');
+        while (merged.length) {
+            merged[0].classList.remove('merged');
+        }
+        const grid = document.getElementsByClassName('grid_cell');
+        for (let i = 0; i < grid.length; i++) {
+            if (grid[i].innerHTML === '') {
+                grid[i].className = 'grid_cell';
+            }
+        }
+        loose();
+    }
+
+    function reset() {
+        buildGridOverlay();
+        const status = document.getElementById('status');
+        if (status) {
+            status.innerHTML = '';
+        }
+        score(0);
+        cellCreator(2, 0);
+    }
+
+    /* SCORE */
+    function score(value) {
+        const gridElement = getGridElement();
+        let add = 0;
+        if (gridElement) {
+            gridElement.dataset.value = parseInt(gridElement.dataset.value || '0', 10) + value;
+            add = gridElement.dataset.value;
+        }
+        const valueElement = document.getElementById('value');
+        if (valueElement) {
+            valueElement.innerHTML = add;
+        }
+    }
+
+    /* LOOSE */
+    function loose() {
+        const grid = document.getElementsByClassName('grid_cell');
+        let count = 0;
+        for (let i = 0; i < grid.length; i++) {
+            if (grid[i].innerHTML === '') {
+                count++;
+            }
+        }
+        if (count == 0) {
+            const doc = document.getElementById('status');
+            if (!doc) {
+                return;
+            }
+            let checker = 0;
+            for (let i = 0; i < grid.length; i++) {
+                const test = grid[i].id;
+                checker += check(test);
+            }
+            if (checker == 0) {
+                doc.innerHTML = '<p>Koniec gry! Spróbuj ponownie.</p>';
+            }
+        }
+    }
+
+    function check(id) {
+        const arr = [];
+        const a = [];
+        arr.push(id);
+        const test = Number(arr[0]);
+        let count = test;
+
+        for (let i = 0; i < 4; i++) {
+            count += 1;
+            a.push(count);
+        }
+
+        const tile = document.getElementById('tile_' + test);
+        const right = document.getElementById('tile_' + a[0]);
+        const bottom = document.getElementById('tile_' + a[2]);
+        if (tile && right && tile.innerHTML == right.innerHTML) {
+            return 1;
+        }
+        if (tile && bottom && tile.innerHTML == bottom.innerHTML) {
+            return 1;
+        }
+        return 0;
+    }
+</script>
 </html>
