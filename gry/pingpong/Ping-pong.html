@@ -8,7 +8,9 @@
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <link rel="stylesheet" href="Ping-pong.css" />
     <script defer src="../../assets/js/site.js"></script>
+    <script defer src="Ping-Pong.js"></script>
 </head>
 <body class="game-page" data-root="../../">
     <header class="site-header">
@@ -41,66 +43,26 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Ping-Pong</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-pingpong-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--pingpong">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Szybki refleks</span>
+                    <h1>Ping-Pong</h1>
+                    <p>Najedź kursorem na planszę i odbijaj piłkę tak długo, jak dasz radę – rozgrywka zajmuje całe okno.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Ping-Pong – graj" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-pingpong-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Rusz paletką za pomocą myszy i utrzymuj piłkę w grze. Szybki sposób, by rozruszać refleks i przetestować swoją koncentrację.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo</dd>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board">
+                    <div class="game-board__inner pingpong-game">
+                        <div class="pingpong-notice">Steruj myszką w pionie, aby poruszać paletką. Kliknij przycisk, aby rozpocząć kolejną rundę.</div>
+                        <div class="pingpong-stage">
+                            <canvas id="pong" width="900" height="600" aria-label="Plansza gry Ping-Pong"></canvas>
                         </div>
-                        <div class="game-details__item">
-                            <dt>Mechanika</dt>
-                            <dd>Sterowanie myszką</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Tempo</dt>
-                            <dd>Rośnie z każdym odbiciem</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Nie przepuść piłki!</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                        <button id="winmsg" type="button" class="pingpong-restart" onclick="restartGame()">Zagraj ponownie</button>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Poruszaj myszką w pionie, aby kontrolować paletkę.</li>
-                        <li>Skup się na miejscu uderzenia – piłka odbije się pod innym kątem w zależności od pozycji.</li>
-                        <li>Przycisk na planszy resetuje grę i pozwala kontynuować.</li>
-                    </ul>
-                    <p>Jeżeli piłka wypadnie z planszy, kliknij przycisk w grze, by natychmiast rozpocząć kolejną rundę.</p>
-                </div>
-                <div class="game-card">
-                    <h2>Przed grą</h2>
-                    <ul class="game-list">
-                        <li>Najedź kursorem na planszę, aby aktywować paletkę.</li>
-                        <li>Zadbaj o płynne ruchy – gwałtowne szarpnięcia zmniejszają kontrolę.</li>
-                        <li>Ustal z przyjacielem limit prób i porównaj najwyższe wyniki.</li>
-                    </ul>
-                    <p>Spróbuj osiągnąć serię 20 odbić bez przerwy. Zapisz wynik i pobij go w kolejnej próbie.</p>
-                </div>
-            </aside>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Miłego treningu refleksu!</p>
-    </footer>
 </body>
 </html>
