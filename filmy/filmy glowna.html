@@ -1,544 +1,141 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pl">
 <head>
-    <title>Filmy itp.</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <style>
-        .center {
-            text-align: center;
-        }
-        /* Style dla pola wyszukiwania */
-        
-        input[type="text"] {
-            padding: 8px;
-            margin-top: 10px;
-            font-size: 16px;
-            border: none;
-            outline: none;
-            width: 300px;
-            /* Szerokość pola wyszukiwania */
-            transition: all 0.3s ease;
-        }
-        /* Dodatkowe style dla przycisku */
-        
-        button {
-            padding: 8px 16px;
-            background-color: #f0e68c;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        button:hover {
-            background-color: #dcdcdc;
-        }
-        
-        .wysrodkuj_liste_nienumerowana {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .nav2 {
-            background-color: #333;
-        }
-        
-        .nav2 ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-        
-        .nav2 li {
-            margin-right: 20px;
-        }
-        
-        .nav2 a {
-            display: block;
-            color: #fff;
-            text-decoration: none;
-            padding: 10px;
-        }
-        
-        .nav2 a:hover {
-            background-color: #555;
-        }
-        
-        .nav2 .dropdown ul {
-            display: none;
-            position: absolute;
-            background-color: #555;
-        }
-        
-        .nav2 .dropdown:hover ul {
-            display: block;
-        }
-        
-        .nav2 .dropdown ul li {
-            margin: 0;
-            padding: 0;
-            border-bottom: 1px solid #444;
-        }
-        
-        .nav2 .dropdown ul li:last-child {
-            border-bottom: none;
-        }
-        
-        .nav2 .dropdown ul li a {
-            padding: 10px;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #6b1a1a59
-        }
-        /*tło nr 2.*/
-        
-        .body1 {
-            background-color: #3a3b4d;
-            background-size: cover;
-            background-repeat: no-repeat;
-            color: #ffc468;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .container {
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-top: 2rem;
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 20px;
-        }
-        
-        .filmy {
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin-top: 2rem;
-            display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            gap: 20px;
-        }
-        
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            /* Adjust dynamically based on the number of elements */
-            gap: 20px;
-            overflow: hidden;
-            /* Prevents any overflow */
-        }
-        
-        .box {
-            width: 322px;
-            /* Consistent box size */
-            height: 322px;
-            /* Consistent box size */
-            margin: 10px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            transition: transform 0.3s ease-in-out;
-            overflow: hidden;
-            /* Ensures nothing spills out */
-            position: relative;
-            /* Needed for absolute positioning of children */
-        }
-        
-        .box:hover {
-            transform: scale(1.05);
-            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
-        }
-        
-        .img-box {
-            width: 100%;
-            height: 280px;
-            /* Adjust height to accommodate caption */
-            background-size: cover;
-            background-position: center;
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        .box p {
-            position: absolute;
-            bottom: 10px;
-            /* Adjust space from the bottom */
-            width: 100%;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            /* Semi-transparent background */
-            color: white;
-            margin: 0;
-            transition: opacity 0.3s ease;
-            opacity: 0;
-            /* Hide by default */
-        }
-        
-        .box:hover p {
-            opacity: 1;
-            /* Show on hover */
-        }
-        
-        .box .img-box {
-            position: relative;
-            height: 300px;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .box .img-box:hover {
-            transform: scale(1.1);
-        }
-        
-        .box .img-box p {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            margin: 0;
-            opacity: 0;
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .box:hover .img-box p {
-            opacity: 1;
-        }
-        
-        .img-box:hover {
-            transform: scale(1.1);
-        }
-        
-        .img-box p {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            margin: 0;
-            opacity: 0;
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .box:hover .img-box p {
-            opacity: 1;
-        }
-        
-        .stoprocentekranu {
-            width: 100%;
-        }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Centrum filmowe – Max Playground</title>
+    <meta name="description" content="Kuratorowane kolekcje filmów i seriali Maxa. Przeglądaj, filtruj i planuj wieczory filmowe w nowoczesnym interfejsie." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../assets/css/site.css" />
+    <script defer src="../assets/js/site.js"></script>
+    <script defer src="../assets/js/movies-data.js"></script>
+    <script defer src="../assets/js/movies-home.js"></script>
 </head>
-
-<body class="body1">
-    <header class="header2">
-        <nav class="nav2">
-            <ul>
-                <li><a href="../index.html">Strona główna</a></li>
-                <li class="dropdown">
-                    <a href="../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-
-                <li><a href="../gry/gry.html">Gry</a></li>
-                <li><a href="../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body>
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../gry/gry.html">Gry</a>
+                <a class="nav-link is-active" href="filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
-        <form class="center" onsubmit="return false;">
-            <input type="text" placeholder="Szukaj filmów" id="searchBox" onkeyup="searchMovies()">
-        </form>
     </header>
-    <h1 class="center">Filmy</h1>
-    <h2 class="center">Polecane strony do oglądania filmów:</h2>
-    <ul class="center wysrodkuj_liste_nienumerowana">
-        <li>Filman.cc</li>
-        <li>Ogladaj.to</li>
-        <li>Filser.cc</li>
-        <li>Vizjer.pl</li>
-    </ul>
-    <main class="filmy">
-        <section>
-            <!-- Tutaj kontynuuj dodawanie innych boxów z filmami, podobnie jak te poniżej -->
-            <div class="container">
-                <div class="box">
-                    <a href="movies.html?series=SzybcyIWściekli" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://static.posters.cz/image/1300/plakaty/fast-furious-dominic-toretto-i114155.jpg');">
-                            <p>Szybcy i wściekli</p>
-                        </div>
-                    </a>
-                </div>
 
-                <div class="box">
-                    <a href="movies.html?series=JohnWick" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://variety.com/wp-content/uploads/2023/03/John-Wick-3.jpg?w=1000');">
-                            <p>John Wick</p>
-                        </div>
-                    </a>
+    <main>
+        <section class="hero hero--subpage hero--media" id="start">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Wieczór filmowy</span>
+                <h1>Planer seansów Maxa</h1>
+                <p class="hero-lead">Odkrywaj dopracowane kolekcje filmów i seriali. W kilka sekund znajdziesz coś na rodzinny seans, nostalgiczny maraton lub szybką dawkę akcji.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" data-film-hero-link href="movies.html?series=TopGun">Otwórz kolekcję</a>
+                    <a class="btn btn-secondary" href="../muzyka/muzyka.html">Włącz soundtrack</a>
+                    <a class="btn btn-ghost" href="movies.html">Zobacz wszystkie filmy</a>
                 </div>
-
-                <div class="box">
-                    <a href="movies.html?series=JasFasola" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://www.gry-online.pl/i/h/17/347901061.jpg');">
-                            <p>Jaś Fasola</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=Reacher" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg');">
-                            <p>Reacher</p>
-                        </div>
-                    </a>
+                <div class="hero-highlight">
+                    <span class="badge">Polecane dziś</span>
+                    <span data-film-highlight>Zanurz się w kolekcjach dobranych ręcznie przez Maxa.</span>
                 </div>
             </div>
-
-            <div class="container">
-                <div class="box">
-                    <a href="movies.html?series=Niezniszczalni" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://www.gry-online.pl/i/h/22/368103601.jpg');">
-                            <p>Niezniszczalni</p>
-                        </div>
-                    </a>
+            <div class="hero-illustration hero-illustration--media">
+                <div class="hero-panel">
+                    <h2>Panel seansów</h2>
+                    <p>Monitoruj ulubione kolekcje i zapisuj inspiracje na kolejny wieczór.</p>
+                    <div class="panel-metrics">
+                        <div class="metric"><span>Kolekcje</span><strong data-film-collection-count>--</strong></div>
+                        <div class="metric"><span>Najczęściej wybierane</span><strong data-film-spotlight-title>Top Gun</strong></div>
+                        <div class="metric"><span>Dominujący klimat</span><strong data-film-spotlight-tags>Akcja</strong></div>
+                    </div>
+                    <a class="btn btn-secondary" href="../zmiany.html">Zobacz co nowego</a>
                 </div>
-
-                <div class="box">
-                    <a href="movies.html?series=_28Dni_Tygodni_Pozniej" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://fwcdn.pl/nph/49468/2019/20327_1.11.jpg');">
-                            <p>28 Dni/Tygodni później</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=topgun" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://cdn1.naekranie.pl/wp-content/uploads/2015/06/top-gun.jpg');">
-                            <p>Top Gun</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=NaZachodzieBezZmian" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://filman.cc/public/static/poster/big/57331.jpg');">
-                            <p>Na Zachodzie bez zmian</p>
-                        </div>
-                    </a>
-                </div>
-
             </div>
+        </section>
 
-            <div class="container">
-                <div class="box">
-                    <a href="movies.html?series=_2012" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://i-viaplay-com.akamaized.net/viaplay-prod/663/744/1460162911-a0891f665f36568e941de6a140c7cf856b6d07d5.jpg?width=400&height=600');">
-                            <p>2012</p>
-                        </div>
-                    </a>
+        <section class="section" id="kolekcje">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Kolekcje</span>
+                    <h2 class="section-title">Kuratorowane zestawy filmowe</h2>
+                    <p class="section-description">Filmy i serie połączone we wspólne maratony. Wybierz klimat i przejdź prosto do gotowej playlisty z linkami do seansu.</p>
                 </div>
-
-                <div class="box">
-                    <a href="movies.html?series=BękartyWojny" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://fwcdn.pl/fpo/77/47/137747/7276639.3.jpg');">
-                            <p>Bękarty Wojny</p>
-                        </div>
-                    </a>
+                <div class="film-toolbar">
+                    <label class="visually-hidden" for="film-search">Wyszukaj kolekcję</label>
+                    <input class="input" id="film-search" type="search" placeholder="Szukaj po tytule lub gatunku" data-film-search />
+                    <button class="btn btn-secondary" type="button" data-film-random>Losuj kolekcję</button>
                 </div>
-
-                <div class="box">
-                    <a href="movies.html?series=CzłowiekZBlizną" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://fwcdn.pl/fpo/48/33/4833/6935904.3.jpg');">
-                            <p>Człowiek z Blizną</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=Doomsday" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://ryesofthegeek.files.wordpress.com/2013/08/doomsdayfrench.jpg');">
-                            <p>Doomsday</p>
-                        </div>
-                    </a>
-                </div>
-
             </div>
-            <div class="container">
-                <div class="box">
-                    <a href="movies.html?series=DruzynaA" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://fwcdn.pl/fpo/02/90/190290/7331069.3.jpg');">
-                            <p>Drużyna A</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=GodzinySzczytu" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://m.media-amazon.com/images/M/MV5BYWM2NDZmYmYtNzlmZC00M2MyLWJmOGUtMjhiYmQ2OGU1YTE1L2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg');">
-                            <p>Godziny Szczytu</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=HotShots" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://assets.mubicdn.net/images/film/37300/image-w1280.jpg?1609835755');">
-                            <p>Hot Shots</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=Doomsdayjaś fasola/jaś fasola.html" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://bi.im-g.pl/im/9c/de/16/z23978140V,Jas-Fasola.jpg');">
-                            <p>Jaś Fasola</p>
-                        </div>
-                    </a>
-                </div>
-
+            <div class="media-grid" data-film-grid>
+                <!-- Karty generowane przez skrypt -->
             </div>
-            <div class="container">
-                <div class="box">
-                    <a href="movies.html?series=OjciecChrzestny" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://a.allegroimg.com/original/1153fd/55daff50455c8406e0e8a94bc248/OJCIEC-CHRZESTNY-Plakat-Filmowy-Klasyka-Kina-A2');">
-                            <p>Ojciec Chrzestny</p>
-                        </div>
-                    </a>
-                </div>
+            <p class="empty-state" data-film-empty>Nie znaleziono kolekcji pasującej do wyszukiwania. Spróbuj innej frazy.</p>
+        </section>
 
-                <div class="box">
-                    <a href="movies.html?series=Taxi" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://www.top10films.co.uk/img/Taxi_review_mark-fraser_top10films_blu-ray1.jpg');">
-                            <p>Taxi</p>
-                        </div>
-                    </a>
+        <section class="section section--surface" id="planer">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Pomysły na seans</span>
+                    <h2 class="section-title">Planer maratonów filmowych</h2>
+                    <p class="section-description">Potrzebujesz inspiracji? Wybierz gotowy scenariusz i połącz go z muzyczną playlistą lub grą towarzyszącą.</p>
                 </div>
-
-                <div class="box">
-                    <a href="movies.html?series=TowerHeistZemstaCieciów" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://programtv.naziemna.info/images/moviedb/00059/59108/tlo/tower-heist-zemsta-cieci%C3%B3w---backdrop-w1280.jpg');">
-                            <p>Tower Heist Zemsta Cieciów</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=Uncharted" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://i0.wp.com/mobirank.pl/wp-content/uploads/2022/10/uncharted-glowny-visual-filmu.jpg');">
-                            <p>Uncharted</p>
-                        </div>
-                    </a>
-                </div>
-
             </div>
-
-            <div class="container">
-                <div class="box">
-                    <a href="movies.html?series=XXX_Trylogia" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://fwcdn.pl/fpo/23/83/32383/7537325.3.jpg');">
-                            <p>XXX</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=ZabójczaBroń" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://bi.im-g.pl/im/5e/89/15/z22582110V,Kadr-z-filmu--Zabojcza-bron-.jpg');">
-                            <p>Zabójcza Broń</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=ZielonaMila" rel="nofollow">
-                        <div class="img-box" style="background-image: url('https://filman.cc/public/static/poster/big/146.jpg');">
-                            <p>Zielona Mila</p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="box">
-                    <a href="movies.html?series=SzeregowiecRyan" rel="nofollow">
-                        <div class="img-box" style="background-image: url('data:image/jpeg;base64,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');">
-                            <p>Szeregowiec Ryan</p>
-                        </div>
-                    </a>
-                </div>
-
-
+            <div class="cards-grid cards-grid--three">
+                <article class="card">
+                    <span class="badge">🎬 Akcja &amp; adrenalina</span>
+                    <h3>Wieczór pełen pościgów</h3>
+                    <p>Połącz kolekcję „Szybcy i Wściekli” z zestawem wyścigowych kawałków w strefie muzycznej. Idealne na spotkanie z przyjaciółmi.</p>
+                    <div class="card-actions">
+                        <a class="btn btn-primary" href="movies.html?series=SzybcyIWściekli">Start maratonu</a>
+                        <a class="btn btn-ghost" href="../muzyka/muzyka.html">Dodaj playlistę</a>
+                    </div>
+                </article>
+                <article class="card">
+                    <span class="badge">🍿 Nostalgia</span>
+                    <h3>Rodzinny seans retro</h3>
+                    <p>Wróć do klasyków z kolekcji „Jaś Fasola” i „Zabójcza broń”. Krótki quiz z działu gier doda dodatkowej zabawy.</p>
+                    <div class="card-actions">
+                        <a class="btn btn-primary" href="movies.html?series=JasFasola">Oglądaj</a>
+                        <a class="btn btn-ghost" href="../gry/gry.html">Włącz grę</a>
+                    </div>
+                </article>
+                <article class="card">
+                    <span class="badge">🌆 Chill &amp; dramat</span>
+                    <h3>Wieczór na spokojnie</h3>
+                    <p>Wybierz klimatyczną „Zieloną Milę” lub „Ojca chrzestnego”, dodaj ciepłe światło i notuj w dzienniku zmian, co Cię poruszyło.</p>
+                    <div class="card-actions">
+                        <a class="btn btn-primary" href="movies.html?series=ZielonaMila">Zacznij seans</a>
+                        <a class="btn btn-ghost" href="../zmiany.html">Zapisz wrażenia</a>
+                    </div>
+                </article>
             </div>
         </section>
     </main>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            clearSearchBox();
 
-            function clearSearchBox() {
-                // Bezwarunkowo czyści pole wyszukiwania
-                const searchBox = document.getElementById('searchBox');
-                searchBox.value = '';
-            }
-
-            function searchMovies() {
-                const filter = searchBox.value.toUpperCase();
-                const boxes = document.querySelectorAll('.box');
-                let visibleCount = 0;
-
-                boxes.forEach(box => {
-                    const title = box.querySelector('p').textContent.toUpperCase();
-                    if (title.startsWith(filter)) {
-                        box.style.display = 'block';
-                        visibleCount++;
-                    } else {
-                        box.style.display = 'none';
-                    }
-                });
-
-                const container = document.querySelector('.container');
-                if (visibleCount <= 3) {
-                    container.style.justifyContent = 'center';
-                } else {
-                    container.style.justifyContent = 'space-between';
-                }
-            }
-
-            // Dodanie nasłuchiwania zdarzeń na pageshow, które wywołuje clearSearchBox również po powrocie do strony przeglądarką
-            window.addEventListener('pageshow', clearSearchBox);
-
-            // Nasłuchiwacz dla wyszukiwania
-            const searchBox = document.getElementById('searchBox');
-            searchBox.addEventListener('keyup', searchMovies);
-        });
-    </script>
-
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>Projektowane z pasją dla społeczności Maxa. Zanurz się w filmach, grach i muzyce kiedy tylko chcesz.</p>
+            <a class="btn btn-ghost" href="../zmiany.html">Dziennik zmian</a>
+        </div>
+    </footer>
 </body>
-
 </html>

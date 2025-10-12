@@ -1,621 +1,116 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filmy itp.</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background-color: #3a3b4d;
-            color: #fff;
-        }
-        
-        .nav2 {
-            background-color: #333;
-        }
-        
-        .nav2 ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-        
-        .nav2 li {
-            margin-right: 20px;
-        }
-        
-        .nav2 a {
-            display: block;
-            color: #fff;
-            text-decoration: none;
-            padding: 10px;
-        }
-        
-        .nav2 a:hover {
-            background-color: #555;
-        }
-        
-        .nav2 .dropdown ul {
-            display: none;
-            position: absolute;
-            background-color: #555;
-        }
-        
-        .nav2 .dropdown:hover ul {
-            display: block;
-        }
-        
-        .nav2 .dropdown ul li {
-            margin: 0;
-            padding: 0;
-            border-bottom: 1px solid #444;
-        }
-        
-        .nav2 .dropdown ul li:last-child {
-            border-bottom: none;
-        }
-        
-        .nav2 .dropdown ul li a {
-            padding: 10px;
-        }
-        
-        .container {
-            width: 100%;
-            margin: 0 auto;
-        }
-        
-        .container2 {
-            overflow-x: auto;
-            /* umożliwia przewijanie poziome */
-            display: flex;
-            flex-wrap: nowrap;
-            /* zapobiega zawijaniu elementów do nowej linii */
-        }
-        
-        .logo {
-            margin: 20px 0;
-        }
-        
-        .movies,
-        .banner {
-            margin-top: 20px;
-            width: 80%;
-            margin-left: 5%;
-        }
-        
-        .movie-box {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        
-        .movie-image img {
-            width: 200px;
-            height: auto;
-            margin-right: 20px;
-        }
-        
-        .movie-info h3,
-        .movie-info p {
-            margin: 0;
-        }
-        
-        .button {
-            display: inline-block;
-            background-color: #f0e68c;
-            padding: 10px;
-            text-decoration: none;
-            color: black;
-            margin-top: 10px;
-        }
-        
-        h1#seriesTitle {
-            font-size: 24px;
-            text-align: center;
-            margin: 20px 0;
-        }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kolekcja filmowa – Max Playground</title>
+    <meta name="description" content="Szczegółowa lista filmów w wybranej kolekcji Maxa. Filtruj, losuj i włącz seans jednym kliknięciem." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../assets/css/site.css" />
+    <script defer src="../assets/js/site.js"></script>
+    <script defer src="../assets/js/movies-data.js"></script>
+    <script defer src="../assets/js/movies-detail.js"></script>
 </head>
-
 <body>
-    <header>
-        <div class="container">
-            <nav class="nav2" id="nav">
-                <ul>
-                    <li><a href="../index.html">Strona domowa</a></li>
-                    <li class="dropdown">
-                        <a href="../Programy/programy.html">Programy</a>
-                        <ul>
-                            <li><a href="../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                            <li><a href="../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                            <li><a href="../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="../gry/gry.html">Biblioteka Gier</a></li>
-                    <li><a href="../muzyka/muzyka.html">Muzyka</a></li>
-                </ul>
-            </nav>
-            <h1 id="seriesTitle">Placeholder Title</h1>
-            <!-- Dynamicznie zmieniany tytuł -->
-        </div>
-    </header>
-    <section class="banner">
-        <div class="container">
-        </div>
-    </section>
-    <section class="movies" id="movieSection">
-        <div class="container2">
-            <!-- Placeholder for movie content -->
-        </div>
-    </section>
-    <script>
-        // Placeholder data for movies
-        const moviesData = {
-            TopGun: [{
-                title: "Top Gun",
-                image: "https://filman.cc/public/static/poster/big/30091.jpg",
-                year: "1986",
-                genre: "Akcja Romans Sensacyjny",
-                link: "https://upstream.to/embed-1ferv58rjpm7.html"
-            }, {
-                title: "Top Gun: Maverick",
-                image: "https://filman.cc/public/static/poster/big/56188.jpg",
-                year: "2022",
-                genre: "Akcja",
-                link: "https://sbchill.com/embed-2zh26ul71s0o.html"
-            }],
-            _28Dni_Tygodni_Pozniej: [{
-                title: "28 dni później / 28 Days Later...",
-                image: "https://filman.cc/public/static/poster/big/8161.jpg",
-                year: "2002",
-                genre: "Horror",
-                link: "https://ebd.cda.pl/740x475/931632386"
-            }, {
-                title: "28 tygodni później / 28 Weeks Later",
-                image: "https://filman.cc/public/static/poster/big/22714.jpg",
-                year: "2007",
-                genre: "Horror",
-                link: "https://ebd.cda.pl/740x475/6559220f9"
-            }],
-            _2012: [{
-                title: "2012",
-                image: "https://fwcdn.pl/fpo/39/13/433913/7695238.3.jpg",
-                year: "2009",
-                genre: "Sci-fi Katastroficzny",
-                link: "https://tummulerviolableness.com/e/ecwl2wid2zfr"
-            }],
-            BękartyWojny: [{
-                title: "Bękarty wojny",
-                image: "https://fwcdn.pl/fpo/77/47/137747/7276639.3.jpg",
-                year: "2009",
-                genre: "Wojenny",
-                link: "https://tummulerviolableness.com/e/lr0om7waukcm"
-            }],
-            CzłowiekZBlizną: [{
-                title: "Człowiek z blizną",
-                image: "https://fwcdn.pl/fpo/48/33/4833/6935904.3.jpg",
-                year: "1983",
-                genre: "Dramat Gangsterski",
-                link: "https://tummulerviolableness.com/e/ugyy55exwf4b"
-            }],
-            Doomsday: [{
-                title: "Doomsday",
-                image: "https://m.media-amazon.com/images/I/81cT24c+EEL._RI_.jpg",
-                year: "2008",
-                genre: "Akcja Sci-Fi",
-                link: "https://vidoza.net/embed-fydvb1zb14ms.html"
-            }],
-            GodzinySzczytu: [{
-                title: "Godziny Szczytu",
-                image: "https://fwcdn.pl/fpo/00/59/59/6922212.3.jpg",
-                year: "1998",
-                genre: "Akcja Komedia Kryminalna",
-                link: "https://ebd.cda.pl/740x475/8369916c5"
-            }, {
-                title: "Godziny Szczytu 2",
-                image: "https://fwcdn.pl/fpo/06/25/30625/7518081.3.jpg",
-                year: "2001",
-                genre: "Akcja Komedia Kryminalna",
-                link: "https://tummulerviolableness.com/e/ir10bt6mc0od"
-            }, {
-                title: "Godziny Szczytu 3",
-                image: "https://fwcdn.pl/fpo/17/52/101752/7183742.3.jpg",
-                year: "1992",
-                genre: "Akcja Komedia Kryminalna",
-                link: "https://tummulerviolableness.com/e/fhky0ff7eg8p"
-            }],
-            XXX_Trylogia: [{
-                title: "xXx",
-                image: "https://filman.cc/public/static/poster/big/788.jpg",
-                year: "2002",
-                genre: "Akcja",
-                link: "https://ebd.cda.pl/740x475/9799776b8"
-            }, {
-                title: "xXx 2: Następny poziom",
-                image: "https://filman.cc/public/static/poster/big/1066.jpg",
-                year: "2005",
-                genre: "Akcja",
-                link: "https://streamtape.com/e/RW9dqQ4qJKcdvQd/xXx_2-_Następny_poziom___xXx-_State_of_the_Union_(2005).mp4"
-            }, {
-                title: "xXx 3: Następny poziom",
-                image: "https://filman.cc/public/static/poster/big/794.jpg",
-                year: "2017",
-                genre: "Akcja",
-                link: "https://upstream.to/embed-kg582gkc8owt.html"
-            }],
-            ZielonaMila: [{
-                title: "Zielona Mila",
-                image: "https://fwcdn.pl/fpo/08/62/862/7517878.3.jpg",
-                year: "1999",
-                genre: "Dramat",
-                link: "https://www.cda.pl/video/1558172203"
-            }],
-            SzeregowiecRyan: [{
-                title: "Szeregowiec Ryan",
-                image: "https://filman.cc/public/static/poster/big/5160.jpg",
-                year: "1998",
-                genre: "Wojenny",
-                link: "https://upstream.to/embed-08tf47alon8c.html"
-            }],
-            ZabójczaBroń: [{
-                title: "Zabójcza broń",
-                image: "https://fwcdn.pl/fpo/13/08/1308/7059259.3.jpg",
-                year: "1987",
-                genre: "Komedia Kryminalna",
-                link: "https://streamtape.com/e/WpGxDePWddfblP0"
-            }, {
-                title: "Zabójcza broń 2",
-                image: "https://fwcdn.pl/fpo/13/09/1309/7059260.3.jpg",
-                year: "1989",
-                genre: "Komedia Kryminalna",
-                link: "https://streamtape.com/e/ZD3dz3ev7oHq8oD"
-            }, {
-                title: "Zabójcza broń 3",
-                image: "https://fwcdn.pl/fpo/13/10/1310/7749098.3.jpg",
-                year: "1992",
-                genre: "Komedia Kryminalna",
-                link: "https://vidoza.net/embed-hnfue51vuyzt.html"
-            }, {
-                title: "Zabójcza broń 4",
-                image: "https://fwcdn.pl/fpo/02/03/203/7059263.3.jpg",
-                year: "1998",
-                genre: "Komedia Kryminalna",
-                link: "https://streamtape.com/e/6XAQwMAkxks9BVq"
-            }],
-            Uncharted: [{
-                title: "Uncharted",
-                image: "https://filman.cc/public/static/poster/big/55523.jpg",
-                year: "2022",
-                genre: "Akcja, Przygodowy",
-                link: "https://vidoza.net/embed-myof11ouvc55.html"
-            }],
-            TowerHeistZemstaCieciów: [{
-                title: "Tower Heist Zemsta cieciów",
-                image: "https://fwcdn.pl/fpo/82/07/288207/7401836.3.jpg",
-                year: "2011",
-                genre: "Akcja,Komedia kryminalna",
-                link: "https://tummulerviolableness.com/e/lr0om7waukcm"
-            }],
-            Taxi: [{
-                    title: "Taxi",
-                    image: "https://fwcdn.pl/fpo/07/27/727/6900934.3.jpg",
-                    year: "1998",
-                    genre: "Komedia Kryminalna",
-                    link: "https://tummulerviolableness.com/e/33donik8qfqf"
-                }, {
-                    title: "Taxi 2",
-                    image: "https://fwcdn.pl/fpo/00/69/10069/7519121.3.jpg",
-                    year: "2001",
-                    genre: "Komedia Kryminalna",
-                    link: "https://streamtape.com/e/8Dy1aKKYKZfjAd"
-                }, {
-                    title: "Taxi 3",
-                    image: "https://fwcdn.pl/fpo/41/98/34198/7518096.3.jpg",
-                    year: "2003",
-                    genre: "Komedia Kryminalna",
-                    link: "https://tummulerviolableness.com/e/z7ij8x1bq8yn"
-                }, {
-                    title: "Taxi 4",
-                    image: "https://fwcdn.pl/fpo/87/99/338799/7530407.3.jpg",
-                    year: "2007",
-                    genre: "Komedia Kryminalna",
-                    link: "https://streamtape.com/e/yAJ762p60Wf1pw3"
-                }, {
-                    title: "Taxi 5",
-                    image: "https://filman.cc/public/static/poster/big/1696.jpg",
-                    year: "2018",
-                    genre: "Komedia Kryminalna",
-                    link: "https://vtube.network/embed-53yz5btc7j0i.html"
-                },
-
-            ],
-            SzybcyIWściekli: [{
-                title: "Szybcy i Wściekli",
-                image: "https://filman.cc/public/static/poster/big/29.jpg",
-                year: "2001",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-pn6efruftbn6.html"
-            }, {
-                title: "Za Szybcy i Wściekli",
-                image: "https://filman.cc/public/static/poster/big/37.jpg",
-                year: "2003",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-skrvj87xbjee.html"
-            }, {
-                title: "Szybko i wściekle",
-                image: "https://filman.cc/public/static/poster/big/27.jpg",
-                year: "2009",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-17fqcy3gvhp2.html"
-            }, {
-                title: "Szybcy i Wściekli V",
-                image: "https://filman.cc/public/static/poster/big/20.jpg",
-                year: "2011",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-o9pxhhpk8mpu.html"
-            }, {
-                title: "Szybcy i Wściekli 6",
-                image: "https://filman.cc/public/static/poster/big/23.jpg",
-                year: "2013",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-f2lo9v9jmbpk.html"
-            }, {
-                title: "Szybcy i Wściekli: Tokyo Drift",
-                image: "https://filman.cc/public/static/poster/big/26.jpg",
-                year: "2006",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-9ac14h5wad3p.html"
-            }, {
-                title: "Szybcy i Wściekli 7",
-                image: "https://filman.cc/public/static/poster/big/44.jpg",
-                year: "2015",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-79p0o882uky4.html"
-            }, {
-                title: "Szybcy i Wściekli 8",
-                image: "https://filman.cc/public/static/poster/big/43.jpg",
-                year: "2017",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://ebd.cda.pl/740x475/65669009e?wersja=720p&t=1"
-            }, {
-                title: "Szybcy i wściekli: Hobbs i Shaw",
-                image: "https://filman.cc/public/static/poster/big/10468.jpg",
-                year: "2019",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://streamtape.com/e/o2zRJPg2JaHJewK/Szybcy_i_w%C5%9Bciekli-_Hobbs_i_Shaw___Fast_%26amp%3B_Furious_presents-_Hobbs_%26amp%3B_Shaw_%282019%29_.mp4"
-            }, {
-                title: "Szybcy i Wściekli 9",
-                image: "https://filman.cc/public/static/poster/big/53139.jpg",
-                year: "2021",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-5we9to52tv0v.html"
-            }],
-            OjciecChrzestny: [{
-                title: "Ojciec chrzestny",
-                image: "https://fwcdn.pl/fpo/10/89/1089/7196615.3.jpg",
-                year: "1972",
-                genre: "Dramat Gangsterski",
-                link: "https://streamtape.com/e/jpqgQaX7KJhz0J2"
-            }, {
-                title: "Ojciec chrzestny 2",
-                image: "https://fwcdn.pl/fpo/10/90/1090/7196616.3.jpg",
-                year: "1974",
-                genre: "Dramat Gangsterski",
-                link: "https://streamtape.com/e/MoDjW77KxXUm7GZ"
-            }, {
-                title: "Ojciec chrzestny 3",
-                image: "https://fwcdn.pl/fpo/10/91/1091/7196617.3.jpg",
-                year: "1990",
-                genre: "Dramat Gangsterski",
-                link: "https://ebd.cda.pl/740x475/66544132c"
-            }],
-            Reacher: [{
-                title: "[s01e01] Welcome to Margrave",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-rr9n87ugxe7x.html"
-            }, {
-                title: "[s01e02] First Dance",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-t7aj5xnw5g4x.html"
-            }, {
-                title: "[s01e03] Spoonful",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-l4wvfh63c6qw.html"
-            }, {
-                title: "[s01e04] In a Tree",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-ysxq61uq8jfh.html"
-            }, {
-                title: "[s01e05] No Apologies",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://vidoza.net/embed-9orpjj6tqukv.html"
-            }, {
-                title: "[s01e06] Papier",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-fl87z9rfcr9a.html"
-            }, {
-                title: "[s01e07] Reacher Said Nothing",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-wrtlvxj3tcl0.html"
-            }, {
-                title: "[s01e08] Pie",
-                image: "https://fwcdn.pl/fpo/59/87/875987/7986413.3.jpg",
-                year: "2022",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-td0e9u1v5oex.html"
-            }],
-            Niezniszczalni: [{
-                title: "Niezniszczalni / The Expendables",
-                image: "https://filman.cc/public/static/poster/big/31.jpg",
-                year: "2010",
-                genre: "Akcja",
-                link: "https://vidoza.net/embed-hkbmwoze5cnd.html"
-            }, {
-                title: "Niezniszczalni 2 / The Expendables 2",
-                image: "https://filman.cc/public/static/poster/big/5619.jpg",
-                year: "2012",
-                genre: "Akcja",
-                link: "https://upstream.to/embed-dedncyvcuvf6.html"
-            }, {
-                title: "Niezniszczalni 3 / The Expendables 3",
-                image: "https://filman.cc/public/static/poster/big/549.jpg",
-                year: "2014",
-                genre: "Akcja",
-                link: "https://upstream.to/embed-l4159pqbpk1l.html"
-            }],
-            NaZachodzieBezZmian: [{
-                title: "Na Zachodzie bez zmian / Im Westen nichts Neues",
-                image: "https://filman.cc/public/static/poster/big/57331.jpg",
-                year: "2022",
-                genre: "Dramat Wojenny",
-                link: "https://streamhide.to/e/4ey821lmcm8p"
-            }],
-            JohnWick: [{
-                title: "John Wick 1 Charapter One",
-                image: "https://filman.cc/public/static/poster/big/497.jpg",
-                year: "2014",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-8wzr9g6sej4j.html"
-            }, {
-                title: "John Wick 2 / John Wick: Chapter Two",
-                image: "https://filman.cc/public/static/poster/big/57.jpg",
-                year: "2017",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://upstream.to/embed-mwl0jkkmew4l.html"
-            }, {
-                title: "John Wick 3 / John Wick: Chapter 3 - Parabellum",
-                image: "https://filman.cc/public/static/poster/big/8617.jpg",
-                year: "2019",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://dood.yt/e/cw91xhr2q65d"
-            }, {
-                title: "John Wick 4 (ENG Napisy-PL)",
-                image: "https://filman.cc/public/static/poster/big/58714.jpg",
-                year: "2023",
-                genre: "Akcja, Kryminał, Thriller",
-                link: "https://voe.sx/e/sgy24h8p6xlo"
-            }],
-            JasFasola: [{
-                title: "Jaś Fasola: Nadciąga totalny kataklizm / Bean",
-                image: "https://assets.upflix.pl/media/plakat/1997/bean__300_427.jpg",
-                year: "1997",
-                genre: "Komedia",
-                link: "https://ebd.cda.pl/740x475/1419273be"
-            }, {
-                title: "Wakacje Jasia Fasoli / Mr. Bean's Holiday",
-                image: "https://filman.cc/public/static/poster/big/4927.jpg",
-                year: "2007",
-                genre: "Familijny, Komedia",
-                link: "https://dood.yt/e/iczo8t416hl9"
-            }],
-            HotShots: [{
-                title: "Hot Shots!",
-                image: "https://filman.cc/public/static/poster/big/7780.jpg",
-                year: "1991",
-                genre: "Akcja, Komedia",
-                link: "https://ebd.cda.pl/740x475/15359849b"
-            }, {
-                title: "Hot Shots 2",
-                image: "https://filman.cc/public/static/poster/big/7781.jpg",
-                year: "2022",
-                genre: "Akcja",
-                link: "https://sbchill.com/embed-2zh26ul71s0o.html"
-            }],
-            DruzynaA: [{
-                title: "Drużyna A",
-                image: "https://fwcdn.pl/fpo/02/90/190290/7331069.3.jpg",
-                year: "2010",
-                genre: "Komedia, Akcja",
-                link: "https://upstream.to/embed-nsjjikyw58nx.html"
-            }],
-
-
-        };
-
-
-        // Function to generate movie HTML
-        function generateMovieHTML(movie) {
-            return `
-                <div class="movie-box">
-                    <div class="movie-image">
-                        <img src="${movie.image}">
-                    </div>
-                    <div class="movie-info">
-                        <h3>${movie.title}</h3>
-                        <p>${movie.year} | ${movie.genre}</p>
-                        <a href="${movie.link}" class="button">Film</a>
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
                     </div>
                 </div>
-            `;
-        }
+                <a class="nav-link" href="../gry/gry.html">Gry</a>
+                <a class="nav-link is-active" href="filmy glowna.html" aria-current="page">Filmy</a>
+                <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-        // Function to display movies and set title based on selected id
-        function displayMovies(id) {
-            const movieSection = document.getElementById('movieSection');
-            const seriesTitle = document.getElementById('seriesTitle');
-            movieSection.innerHTML = ''; // Clear previous content
+    <main>
+        <section class="hero hero--subpage hero--media">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Kolekcja filmowa</span>
+                <h1 data-series-title>Wczytywanie kolekcji…</h1>
+                <p class="hero-lead" data-series-description>Trwa przygotowywanie listy filmów. Za moment pokażemy pełen repertuar.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" data-series-primary href="#lista">Przejdź do listy</a>
+                    <a class="btn btn-secondary" href="filmy glowna.html">Powrót do wszystkich kolekcji</a>
+                </div>
+                <div class="hero-highlight">
+                    <span class="badge" data-series-meta>-- tytułów</span>
+                    <span data-series-highlight>Znajdź idealny tytuł na dzisiejszy wieczór.</span>
+                </div>
+            </div>
+            <div class="hero-illustration hero-illustration--media">
+                <div class="hero-panel">
+                    <h2>Parametry seansu</h2>
+                    <p>Odkryj szczegóły kolekcji i zaplanuj maraton z ulubionym klimatem.</p>
+                    <div class="panel-metrics">
+                        <div class="metric"><span>Liczba filmów</span><strong data-series-count>0</strong></div>
+                        <div class="metric"><span>Dominujący gatunek</span><strong data-series-genre>—</strong></div>
+                        <div class="metric"><span>Rekomendacja</span><strong data-series-mood>—</strong></div>
+                    </div>
+                    <div class="hero-panel__actions">
+                        <button class="btn btn-secondary" type="button" data-series-random>Losuj tytuł</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            // Transform ID to a readable title format
-            let formattedTitle = id
-                .replace(/_/g, ' ') // Replace underscores with spaces
-                .replace(/(\d+)([A-Z])/g, '$1 $2') // Add space between number and text
-                .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space before capitals in camelCase
-                .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2') // Handle acronyms followed by words
-                .replace(/(\d+)/g, ' $1') // Add space before numbers
-                .replace(/DniTygodni/g, 'Dni / Tygodni') // Specific replacement for "28 Dni / Tygodni"
-                .replace(/\b(\w)/g, match => match.toUpperCase()); // Capitalize the first letter of each word
+        <section class="section" id="lista">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Lista tytułów</span>
+                    <h2 class="section-title" data-series-section-title>Przygotuj popcorn</h2>
+                    <p class="section-description" data-series-section-description>Wszystkie filmy tej kolekcji pojawią się poniżej – gotowe do odpalenia.</p>
+                </div>
+                <div class="film-toolbar">
+                    <label class="visually-hidden" for="film-filter">Filtruj filmy</label>
+                    <input class="input" id="film-filter" type="search" placeholder="Szukaj po tytule lub gatunku" data-film-filter />
+                    <button class="btn btn-secondary" type="button" data-film-random>Losuj tytuł</button>
+                </div>
+            </div>
+            <div class="media-grid media-grid--compact" data-series-container>
+                <!-- Karty filmów generowane dynamicznie -->
+            </div>
+            <p class="empty-state" data-film-empty>Brak wyników dla wybranego filtra. Spróbuj innego tytułu lub gatunku.</p>
+        </section>
 
-            // Capitalize each word for the title, ensuring consistent formatting
-            formattedTitle = formattedTitle.split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
+        <section class="section" id="zobacz-tez">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Zobacz także</span>
+                    <h2 class="section-title">Inne kolekcje warte uwagi</h2>
+                    <p class="section-description">Nie możesz się zdecydować? Sprawdź propozycje, które świetnie komponują się z aktualną serią.</p>
+                </div>
+            </div>
+            <div class="media-grid media-grid--mini" data-series-suggestions>
+                <!-- Sugestie kolekcji -->
+            </div>
+        </section>
+    </main>
 
-            seriesTitle.textContent = formattedTitle; // Set the series title
-
-            if (moviesData[id]) {
-                moviesData[id].forEach(movie => {
-                    const movieHTML = generateMovieHTML(movie);
-                    movieSection.innerHTML += movieHTML;
-                });
-            } else {
-                movieSection.innerHTML = '<p>No movies found</p>';
-            }
-        }
-
-
-        // Example: Display movies for "Top Gun" initially
-        displayMovies('TopGun', '_28Dni_Tygodni_Pozniej');
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const seriesId = urlParams.get('series'); // Odczytanie wartości parametru 'series' z URL
-
-            if (seriesId && moviesData[seriesId]) {
-                displayMovies(seriesId);
-            } else {
-                displayMovies('TopGun'); // Domyślne wyświetlanie Top Gun, jeśli nie podano serii lub jest błędna
-            }
-        });
-    </script>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>Masz sugestię nowej kolekcji? Zapisz ją w dzienniku zmian i pomóż rozwijać bazę filmów.</p>
+            <a class="btn btn-ghost" href="../zmiany.html">Dziennik zmian</a>
+        </div>
+    </footer>
 </body>
-
 </html>
