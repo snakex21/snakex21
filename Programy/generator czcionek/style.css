@@ -1,0 +1,79 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0f172a;
+  font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+.app-hero {
+  color: #f8fafc;
+}
+
+.app-hero .badge {
+  background: rgba(99, 102, 241, 0.25);
+  color: #ede9fe;
+}
+
+.app-hero__content p {
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.standalone-app--light {
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.standalone-app__inner {
+  padding-bottom: clamp(2rem, 6vw, 4rem);
+}
+
+.font-generator.card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 25px 55px -35px rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+}
+
+.font-generator h2 {
+  margin-bottom: 1rem;
+}
+
+.fancytext {
+  min-height: 120px;
+  resize: vertical;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background-color: rgba(30, 41, 59, 0.85) !important;
+  color: #f8fafc !important;
+}
+
+#result .input-group {
+  background: rgba(15, 23, 42, 0.65);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#result .input-group + .input-group {
+  margin-top: 0.75rem;
+}
+
+#result .form-control {
+  background: rgba(15, 23, 42, 0.65);
+  border: none;
+  color: #f8fafc;
+}
+
+#result .input-group-text {
+  background: rgba(99, 102, 241, 0.35);
+  color: #f8fafc;
+  border: none;
+  transition: background 200ms ease;
+}
+
+#result .input-group-text:hover {
+  background: rgba(99, 102, 241, 0.55);
+}
+
+.loadmore {
+  border-radius: var(--radius-sm, 999px);
+  padding-inline: 2.5rem;
+}
