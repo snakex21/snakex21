@@ -1,152 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <title>Kóko Krzyżyk (Solo)</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <meta name="monetization" content="$ilp.uphold.com/WUdKN2pAgLAG">
-    <link rel="stylesheet" href="kolkos.css">
-
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kółko i krzyżyk (solo) – Max Playground</title>
+    <meta name="description" content="Zmierz się z komputerem w klasycznym kółku i krzyżyku. Wybierz trudność, zdecyduj kto zaczyna i spróbuj wygrać trzy w linii." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <script defer src="../../assets/js/site.js"></script>
 </head>
-
-<body>
-
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../../index.html">Strona główna</a></li>
-
-                <li class="dropdown">
-                    <a href="../../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../../gry/gry.html">Gry</a></li>
-                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body class="game-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="../gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-    <!-- partial:index.partial.html -->
-    <input type="checkbox" id="difficulty" checked />
-    <input type="checkbox" id="sound" />
-    <input type="checkbox" id="first" />
-
-    <input type="checkbox" id="start" />
-
-    <form id="tictactoe">
-        <input type="radio" name="cell-0" id="cell-0-x" />
-        <input type="radio" name="cell-0" id="cell-0-o" />
-        <input type="radio" name="cell-1" id="cell-1-x" />
-        <input type="radio" name="cell-1" id="cell-1-o" />
-        <input type="radio" name="cell-2" id="cell-2-x" />
-        <input type="radio" name="cell-2" id="cell-2-o" />
-        <input type="radio" name="cell-3" id="cell-3-x" />
-        <input type="radio" name="cell-3" id="cell-3-o" />
-        <input type="radio" name="cell-4" id="cell-4-x" />
-        <input type="radio" name="cell-4" id="cell-4-o" />
-        <input type="radio" name="cell-5" id="cell-5-x" />
-        <input type="radio" name="cell-5" id="cell-5-o" />
-        <input type="radio" name="cell-6" id="cell-6-x" />
-        <input type="radio" name="cell-6" id="cell-6-o" />
-        <input type="radio" name="cell-7" id="cell-7-x" />
-        <input type="radio" name="cell-7" id="cell-7-o" />
-        <input type="radio" name="cell-8" id="cell-8-x" />
-        <input type="radio" name="cell-8" id="cell-8-o" />
-
-        <div id="menu" class="scrim">
-            <div class="center">
-                <h1>CSS Tic-Tac-Toe</h1>
-                <div>
-                    <h2>Difficulty</h2>
-                    <div class="toggle-group">
-                        <span>Beginner</span>
-                        <label for="difficulty" class="toggle"></label>
-                        <span>Advanced</span>
-                    </div>
-                    <!-- Soon...
-        <h2>Sound</h2>
-        <div class="toggle-group">
-          <span>Off</span>
-          <label for="sound" class="toggle"></label>
-          <span>On</span>
-        </div>
-        -->
-                    <h2>First turn</h2>
-                    <div class="toggle-group">
-                        <span>Player</span>
-                        <label for="first" class="toggle"></label>
-                        <span>Computer</span>
-                    </div>
-                    <label for="start" id="start-button" class="btn">Start Game</label>
+    <main>
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Kółko i krzyżyk – tryb solo</h1>
+            <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolkos-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
+                <div class="game-frame">
+                    <iframe src="play.html" title="Kółko i krzyżyk solo – zagraj" loading="lazy"></iframe>
                 </div>
             </div>
-        </div>
-
-        <div id="board" class="center">
-            <div class="tile" id="tile-0">
-                <label for="cell-0-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-1">
-                <label for="cell-1-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-2">
-                <label for="cell-2-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-3">
-                <label for="cell-3-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-4">
-                <label for="cell-4-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-5">
-                <label for="cell-5-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-6">
-                <label for="cell-6-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-7">
-                <label for="cell-7-x"></label>
-                <div></div>
-            </div>
-            <div class="tile" id="tile-8">
-                <label for="cell-8-x"></label>
-                <div></div>
-            </div>
-        </div>
-        <div id="label-computer" class="btn">
-            Computer Move!
-            <label for="cell-0-o"></label>
-            <label for="cell-1-o"></label>
-            <label for="cell-2-o"></label>
-            <label for="cell-3-o"></label>
-            <label for="cell-4-o"></label>
-            <label for="cell-5-o"></label>
-            <label for="cell-6-o"></label>
-            <label for="cell-7-o"></label>
-            <label for="cell-8-o"></label>
-        </div>
-        <div id="end" class="scrim">
-            <div id="message" class="center">
-                <div>
-                    <input type="reset" for="tictactoe" value="Play again" />
+            <aside class="game-layout__aside" id="game-kolkos-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Wybierz poziom trudności i sprawdź, czy potrafisz przechytrzyć algorytm. Gra natychmiast reaguje na Twoje decyzje, dzięki czemu w kilka minut możesz rozegrać całą serię pojedynków.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo vs AI</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Trudność</dt>
+                            <dd>Początkujący lub zaawansowany</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Sesja</dt>
+                            <dd>2–5 minut</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Strategia startowa</dt>
+                            <dd>Zajmij środek i blokuj linie przeciwnika</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Otwórz w nowym oknie</a>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </form>
-    <!-- partial -->
-
+                <div class="game-card">
+                    <h2>Sterowanie</h2>
+                    <ul class="game-list">
+                        <li>Kliknij wybrane pole, by postawić swój znak.</li>
+                        <li>Użyj przełączników, aby zdecydować kto zaczyna i jaki poziom trudności obowiązuje.</li>
+                        <li>Przycisk Start na dole planszy rozpoczyna nową rundę.</li>
+                    </ul>
+                    <p>Podczas gry przełączaj trudność, aby od razu zobaczyć różnicę w stylu prowadzenia partii przez komputer.</p>
+                </div>
+                <div class="game-card">
+                    <h2>Jak wygrać?</h2>
+                    <ul class="game-list">
+                        <li>Zacznij od zajęcia pola centralnego – to zapewnia najwięcej możliwości.</li>
+                        <li>Jeżeli komputer rozpoczyna, patrz na jego pierwszy ruch i planuj kontratak.</li>
+                        <li>Pilnuj dwóch linii jednocześnie – jedna ofensywna, druga defensywna.</li>
+                    </ul>
+                    <p>Rozegraj serię pięciu partii i policz, ile razy udało Ci się wygrać bez remisu. Zapisuj rezultaty, aby porównać kolejne podejścia.</p>
+                </div>
+            </aside>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Max Playground · Powodzenia w taktycznym pojedynku!</p>
+    </footer>
 </body>
-
 </html>

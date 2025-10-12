@@ -1,81 +1,39 @@
-body, html{
-  background-color: #222;
+.spaceinvaders-game {
+  width: min(720px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+
+.spaceinvaders-display {
+  width: min(640px, 100%);
+  aspect-ratio: 1 / 1;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.18), rgba(15, 23, 42, 0.85));
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.55);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spaceinvaders-display canvas {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  image-rendering: pixelated;
 }
 
-canvas {
- 
-
-  width: 80%;
-  height: 75%;
-margin-left: 8em;
-  bottom: 0;
-  padding: 7em;
-  image-rendering: optimizeSpeed;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: optimize-contrast
-}
-
-/* styles.css */
-body {
-  font-family: Arial, sans-serif;
+.spaceinvaders-controls {
   margin: 0;
-  padding: 0;
-  background-color:#6b1a1a59
-  
-  
+  text-align: center;
+  max-width: 48ch;
+  color: var(--color-text-muted);
 }
 
-.body1{
-  background-color: #793646;
-  background-size: cover;
-  background-repeat: no-repeat;
-  color: #ffc468;
-}
-
-/* --------------------------------------------------nagłówek nr2.----------------------------------*/
-
- /* tu jest pasek nawigacyjny z rozsówaną opcją */
- .nav2 {
-  background-color: #333;
-}
- .nav2 ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-}
- .nav2 li {
-  margin-right: 20px;
-}
- .nav2 a {
-  display: block;
-  color: #fff;
-  text-decoration: none;
-  padding: 10px;
-}
- .nav2 a:hover {
-  background-color: #555;
-}
- .nav2 .dropdown ul {
-  display: none;
-  position: absolute;
-  background-color: #555;
-}
- .nav2 .dropdown:hover ul {
-  display: block;
-}
- .nav2 .dropdown ul li {
-  margin: 0;
-  padding: 0;
-  border-bottom: 1px solid #444;
-}
- .nav2 .dropdown ul li:last-child {
-  border-bottom: none;
-}
- .nav2 .dropdown ul li a {
-  padding: 10px;
+@media (max-width: 640px) {
+  .spaceinvaders-display {
+    padding: 0.5rem;
+  }
 }

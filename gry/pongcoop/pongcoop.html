@@ -1,47 +1,71 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Pong Coop</title>
-    <link rel="stylesheet" href="pongcoop.css">
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pong Coop – Max Playground</title>
+    <meta name="description" content="Współpracujcie przy jednym ekranie, aby utrzymać piłkę w grze. Dwóch graczy, dwie paletki i dużo emocji!" />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <link rel="stylesheet" href="pongcoop.css" />
+    <script defer src="../../assets/js/site.js"></script>
+    <script defer src="pongcoop.js"></script>
 </head>
-
-<body>
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../../index.html">Strona główna</a></li>
-
-                <li class="dropdown">
-                    <a href="../../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../../gry/gry.html">Gry</a></li>
-                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body class="game-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="../gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-
-    <div class="container">
-        <canvas id="c" width="640" height="480" style="background:#000"></canvas>
-    </div>
-
-    <div class="instructions">
-        <h1>Sterowanie:</h1>
-        <h2>gracz 1:</h2>
-        <h3>Q = przesunięcie do góry paletki, A = przesunięcie w dół paletki</h3>
-        <h2>gracz 2:</h2>
-        <h3>^ (strzałka do góry) = przesunięcie do góry, v (strzałka w dół) = przesunięcie w dół</h3>
-    </div>
-
-    <script src="pongcoop.js"></script>
+    <main>
+        <section class="game-stage game-stage--pongcoop">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Kooperacyjny klasyk</span>
+                    <h1>Pong Coop</h1>
+                    <p>Współpracujcie przy jednej klawiaturze – plansza gry wypełnia całe okno, więc liczy się refleks i komunikacja.</p>
+                </div>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board">
+                    <div class="game-board__inner pongcoop-game">
+                        <div class="pongcoop-stage" role="application" aria-label="Plansza gry Pong Coop">
+                            <canvas id="c" width="640" height="480"></canvas>
+                        </div>
+                        <ul class="pongcoop-controls">
+                            <li>Gracz 1: Q (góra) · A (dół)</li>
+                            <li>Gracz 2: ↑ (góra) · ↓ (dół)</li>
+                            <li>Naciśnij ESC, aby zapauzować i wznowić.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
-
 </html>

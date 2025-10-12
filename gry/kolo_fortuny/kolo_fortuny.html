@@ -1,54 +1,106 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Koło Fortuny</title>
-    <link rel="stylesheet" href="./style.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Koło Fortuny – Max Playground</title>
+    <meta name="description" content="Dodaj własne imiona, wylosuj szczęśliwego zwycięzcę i baw się przy kołowrotku pełnym kolorów. Idealne na losowania i mini-zabawy." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <script defer src="../../assets/js/site.js"></script>
 </head>
-
-<body>
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../../index.html">Strona główna</a></li>
-
-                <li class="dropdown">
-                    <a href="../../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../../gry/gry.html">Gry</a></li>
-                <li><a href="../../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body class="game-page" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="../gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-
-    <div id="main">
-        <div id="left-column">
-            <form class="iform" action="#" method="get">
-                <label for="joiner"></label>
-                <input id="joiner" name="joiner" class="joiner" placeholder="Please Enter your name" />
-                <button class="add">Add</button>
-                <button class="spin-trigger">Spin</button>
-                <button class="reset">Reset</button>
-            </form>
-            <canvas class="canvas" width="500" height="500"></canvas>
-        </div>
-        <div id="right-column">
-            <p class="winner">The Winner is ... <span>&nbsp;</span></p>
-            <ul class="participants">
-            </ul>
-        </div>
-        <div style="clear:both"></div>
-    </div>
-
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-    <script src="./script.js"></script>
+    <main>
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Koło Fortuny</h1>
+            <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolofortuny-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
+                <div class="game-frame">
+                    <iframe src="play.html" title="Koło Fortuny – losuj" loading="lazy"></iframe>
+                </div>
+            </div>
+            <aside class="game-layout__aside" id="game-kolofortuny-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Dodaj dowolne imiona lub zadania i obserwuj kolorowe losowanie. Idealne do wyboru kolejności w grach, przydziału zadań czy zabaw podczas spotkań.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Dowolna liczba graczy</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Czas</dt>
+                            <dd>Losowanie w kilka sekund</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Personalizacja</dt>
+                            <dd>Własne wpisy, reset i ponowne losowanie</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Zastosowanie</dt>
+                            <dd>Losowanie zadań, nagród, kolejności</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Tryb pełnoekranowy</a>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <h2>Sterowanie</h2>
+                    <ul class="game-list">
+                        <li>W polu tekstowym wpisz imię lub zadanie i kliknij „Add”, aby dodać je do koła.</li>
+                        <li>Przycisk „Spin” rozpoczyna losowanie, a „Reset” czyści listę uczestników.</li>
+                        <li>Koło automatycznie zatrzymuje się na zwycięskiej sekcji.</li>
+                    </ul>
+                    <p>Wpisz dowolną liczbę uczestników, wciśnij „Add”, a potem naciśnij „Spin”, aby uruchomić kolorową animację losowania.</p>
+                </div>
+                <div class="game-card">
+                    <h2>Pomysły na użycie</h2>
+                    <ul class="game-list">
+                        <li>Wpisz ulubione przekąski i wylosuj menu filmowego seansu.</li>
+                        <li>Przydziel zadania domowe w losowy sposób – sprawiedliwie i zabawnie.</li>
+                        <li>Wprowadź wyzwania dnia i daj się zaskoczyć ruletce.</li>
+                    </ul>
+                    <p>Przygotuj kilka list i zapisuj je w notatniku, by móc szybko przełączać się między różnymi losowaniami – np. zadania domowe, zagadki czy aktywności ruchowe.</p>
+                </div>
+            </aside>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Max Playground · Niech szczęście będzie po Twojej stronie!</p>
+    </footer>
 </body>
-
 </html>
