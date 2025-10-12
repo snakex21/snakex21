@@ -3,11 +3,231 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kółko i krzyżyk (solo) – Max Playground</title>
-    <meta name="description" content="Zmierz się z komputerem w klasycznym kółku i krzyżyku. Wybierz trudność, zdecyduj kto zaczyna i spróbuj wygrać trzy w linii." />
+    <title>Kółko i krzyżyk (vs AI) – Max Playground</title>
+    <meta name="description" content="Zmierz się z komputerem w kółko i krzyżyk. Wybierz poziom trudności, zdecyduj kto zaczyna i prowadź statystyki zwycięstw." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <style>
+        .game-stage--tictactoe {
+            --ttt-board-gap: clamp(0.6rem, 2vw, 1rem);
+            --ttt-tile-radius: 26px;
+            --ttt-accent-x: #38bdf8;
+            --ttt-accent-o: #f472b6;
+            --ttt-surface: linear-gradient(150deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.95));
+            --ttt-border: rgba(148, 163, 184, 0.35);
+        }
+
+        .game-stage--tictactoe .game-stage__board {
+            justify-content: center;
+            gap: clamp(1rem, 3vw, 1.75rem);
+        }
+
+        .tictactoe-app {
+            width: min(960px, 100%);
+            display: grid;
+            gap: clamp(1rem, 3vw, 1.85rem);
+            justify-items: center;
+        }
+
+        .tictactoe-board {
+            width: min(520px, 90vw);
+            aspect-ratio: 1 / 1;
+            background: var(--ttt-surface);
+            border-radius: calc(var(--ttt-tile-radius) * 1.4);
+            border: 1px solid var(--ttt-border);
+            padding: clamp(1rem, 3vw, 1.6rem);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--ttt-board-gap);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 60px rgba(15, 23, 42, 0.55);
+        }
+
+        .tictactoe-cell {
+            border: none;
+            border-radius: var(--ttt-tile-radius);
+            background: rgba(15, 23, 42, 0.65);
+            color: #f8fafc;
+            font-weight: 700;
+            font-size: clamp(2.5rem, 6vw, 3.4rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 35px rgba(8, 47, 73, 0.45);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .tictactoe-cell:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 28px 60px rgba(8, 47, 73, 0.55);
+        }
+
+        .tictactoe-cell:disabled {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .tictactoe-cell.is-x {
+            color: var(--ttt-accent-x);
+        }
+
+        .tictactoe-cell.is-o {
+            color: var(--ttt-accent-o);
+        }
+
+        .tictactoe-cell.is-winning {
+            background: rgba(45, 212, 191, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 28px 70px rgba(45, 212, 191, 0.32);
+        }
+
+        .tictactoe-hud {
+            width: min(880px, 100%);
+            display: grid;
+            gap: clamp(0.75rem, 2vw, 1.25rem);
+            justify-items: center;
+        }
+
+        .tictactoe-turn {
+            font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+            font-weight: 600;
+            color: var(--color-text);
+            text-align: center;
+        }
+
+        .game-stage--tictactoe .game-hud .game-score {
+            min-width: clamp(120px, 30vw, 160px);
+        }
+
+        .game-stage--tictactoe .game-hud .game-score.is-active {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 14px 25px rgba(56, 189, 248, 0.28);
+        }
+
+        .game-stage--tictactoe .game-hud .game-score[data-player="ai"].is-active {
+            border-color: rgba(244, 114, 182, 0.5);
+            box-shadow: 0 14px 25px rgba(244, 114, 182, 0.28);
+        }
+
+        .tictactoe-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .tictactoe-actions button {
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 0.65rem 1.4rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: rgba(30, 64, 175, 0.18);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+        }
+
+        .tictactoe-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 35px rgba(30, 64, 175, 0.28);
+            background: rgba(56, 189, 248, 0.22);
+        }
+
+        .tictactoe-actions button:focus-visible {
+            outline: 2px solid rgba(56, 189, 248, 0.75);
+            outline-offset: 3px;
+        }
+
+        .tictactoe-settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            justify-content: center;
+        }
+
+        .tictactoe-settings label {
+            display: grid;
+            gap: 0.35rem;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        .tictactoe-settings select {
+            min-width: 200px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.12);
+            color: var(--color-text);
+            padding: 0.55rem 0.85rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tictactoe-settings select:focus-visible {
+            outline: 2px solid rgba(56, 189, 248, 0.65);
+            outline-offset: 3px;
+        }
+
+        .tictactoe-settings option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        .tictactoe-history {
+            width: min(520px, 100%);
+            padding: 1rem 1.25rem;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .tictactoe-history h2 {
+            margin: 0 0 0.6rem;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+        }
+
+        .tictactoe-history p {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.92rem;
+        }
+
+        .tictactoe-history ol {
+            margin: 0;
+            padding-left: 1.1rem;
+            display: grid;
+            gap: 0.35rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 720px) {
+            .tictactoe-board {
+                width: min(92vw, 420px);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .tictactoe-board {
+                padding: 0.85rem;
+                gap: clamp(0.45rem, 4vw, 0.65rem);
+                border-radius: calc(var(--ttt-tile-radius) * 1.1);
+            }
+
+            .tictactoe-cell {
+                border-radius: calc(var(--ttt-tile-radius) * 0.75);
+            }
+
+            .tictactoe-settings select {
+                min-width: 0;
+            }
+        }
+    </style>
     <script defer src="../../assets/js/site.js"></script>
 </head>
 <body class="game-page" data-root="../../">
@@ -41,66 +261,463 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Kółko i krzyżyk – tryb solo</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolkos-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <article class="game-stage game-stage--tictactoe">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Tryb solo vs AI</span>
+                    <h1>Kółko i krzyżyk</h1>
+                    <p>Wybierz poziom trudności, zdecyduj kto zaczyna i spróbuj przechytrzyć komputer. Każda runda trwa chwilę, ale statystyki pamiętają każdy Twój sukces.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Kółko i krzyżyk solo – zagraj" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-kolkos-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Wybierz poziom trudności i sprawdź, czy potrafisz przechytrzyć algorytm. Gra natychmiast reaguje na Twoje decyzje, dzięki czemu w kilka minut możesz rozegrać całą serię pojedynków.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo vs AI</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Trudność</dt>
-                            <dd>Początkujący lub zaawansowany</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Sesja</dt>
-                            <dd>2–5 minut</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Strategia startowa</dt>
-                            <dd>Zajmij środek i blokuj linie przeciwnika</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Otwórz w nowym oknie</a>
+                <div class="game-hud">
+                    <div class="game-score is-active" data-player="human">
+                        <span>Wygrane gracza</span>
+                        <strong data-score-player>0</strong>
+                    </div>
+                    <div class="game-score" data-player="ai">
+                        <span>Wygrane komputera</span>
+                        <strong data-score-ai>0</strong>
+                    </div>
+                    <div class="game-score" data-player="draws">
+                        <span>Remisy</span>
+                        <strong data-score-draws>0</strong>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Kliknij wybrane pole, by postawić swój znak.</li>
-                        <li>Użyj przełączników, aby zdecydować kto zaczyna i jaki poziom trudności obowiązuje.</li>
-                        <li>Przycisk Start na dole planszy rozpoczyna nową rundę.</li>
-                    </ul>
-                    <p>Podczas gry przełączaj trudność, aby od razu zobaczyć różnicę w stylu prowadzenia partii przez komputer.</p>
+            </header>
+
+            <div class="game-stage__board">
+                <div class="tictactoe-app">
+                    <div class="tictactoe-hud">
+                        <div class="tictactoe-turn" data-turn-display>Runda 1 · Twój ruch (X)</div>
+                        <div class="tictactoe-actions">
+                            <button type="button" data-action="next">Nowa runda</button>
+                            <button type="button" data-action="reset">Wyzeruj mecz</button>
+                        </div>
+                        <div class="tictactoe-settings">
+                            <label>
+                                Poziom trudności
+                                <select data-difficulty>
+                                    <option value="easy">Łatwy (losowe ruchy)</option>
+                                    <option value="hard">Zaawansowany (minimax)</option>
+                                </select>
+                            </label>
+                            <label>
+                                Kto zaczyna?
+                                <select data-starter>
+                                    <option value="player">Ty zaczynasz (grasz jako X)</option>
+                                    <option value="ai">Komputer zaczyna (grasz jako O)</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="tictactoe-board" role="grid" aria-label="Plansza gry kółko i krzyżyk">
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 1" data-index="0"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 2" data-index="1"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 3" data-index="2"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 4" data-index="3"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 5" data-index="4"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 6" data-index="5"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 7" data-index="6"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 8" data-index="7"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 9" data-index="8"></button>
+                    </div>
+
+                    <p class="game-status" data-status aria-live="polite">Ułóż trzy swoje symbole w linii, zanim zrobi to komputer.</p>
+
+                    <section class="tictactoe-history" aria-live="polite">
+                        <h2>Historia partii</h2>
+                        <p data-history-empty>Jeszcze nie rozegrano żadnej partii.</p>
+                        <ol data-history></ol>
+                    </section>
                 </div>
-                <div class="game-card">
-                    <h2>Jak wygrać?</h2>
-                    <ul class="game-list">
-                        <li>Zacznij od zajęcia pola centralnego – to zapewnia najwięcej możliwości.</li>
-                        <li>Jeżeli komputer rozpoczyna, patrz na jego pierwszy ruch i planuj kontratak.</li>
-                        <li>Pilnuj dwóch linii jednocześnie – jedna ofensywna, druga defensywna.</li>
-                    </ul>
-                    <p>Rozegraj serię pięciu partii i policz, ile razy udało Ci się wygrać bez remisu. Zapisuj rezultaty, aby porównać kolejne podejścia.</p>
-                </div>
-            </aside>
-        </section>
+            </div>
+        </article>
     </main>
     <footer>
-        <p>© 2024 Max Playground · Powodzenia w taktycznym pojedynku!</p>
+        <p>© 2024 Max Playground · Powodzenia w starciu z algorytmem!</p>
     </footer>
+    <script>
+        (() => {
+            const cells = Array.from(document.querySelectorAll('[data-cell]'));
+            const turnDisplay = document.querySelector('[data-turn-display]');
+            const statusEl = document.querySelector('[data-status]');
+            const scorePlayerEl = document.querySelector('[data-score-player]');
+            const scoreAiEl = document.querySelector('[data-score-ai]');
+            const scoreDrawEl = document.querySelector('[data-score-draws]');
+            const historyList = document.querySelector('[data-history]');
+            const historyEmpty = document.querySelector('[data-history-empty]');
+            const nextButton = document.querySelector('[data-action="next"]');
+            const resetButton = document.querySelector('[data-action="reset"]');
+            const difficultySelect = document.querySelector('[data-difficulty]');
+            const starterSelect = document.querySelector('[data-starter]');
+            const scoreCards = {
+                player: document.querySelector('[data-player="human"]'),
+                ai: document.querySelector('[data-player="ai"]'),
+            };
+
+            const winningCombos = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6],
+            ];
+
+            const state = {
+                board: Array(9).fill(null),
+                current: 'X',
+                moves: 0,
+                finished: false,
+                round: 1,
+                difficulty: 'easy',
+                starter: 'player',
+                playerSymbol: 'X',
+                aiSymbol: 'O',
+                scores: {
+                    player: 0,
+                    ai: 0,
+                    draws: 0,
+                },
+                aiTimeoutId: null,
+            };
+
+            function ownerOf(symbol) {
+                return symbol === state.playerSymbol ? 'player' : 'ai';
+            }
+
+            function updateScoreboard() {
+                scorePlayerEl.textContent = state.scores.player;
+                scoreAiEl.textContent = state.scores.ai;
+                scoreDrawEl.textContent = state.scores.draws;
+            }
+
+            function clearBoardUI() {
+                cells.forEach((cell) => {
+                    cell.textContent = '';
+                    cell.disabled = false;
+                    cell.classList.remove('is-x', 'is-o', 'is-winning');
+                });
+            }
+
+            function setStatus(text, variant = '') {
+                statusEl.textContent = text;
+                statusEl.classList.remove('won', 'lose');
+                if (variant) {
+                    statusEl.classList.add(variant);
+                }
+            }
+
+            function updateTurnDisplay() {
+                if (state.finished) {
+                    scoreCards.player.classList.remove('is-active');
+                    scoreCards.ai.classList.remove('is-active');
+                    return;
+                }
+
+                const owner = ownerOf(state.current);
+                const label = owner === 'player' ? 'Twój ruch' : 'Ruch komputera';
+                turnDisplay.textContent = `Runda ${state.round} · ${label} (${state.current})`;
+
+                scoreCards.player.classList.toggle('is-active', owner === 'player');
+                scoreCards.ai.classList.toggle('is-active', owner === 'ai');
+            }
+
+            function checkWinner(board = state.board) {
+                for (const combo of winningCombos) {
+                    const [a, b, c] = combo;
+                    const mark = board[a];
+                    if (mark && mark === board[b] && mark === board[c]) {
+                        return { winner: mark, combo };
+                    }
+                }
+                if (board.every((mark) => mark)) {
+                    return { winner: null, combo: [] };
+                }
+                return null;
+            }
+
+            function highlightCombo(combo) {
+                combo.forEach((index) => {
+                    const cell = cells[index];
+                    if (cell) {
+                        cell.classList.add('is-winning');
+                    }
+                });
+            }
+
+            function appendHistoryEntry(text) {
+                const entry = document.createElement('li');
+                entry.textContent = text;
+                historyList.prepend(entry);
+                historyEmpty.hidden = true;
+                const maxEntries = 8;
+                while (historyList.children.length > maxEntries) {
+                    historyList.removeChild(historyList.lastElementChild);
+                }
+            }
+
+            function stopAiTimer() {
+                if (state.aiTimeoutId) {
+                    clearTimeout(state.aiTimeoutId);
+                    state.aiTimeoutId = null;
+                }
+            }
+
+            function finishRound(result) {
+                state.finished = true;
+                stopAiTimer();
+                cells.forEach((cell) => (cell.disabled = true));
+
+                let message;
+                if (result.winner === state.playerSymbol) {
+                    state.scores.player += 1;
+                    message = `Wygrywasz rundę ${state.round}!`;
+                    setStatus(message, 'won');
+                    turnDisplay.textContent = message;
+                    highlightCombo(result.combo);
+                } else if (result.winner === state.aiSymbol) {
+                    state.scores.ai += 1;
+                    message = `Komputer zwycięża w rundzie ${state.round}.`;
+                    setStatus(message, 'lose');
+                    turnDisplay.textContent = message;
+                    highlightCombo(result.combo);
+                } else {
+                    state.scores.draws += 1;
+                    message = `Runda ${state.round} kończy się remisem.`;
+                    setStatus(message);
+                    turnDisplay.textContent = message;
+                }
+
+                updateScoreboard();
+                appendHistoryEntry(message);
+                scoreCards.player.classList.remove('is-active');
+                scoreCards.ai.classList.remove('is-active');
+            }
+
+            function applyMove(index, symbol) {
+                state.board[index] = symbol;
+                state.moves += 1;
+                const cell = cells[index];
+                if (cell) {
+                    cell.textContent = symbol;
+                    cell.classList.add(symbol === 'X' ? 'is-x' : 'is-o');
+                    cell.disabled = true;
+                }
+            }
+
+            function makeTurn(symbol, index) {
+                applyMove(index, symbol);
+                const result = checkWinner();
+                if (result) {
+                    finishRound(result);
+                    return;
+                }
+
+                state.current = symbol === 'X' ? 'O' : 'X';
+                updateTurnDisplay();
+                const owner = ownerOf(state.current);
+                if (owner === 'player') {
+                    setStatus('Twoja kolej! Spróbuj ułożyć trzy symbole zanim zrobi to komputer.');
+                } else {
+                    queueAiMove();
+                }
+            }
+
+            function availableMoves(board) {
+                const moves = [];
+                for (let i = 0; i < board.length; i += 1) {
+                    if (!board[i]) {
+                        moves.push(i);
+                    }
+                }
+                return moves;
+            }
+
+            function evaluateBoard(board) {
+                const result = checkWinner(board);
+                if (!result) {
+                    return null;
+                }
+                if (result.winner === state.aiSymbol) {
+                    return 'ai';
+                }
+                if (result.winner === state.playerSymbol) {
+                    return 'player';
+                }
+                if (result.winner === null) {
+                    return 'draw';
+                }
+                return null;
+            }
+
+            function minimax(board, depth, maximizing) {
+                const outcome = evaluateBoard(board);
+                if (outcome === 'ai') {
+                    return { score: 10 - depth };
+                }
+                if (outcome === 'player') {
+                    return { score: depth - 10 };
+                }
+                if (outcome === 'draw') {
+                    return { score: 0 };
+                }
+
+                const moves = availableMoves(board);
+                if (maximizing) {
+                    let bestScore = -Infinity;
+                    let bestMove = moves[0];
+                    for (const move of moves) {
+                        board[move] = state.aiSymbol;
+                        const result = minimax(board, depth + 1, false);
+                        board[move] = null;
+                        if (result.score > bestScore) {
+                            bestScore = result.score;
+                            bestMove = move;
+                        }
+                    }
+                    return depth === 0 ? { score: bestScore, move: bestMove } : { score: bestScore };
+                }
+
+                let bestScore = Infinity;
+                for (const move of moves) {
+                    board[move] = state.playerSymbol;
+                    const result = minimax(board, depth + 1, true);
+                    board[move] = null;
+                    if (result.score < bestScore) {
+                        bestScore = result.score;
+                    }
+                }
+                return { score: bestScore };
+            }
+
+            function chooseAiMove() {
+                const moves = availableMoves(state.board);
+                if (!moves.length) {
+                    return null;
+                }
+
+                if (state.difficulty === 'easy') {
+                    const randomIndex = Math.floor(Math.random() * moves.length);
+                    return moves[randomIndex];
+                }
+
+                const boardCopy = state.board.slice();
+                const result = minimax(boardCopy, 0, true);
+                if (typeof result.move === 'number') {
+                    return result.move;
+                }
+
+                // Fallback if minimax did not return a move for any reason
+                const randomIndex = Math.floor(Math.random() * moves.length);
+                return moves[randomIndex];
+            }
+
+            function queueAiMove() {
+                setStatus('Komputer analizuje swój ruch...');
+                scoreCards.player.classList.remove('is-active');
+                scoreCards.ai.classList.add('is-active');
+                stopAiTimer();
+                state.aiTimeoutId = setTimeout(() => {
+                    state.aiTimeoutId = null;
+                    if (state.finished) {
+                        return;
+                    }
+                    const move = chooseAiMove();
+                    if (move != null) {
+                        makeTurn(state.aiSymbol, move);
+                    }
+                }, 450);
+            }
+
+            function handleCellClick(event) {
+                const cell = event.currentTarget;
+                const index = Number(cell.dataset.index);
+                if (state.finished || state.board[index]) {
+                    return;
+                }
+                if (ownerOf(state.current) !== 'player') {
+                    return;
+                }
+
+                makeTurn(state.playerSymbol, index);
+            }
+
+            function prepareRound({ incrementRound = false, resetScores = false } = {}) {
+                stopAiTimer();
+                state.board.fill(null);
+                state.moves = 0;
+                state.finished = false;
+
+                if (resetScores) {
+                    state.scores.player = 0;
+                    state.scores.ai = 0;
+                    state.scores.draws = 0;
+                    state.round = 1;
+                } else if (incrementRound) {
+                    state.round += 1;
+                }
+
+                state.playerSymbol = state.starter === 'player' ? 'X' : 'O';
+                state.aiSymbol = state.playerSymbol === 'X' ? 'O' : 'X';
+                state.current = state.starter === 'player' ? state.playerSymbol : state.aiSymbol;
+
+                if (difficultySelect && difficultySelect.value !== state.difficulty) {
+                    difficultySelect.value = state.difficulty;
+                }
+                if (starterSelect && starterSelect.value !== state.starter) {
+                    starterSelect.value = state.starter;
+                }
+
+                clearBoardUI();
+                updateScoreboard();
+                updateTurnDisplay();
+                if (ownerOf(state.current) === 'player') {
+                    setStatus('Twoja kolej! Postaw pierwszy znak i zaplanuj zwycięską linię.');
+                } else {
+                    setStatus('Komputer rozpoczyna – obserwuj jego pierwszy ruch.');
+                    queueAiMove();
+                }
+            }
+
+            cells.forEach((cell) => cell.addEventListener('click', handleCellClick));
+
+            nextButton.addEventListener('click', () => {
+                if (!state.finished && state.moves > 0) {
+                    appendHistoryEntry(`Runda ${state.round} została przerwana.`);
+                }
+                prepareRound({ incrementRound: true });
+            });
+
+            resetButton.addEventListener('click', () => {
+                historyList.innerHTML = '';
+                historyEmpty.hidden = false;
+                prepareRound({ resetScores: true });
+            });
+
+            difficultySelect.addEventListener('change', (event) => {
+                const value = event.target.value === 'hard' ? 'hard' : 'easy';
+                if (state.difficulty !== value) {
+                    state.difficulty = value;
+                    const label = value === 'hard' ? 'zaawansowany' : 'łatwy';
+                    appendHistoryEntry(`Zmieniono poziom trudności na ${label}.`);
+                    prepareRound();
+                }
+            });
+
+            starterSelect.addEventListener('change', (event) => {
+                const value = event.target.value === 'ai' ? 'ai' : 'player';
+                if (state.starter !== value) {
+                    state.starter = value;
+                    appendHistoryEntry(value === 'player' ? 'Gracz zaczyna rundy jako X.' : 'Komputer zaczyna rundy jako X.');
+                    prepareRound();
+                }
+            });
+
+            prepareRound();
+        })();
+    </script>
 </body>
 </html>

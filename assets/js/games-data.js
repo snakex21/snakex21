@@ -136,6 +136,22 @@ const gamesCatalog = [
       "Idealne, gdy chcesz zagrać z kimś obok – szybkie wejście, zero konfiguracji i dużo śmiechu."
   },
   {
+    slug: "tic-tac-toe-ai",
+    title: "Kółko i krzyżyk (vs AI)",
+    description:
+      "Wybierz poziom trudności i sprawdź, czy zdołasz przechytrzyć komputer. Każda runda trwa chwilę, ale statystyki pamiętają każdy wynik.",
+    cover: "kolkokrzyrzykc/kókokrzyżyk.JPG",
+    coverAlt: "Plansza 3x3 w grze kółko i krzyżyk z zaznaczonymi symbolami",
+    url: "kolkos/kolkos.html",
+    genres: ["Logiczna", "Klasyk"],
+    modes: ["Solo"],
+    tags: ["Sztuczna inteligencja", "Szybkie rundy"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight:
+      "Dwie strategie komputerowe do wyboru – zacznij jako X albo oddaj pierwszy ruch AI i ucz się na jego zagraniach."
+  },
+  {
     slug: "tic-tac-toe",
     title: "Kółko i krzyżyk (2 graczy)",
     description:
