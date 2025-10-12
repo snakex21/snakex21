@@ -237,8 +237,18 @@
     libraryGrid: document.querySelector('[data-library-grid]'),
     libraryEmpty: document.querySelector('[data-library-empty]'),
     librarySearch: document.querySelector('[data-library-search]'),
-    loopIndicator: document.querySelector('[data-loop-indicator]')
+    loopIndicator: document.querySelector('[data-loop-indicator]'),
+    libraryDrawer: document.querySelector('[data-library-drawer]'),
+    libraryDrawerPanel: document.querySelector('[data-library-drawer-panel]'),
+    libraryDrawerList: document.querySelector('[data-library-drawer-list]'),
+    libraryDrawerSearch: document.querySelector('[data-library-drawer-search]'),
+    libraryDrawerEmpty: document.querySelector('[data-library-drawer-empty]'),
+    openLibraryButtons: document.querySelectorAll('[data-action="open-library"]'),
+    closeLibraryButtons: document.querySelectorAll('[data-action="close-library"]')
   };
+
+  let isDrawerOpen = false;
+  let lastFocusedElement = null;
 
   function hexToRgb(hex) {
     const cleaned = hex.replace('#', '');
@@ -420,8 +430,35 @@
     });
   }
 
+  function highlightDrawer() {
+    if (!elements.libraryDrawerList) {
+      return;
+    }
+    elements.libraryDrawerList.querySelectorAll('.drawer-track').forEach((row) => {
+      const index = Number(row.dataset.trackIndex);
+      const track = trackLibrary[index];
+      if (!track) {
+        return;
+      }
+      const isActive = index === state.currentIndex;
+      const isFavorite = state.favorites.has(index);
+      row.classList.toggle('is-active', isActive);
+      row.classList.toggle('is-favorite', isFavorite);
+      const favoriteButton = row.querySelector('.drawer-track__favorite');
+      if (favoriteButton) {
+        favoriteButton.textContent = isFavorite ? '♥' : '♡';
+        favoriteButton.setAttribute('aria-pressed', String(isFavorite));
+        favoriteButton.setAttribute(
+          'aria-label',
+          isFavorite ? `Usuń ${track.title} z ulubionych` : `Dodaj ${track.title} do ulubionych`
+        );
+      }
+    });
+  }
+
   function highlightLibrary() {
     if (!elements.libraryGrid) {
+      highlightDrawer();
       return;
     }
     const isFavorite = (index) => state.favorites.has(index);
@@ -430,6 +467,7 @@
       card.classList.toggle('is-active', index === state.currentIndex);
       card.classList.toggle('is-favorite', isFavorite(index));
     });
+    highlightDrawer();
   }
 
   function buildQueue(filter = '') {
@@ -519,6 +557,115 @@
       elements.libraryEmpty.hidden = hasResults;
     }
     highlightLibrary();
+  }
+
+  function buildLibraryDrawer(filter = '') {
+    if (!elements.libraryDrawerList) {
+      return;
+    }
+    const normalized = filter.trim().toLowerCase();
+    const tracks = trackLibrary
+      .map((track, index) => ({ track, index }))
+      .filter(({ track }) => matchesFilter(track, normalized));
+
+    elements.libraryDrawerList.innerHTML = '';
+
+    tracks.forEach(({ track, index }) => {
+      const item = document.createElement('li');
+      item.className = 'drawer-track';
+      item.dataset.trackIndex = String(index);
+
+      const mainButton = document.createElement('button');
+      mainButton.type = 'button';
+      mainButton.className = 'drawer-track__main';
+      mainButton.dataset.drawerAction = 'play';
+      mainButton.setAttribute('aria-label', `Odtwórz ${track.title} – ${track.artist}`);
+
+      const number = document.createElement('span');
+      number.className = 'drawer-track__number';
+      number.textContent = String(index + 1).padStart(2, '0');
+
+      const meta = document.createElement('div');
+      meta.className = 'drawer-track__meta';
+
+      const title = document.createElement('span');
+      title.className = 'drawer-track__title';
+      title.textContent = track.title;
+
+      const subtitle = document.createElement('span');
+      subtitle.className = 'drawer-track__subtitle';
+      subtitle.textContent = track.album ? `${track.artist} • ${track.album}` : track.artist;
+
+      meta.append(title, subtitle);
+      mainButton.append(number, meta);
+
+      const favoriteButton = document.createElement('button');
+      favoriteButton.type = 'button';
+      favoriteButton.className = 'drawer-track__favorite';
+      favoriteButton.dataset.drawerAction = 'favorite';
+      favoriteButton.setAttribute('aria-pressed', 'false');
+      favoriteButton.setAttribute('aria-label', `Dodaj ${track.title} do ulubionych`);
+      favoriteButton.textContent = '♡';
+
+      item.append(mainButton, favoriteButton);
+      elements.libraryDrawerList.append(item);
+    });
+
+    const hasResults = tracks.length > 0;
+    if (elements.libraryDrawerEmpty) {
+      elements.libraryDrawerEmpty.hidden = hasResults;
+    }
+    highlightDrawer();
+  }
+
+  function openLibraryDrawer() {
+    if (!elements.libraryDrawer) {
+      return;
+    }
+    if (!elements.libraryDrawer.classList.contains('is-open')) {
+      lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    const currentFilter = elements.libraryDrawerSearch ? elements.libraryDrawerSearch.value : '';
+    buildLibraryDrawer(currentFilter);
+    elements.libraryDrawer.classList.add('is-open');
+    elements.libraryDrawer.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('drawer-open');
+    isDrawerOpen = true;
+    if (elements.libraryDrawerSearch) {
+      const focusTarget = elements.libraryDrawerSearch;
+      if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+        window.requestAnimationFrame(() => {
+          focusTarget.focus();
+        });
+      } else {
+        focusTarget.focus();
+      }
+    }
+  }
+
+  function closeLibraryDrawer(options = {}) {
+    if (!elements.libraryDrawer) {
+      return;
+    }
+    if (!elements.libraryDrawer.classList.contains('is-open')) {
+      return;
+    }
+    elements.libraryDrawer.classList.remove('is-open');
+    elements.libraryDrawer.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('drawer-open');
+    isDrawerOpen = false;
+    const { restoreFocus = true } = options;
+    if (restoreFocus && lastFocusedElement) {
+      lastFocusedElement.focus();
+    }
+    lastFocusedElement = null;
+  }
+
+  function handleDocumentKeydown(event) {
+    if (event.key === 'Escape' && isDrawerOpen) {
+      event.preventDefault();
+      closeLibraryDrawer();
+    }
   }
 
   function syncProgressDisplays() {
@@ -711,14 +858,25 @@
     updateLoopIndicator();
   }
 
-  function toggleFavorite() {
-    if (state.favorites.has(state.currentIndex)) {
-      state.favorites.delete(state.currentIndex);
-    } else {
-      state.favorites.add(state.currentIndex);
+  function toggleFavorite(target = state.currentIndex) {
+    let index = target;
+    if (typeof target === 'object') {
+      index = state.currentIndex;
     }
-    updateLikeButtons();
+    const parsed = Number(index);
+    if (!Number.isInteger(parsed) || !trackLibrary[parsed]) {
+      return;
+    }
+    if (state.favorites.has(parsed)) {
+      state.favorites.delete(parsed);
+    } else {
+      state.favorites.add(parsed);
+    }
+    if (parsed === state.currentIndex) {
+      updateLikeButtons();
+    }
     highlightLibrary();
+    highlightDrawer();
     saveFavorites();
   }
 
@@ -810,6 +968,60 @@
         buildLibrary(event.target.value);
       });
     }
+    if (elements.openLibraryButtons?.length) {
+      elements.openLibraryButtons.forEach((button) =>
+        button.addEventListener('click', () => {
+          const currentFilter = elements.libraryDrawerSearch ? elements.libraryDrawerSearch.value : '';
+          buildLibraryDrawer(currentFilter);
+          openLibraryDrawer();
+        })
+      );
+    }
+    if (elements.closeLibraryButtons?.length) {
+      elements.closeLibraryButtons.forEach((button) => button.addEventListener('click', () => closeLibraryDrawer()));
+    }
+    if (elements.libraryDrawer) {
+      elements.libraryDrawer.addEventListener('click', (event) => {
+        const action = event.target.dataset.action;
+        if (action === 'close-library') {
+          closeLibraryDrawer();
+        }
+      });
+    }
+    if (elements.libraryDrawerSearch) {
+      elements.libraryDrawerSearch.addEventListener('input', (event) => {
+        buildLibraryDrawer(event.target.value);
+      });
+    }
+    if (elements.libraryDrawerList) {
+      elements.libraryDrawerList.addEventListener('click', (event) => {
+        const control = event.target.closest('[data-drawer-action]');
+        if (!control) {
+          return;
+        }
+        const row = control.closest('.drawer-track');
+        if (!row) {
+          return;
+        }
+        const index = Number(row.dataset.trackIndex);
+        if (!Number.isInteger(index) || !trackLibrary[index]) {
+          return;
+        }
+        const action = control.dataset.drawerAction;
+        if (action === 'play') {
+          loadTrack(index, { autoplay: true });
+          const shouldClose =
+            typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+          if (shouldClose) {
+            closeLibraryDrawer({ restoreFocus: false });
+          }
+        } else if (action === 'favorite') {
+          event.preventDefault();
+          toggleFavorite(index);
+        }
+      });
+    }
+    document.addEventListener('keydown', handleDocumentKeydown);
   }
 
   function handleAudioEvents() {
@@ -846,6 +1058,7 @@
     updateLoopIndicator();
     buildQueue('');
     buildLibrary('');
+    buildLibraryDrawer('');
     attachEventListeners();
     handleAudioEvents();
     if (elements.volumeControls.length) {

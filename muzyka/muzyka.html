@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../assets/css/music.css" />
     <script defer src="../assets/js/site.js"></script>
 </head>
-<body>
+<body class="music-page">
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
             <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
@@ -125,6 +125,7 @@
                             <div class="library-actions">
                                 <label class="visually-hidden" for="library-search">Szukaj w bibliotece</label>
                                 <input id="library-search" class="input" type="search" placeholder="Filtruj bibliotekę" data-library-search />
+                                <button class="tag-btn" type="button" data-action="open-library">Pełna lista</button>
                             </div>
                         </div>
                         <div class="library-grid" data-library-grid></div>
@@ -157,6 +158,40 @@
         </section>
     </main>
 
+    <div class="library-drawer" data-library-drawer aria-hidden="true">
+        <div class="library-drawer__backdrop" data-action="close-library" aria-hidden="true"></div>
+        <div
+            class="library-drawer__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="library-drawer-title"
+            data-library-drawer-panel
+        >
+            <header class="library-drawer__header">
+                <div>
+                    <span class="eyebrow">Pełna biblioteka</span>
+                    <h2 id="library-drawer-title">Wszystkie utwory pod ręką</h2>
+                    <p>Przeglądaj, wyszukuj i odtwarzaj dowolny kawałek jednym kliknięciem.</p>
+                </div>
+                <div class="library-drawer__actions">
+                    <label class="visually-hidden" for="library-drawer-search">Filtruj utwory w bibliotece</label>
+                    <input
+                        id="library-drawer-search"
+                        class="input"
+                        type="search"
+                        placeholder="Szukaj po tytule, artyście lub albumie"
+                        data-library-drawer-search
+                    />
+                    <button class="tag-btn" type="button" data-action="close-library">Zamknij</button>
+                </div>
+            </header>
+            <div class="library-drawer__content">
+                <ul class="drawer-track-list" data-library-drawer-list role="listbox" aria-label="Pełna lista utworów"></ul>
+                <p class="drawer-empty" data-library-drawer-empty hidden>Brak wyników. Spróbuj innego hasła.</p>
+            </div>
+        </div>
+    </div>
+
     <footer class="player-footer" aria-label="Panel sterowania odtwarzaczem">
         <div class="spotify-player" data-player-bar>
             <div class="player-bar-left">
@@ -182,6 +217,7 @@
                 </div>
             </div>
             <div class="player-bar-right">
+                <button class="player-btn" type="button" data-action="open-library" aria-label="Otwórz bibliotekę">📚</button>
                 <button class="player-btn" data-action="mute" aria-label="Wycisz lub włącz dźwięk">🔊</button>
                 <input type="range" min="0" max="100" value="80" data-volume aria-label="Głośność" />
                 <div class="loop-indicator" data-loop-indicator>Tryb: brak powtarzania</div>
