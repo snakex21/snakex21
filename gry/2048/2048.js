@@ -259,7 +259,7 @@ function cellReset() {
     }
   }
   if (count == 16) {
-    document.getElementById('status').className = 'lose';
+    updateStatus('lose');
   } else if (gridElement.id == 'moved'){
     cellCreator(1, 1);
   }
@@ -284,7 +284,7 @@ function colorSet(value, tile) {
   tile.textContent = ''+value;
   tile.className = 'tile tile-' + value;
   if (value >= 2048) {
-    document.getElementById('status').className = 'won';
+    updateStatus('won');
   }
 }
 
@@ -312,9 +312,20 @@ function reset() {
       }
     }
   }
-  document.getElementById('status').className = '';
+  updateStatus();
   gridElement.dataset.value = 0;
   gridElement.id = ' ';
   score();
   cellCreator(2, 0);
+}
+
+function updateStatus(state) {
+  var statusElement = document.getElementById('status');
+  if (!statusElement) {
+    return;
+  }
+  statusElement.classList.remove('lose', 'won');
+  if (state) {
+    statusElement.classList.add(state);
+  }
 }

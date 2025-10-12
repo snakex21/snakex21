@@ -1,4 +1,4 @@
-:root {
+.game-stage--2048 {
   --board-padding: clamp(0.8rem, 1.8vw, 1.1rem);
   --board-radius: 28px;
   --cell-radius: 18px;
@@ -7,14 +7,10 @@
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-body {
-  margin: 0;
-}
-
-.game {
+.game-stage--2048 [data-game-root] {
   position: relative;
   width: min(420px, 100%);
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
   padding: var(--board-padding);
   border-radius: var(--board-radius);
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.92));
@@ -26,7 +22,7 @@ body {
   justify-content: stretch;
 }
 
-.grid {
+.game-stage--2048 .grid {
   position: relative;
   width: 100%;
   height: 100%;
@@ -35,13 +31,13 @@ body {
   gap: var(--board-padding);
 }
 
-.grid_row {
+.game-stage--2048 .grid_row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--board-padding);
 }
 
-.grid_cell {
+.game-stage--2048 .grid_cell {
   position: relative;
   border-radius: var(--cell-radius);
   background: rgba(148, 163, 184, 0.12);
@@ -50,11 +46,11 @@ body {
   box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.35);
 }
 
-.grid_cell.active {
+.game-stage--2048 .grid_cell.active {
   border-color: rgba(56, 189, 248, 0.35);
 }
 
-.tile {
+.game-stage--2048 .tile {
   position: absolute;
   inset: 0;
   display: grid;
@@ -72,69 +68,41 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.tile.appearing,
-.grid_cell.active .tile {
+.game-stage--2048 .tile.appearing,
+.game-stage--2048 .grid_cell.active .tile {
   opacity: 1;
   transform: scale(1);
 }
 
-.tile::after {
+.game-stage--2048 .tile::after {
   content: attr(data-value);
   font-variant-numeric: tabular-nums;
 }
 
-.tile[data-value="2"], .tile.tile-2 { background: #fef3c7; }
-.tile[data-value="4"], .tile.tile-4 { background: #fde68a; }
-.tile[data-value="8"], .tile.tile-8 { background: #fbbf24; }
-.tile[data-value="16"], .tile.tile-16 { background: #fb923c; }
-.tile[data-value="32"], .tile.tile-32 { background: #f97316; color: #0f172a; }
-.tile[data-value="64"], .tile.tile-64 { background: #ef4444; color: #0f172a; }
-.tile[data-value="128"], .tile.tile-128 { background: #f472b6; color: #0f172a; }
-.tile[data-value="256"], .tile.tile-256 { background: #c084fc; color: #0f172a; }
-.tile[data-value="512"], .tile.tile-512 { background: #38bdf8; color: #0f172a; }
-.tile[data-value="1024"], .tile.tile-1024 { background: #22d3ee; color: #0f172a; }
-.tile[data-value="2048"], .tile.tile-2048 { background: #2dd4bf; color: #0f172a; }
-.tile[data-value="4096"], .tile.tile-4096 { background: #a855f7; color: #f8fafc; }
-
-.status {
-  margin-top: 1rem;
-  min-height: 2rem;
-  padding: 0.65rem 1rem;
-  border-radius: 14px;
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  color: rgba(226, 232, 240, 0.85);
-  text-align: center;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.status.won {
-  background: rgba(45, 212, 191, 0.16);
-  border-color: rgba(34, 197, 94, 0.38);
-  color: #bbf7d0;
-}
-
-.status.lose {
-  background: rgba(248, 113, 113, 0.18);
-  border-color: rgba(248, 113, 113, 0.45);
-  color: #fecaca;
-}
+.game-stage--2048 .tile[data-value="2"], .game-stage--2048 .tile.tile-2 { background: #fef3c7; }
+.game-stage--2048 .tile[data-value="4"], .game-stage--2048 .tile.tile-4 { background: #fde68a; }
+.game-stage--2048 .tile[data-value="8"], .game-stage--2048 .tile.tile-8 { background: #fbbf24; }
+.game-stage--2048 .tile[data-value="16"], .game-stage--2048 .tile.tile-16 { background: #fb923c; }
+.game-stage--2048 .tile[data-value="32"], .game-stage--2048 .tile.tile-32 { background: #f97316; color: #0f172a; }
+.game-stage--2048 .tile[data-value="64"], .game-stage--2048 .tile.tile-64 { background: #ef4444; color: #0f172a; }
+.game-stage--2048 .tile[data-value="128"], .game-stage--2048 .tile.tile-128 { background: #f472b6; color: #0f172a; }
+.game-stage--2048 .tile[data-value="256"], .game-stage--2048 .tile.tile-256 { background: #c084fc; color: #0f172a; }
+.game-stage--2048 .tile[data-value="512"], .game-stage--2048 .tile.tile-512 { background: #38bdf8; color: #0f172a; }
+.game-stage--2048 .tile[data-value="1024"], .game-stage--2048 .tile.tile-1024 { background: #22d3ee; color: #0f172a; }
+.game-stage--2048 .tile[data-value="2048"], .game-stage--2048 .tile.tile-2048 { background: #2dd4bf; color: #0f172a; }
+.game-stage--2048 .tile[data-value="4096"], .game-stage--2048 .tile.tile-4096 { background: #a855f7; color: #f8fafc; }
 
 #repeat {
   border: none;
 }
 
-#repeat:focus-visible,
-.arcade-button:focus-visible {
+#repeat:focus-visible {
   outline: 2px solid rgba(14, 165, 233, 0.85);
   outline-offset: 4px;
 }
 
 @media (max-width: 720px) {
-  .game {
+  .game-stage--2048 [data-game-root] {
     width: 100%;
-    aspect-ratio: 1;
   }
 }
