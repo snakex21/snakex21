@@ -4,11 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gra w zapamiętywanie – Max Playground</title>
-    <meta name="description" content="Ćwicz pamięć, odkrywając pary kart. Ustaw własne tempo i sprawdź, ile ruchów potrzebujesz, aby odkryć wszystkie symbole." />
+    <meta name="description" content="Ćwicz pamięć, odkrywając pary kart. Gra zajmuje teraz całe okno – klikaj karty i bij własne rekordy." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <link rel="stylesheet" href="gra zapamietywanie.css" />
     <script defer src="../../assets/js/site.js"></script>
+    <script defer src="gra zapamietywanie.js"></script>
 </head>
 <body class="game-page" data-root="../../">
     <header class="site-header">
@@ -41,70 +43,41 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Gra w zapamiętywanie</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-memory-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--memory">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Trening pamięci</span>
+                    <h1>Gra w zapamiętywanie</h1>
+                    <p>Odkrywaj pary kart jedna po drugiej – cała plansza mieści się teraz w głównym oknie gry.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Gra w zapamiętywanie – zagraj" loading="lazy"></iframe>
+            </header>
+            <div class="game-stage__board">
+                <div class="memory-game">
+                    <div class="memory-summary">Ostatni wynik: <span class="score">--</span>% · Czas: <span class="time">--</span>s</div>
+                    <div class="memory-grid" data-memory-grid>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                        <div class="memory-card" data-card></div>
+                    </div>
+                    <p class="memory-legend">Zapisujemy Twój najlepszy wynik w pamięci przeglądarki – spróbuj ukończyć planszę jak najszybciej i z jak najmniejszą liczbą pomyłek.</p>
                 </div>
             </div>
-            <aside class="game-layout__aside" id="game-memory-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Znajdź wszystkie pary symboli, odkrywając po dwie karty naraz. Im mniej ruchów wykonasz, tym lepszy wynik – to świetny trening koncentracji i spostrzegawczości.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo, relaksacyjny</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Odkryj wszystkie pary</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Sesja</dt>
-                            <dd>3–8 minut</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Umiejętności</dt>
-                            <dd>Pamięć robocza i skupienie</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
-                </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Kliknij lub stuknij w kartę, aby ją odkryć.</li>
-                        <li>Odkryj dwie karty – jeśli tworzą parę, pozostaną odkryte.</li>
-                        <li>Brak limitu czasu: graj we własnym tempie.</li>
-                    </ul>
-                </div>
-                <div class="game-card">
-                    <h2>Wskazówki</h2>
-                    <p>Zwiększ szanse na rekord, korzystając z prostych sztuczek:</p>
-                    <ul class="game-list">
-                        <li>Zapamiętuj położenie kart seriami – rzędem lub kolumną.</li>
-                        <li>Nie odkrywaj losowo – twórz krótkie sekwencje ruchów.</li>
-                        <li>Jeśli zapomnisz położenie, szybko wróć do wcześniej odkrytej pary.</li>
-                    </ul>
-                    <p>Spróbuj ukończyć rundę przy minimalnej liczbie pomyłek. Powtarzaj grę, aby sprawdzić, czy potrafisz skrócić czas reakcji.</p>
-                </div>
-                <div class="game-card">
-                    <h2>Pomysł na rywalizację</h2>
-                    <p>Zaproś znajomych i zobaczcie, kto odkryje wszystkie pary w mniejszej liczbie ruchów. Możesz też zapisywać liczbę prób dla kolejnych podejść.</p>
-                </div>
-            </aside>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Trenuj pamięć każdego dnia!</p>
-    </footer>
 </body>
 </html>

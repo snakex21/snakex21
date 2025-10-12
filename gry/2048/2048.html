@@ -8,7 +8,10 @@
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <link rel="stylesheet" href="2048.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
     <script defer src="../../assets/js/site.js"></script>
+    <script defer src="2048.js"></script>
 </head>
 <body class="game-page" data-root="../../">
     <header class="site-header">
@@ -41,67 +44,26 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">2048</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-2048-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--2048">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Gra logiczna</span>
+                    <h1>2048</h1>
+                    <p>Przesuwaj planszę, łącz identyczne liczby i pilnuj wyniku – cała akcja dzieje się teraz tuż pod paskiem nawigacji.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="2048 – graj teraz" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-2048-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Przesuwaj planszę, łącz identyczne liczby i twórz coraz większe wartości. Każdy ruch ma znaczenie – buduj łańcuchy i zarządzaj wolnymi polami, aby dotrzeć do magicznej płytki 2048.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo, offline</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Poziom</dt>
-                            <dd>Strategiczna łamigłówka</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Sesja</dt>
-                            <dd>5–10 minut</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Zdobywaj kolejne rekordy punktowe</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Otwórz w nowej karcie</a>
+                <div class="game-hud">
+                    <div class="game-score">
+                        <span>Wynik</span>
+                        <strong id="value">0</strong>
                     </div>
+                    <button class="game-hud__button" type="button" id="repeat">↻ Restart</button>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Strzałki na klawiaturze – przesuwanie całej planszy.</li>
-                        <li>Dotyk na urządzeniach mobilnych – przesunięcia palcem w czterech kierunkach.</li>
-                        <li>Przycisk ↻ w grze – szybki restart partii.</li>
-                    </ul>
-                </div>
-                <div class="game-card">
-                    <h2>Szybkie wskazówki</h2>
-                    <p>Zapanuj nad planszą dzięki prostym strategiom:</p>
-                    <ul class="game-list">
-                        <li>Trzymaj największe liczby w jednym rogu.</li>
-                        <li>Układaj wartości w malejące rzędy lub kolumny.</li>
-                        <li>Ogranicz losowe ruchy, aby nie zapełnić planszy.</li>
-                    </ul>
-                    <p>Wskazówka: Zacznij od ustawienia największej liczby w jednym z narożników i trzymaj się wybranej strategii do końca rundy.</p>
-                    <p>Spróbuj pobić swój poprzedni wynik, a gdy osiągniesz 2048, kontynuuj dalej, aby zobaczyć, jak wysoko potrafisz dojść.</p>
-                </div>
-            </aside>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board" data-game-root></div>
+                <div class="game-status" id="status" aria-live="polite"></div>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Powodzenia w zdobywaniu kolejnych rekordów!</p>
-    </footer>
 </body>
 </html>
