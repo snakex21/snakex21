@@ -1,228 +1,121 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Biblioteka Gier</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        
-        .nav2 {
-            background-color: #333;
-        }
-        
-        .nav2 ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-        
-        .nav2 li {
-            margin-right: 20px;
-        }
-        
-        .nav2 a {
-            display: block;
-            color: #fff;
-            text-decoration: none;
-            padding: 10px;
-        }
-        
-        .nav2 a:hover {
-            background-color: #555;
-        }
-        
-        .nav2 .dropdown ul {
-            display: none;
-            position: absolute;
-            background-color: #555;
-        }
-        
-        .nav2 .dropdown:hover ul {
-            display: block;
-        }
-        
-        .nav2 .dropdown ul li {
-            margin: 0;
-            padding: 0;
-            border-bottom: 1px solid #444;
-        }
-        
-        .nav2 .dropdown ul li:last-child {
-            border-bottom: none;
-        }
-        
-        .nav2 .dropdown ul li a {
-            padding: 10px;
-        }
-        
-        .center {
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .lista_malych_przyciskow {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
-        
-        .rzad_przyciskow {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            /* Pozwala elementom przechodzić do nowej linii */
-            width: 100%;
-            margin: 0 auto;
-            /* Centruje rzędy w kontenerze */
-        }
-        
-        .maly_przycisk {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: #333;
-            font-size: 18px;
-            font-weight: bold;
-            flex: 1 0 18%;
-            /* Procent szerokości przycisku */
-            margin: 10px 5px;
-            /* Dostosowanie marginesów dla lepszego wykorzystania przestrzeni */
-            min-width: 150px;
-            /* Minimalna szerokość, zapewnia, że elementy są czytelne */
-            max-width: 220px;
-            /* Maksymalna szerokość, zapewnia jednolitość rozmiarów */
-        }
-        /* Dostosowanie dla mniejszych ekranów, jeśli to potrzebne */
-        
-        @media (max-width: 768px) {
-            .maly_przycisk {
-                flex: 1 0 46%;
-                /* Dwa przyciski na rząd na mniejszych ekranach */
-                margin: 10px 2%;
-                /* Zmniejszone marginesy */
-            }
-        }
-        
-        .maly_przycisk:hover {
-            background-color: #eee;
-        }
-        
-        .maly_przycisk img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 15px;
-        }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Biblioteka gier – Max Playground</title>
+    <meta name="description" content="Nowa, interaktywna biblioteka gier Maxa. Filtruj tytuły, losuj pomysły i rozpocznij zabawę jednym kliknięciem." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="../assets/css/site.css" />
+    <script defer src="../assets/js/site.js"></script>
+    <script defer src="../assets/js/games-data.js"></script>
+    <script defer src="../assets/js/games.js"></script>
 </head>
-
-<body class="body1">
-    <header>
-        <nav class="nav2">
-            <ul>
-                <li><a href="../index.html">Strona główna</a></li>
-                <li class="dropdown">
-                    <a href="../Programy/programy.html">Programy</a>
-                    <ul>
-                        <li><a href="../Programy/generator kolorow/generator kolorow.html">Generator Kolorów</a></li>
-                        <li><a href="../Programy/generator czcionek/generator czcionek.html">Generator Czcionek</a></li>
-                        <li><a href="../Programy/generator emoji/generator emoji.html">Generator Emoji</a></li>
-                    </ul>
-                </li>
-                <li><a href="../filmy/filmy glowna.html">Strona do filmów</a></li>
-                <li><a href="../muzyka/muzyka.html">Muzyka</a></li>
-            </ul>
+<body>
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
+                <a class="nav-link is-active" href="gry.html">Gry</a>
+                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
         </nav>
     </header>
-    <h1 class="center">Biblioteka Gier</h1>
-    <div class="lista_malych_przyciskow">
-        <a class="maly_przycisk" href="gra zapamietywanie/gra zapamietywanie.html" rel="nofollow">
-            <img src="gra zapamietywanie/zdjęcie gry na zapamiętywanie.JPG" alt="Gra na zapamiętywanie">
-            <span>Gra na zapamiętywanie</span>
-        </a>
-        <a class="maly_przycisk" href="2048/2048.html" rel="nofollow">
-            <img src="2048/2048.JPG" alt="2048">
-            <span>2048</span>
-        </a>
-        <a class="maly_przycisk" href="chess/chess.html" rel="nofollow">
-            <img src="https://zegaryszachowe.pl/userdata/public/gfx/9560/Szachy-Turniejowe-4.jpg" alt="Szachy">
-            <span>Szachy</span>
-        </a>
-        <a class="maly_przycisk" href="wisielec/wisielec.html" rel="nofollow">
-            <img src="https://play-lh.googleusercontent.com/j3fSpmOuYo8M43ZldLXybNIEc6B9xQ25jy_OlIqx0loPB_lomyQlkXdwBFhYWi7-GA=w240-h480-rw" alt="Wisielec">
-            <span>Wisielec</span>
-        </a>
-        <a class="maly_przycisk" href="tetris/tetris.html" rel="nofollow">
-            <img src="tetris/tetris.JPG" alt="Tetris">
-            <span>Tetris</span>
-        </a>
-        <a class="maly_przycisk" href="spaceinvaders/spaceinvaders.html" rel="nofollow">
-            <img src="https://i.ytimg.com/vi/D1jZaIPeD5w/maxresdefault.jpg" alt="Space Invaders">
-            <span>Space Invaders</span>
-        </a>
-        <a class="maly_przycisk" href="pongcoop/pongcoop.html" rel="nofollow">
-            <img src="pongcoop/pong(coop).JPG" alt="Pong Coop lokalny">
-            <span>Pong (Coop lokalny)</span>
-        </a>
-        <a class="maly_przycisk" href="kolkos/kolkos.html" rel="nofollow">
-            <img src="kolkokrzyrzykc/kókokrzyżyk.JPG" alt="Kółko Krzyżyk Solo">
-            <span>Kółko Krzyżyk (Solo)</span>
-        </a>
-        <a class="maly_przycisk" href="kolo_fortuny/kolo_fortuny.html" rel="nofollow">
-            <img src="kolo_fortuny/Kolo-fortuny-suchoscieralne-157cm.jpg" alt="Koło Fortuny">
-            <span>Koło Fortuny</span>
-        </a>
-        <a class="maly_przycisk" href="quiz/quiz.html" rel="nofollow">
-            <img src="quiz/CEIk9kuTURBXy9jNmFjZDg1MS1jM2JjLTQ2M2EtOTE2Zi1hOWVmMjRjNTUxNzIuanBlZ5DeAAGhMAU.webp" alt="Quiz o podzespołach komputerowych">
-            <span>Quiz o podzespołach komputerowych</span>
-        </a>
+    <main>
+        <section class="page-hero">
+            <h1>Biblioteka gier</h1>
+            <p>Wybierz grę na już albo odkrywaj losowe propozycje. Każdy tytuł uruchamia się w przeglądarce, bez instalacji i czekania.</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span>Łączna liczba gier</span>
+                    <strong data-games-count>11</strong>
+                    <small>Wszystkie działają bez instalacji.</small>
+                </div>
+                <div class="hero-stat">
+                    <span>Tryby rozgrywki</span>
+                    <strong><span data-games-solo>0</span> solo · <span data-games-multi>0</span> wspólne</strong>
+                    <small>Aktywuj filtr, by zobaczyć tylko swój tryb.</small>
+                </div>
+                <div class="hero-stat">
+                    <span>Średni poziom trudności</span>
+                    <strong data-games-difficulty>Średnia</strong>
+                    <small data-games-difficulty-note>Klasyczne tempo i równy poziom wyzwań.</small>
+                </div>
+                <div class="hero-stat">
+                    <span>Najczęstsza długość sesji</span>
+                    <strong data-games-duration>Standardowa (10–20 min)</strong>
+                    <small data-games-duration-note>Świetne na krótką sesję po lekcjach.</small>
+                </div>
+            </div>
+        </section>
 
+        <section class="game-toolbar" aria-label="Panel wyszukiwania gier">
+            <div class="game-toolbar__row">
+                <label class="game-search">
+                    <span role="img" aria-hidden="true">🔍</span>
+                    <span class="sr-only">Szukaj gier</span>
+                    <input type="search" placeholder="Wpisz nazwę, tryb lub gatunek..." data-game-search-input />
+                </label>
+                <button class="btn btn-secondary" type="button" data-random-game>Losuj grę dla mnie</button>
+            </div>
+            <div class="game-toolbar__filters" data-game-filters></div>
+            <div class="game-toolbar__row game-toolbar__row--footer">
+                <p class="game-toolbar__meta" data-game-active-count>Pokazujemy wszystkie 11 gier</p>
+                <a class="btn btn-ghost" href="../zmiany.html">Zobacz, co dodaliśmy ostatnio</a>
+            </div>
+        </section>
 
+        <section class="section game-featured" aria-label="Polecane gry">
+            <div class="section-header">
+                <div>
+                    <p class="section-eyebrow">Na dobry start</p>
+                    <h2 class="section-title">Polecane tytuły na dziś</h2>
+                </div>
+                <p>Wybieramy różne kombinacje gatunków i poziomów trudności przy każdym odświeżeniu strony.</p>
+            </div>
+            <div class="game-featured__list" data-game-featured></div>
+        </section>
 
+        <section class="section game-collections" aria-label="Szybkie kolekcje">
+            <div class="section-header">
+                <div>
+                    <p class="section-eyebrow">Szybkie skróty</p>
+                    <h2 class="section-title">Zestawy dobrane do Twojego nastroju</h2>
+                </div>
+                <p>Jednym kliknięciem wskakujesz do gier solo, kooperacyjnych lub klasyków retro.</p>
+            </div>
+            <div class="game-collections__grid" data-game-collections></div>
+        </section>
 
+        <section class="game-grid" data-game-grid></section>
 
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const games = document.querySelectorAll('.maly_przycisk');
-            const gridContainer = document.querySelector('.lista_malych_przyciskow');
-            const numberOfGames = games.length;
-
-            const columns = Math.ceil(numberOfGames / Math.ceil(numberOfGames / 5)); // Liczba kolumn zależna od liczby gier
-
-            // Tworzenie i zarządzanie rzędami
-            let currentRow = document.createElement('div');
-            currentRow.className = 'rzad_przyciskow';
-            gridContainer.appendChild(currentRow);
-
-            games.forEach((game, index) => {
-                currentRow.appendChild(game);
-                if ((index + 1) % columns === 0 && index + 1 < numberOfGames) {
-                    currentRow = document.createElement('div');
-                    currentRow.className = 'rzad_przyciskow';
-                    gridContainer.appendChild(currentRow);
-                }
-            });
-        });
-    </script>
+        <div class="empty-state" data-empty-state>
+            <strong>Brak wyników wyszukiwania.</strong>
+            <p>Spróbuj użyć innego słowa kluczowego lub skorzystaj z losowania, aby znaleźć nową inspirację.</p>
+        </div>
+    </main>
+    <footer>
+        <p>Życzymy udanej rozgrywki! &middot; Max Playground</p>
+    </footer>
 </body>
-
-
 </html>
