@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Szachy – Max Playground</title>
     <meta name="description" content="Rozstaw figury, steruj perspektywą i obserwuj automatyczną rozgrywkę na pełnoekranowej planszy szachowej." />
+    <title>Szachy Max Playground</title>
+    <meta name="description" content="Rozstaw figury, steruj perspektyw&#261; i obserwuj automatyczn&#261; rozgrywk&#281; na pe&#322;noekranowej planszy szachowej." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
@@ -234,6 +236,14 @@
             transform: translate(
                     calc(var(--pos-col) * 100%),
                     calc(var(--pos-row) * -100%)
+            --pos-row: 3.5;
+            --scale: 0;
+            position: absolute;
+            inline-size: calc(100% / 8);
+            block-size: calc(100% / 8);
+            transform: translate(
+                    calc(var(--pos-col) * 100%),
+                    calc((7 - var(--pos-row)) * 100%)
                 )
                 translateZ(0);
             transform-origin: 50% 50%;
@@ -244,6 +254,7 @@
             transform: translate(
                     calc((7 - var(--pos-col)) * 100%),
                     calc((7 - var(--pos-row)) * -100%)
+                    calc(var(--pos-row) * 100%)
                 )
                 translateZ(0);
         }
@@ -253,6 +264,7 @@
             inset: 50% auto auto 50%;
             transform: translate(-50%, -50%) scale(var(--scale));
             inline-size: calc(var(--chess-board-size) / 7);
+            inline-size: 90%;
             block-size: auto;
             transition: transform 220ms var(--transition-ease), opacity 220ms var(--transition-ease);
             opacity: 0.9;
@@ -316,6 +328,11 @@
             }
             .game-stage--chess .pieces .piece svg {
                 inline-size: calc(var(--chess-board-size) / 7.5);
+                inline-size: calc(100% / 8);
+                block-size: calc(100% / 8);
+            }
+            .game-stage--chess .pieces .piece svg {
+                inline-size: 90%;
             }
         }
     
@@ -334,6 +351,16 @@
                     <div class="nav-dropdown" id="nav-programy" role="menu">
                         <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
                         <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+        <nav class="main-nav" aria-label="GĹ‚Ăłwna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona g&#322;&#243;wna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../../Programy/programy.html">PrzeglÄ…d wszystkich programĂłw</a>
+                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorĂłw</a>
                         <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
                         <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
                     </div>
@@ -348,6 +375,10 @@
                 <div class="header-clock">
                     <span class="clock-time" data-clock-time>--:--:--</span>
                     <span class="clock-date" data-clock-date>Ładowanie…</span>
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">đźŚ™ Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ĺadowanieâ€¦</span>
                 </div>
             </div>
         </nav>
@@ -359,6 +390,9 @@
                     <span class="game-eyebrow">Planszówka</span>
                     <h1>Szachy</h1>
                     <p>Trenuj strategie, przełączaj perspektywę i pozwól komputerowi rozgrywać partie, obserwując całą planszę bezpośrednio pod paskiem nawigacji.</p>
+                    <span class="game-eyebrow">Plansz&#243;wka</span>
+                    <h1>Szachy</h1>
+                    <p>Trenuj strategi&#281;, prze&#322;&#261;czaj perspektyw&#281; i pozw&#243;l komputerowi rozgrywa&#263; partie, obserwuj&#261;c ca&#322;&#261; plansz&#281; bezpo&#347;rednio pod paskiem nawigacji.</p>
                 </div>
                 <div class="game-hud">
                     <div class="game-score">
@@ -368,6 +402,11 @@
                     <div class="game-score">
                         <span>Auto-play</span>
                         <strong data-chess-auto>wyłączone</strong>
+                        <strong data-chess-turn>bia&#322;a</strong>
+                    </div>
+                    <div class="game-score">
+                        <span>Auto-play</span>
+                        <strong data-chess-auto>wy&#322;&#261;czone</strong>
                     </div>
                 </div>
             </header>
@@ -381,6 +420,11 @@
                                     <input type="checkbox" id="white-random" />
                                     <svg width="170" height="170" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg" class="white"><use href="#king" /></svg>
                                     <span>Białe</span>
+                                <legend>Auto-ruchy</legend>
+                                <label>
+                                    <input type="checkbox" id="white-random" />
+                                    <svg width="170" height="170" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg" class="white"><use href="#king" /></svg>
+                                    <span>Bia&#322;e</span>
                                 </label>
                                 <label>
                                     <input type="checkbox" id="black-random" />
@@ -413,6 +457,7 @@
                                     <input type="radio" name="perspective" id="white-perspective" checked />
                                     <svg width="170" height="170" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg" class="white"><use href="#king" /></svg>
                                     <span>Białe</span>
+                                    <span>Bia&#322;e</span>
                                 </label>
                                 <label>
                                     <input type="radio" name="perspective" id="black-perspective" />
@@ -425,6 +470,7 @@
                             <div id="board"></div>
                         </div>
                         <p class="chess-legend">Poruszaj figurami klikając najpierw figurę, a później docelowe pole. Włącz auto-ruchy, by obserwować, jak komputer rozgrywa pełne partie.</p>
+                        <p class="chess-legend">Poruszaj figurami klikaj&#261;c najpierw figur&#281;, a p&#243;&#378;niej docelowe pole. W&#322;&#261;cz auto-ruchy, by obserwowa&#263;, jak komputer rozgrywa pe&#322;ne partie.</p>
                     </div>
                 </div>
             </div>
@@ -1542,3 +1588,4 @@ control.autoplay();
 })();
     </script>
 </html>
+
