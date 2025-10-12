@@ -1,0 +1,73 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 20%, rgba(236, 201, 75, 0.25), transparent 50%),
+    radial-gradient(circle at 80% 0%, rgba(244, 114, 182, 0.18), transparent 55%),
+    #fef3c7;
+  font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+.app-hero {
+  color: #7c2d12;
+}
+
+.app-hero .badge {
+  background: rgba(249, 115, 22, 0.2);
+  color: #9a3412;
+}
+
+.app-hero__content p {
+  color: rgba(120, 53, 15, 0.75);
+}
+
+.standalone-app--light {
+  background: transparent;
+}
+
+.standalone-app__inner {
+  padding-bottom: clamp(2rem, 6vw, 4rem);
+}
+
+.emoji-panel.card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  box-shadow: 0 25px 55px -35px rgba(249, 115, 22, 0.4);
+}
+
+.emoji-panel__description {
+  color: rgba(79, 70, 229, 0.85);
+}
+
+.emoji-groups {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.emoji-group {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 1.4rem;
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  box-shadow: 0 18px 40px -32px rgba(249, 115, 22, 0.55);
+}
+
+.emoji-group h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  color: #c2410c;
+}
+
+.emoji-sample {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.6;
+  text-align: center;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .emoji-sample {
+    font-size: 1.4rem;
+  }
+}
