@@ -90,6 +90,14 @@
             border-color: var(--hangman-highlight);
         }
 
+        .hangman-topic {
+            margin: 0.4rem 0 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(226, 232, 240, 0.65);
+        }
+
         .hangman-hint {
             margin: 0;
             font-size: 0.95rem;
@@ -260,6 +268,7 @@
                         </div>
                         <div class="hangman-panel">
                             <div class="hangman-word" data-hangman-word aria-live="polite"></div>
+                            <p class="hangman-topic" data-hangman-topic></p>
                             <p class="hangman-hint" data-hangman-hint hidden></p>
                             <div class="hangman-status">
                                 <div class="hangman-status__item">
@@ -286,23 +295,47 @@
 </body>
 <script>
     (() => {
-        const words = [
-            { word: "PROGRAMISTA", hint: "Tworzy aplikacje i rozwiązania w kodzie" },
-            { word: "KALAFIOR", hint: "Warzywo o kwiatostanie przypominającym drzewko" },
-            { word: "ASTRONOMIA", hint: "Nauka zajmująca się badaniem kosmosu" },
-            { word: "RZESZÓW", hint: "Miasto w południowo-wschodniej Polsce" },
-            { word: "INSTRUKCJA", hint: "Opis krok po kroku, jak coś zrobić" },
-            { word: "ORANŻADA", hint: "Musujący napój o owocowym smaku" },
-            { word: "KOPERNIK", hint: "Polski astronom, który ruszył Ziemię" },
-            { word: "SIEKIERA", hint: "Narzędzie do rąbania drewna" },
-            { word: "POZIOMKA", hint: "Leśna kuzynka truskawki" },
-            { word: "WIATRAK", hint: "Urządzenie napędzane wiatrem" },
-            { word: "LITERATURA", hint: "Świat książek i opowieści" },
-            { word: "GIMNASTYKA", hint: "Ćwiczenia dla ciała i równowagi" }
+        const categories = [
+            {
+                topic: "Drużyny Premier League",
+                entries: [
+                    { word: "EVERTON", hint: "Klub z niebieskiej części Liverpoolu" },
+                    { word: "LIVERPOOL", hint: "Czerwoni z Anfield" },
+                    { word: "SWANSEA", hint: "Pierwszy walijski klub w Premier League" },
+                    { word: "CHELSEA", hint: "Londyński klub ze Stamford Bridge" },
+                    { word: "HULL", hint: "Tygrysy z Kingston upon Hull" },
+                    { word: "MANCHESTER-CITY", hint: "Mistrzowie z Etihad Stadium" },
+                    { word: "NEWCASTLE-UNITED", hint: "Sroki z St James' Park" }
+                ]
+            },
+            {
+                topic: "Filmy",
+                entries: [
+                    { word: "OBCY", hint: "Kultowy horror science fiction Ridleya Scotta" },
+                    { word: "BRUDNY-HARRY", hint: "Ikoniczny policjant grany przez Clinta Eastwooda" },
+                    { word: "GLADIATOR", hint: "Epicki dramat o generale Maximusa" },
+                    { word: "GDZIE-JEST-NEMO", hint: "Animacja Pixara o poszukiwaniach rybki" },
+                    { word: "SZCZĘKI", hint: "Klasyk Stevena Spielberga o wielkim żarłaczu" }
+                ]
+            },
+            {
+                topic: "Miasta",
+                entries: [
+                    { word: "MANCHESTER", hint: "Miasto w północnej Anglii" },
+                    { word: "MEDIOLAN", hint: "Włoska stolica mody" },
+                    { word: "MADRYT", hint: "Stolica Hiszpanii" },
+                    { word: "AMSTERDAM", hint: "Stolica Holandii słynąca z kanałów" },
+                    { word: "PRAGA", hint: "Stolica Czech nad Wełtawą" }
+                ]
+            }
         ];
-        const letters = Array.from("AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUVWYZŹŻ");
+        const words = categories.flatMap((category) =>
+            category.entries.map((entry) => ({ ...entry, topic: category.topic }))
+        );
+        const letters = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZĄĆĘŁŃÓŚŹŻ");
         const keyboard = document.querySelector('[data-hangman-keyboard]');
         const wordElement = document.querySelector('[data-hangman-word]');
+        const topicElement = document.querySelector('[data-hangman-topic]');
         const hintElement = document.querySelector('[data-hangman-hint]');
         const hintButton = document.querySelector('[data-hangman-hint-button]');
         const resetButton = document.querySelector('[data-hangman-reset]');
@@ -425,6 +458,9 @@
             messageElement.classList.remove('is-lost');
             hintElement.hidden = true;
             hintElement.textContent = "";
+            if (topicElement) {
+                topicElement.textContent = `Temat: ${activeWord.topic}`;
+            }
             hintButton.disabled = false;
             revealWord();
             updateFigure();
