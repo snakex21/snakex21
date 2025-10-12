@@ -137,19 +137,19 @@ const gamesCatalog = [
   },
   {
     slug: "tic-tac-toe",
-    title: "Kółko i krzyżyk",
+    title: "Kółko i krzyżyk (2 graczy)",
     description:
-      "Klasyczny pojedynek X kontra O z kilkoma poziomami trudności. Spróbuj przechytrzyć komputer lub potrenuj szybkie decyzje.",
+      "Stańcie naprzeciw siebie przy jednym ekranie i rywalizujcie w klasycznym pojedynku X kontra O. Prowadź tablicę wyników i rewanżuj się do woli!",
     cover: "kolkokrzyrzykc/kókokrzyżyk.JPG",
     coverAlt: "Plansza 3x3 w grze kółko i krzyżyk z zaznaczonymi symbolami",
-    url: "kolkos/kolkos.html",
+    url: "kolkokrzyrzykc/kolkokrzyzykc.html",
     genres: ["Logiczna", "Klasyk"],
-    modes: ["Solo"],
-    tags: ["Szybkie decyzje", "Tryb treningowy"],
+    modes: ["Dwóch graczy"],
+    tags: ["Hot seat", "Rywalizacja"],
     difficulty: "casual",
     duration: "quick",
     spotlight:
-      "Najlepsze na momenty, gdy masz tylko kilka minut – jedna runda trwa tyle co łyk kawy."
+      "Świetne, gdy szukasz szybkiej rundy ze znajomym – historia partii i licznik zwycięstw dodają smaczku każdej dogrywce."
   },
   {
     slug: "wheel",
