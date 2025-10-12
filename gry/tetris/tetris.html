@@ -288,7 +288,8 @@
                                 <li><strong>Strzałka ↑ / X</strong> – obrót w prawo.</li>
                                 <li><strong>Z</strong> – obrót w lewo.</li>
                                 <li><strong>Strzałka ↓</strong> – szybszy spadek.</li>
-                                <li><strong>Spacja</strong> – natychmiastowy zrzut lub pauza.</li>
+                                <li><strong>Spacja</strong> – wstrzymuje lub wznawia grę.</li>
+                                <li><strong>Shift + Spacja</strong> – natychmiastowy zrzut.</li>
                             </ul>
                             <div class="tetris-actions">
                                 <button type="button" data-action="toggle">Start</button>
@@ -452,16 +453,21 @@
             }
 
             function merge(board, piece) {
+                let reachedTop = false;
                 piece.matrix.forEach((row, y) => {
                     row.forEach((value, x) => {
-                        if (value) {
-                            const boardY = y + piece.pos.y;
-                            if (boardY >= 0) {
-                                board[boardY][x + piece.pos.x] = piece.type;
-                            }
+                        if (!value) {
+                            return;
                         }
+                        const boardY = y + piece.pos.y;
+                        if (boardY < 0) {
+                            reachedTop = true;
+                            return;
+                        }
+                        board[boardY][x + piece.pos.x] = piece.type;
                     });
                 });
+                return reachedTop;
             }
 
             function clearBoard() {
@@ -611,7 +617,11 @@
                 state.piece.pos.y += 1;
                 if (collide(state.board, state.piece)) {
                     state.piece.pos.y -= 1;
-                    merge(state.board, state.piece);
+                    const reachedTop = merge(state.board, state.piece);
+                    if (reachedTop) {
+                        endGame();
+                        return;
+                    }
                     sweepLines();
                     spawnPiece();
                 }
@@ -634,7 +644,12 @@
                 if (distance > 0) {
                     state.score += distance * 2;
                 }
-                merge(state.board, state.piece);
+                const reachedTop = merge(state.board, state.piece);
+                if (reachedTop) {
+                    updateHud();
+                    endGame();
+                    return;
+                }
                 sweepLines();
                 spawnPiece();
                 dropCounter = 0;
@@ -728,7 +743,7 @@
             }
 
             function pauseGame() {
-                if (isGameOver) {
+                if (isGameOver || isPaused) {
                     return;
                 }
                 isPaused = true;
@@ -738,7 +753,7 @@
             }
 
             function resumeGame() {
-                if (isGameOver) {
+                if (isGameOver || !isPaused) {
                     return;
                 }
                 isPaused = false;
@@ -816,8 +831,10 @@
                             startGame();
                         } else if (isPaused) {
                             resumeGame();
-                        } else {
+                        } else if (event.shiftKey) {
                             hardDrop();
+                        } else {
+                            pauseGame();
                         }
                         break;
                     case 'KeyP':
