@@ -4,6 +4,27 @@
 
   const trackLibrary = [
     {
+      title: 'Bad Romance (AI Cover)',
+      artist: 'Adolf Hitler (AI)',
+      album: 'Memy i covery',
+      file: '(RECREATION) Adolf Hitler -  Bad Romance (Ai Cover).mp3',
+      accent: '#fb7185'
+    },
+    {
+      title: 'James Bond Theme',
+      artist: 'Monty Norman',
+      album: '007',
+      file: '007  James Bond  Theme.mp3',
+      accent: '#facc15'
+    },
+    {
+      title: 'Get Ready For This',
+      artist: '2 Unlimited',
+      album: 'Hits 90s',
+      file: '2 UNLIMITED - Get Ready For This (Official Music Video).webm',
+      accent: '#22d3ee'
+    },
+    {
       title: 'Gimme! Gimme! Gimme! (A Man After Midnight)',
       artist: 'ABBA',
       album: 'Greatest Hits',
@@ -30,6 +51,13 @@
       album: 'The Original High',
       file: 'Adam Lambert - Ghost Town [Official Music Video].mp3',
       accent: '#a855f7'
+    },
+    {
+      title: 'Barbie Girl (AI Cover)',
+      artist: 'Adolf Hitler (AI)',
+      album: 'Memy i covery',
+      file: 'Adolf Hitler - Barbie Girl [Ai Cover].mp3',
+      accent: '#f97316'
     },
     {
       title: 'All Falls Down',
@@ -79,6 +107,13 @@
       album: 'Saxobeats',
       file: 'Alexandra Stan - Mr. Saxobeat (Official Video).mp3',
       accent: '#f97316'
+    },
+    {
+      title: 'All Star (AI Cover)',
+      artist: 'Dr. Doofenshmirtz',
+      album: 'Parodie',
+      file: 'All Star Doofenshmirtz AI Cover.mp3',
+      accent: '#34d399'
     },
     {
       title: 'Please Tell Rosie',
@@ -144,25 +179,46 @@
       accent: '#60a5fa'
     },
     {
-      title: 'The Ketchup Song (Aserejé)',
+      title: 'The Ketchup Song (Lyrics)',
       artist: 'Las Ketchup',
       album: 'Hijas del Tomate',
-      file: 'Aserejé (The Ketchup Song) [Spanish Version] - Las Ketchup.mp3',
+      file: 'Aserejé (The Ketchup Song) - Las Ketchup ( letra  lyrics ) [ Spanish Version ].mp3',
       accent: '#f97316'
     },
     {
-      title: 'Take On Me',
-      artist: 'a-ha',
-      album: 'Hunting High and Low',
-      file: 'a-ha - Take On Me (Official Video) [Remastered in 4K].mp3',
-      accent: '#38bdf8'
+      title: 'The Ketchup Song (Spanish Version)',
+      artist: 'Las Ketchup',
+      album: 'Hijas del Tomate',
+      file: 'Aserejé (The Ketchup Song) [Spanish Version] - Las Ketchup.mp3',
+      accent: '#fbbf24'
     },
     {
-      title: 'James Bond Theme',
-      artist: 'Monty Norman',
-      album: '007',
-      file: '007  James Bond  Theme.mp3',
-      accent: '#facc15'
+      title: 'DADDY (Parodia)',
+      artist: 'Adolf Hitler (AI)',
+      album: 'Memy i covery',
+      file: '[DPMV] Adolf Hitler - DADDY (Parody of PSY\'s DADDY).mp3',
+      accent: '#f97316'
+    },
+    {
+      title: 'Eye of the Fegel',
+      artist: 'Adolf Hitler (AI)',
+      album: 'Memy i covery',
+      file: '[DPMV] Adolf Hitler - Eye of the Fegel (Eye of the Tiger Parody).mp3',
+      accent: '#a855f7'
+    },
+    {
+      title: 'MEIN\'S NOT HOT',
+      artist: 'BIG SHITLER',
+      album: 'Memy i covery',
+      file: '[DPMV] BIG SHITLER - MEIN\'S NOT HOT.mp3',
+      accent: '#f472b6'
+    },
+    {
+      title: 'Deutschland Funk',
+      artist: 'Adolf Hitler (AI)',
+      album: 'Memy i covery',
+      file: '[DPMV] Deutschland Funk.mp3',
+      accent: '#fb923c'
     },
     {
       title: 'OPPA GODDAMN STYLE',
@@ -172,9 +228,44 @@
       accent: '#22d3ee'
     },
     {
+      title: 'House In The Middle Of A Street',
+      artist: 'Michael Rosen (YTPMV)',
+      album: 'Internet Classics',
+      file: '[YTPMV] - Michael Rosen Has A House In The Middle Of A Street (Our House - Madness).mp3',
+      accent: '#6366f1'
+    },
+    {
+      title: 'Uptown Rectal Cleansing PSA',
+      artist: 'Bruno (YTP)',
+      album: 'Internet Classics',
+      file: '[YTP] Bruno\'s Uptown Rectal Cleansing Sing-along PSA.mp3',
+      accent: '#f43f5e'
+    },
+    {
+      title: 'Take On Me',
+      artist: 'a-ha',
+      album: 'Hunting High and Low',
+      file: 'a-ha - Take On Me (Official Video) [Remastered in 4K].mp3',
+      accent: '#38bdf8'
+    },
+    {
+      title: 'El Mismo Sol (Parodia)',
+      artist: 'Andrzej Duda & Jarosław Kaczyński & Aniela Bogusz',
+      album: 'Parodie',
+      file: '♪ Andrzej Duda & Jarosław Kaczyński & Aniela Bogusz - El Mismo Sol (Alvaro Solder Parodia).mp3',
+      accent: '#2dd4bf'
+    },
+    {
+      title: 'SKIBIDI (Parodia)',
+      artist: 'Andrzej Duda',
+      album: 'Parodie',
+      file: '♪ Andrzej Duda - SKIBIDI (Little Big Parodia) #skibidichallenge.mp3',
+      accent: '#f87171'
+    },
+    {
       title: 'Donald Trump Sings All Star',
       artist: 'Donald Trump AI',
-      album: 'Memiczna Kolekcja',
+      album: 'Memy i covery',
       file: '♪ Donald Trump Sings All Star by Smash Mouth.mp3',
       accent: '#f59e0b'
     },
@@ -184,6 +275,13 @@
       album: 'Parodie',
       file: '♪ Janusz Korwin-Mikke - Shape of You (Ed Sheeran Parodia).mp3',
       accent: '#fb7185'
+    },
+    {
+      title: 'Miętowa herbata',
+      artist: 'Robert Makłowicz',
+      album: 'Parodie',
+      file: '♪ Robert Makłowicz - Miętowa herbata (Alvaro Soler ft. M. Lewczuk Parodia).mp3',
+      accent: '#0ea5e9'
     }
   ];
 
@@ -685,6 +783,20 @@
     });
   }
 
+  function resetProgressDisplays() {
+    elements.progressControls.forEach((input) => {
+      if (document.activeElement !== input) {
+        input.value = '0';
+      }
+    });
+    elements.currentTimeDisplays.forEach((display) => {
+      display.textContent = '0:00';
+    });
+    elements.durationDisplays.forEach((display) => {
+      display.textContent = '--:--';
+    });
+  }
+
   function setVolume(value) {
     const clamped = Math.min(100, Math.max(0, Number(value)));
     const level = clamped / 100;
@@ -804,6 +916,7 @@
     state.currentIndex = index;
     const source = `${basePath}${track.file}`;
     const wasPlaying = options.autoplay ?? state.isPlaying;
+    resetProgressDisplays();
     audio.src = source;
     audio.currentTime = options.startTime || 0;
     applyAccent(track);
