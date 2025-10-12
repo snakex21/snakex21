@@ -59,6 +59,20 @@
             backdrop-filter: blur(6px);
             display: grid;
             place-items: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 180ms ease, visibility 180ms ease;
+        }
+
+        .tetris-overlay.is-visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .tetris-overlay[hidden] {
+            display: none !important;
         }
 
         .tetris-overlay__panel {
@@ -718,9 +732,13 @@
                 overlayTitle.textContent = title;
                 overlaySubtitle.textContent = subtitle;
                 overlay.hidden = false;
+                overlay.classList.add('is-visible');
+                overlay.setAttribute('aria-hidden', 'false');
             }
 
             function hideOverlay() {
+                overlay.classList.remove('is-visible');
+                overlay.setAttribute('aria-hidden', 'true');
                 overlay.hidden = true;
             }
 
