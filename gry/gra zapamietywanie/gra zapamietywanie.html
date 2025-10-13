@@ -4,10 +4,106 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gra w zapamiętywanie – Max Playground</title>
-    <meta name="description" content="Ćwicz pamięć, odkrywając pary kart. Ustaw własne tempo i sprawdź, ile ruchów potrzebujesz, aby odkryć wszystkie symbole." />
+    <meta name="description" content="Ćwicz pamięć, odkrywając pary kart. Gra zajmuje teraz całe okno – klikaj karty i bij własne rekordy." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <style>
+        .memory-game {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(1rem, 2vw, 1.75rem);
+        }
+
+        .memory-grid {
+            width: min(720px, 100%);
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: clamp(0.6rem, 2.5vw, 1rem);
+        }
+
+        .memory-card {
+            position: relative;
+            border-radius: 18px;
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            aspect-ratio: 1 / 1;
+            background: #1f2937;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease,
+                filter 0.2s ease, background 0.2s ease;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 28px 60px rgba(15, 23, 42, 0.55);
+        }
+
+        .memory-card.hidden {
+            background: #94a3b8;
+            border-color: rgba(241, 245, 249, 0.65);
+            filter: saturate(0.25);
+        }
+
+        .memory-card.off {
+            cursor: default;
+            opacity: 0;
+            border-color: transparent;
+            box-shadow: none;
+            visibility: hidden;
+        }
+
+        .memory-card:not(.hidden).red { background-color: #ef4444; }
+        .memory-card:not(.hidden).green { background-color: #22c55e; }
+        .memory-card:not(.hidden).blue { background-color: #3b82f6; }
+        .memory-card:not(.hidden).magenta { background-color: #e879f9; }
+        .memory-card:not(.hidden).yellow { background-color: #facc15; }
+        .memory-card:not(.hidden).bisque { background-color: #fbbf24; }
+        .memory-card:not(.hidden).brown { background-color: #b45309; }
+        .memory-card:not(.hidden).cyan { background-color: #22d3ee; }
+        .memory-card:not(.hidden).orange { background-color: #fb923c; }
+
+        .memory-legend {
+            text-align: center;
+            color: var(--color-text-muted);
+            max-width: 48ch;
+            line-height: 1.6;
+        }
+
+        .memory-message {
+            margin: 0;
+            padding: 0.8rem 1.2rem;
+            border-radius: 14px;
+            background: rgba(45, 212, 191, 0.16);
+            border: 1px solid rgba(45, 212, 191, 0.38);
+            color: #0f766e;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .memory-message.is-visible {
+            display: block;
+        }
+
+        @media (max-width: 960px) {
+            .memory-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            .memory-grid {
+                gap: 0.5rem;
+            }
+
+            .memory-card {
+                border-width: 3px;
+            }
+        }
+    </style>
     <script defer src="../../assets/js/site.js"></script>
 </head>
 <body class="game-page" data-root="../../">
@@ -24,6 +120,10 @@
                         <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
                         <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
                         <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                        <a href="../../Programy/konwerter jednostek/konwerter jednostek.html">Konwerter jednostek</a>
+                        <a href="../../Programy/planer zadan/planer zadan.html">Planer zadań</a>
+                        <a href="../../Programy/kalkulator bmi/kalkulator bmi.html">Kalkulator BMI</a>
+                        <a href="../../Programy/pomodoro timer/pomodoro timer.html">Timer Pomodoro</a>
                     </div>
                 </div>
                 <a class="nav-link is-active" href="../gry.html">Gry</a>
@@ -41,70 +141,312 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Gra w zapamiętywanie</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-memory-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--memory">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Trening pamięci</span>
+                    <h1>Gra w zapamiętywanie</h1>
+                    <p>Odkrywaj pary kart jedna po drugiej – cała plansza mieści się teraz w głównym oknie gry.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Gra w zapamiętywanie – zagraj" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-memory-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Znajdź wszystkie pary symboli, odkrywając po dwie karty naraz. Im mniej ruchów wykonasz, tym lepszy wynik – to świetny trening koncentracji i spostrzegawczości.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo, relaksacyjny</dd>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board">
+                    <div class="game-board__inner memory-game">
+                        <div class="memory-hud">
+                            <div class="memory-hud__item">
+                                <span>Ruchy</span>
+                                <strong class="memory-hud__value" data-memory-moves>0</strong>
+                            </div>
+                            <div class="memory-hud__item">
+                                <span>Czas</span>
+                                <strong class="memory-hud__value" data-memory-time>0:00</strong>
+                            </div>
+                            <div class="memory-hud__item">
+                                <span>Skuteczność</span>
+                                <strong class="memory-hud__value" data-memory-accuracy>100%</strong>
+                            </div>
+                            <button class="memory-hud__button" type="button" data-memory-reset>🔄 Zagraj ponownie</button>
                         </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Odkryj wszystkie pary</dd>
+                        <div class="memory-grid" data-memory-grid>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
+                            <div class="memory-card" data-card></div>
                         </div>
-                        <div class="game-details__item">
-                            <dt>Sesja</dt>
-                            <dd>3–8 minut</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Umiejętności</dt>
-                            <dd>Pamięć robocza i skupienie</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                        <p class="memory-message" data-memory-message></p>
+                        <div class="memory-summary">Najlepszy wynik: <span data-memory-best-score>--</span>% · Czas: <span data-memory-best-time>--</span>s · Ruchy: <span data-memory-best-moves>--</span></div>
+                        <p class="memory-legend">Zapisujemy Twój najlepszy wynik w pamięci przeglądarki – spróbuj ukończyć planszę jak najszybciej i z jak najmniejszą liczbą pomyłek.</p>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Kliknij lub stuknij w kartę, aby ją odkryć.</li>
-                        <li>Odkryj dwie karty – jeśli tworzą parę, pozostaną odkryte.</li>
-                        <li>Brak limitu czasu: graj we własnym tempie.</li>
-                    </ul>
-                </div>
-                <div class="game-card">
-                    <h2>Wskazówki</h2>
-                    <p>Zwiększ szanse na rekord, korzystając z prostych sztuczek:</p>
-                    <ul class="game-list">
-                        <li>Zapamiętuj położenie kart seriami – rzędem lub kolumną.</li>
-                        <li>Nie odkrywaj losowo – twórz krótkie sekwencje ruchów.</li>
-                        <li>Jeśli zapomnisz położenie, szybko wróć do wcześniej odkrytej pary.</li>
-                    </ul>
-                    <p>Spróbuj ukończyć rundę przy minimalnej liczbie pomyłek. Powtarzaj grę, aby sprawdzić, czy potrafisz skrócić czas reakcji.</p>
-                </div>
-                <div class="game-card">
-                    <h2>Pomysł na rywalizację</h2>
-                    <p>Zaproś znajomych i zobaczcie, kto odkryje wszystkie pary w mniejszej liczbie ruchów. Możesz też zapisywać liczbę prób dla kolejnych podejść.</p>
-                </div>
-            </aside>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Trenuj pamięć każdego dnia!</p>
-    </footer>
 </body>
+<script>
+    const CARD_COLORS = [
+        "red",
+        "red",
+        "green",
+        "green",
+        "blue",
+        "blue",
+        "magenta",
+        "magenta",
+        "yellow",
+        "yellow",
+        "bisque",
+        "bisque",
+        "brown",
+        "brown",
+        "cyan",
+        "cyan",
+        "orange",
+        "orange",
+    ];
+
+    const gridElement = document.querySelector("[data-memory-grid]");
+    const movesElement = document.querySelector("[data-memory-moves]");
+    const timeElement = document.querySelector("[data-memory-time]");
+    const accuracyElement = document.querySelector("[data-memory-accuracy]");
+    const resetButton = document.querySelector("[data-memory-reset]");
+    const messageElement = document.querySelector("[data-memory-message]");
+    const bestScoreElement = document.querySelector("[data-memory-best-score]");
+    const bestTimeElement = document.querySelector("[data-memory-best-time]");
+    const bestMovesElement = document.querySelector("[data-memory-best-moves]");
+
+    const BEST_SCORE_KEY = "memory-best-score";
+
+    if (!gridElement) {
+        console.warn("Nie znaleziono planszy gry w zapamiętywanie.");
+    } else {
+        const cards = Array.from(gridElement.querySelectorAll("[data-card]"));
+        const state = {
+            openCards: [],
+            foundPairs: 0,
+            moves: 0,
+            startTime: null,
+            timerId: null,
+            isBusy: false,
+        };
+
+        const formatTime = seconds => {
+            const mins = Math.floor(seconds / 60)
+                .toString()
+                .padStart(2, "0");
+            const secs = (seconds % 60).toString().padStart(2, "0");
+            return `${mins}:${secs}`;
+        };
+
+        const updateHud = () => {
+            if (movesElement) {
+                movesElement.textContent = state.moves.toString();
+            }
+            if (timeElement) {
+                const elapsed = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
+                timeElement.textContent = formatTime(elapsed);
+            }
+            if (accuracyElement) {
+                const accuracy = state.moves === 0 ? 100 : Math.round((state.foundPairs / state.moves) * 100);
+                accuracyElement.textContent = `${Math.max(0, Math.min(accuracy, 100))}%`;
+            }
+        };
+
+        const stopTimer = () => {
+            if (state.timerId) {
+                clearInterval(state.timerId);
+                state.timerId = null;
+            }
+        };
+
+        const startTimer = () => {
+            if (!state.startTime) {
+                state.startTime = Date.now();
+                state.timerId = setInterval(updateHud, 1000);
+            }
+        };
+
+        const resetMessage = () => {
+            if (messageElement) {
+                messageElement.textContent = "";
+                messageElement.classList.remove("is-visible");
+            }
+        };
+
+        const showMessage = text => {
+            if (!messageElement) {
+                return;
+            }
+            messageElement.textContent = text;
+            messageElement.classList.add("is-visible");
+        };
+
+        const saveBestResult = result => {
+            try {
+                const stored = JSON.parse(localStorage.getItem(BEST_SCORE_KEY) || "null");
+                if (!stored || result.score > stored.score || (result.score === stored.score && result.time < stored.time)) {
+                    localStorage.setItem(BEST_SCORE_KEY, JSON.stringify(result));
+                    return result;
+                }
+                return stored;
+            } catch (error) {
+                console.error("Nie udało się zapisać najlepszego wyniku", error);
+                return null;
+            }
+        };
+
+        const loadBestResult = () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem(BEST_SCORE_KEY) || "null");
+                return stored;
+            } catch (error) {
+                console.error("Nie udało się wczytać najlepszego wyniku", error);
+                return null;
+            }
+        };
+
+        const updateBestSummary = best => {
+            if (!best) {
+                return;
+            }
+            if (bestScoreElement) {
+                bestScoreElement.textContent = best.score.toString();
+            }
+            if (bestTimeElement) {
+                bestTimeElement.textContent = formatTime(best.time);
+            }
+            if (bestMovesElement) {
+                bestMovesElement.textContent = best.moves.toString();
+            }
+        };
+
+        const finishGame = () => {
+            stopTimer();
+            const totalTime = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
+            const score = state.moves === 0 ? 100 : Math.round((state.foundPairs / state.moves) * 100);
+            const result = { score, time: totalTime, moves: state.moves };
+            const best = saveBestResult(result) || result;
+            updateBestSummary(best);
+            showMessage(`Gratulacje! Ukończyłeś planszę w ${formatTime(totalTime)} i ${state.moves} ruchach.`);
+        };
+
+        const hideCards = cardsToHide => {
+            cardsToHide.forEach(card => card.classList.add("hidden"));
+        };
+
+        const markAsFound = cardsToMark => {
+            cardsToMark.forEach(card => card.classList.add("off"));
+        };
+
+        const revealCard = card => {
+            if (state.isBusy || card.classList.contains("off") || state.openCards.includes(card)) {
+                return;
+            }
+
+            startTimer();
+            resetMessage();
+            card.classList.remove("hidden");
+            state.openCards.push(card);
+
+            if (state.openCards.length < 2) {
+                return;
+            }
+
+            state.isBusy = true;
+            state.moves += 1;
+            updateHud();
+
+            const [first, second] = state.openCards;
+            const firstColor = first.dataset.color;
+            const secondColor = second.dataset.color;
+
+            if (firstColor === secondColor) {
+                markAsFound(state.openCards);
+                state.foundPairs += 1;
+                state.openCards = [];
+                state.isBusy = false;
+                if (state.foundPairs === CARD_COLORS.length / 2) {
+                    finishGame();
+                }
+            } else {
+                setTimeout(() => {
+                    hideCards(state.openCards);
+                    state.openCards = [];
+                    state.isBusy = false;
+                }, 750);
+            }
+        };
+
+        const shuffleCards = () => {
+            const deck = [...CARD_COLORS];
+            cards.forEach(card => {
+                card.className = "memory-card";
+                const randomIndex = Math.floor(Math.random() * deck.length);
+                const color = deck.splice(randomIndex, 1)[0];
+                card.dataset.color = color;
+                card.classList.add(color);
+            });
+        };
+
+        const stopHiding = () => {
+            cards.forEach(card => card.classList.remove("hidden", "off"));
+        };
+
+        const resetGame = () => {
+            stopTimer();
+            state.openCards = [];
+            state.foundPairs = 0;
+            state.moves = 0;
+            state.startTime = null;
+            state.isBusy = false;
+            cards.forEach(card => {
+                card.className = "memory-card";
+                delete card.dataset.color;
+            });
+            shuffleCards();
+            stopHiding();
+            setTimeout(() => {
+                cards.forEach(card => card.classList.add("hidden"));
+            }, 1800);
+            updateHud();
+            resetMessage();
+        };
+
+        const initialise = () => {
+            shuffleCards();
+            const handleCardClick = event => revealCard(event.currentTarget);
+            cards.forEach(card => {
+                card.classList.remove("hidden", "off");
+                card.addEventListener("click", handleCardClick);
+            });
+            setTimeout(() => {
+                cards.forEach(card => card.classList.add("hidden"));
+            }, 1800);
+            updateHud();
+            const best = loadBestResult();
+            if (best) {
+                updateBestSummary(best);
+            }
+        };
+
+        if (resetButton) {
+            resetButton.addEventListener("click", resetGame);
+        }
+
+        initialise();
+    }
+</script>
 </html>
