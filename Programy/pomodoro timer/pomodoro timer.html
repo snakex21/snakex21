@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Timer Pomodoro – Max Playground</title>
+    <meta name="description" content="Zaplanuj pracę metodą Pomodoro, kontroluj długość sesji i przerw oraz zapisuj dzienne postępy." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.16), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.18), transparent 60%),
+                var(--surface-page, #0f172a);
+        }
+
+        .pomodoro-layout {
+            display: grid;
+            gap: 2.5rem;
+            grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+            align-items: start;
+        }
+
+        @media (max-width: 1080px) {
+            .pomodoro-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pomodoro-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 24px;
+            padding: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+            display: grid;
+            gap: 1.75rem;
+            box-shadow: 0 25px 70px rgba(15, 23, 42, 0.45);
+        }
+
+        .pomodoro-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .phase-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 999px;
+            padding: 0.55rem 1.1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            background: rgba(248, 113, 113, 0.16);
+            color: rgba(248, 113, 113, 0.95);
+        }
+
+        .timer-display {
+            display: grid;
+            gap: 1rem;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .timer-value {
+            font-size: clamp(3.5rem, 6vw + 1rem, 5.5rem);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: min(320px, 70vw);
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: conic-gradient(#ef4444 0deg, rgba(148, 163, 184, 0.3) 0deg);
+            display: grid;
+            place-items: center;
+        }
+
+        .progress-ring::after {
+            content: "";
+            width: 82%;
+            height: 82%;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .timer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .timer-controls button {
+            min-width: 140px;
+        }
+
+        .timer-stats {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .stat-card {
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 18px;
+            padding: 1rem 1.25rem;
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .stat-card span {
+            font-size: 0.85rem;
+            color: rgba(148, 163, 184, 0.8);
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .stat-card strong {
+            font-size: 1.35rem;
+            color: rgba(226, 232, 240, 0.95);
+        }
+
+        .settings-form {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .settings-group {
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .settings-group label {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            color: rgba(148, 163, 184, 0.85);
+        }
+
+        .settings-row {
+            display: grid;
+            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        .settings-group input[type="number"] {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 14px;
+            padding: 0.75rem 1rem;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .toggle-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            padding: 0.75rem 1rem;
+        }
+
+        .toggle-line label {
+            display: grid;
+            gap: 0.25rem;
+        }
+
+        .toggle-line span {
+            font-size: 0.8rem;
+            color: rgba(148, 163, 184, 0.75);
+        }
+
+        .settings-group input[type="checkbox"] {
+            width: 52px;
+            height: 28px;
+            border-radius: 999px;
+            appearance: none;
+            background: rgba(148, 163, 184, 0.25);
+            position: relative;
+            transition: background 0.2s ease;
+        }
+
+        .settings-group input[type="checkbox"]::after {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(226, 232, 240, 0.95);
+            transition: transform 0.2s ease;
+        }
+
+        .settings-group input[type="checkbox"]:checked {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(129, 140, 248, 0.85));
+        }
+
+        .settings-group input[type="checkbox"]:checked::after {
+            transform: translateX(24px);
+        }
+
+        .history-log {
+            display: grid;
+            gap: 0.85rem;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .history-item {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            padding: 0.85rem 1rem;
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .history-item strong {
+            font-size: 1rem;
+        }
+
+        .history-item span {
+            font-size: 0.85rem;
+            color: rgba(148, 163, 184, 0.8);
+        }
+
+        .history-empty {
+            color: rgba(148, 163, 184, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .settings-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+    </style>
+    <script defer src="../../assets/js/site.js"></script>
+</head>
+<body class="app-page app-page--dark" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../programy.html">Przegląd wszystkich programów</a>
+                        <a href="../generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../generator emoji/generator emoji.html">Generator emoji</a>
+                        <a href="../konwerter jednostek/konwerter jednostek.html">Konwerter jednostek</a>
+                        <a href="../planer zadan/planer zadan.html">Planer zadań</a>
+                        <a href="../kalkulator bmi/kalkulator bmi.html">Kalkulator BMI</a>
+                        <a class="is-current" href="pomodoro timer.html">Timer Pomodoro</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../../gry/gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="standalone-app standalone-app--dark">
+        <section class="app-hero">
+            <div class="app-hero__content">
+                <span class="badge">Organizacja i nawyki</span>
+                <h1>Timer Pomodoro</h1>
+                <p>Skup się na krótkich sprintach i rób regularne przerwy. Dostosuj długość sesji, uruchom automatyczne przejścia i monitoruj dzienne postępy.</p>
+            </div>
+            <div class="app-hero__actions">
+                <a class="btn btn-secondary" href="../programy.html">← Wróć do listy programów</a>
+            </div>
+        </section>
+        <div class="standalone-app__inner pomodoro-layout">
+            <section class="pomodoro-card" aria-label="Timer pomodoro">
+                <header class="pomodoro-header">
+                    <div>
+                        <h2>Aktualna sesja</h2>
+                        <p>Skup się przez wybrany czas, a następnie odpocznij. Narzędzie poprowadzi Cię krok po kroku.</p>
+                    </div>
+                    <span class="phase-badge" data-phase-label>Sesja skupienia</span>
+                </header>
+                <div class="timer-display">
+                    <div class="progress-ring" data-progress-ring>
+                        <div class="timer-value" data-timer-value>25:00</div>
+                    </div>
+                    <p data-phase-description>Pracuj bez rozproszeń do końca odliczania.</p>
+                </div>
+                <div class="timer-controls">
+                    <button class="btn btn-primary" type="button" data-action="toggle">Start</button>
+                    <button class="btn btn-secondary" type="button" data-action="skip">Pomiń etap</button>
+                    <button class="btn btn-secondary" type="button" data-action="reset">Resetuj zegar</button>
+                    <button class="btn-tertiary" type="button" data-action="finish-day">Zakończ dzień</button>
+                </div>
+                <div class="timer-stats">
+                    <div class="stat-card">
+                        <span>Dziś ukończone</span>
+                        <strong data-stat-sessions>0</strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Minut skupienia</span>
+                        <strong data-stat-focus>0</strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Seria</span>
+                        <strong data-stat-streak>0</strong>
+                    </div>
+                </div>
+            </section>
+            <section class="pomodoro-card" aria-label="Ustawienia i historia">
+                <form class="settings-form" data-settings-form>
+                    <div class="settings-group">
+                        <label>Czas trwania (minuty)</label>
+                        <div class="settings-row">
+                            <label>
+                                Sesja skupienia
+                                <input type="number" min="5" max="90" step="1" value="25" data-setting="focus" />
+                            </label>
+                            <label>
+                                Krótka przerwa
+                                <input type="number" min="2" max="30" step="1" value="5" data-setting="short" />
+                            </label>
+                            <label>
+                                Długa przerwa
+                                <input type="number" min="5" max="60" step="1" value="15" data-setting="long" />
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <label>Ustawienia cyklu</label>
+                        <div class="settings-row">
+                            <label>
+                                Sesje przed długą przerwą
+                                <input type="number" min="1" max="8" step="1" value="4" data-setting="interval" />
+                            </label>
+                            <label>
+                                Limit dzienny sesji
+                                <input type="number" min="1" max="24" step="1" value="12" data-setting="dailyLimit" />
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <label>Automatyzacja</label>
+                        <div class="toggle-line">
+                            <label>
+                                Autostart kolejnych etapów
+                                <span>Po zakończeniu sesji następna rozpocznie się automatycznie.</span>
+                            </label>
+                            <input type="checkbox" data-setting="autoStart" />
+                        </div>
+                        <div class="toggle-line">
+                            <label>
+                                Powiadomienia dźwiękowe
+                                <span>Odtwarzaj sygnał przy zmianie fazy.</span>
+                            </label>
+                            <input type="checkbox" data-setting="sound" checked />
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="btn-secondary" type="button" data-settings-save>Zapisz ustawienia</button>
+                        <button class="btn-tertiary" type="button" data-settings-reset>Przywróć domyślne</button>
+                    </div>
+                </form>
+                <div>
+                    <h3>Historia dnia</h3>
+                    <div class="history-log" data-history-log>
+                        <p class="history-empty">Rozpocznij pierwszą sesję, aby zobaczyć historię.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
+    </footer>
+    <audio data-phase-sound preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-soft-bell-notification-933.mp3" hidden></audio>
+    <script>
+        (() => {
+            const root = document.querySelector('[data-progress-ring]');
+            const timerValueEl = document.querySelector('[data-timer-value]');
+            const phaseLabel = document.querySelector('[data-phase-label]');
+            const phaseDescription = document.querySelector('[data-phase-description]');
+            const controls = document.querySelectorAll('[data-action]');
+            const statSessions = document.querySelector('[data-stat-sessions]');
+            const statFocus = document.querySelector('[data-stat-focus]');
+            const statStreak = document.querySelector('[data-stat-streak]');
+            const settingsForm = document.querySelector('[data-settings-form]');
+            const historyLog = document.querySelector('[data-history-log]');
+            const saveSettingsButton = document.querySelector('[data-settings-save]');
+            const resetSettingsButton = document.querySelector('[data-settings-reset]');
+            const soundElement = document.querySelector('[data-phase-sound]');
+
+            if (!root || !timerValueEl || !phaseLabel || !phaseDescription || !settingsForm) {
+                return;
+            }
+
+            const settingsKey = 'max-pomodoro-settings';
+            const historyKey = 'max-pomodoro-history';
+
+            const defaultSettings = {
+                focus: 25,
+                short: 5,
+                long: 15,
+                interval: 4,
+                dailyLimit: 12,
+                autoStart: false,
+                sound: true
+            };
+
+            const phases = [
+                {
+                    id: 'focus',
+                    label: 'Sesja skupienia',
+                    description: 'Pracuj intensywnie do końca odliczania.',
+                    color: '#ef4444'
+                },
+                {
+                    id: 'short',
+                    label: 'Krótka przerwa',
+                    description: 'Oderwij wzrok od ekranu, napij się wody i złap oddech.',
+                    color: '#22d3ee'
+                },
+                {
+                    id: 'long',
+                    label: 'Długa przerwa',
+                    description: 'Zrelaksuj się dłużej, zanim rozpoczniesz kolejną serię.',
+                    color: '#a855f7'
+                }
+            ];
+
+            let settings = { ...defaultSettings, ...loadSettings() };
+            let history = loadHistory();
+
+            let currentPhase = phases[0];
+            let phaseIndex = 0;
+            let remainingSeconds = settings.focus * 60;
+            let totalSeconds = remainingSeconds;
+            let isRunning = false;
+            let intervalId = null;
+            let completedSessions = history.filter(
+                (entry) => entry.phase === 'focus' && !entry.skipped && (entry.duration ?? 0) > 0
+            ).length;
+            let streak = calculateStreak();
+
+            function loadSettings() {
+                try {
+                    const stored = localStorage.getItem(settingsKey);
+                    if (!stored) return {};
+                    const parsed = JSON.parse(stored);
+                    return typeof parsed === 'object' && parsed ? parsed : {};
+                } catch (error) {
+                    console.error('Nie udało się wczytać ustawień Pomodoro', error);
+                    return {};
+                }
+            }
+
+            function persistSettings() {
+                localStorage.setItem(settingsKey, JSON.stringify(settings));
+            }
+
+            function loadHistory() {
+                try {
+                    const stored = localStorage.getItem(historyKey);
+                    if (!stored) return [];
+                    const parsed = JSON.parse(stored);
+                    if (!Array.isArray(parsed)) return [];
+                    return parsed
+                        .map((entry) => ({ ...entry, startedAt: entry.startedAt ?? new Date().toISOString() }))
+                        .filter((entry) => isSameDay(new Date(entry.startedAt), new Date()))
+                        .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+                } catch (error) {
+                    console.error('Nie udało się wczytać historii Pomodoro', error);
+                    return [];
+                }
+            }
+
+            function persistHistory() {
+                localStorage.setItem(historyKey, JSON.stringify(history));
+            }
+
+            function isSameDay(a, b) {
+                return (
+                    a.getFullYear() === b.getFullYear() &&
+                    a.getMonth() === b.getMonth() &&
+                    a.getDate() === b.getDate()
+                );
+            }
+
+            function calculateStreak() {
+                if (!history.length) return 0;
+                let count = 0;
+                for (const entry of history) {
+                    if (entry.phase === 'focus' && !entry.skipped && (entry.duration ?? 0) > 0) {
+                        count += 1;
+                    } else {
+                        break;
+                    }
+                }
+                return count;
+            }
+
+            function focusMinutesToday() {
+                const focusEntries = history.filter((entry) => entry.phase === 'focus');
+                const totalSeconds = focusEntries.reduce((sum, entry) => sum + (entry.duration ?? 0), 0);
+                return Math.round(totalSeconds / 60);
+            }
+
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.max(0, seconds % 60);
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            function updateProgress() {
+                const progress = 1 - remainingSeconds / Math.max(totalSeconds, 1);
+                const degrees = Math.min(360, Math.max(0, progress * 360));
+                root.style.background = `conic-gradient(${currentPhase.color} ${degrees}deg, rgba(148, 163, 184, 0.3) ${degrees}deg 360deg)`;
+                timerValueEl.textContent = formatTime(remainingSeconds);
+            }
+
+            function updatePhaseDisplay() {
+                phaseLabel.textContent = currentPhase.label;
+                phaseDescription.textContent = currentPhase.description;
+                updateProgress();
+            }
+
+            function getPhaseDuration(phaseId) {
+                switch (phaseId) {
+                    case 'focus':
+                        return settings.focus * 60;
+                    case 'short':
+                        return settings.short * 60;
+                    case 'long':
+                        return settings.long * 60;
+                    default:
+                        return 0;
+                }
+            }
+
+            function nextPhase(skipped = false) {
+                const wasFocus = currentPhase.id === 'focus';
+                recordPhase(totalSeconds - remainingSeconds, skipped);
+
+                const countedFocus = wasFocus && !skipped;
+                streak = calculateStreak();
+
+                if (wasFocus) {
+                    if (countedFocus && completedSessions % settings.interval === 0) {
+                        currentPhase = phases[2];
+                        phaseIndex = 2;
+                    } else {
+                        currentPhase = phases[1];
+                        phaseIndex = 1;
+                    }
+                } else {
+                    currentPhase = phases[0];
+                    phaseIndex = 0;
+                }
+
+                totalSeconds = getPhaseDuration(currentPhase.id);
+                remainingSeconds = totalSeconds;
+                updatePhaseDisplay();
+                updateStats();
+
+                if (settings.autoStart && (!settings.dailyLimit || completedSessions < settings.dailyLimit)) {
+                    startTimer();
+                } else {
+                    stopTimer();
+                }
+            }
+
+            function recordPhase(duration, skipped) {
+                if (!totalSeconds) return;
+                const entry = {
+                    phase: currentPhase.id,
+                    duration: skipped ? 0 : duration,
+                    planned: totalSeconds,
+                    startedAt: new Date().toISOString(),
+                    skipped
+                };
+
+                history = [entry, ...history].slice(0, 60);
+                completedSessions = history.filter(
+                    (item) => item.phase === 'focus' && !item.skipped && (item.duration ?? 0) > 0
+                ).length;
+                persistHistory();
+                renderHistory();
+            }
+
+            function renderHistory() {
+                historyLog.innerHTML = '';
+                if (!history.length) {
+                    const empty = document.createElement('p');
+                    empty.className = 'history-empty';
+                    empty.textContent = 'Rozpocznij pierwszą sesję, aby zobaczyć historię.';
+                    historyLog.appendChild(empty);
+                    return;
+                }
+
+                const formatter = new Intl.DateTimeFormat('pl-PL', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                history.forEach((entry) => {
+                    const item = document.createElement('article');
+                    item.className = 'history-item';
+                    const phase = phases.find((phase) => phase.id === entry.phase) ?? phases[0];
+
+                    const title = document.createElement('strong');
+                    title.textContent = `${phase.label} · ${formatTime(entry.duration ?? 0)}`;
+                    item.appendChild(title);
+
+                    const meta = document.createElement('span');
+                    const started = entry.startedAt ? formatter.format(new Date(entry.startedAt)) : '—';
+                    const planned = formatTime(entry.planned ?? 0);
+                    const skippedText = entry.skipped ? ' (pominięto)' : '';
+                    meta.textContent = `${started} · Plan: ${planned}${skippedText}`;
+                    item.appendChild(meta);
+
+                    historyLog.appendChild(item);
+                });
+            }
+
+            function updateStats() {
+                statSessions.textContent = completedSessions.toString();
+                statFocus.textContent = focusMinutesToday().toString();
+                statStreak.textContent = streak.toString();
+            }
+
+            function tick() {
+                if (!isRunning) return;
+                if (remainingSeconds <= 0) {
+                    playSound();
+                    nextPhase(false);
+                    return;
+                }
+                remainingSeconds -= 1;
+                updateProgress();
+            }
+
+            function startTimer() {
+                if (isRunning) return;
+                isRunning = true;
+                controls.forEach((button) => {
+                    if (button.dataset.action === 'toggle') {
+                        button.textContent = 'Pauza';
+                        button.classList.remove('btn-primary');
+                        button.classList.add('btn-secondary');
+                    }
+                });
+                intervalId = window.setInterval(tick, 1000);
+            }
+
+            function stopTimer() {
+                isRunning = false;
+                controls.forEach((button) => {
+                    if (button.dataset.action === 'toggle') {
+                        button.textContent = 'Start';
+                        button.classList.remove('btn-secondary');
+                        button.classList.add('btn-primary');
+                    }
+                });
+                if (intervalId) {
+                    window.clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }
+
+            function resetTimer() {
+                stopTimer();
+                totalSeconds = getPhaseDuration(currentPhase.id);
+                remainingSeconds = totalSeconds;
+                updateProgress();
+            }
+
+            function skipPhase() {
+                playSound();
+                nextPhase(true);
+            }
+
+            function finishDay() {
+                stopTimer();
+                history = [];
+                completedSessions = 0;
+                streak = 0;
+                persistHistory();
+                renderHistory();
+                updateStats();
+            }
+
+            function playSound() {
+                if (!settings.sound || !soundElement) return;
+                try {
+                    soundElement.currentTime = 0;
+                    void soundElement.play();
+                } catch (error) {
+                    console.warn('Nie udało się odtworzyć dźwięku powiadomienia', error);
+                }
+            }
+
+            function bindControls() {
+                controls.forEach((button) => {
+                    button.addEventListener('click', () => {
+                        switch (button.dataset.action) {
+                            case 'toggle':
+                                if (isRunning) {
+                                    stopTimer();
+                                } else {
+                                    startTimer();
+                                }
+                                break;
+                            case 'skip':
+                                skipPhase();
+                                break;
+                            case 'reset':
+                                resetTimer();
+                                break;
+                            case 'finish-day':
+                                finishDay();
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                });
+            }
+
+            function syncForm() {
+                settingsForm.querySelectorAll('[data-setting]').forEach((input) => {
+                    const key = input.dataset.setting;
+                    if (key in settings) {
+                        if (input.type === 'checkbox') {
+                            input.checked = Boolean(settings[key]);
+                        } else {
+                            input.value = settings[key];
+                        }
+                    }
+                });
+            }
+
+            function readSettingsFromForm() {
+                settingsForm.querySelectorAll('[data-setting]').forEach((input) => {
+                    const key = input.dataset.setting;
+                    if (!key) return;
+                    if (input.type === 'checkbox') {
+                        settings[key] = input.checked;
+                    } else {
+                        const value = Number.parseInt(input.value, 10);
+                        if (Number.isFinite(value)) {
+                            settings[key] = value;
+                        }
+                    }
+                });
+
+                settings = {
+                    ...defaultSettings,
+                    ...settings
+                };
+            }
+
+            function applySettings() {
+                const previousPhase = currentPhase;
+                const previousId = previousPhase.id;
+
+                totalSeconds = getPhaseDuration(previousId);
+                remainingSeconds = totalSeconds;
+
+                updateProgress();
+            }
+
+            function handleSaveSettings() {
+                readSettingsFromForm();
+                persistSettings();
+                applySettings();
+            }
+
+            function handleResetSettings() {
+                settings = { ...defaultSettings };
+                persistSettings();
+                syncForm();
+                applySettings();
+            }
+
+            settingsForm.addEventListener('change', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) return;
+                if (target.dataset.setting) {
+                    readSettingsFromForm();
+                    applySettings();
+                }
+            });
+
+            saveSettingsButton?.addEventListener('click', (event) => {
+                event.preventDefault();
+                handleSaveSettings();
+            });
+
+            resetSettingsButton?.addEventListener('click', (event) => {
+                event.preventDefault();
+                handleResetSettings();
+            });
+
+            bindControls();
+            syncForm();
+            updatePhaseDisplay();
+            updateStats();
+            renderHistory();
+        })();
+    </script>
+</body>
+</html>
