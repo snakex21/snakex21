@@ -46,6 +46,46 @@ const programsLibrary = [
     meta: "Wyraź siebie szybciej",
     cta: "Otwórz bibliotekę",
     updated: "2024-05-16"
+  },
+  {
+    id: "unit-converter",
+    title: "Konwerter jednostek",
+    description:
+      "Przeliczaj długości, masy, temperatury i dane cyfrowe w czasie rzeczywistym. Zapamiętaj ulubione ustawienia i porównuj wyniki jednym kliknięciem.",
+    url: "Programy/konwerter jednostek/konwerter jednostek.html",
+    image:
+      "https://images.unsplash.com/photo-1527430253228-e93688616381?auto=format&fit=crop&w=900&q=80",
+    categoryId: "calculations",
+    categoryName: "Codzienne obliczenia",
+    tags: ["Konwersje", "Jednostki", "Inżynieria"],
+    features: [
+      "Obsługa długości, masy, temperatur i danych",
+      "Natychmiastowe przeliczanie",
+      "Zapamiętywanie preferowanych jednostek"
+    ],
+    meta: "Asystent liczenia",
+    cta: "Przelicz teraz",
+    updated: "2024-05-26"
+  },
+  {
+    id: "task-planner",
+    title: "Planer zadań",
+    description:
+      "Twórz listy zadań, ustawiaj priorytety, śledź terminy i filtruj obowiązki według kategorii. Wszystko zapisuje się lokalnie.",
+    url: "Programy/planer zadan/planer zadan.html",
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80",
+    categoryId: "planning",
+    categoryName: "Organizacja i nawyki",
+    tags: ["To-do", "Priorytety", "Organizacja"],
+    features: [
+      "Filtry statusu i kategorii",
+      "Panel statystyk i terminów",
+      "Trwałe zapisywanie w przeglądarce"
+    ],
+    meta: "Codzienny planer",
+    cta: "Zaplanuj dzień",
+    updated: "2024-05-26"
   }
 ];
 

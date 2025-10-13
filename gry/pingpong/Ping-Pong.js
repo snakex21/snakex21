@@ -1,6 +1,6 @@
 const cvs = document.getElementById("pong")
 const ctx = cvs.getContext('2d')
-const winmsg = document.querySelector("button")
+const winmsg = document.getElementById("winmsg")
 
 //drawing rectange(game board)
 // creating user paddle
@@ -130,11 +130,18 @@ ball.y = cvs.height/2
 ball.velocityX = -ball.velocityX
 ball.speed = 10
 }
-/*
 function restartGame(){
+user.score = 0
+com.score = 0
+ball.speed = 10
 ball.velocityX = 5
 ball.velocityY = 5
-}*/
+ball.x = cvs.width / 2
+ball.y = cvs.height / 2
+if (winmsg) {
+  winmsg.blur()
+}
+}
 
 
 //update the game
