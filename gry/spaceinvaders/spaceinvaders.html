@@ -8,7 +8,9 @@
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <link rel="stylesheet" href="spaceinvaders.css" />
     <script defer src="../../assets/js/site.js"></script>
+    <script defer src="spaceinvaders.js"></script>
 </head>
 <body class="game-page" data-root="../../">
     <header class="site-header">
@@ -24,6 +26,10 @@
                         <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
                         <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
                         <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                        <a href="../../Programy/konwerter jednostek/konwerter jednostek.html">Konwerter jednostek</a>
+                        <a href="../../Programy/planer zadan/planer zadan.html">Planer zadań</a>
+                        <a href="../../Programy/kalkulator bmi/kalkulator bmi.html">Kalkulator BMI</a>
+                        <a href="../../Programy/pomodoro timer/pomodoro timer.html">Timer Pomodoro</a>
                     </div>
                 </div>
                 <a class="nav-link is-active" href="../gry.html">Gry</a>
@@ -41,66 +47,25 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Space Invaders</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-spaceinvaders-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--spaceinvaders">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Kosmiczna strzelanka</span>
+                    <h1>Space Invaders</h1>
+                    <p>Zestrzel kolejne fale najeźdźców – gra wypełnia całe okno, więc skup się na zręczności.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Space Invaders – zagraj" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-spaceinvaders-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Wrogie statki zbliżają się falami – zestrzel je wszystkie, zanim dotrą do dolnej krawędzi ekranu. Używaj osłon i unikaj serii pocisków.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Solo</dd>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board">
+                    <div class="game-board__inner spaceinvaders-game">
+                        <div class="spaceinvaders-display" role="application" aria-label="Plansza gry Space Invaders">
+                            <canvas id="game-canvas" width="640" height="640"></canvas>
                         </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Zestrzel każdą falę najeźdźców</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Poziom trudności</dt>
-                            <dd>Rosnące tempo ataku</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Styl gry</dt>
-                            <dd>Zręcznościowa strzelanka</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                        <p class="spaceinvaders-controls">Sterowanie: strzałki ← → poruszają statkiem, spacja wystrzeliwuje laser.</p>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Strzałki w lewo i w prawo – ruch statku.</li>
-                        <li>Klawisz spacji – strzał laserem.</li>
-                        <li>Utrzymuj dystans od dolnej krawędzi, aby mieć czas na reakcję.</li>
-                    </ul>
-                    <p>Zestrzel wszystkie statki i pobij swój rekord punktowy. Każda kolejna fala przyspiesza!</p>
-                </div>
-                <div class="game-card">
-                    <h2>Wskazówki pilota</h2>
-                    <ul class="game-list">
-                        <li>Zachowaj osłony na późniejsze fale – nie marnuj ich na pierwsze strzały.</li>
-                        <li>Strzelaj, gdy wrogowie są na jednej linii, aby trafiać kilka celów po kolei.</li>
-                        <li>Nie stój w miejscu – ruch w bok zmniejsza szanse na trafienie.</li>
-                    </ul>
-                    <p>Spróbuj przejść trzy fale bez utraty życia. Zapisz wynik i powtarzaj, aby poprawić swoje osiągnięcia.</p>
-                </div>
-            </aside>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Powodzenia w obronie planety!</p>
-    </footer>
 </body>
 </html>

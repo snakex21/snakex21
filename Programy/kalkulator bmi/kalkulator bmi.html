@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kalkulator BMI – Max Playground</title>
+    <meta name="description" content="Policz indeks masy ciała, zobacz interpretację oraz zapisz swoje pomiary w historii. Wszystko w jednym miejscu." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 55%),
+                radial-gradient(circle at bottom left, rgba(94, 234, 212, 0.18), transparent 60%),
+                var(--surface-page, #0f172a);
+        }
+
+        .bmi-layout {
+            display: grid;
+            gap: 2.5rem;
+            grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+            align-items: start;
+        }
+
+        @media (max-width: 1080px) {
+            .bmi-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .bmi-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 24px;
+            padding: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+            display: grid;
+            gap: 1.75rem;
+            box-shadow: 0 25px 70px rgba(15, 23, 42, 0.45);
+        }
+
+        .bmi-card header h2 {
+            font-size: clamp(1.35rem, 2vw + 1rem, 1.85rem);
+        }
+
+        .bmi-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .bmi-fieldset {
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .bmi-fieldset label {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            color: rgba(148, 163, 184, 0.85);
+        }
+
+        .bmi-fieldset input,
+        .bmi-fieldset select {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 14px;
+            padding: 0.85rem 1rem;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .bmi-fieldset input:focus,
+        .bmi-fieldset select:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.7);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+        }
+
+        .bmi-split {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .bmi-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .btn-tertiary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 999px;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(148, 163, 184, 0.08);
+            color: rgba(226, 232, 240, 0.9);
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-tertiary:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.18);
+        }
+
+        .bmi-result {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .bmi-value {
+            font-size: clamp(2.5rem, 3vw + 1.5rem, 3.5rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .bmi-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            background: rgba(56, 189, 248, 0.16);
+            color: rgba(125, 211, 252, 0.95);
+        }
+
+        .bmi-gauge {
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bmi-gauge span {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #22d3ee, #6366f1);
+            transform-origin: left center;
+            transition: transform 0.35s ease;
+            transform: scaleX(0.2);
+        }
+
+        .bmi-guides {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .bmi-guides li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.95rem;
+            color: rgba(226, 232, 240, 0.85);
+        }
+
+        .bmi-guides span {
+            font-weight: 600;
+        }
+
+        .bmi-advice {
+            background: rgba(45, 212, 191, 0.12);
+            border: 1px solid rgba(45, 212, 191, 0.35);
+            border-radius: 18px;
+            padding: 1rem 1.25rem;
+            color: rgba(94, 234, 212, 0.95);
+            font-size: 0.95rem;
+        }
+
+        .bmi-history {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 0.75rem;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .history-entry {
+            display: grid;
+            gap: 0.3rem;
+            padding: 0.85rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .history-entry strong {
+            font-size: 1rem;
+        }
+
+        .history-entry span {
+            font-size: 0.85rem;
+            color: rgba(148, 163, 184, 0.85);
+        }
+
+        .history-empty {
+            color: rgba(148, 163, 184, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .bmi-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .bmi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(94, 234, 212, 0.16);
+            color: rgba(94, 234, 212, 0.9);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .bmi-footnote {
+            font-size: 0.78rem;
+            color: rgba(148, 163, 184, 0.75);
+            line-height: 1.6;
+        }
+
+        .imperial-group {
+            display: none;
+            gap: 1rem;
+        }
+
+        .imperial-group.is-visible {
+            display: grid;
+        }
+
+        .imperial-group .bmi-split {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+
+        .history-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .history-actions .btn-tertiary {
+            font-size: 0.85rem;
+        }
+
+        .history-summary {
+            display: grid;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: rgba(148, 163, 184, 0.85);
+        }
+
+        .history-summary strong {
+            color: rgba(226, 232, 240, 0.95);
+        }
+    </style>
+    <script defer src="../../assets/js/site.js"></script>
+</head>
+<body class="app-page app-page--dark" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../programy.html">Przegląd wszystkich programów</a>
+                        <a href="../generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../generator emoji/generator emoji.html">Generator emoji</a>
+                        <a href="../konwerter jednostek/konwerter jednostek.html">Konwerter jednostek</a>
+                        <a href="../planer zadan/planer zadan.html">Planer zadań</a>
+                        <a class="is-current" href="kalkulator bmi.html">Kalkulator BMI</a>
+                        <a href="../pomodoro timer/pomodoro timer.html">Timer Pomodoro</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../../gry/gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="standalone-app standalone-app--dark">
+        <section class="app-hero">
+            <div class="app-hero__content">
+                <span class="badge">Zdrowie i lifestyle</span>
+                <h1>Kalkulator BMI</h1>
+                <p>Oblicz indeks masy ciała na podstawie wzrostu oraz masy. Sprawdź rekomendowany przedział, zapisz wynik w historii i śledź zmiany swojej sylwetki.</p>
+            </div>
+            <div class="app-hero__actions">
+                <a class="btn btn-secondary" href="../programy.html">← Wróć do listy programów</a>
+            </div>
+        </section>
+        <div class="standalone-app__inner bmi-layout">
+            <section class="bmi-card" aria-label="Kalkulator BMI">
+                <header>
+                    <h2>Podaj swoje dane</h2>
+                    <p>Wybierz system jednostek i uzupełnij pola. Wynik zaktualizuje się automatycznie.</p>
+                </header>
+                <form class="bmi-form" data-bmi-form>
+                    <div class="bmi-fieldset">
+                        <label for="bmi-system">System jednostek</label>
+                        <select id="bmi-system" data-bmi-system>
+                            <option value="metric" selected>Metryczny (kg, cm)</option>
+                            <option value="imperial">Imperialny (lb, ft)</option>
+                        </select>
+                    </div>
+                    <div class="bmi-fieldset metric-group" data-bmi-metric-group>
+                        <label for="bmi-weight">Masa ciała</label>
+                        <input id="bmi-weight" type="number" min="20" max="500" step="0.1" inputmode="decimal" value="70" data-bmi-weight />
+                    </div>
+                    <div class="bmi-fieldset metric-group" data-bmi-metric-group>
+                        <label for="bmi-height">Wzrost</label>
+                        <input id="bmi-height" type="number" min="120" max="230" step="0.1" inputmode="decimal" value="175" data-bmi-height />
+                    </div>
+                    <div class="imperial-group" data-bmi-imperial-group>
+                        <div class="bmi-fieldset">
+                            <label for="bmi-weight-lb">Masa ciała (funty)</label>
+                            <input id="bmi-weight-lb" type="number" min="44" max="1100" step="0.1" inputmode="decimal" value="154.3" data-bmi-weight-imperial />
+                        </div>
+                        <div class="bmi-fieldset">
+                            <label>Wzrost (ft + in)</label>
+                            <div class="bmi-split">
+                                <input type="number" min="3" max="8" step="1" inputmode="numeric" value="5" data-bmi-height-ft />
+                                <input type="number" min="0" max="11" step="1" inputmode="numeric" value="9" data-bmi-height-in />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bmi-actions">
+                        <button class="btn btn-primary" type="button" data-bmi-save>Zapisz pomiar</button>
+                        <button class="btn-tertiary" type="button" data-bmi-reset>Przywróć domyślne</button>
+                    </div>
+                </form>
+                <p class="bmi-footnote">BMI to wskaźnik pomocniczy. W interpretacji wyników uwzględnij indywidualne czynniki, takie jak budowa ciała, wiek czy poziom aktywności.</p>
+            </section>
+            <section class="bmi-card" aria-live="polite">
+                <div class="bmi-result">
+                    <header>
+                        <h2>Twój wynik</h2>
+                        <p>Zobacz klasyfikację i rekomendowany zakres masy dla Twojego wzrostu.</p>
+                    </header>
+                    <div>
+                        <div class="bmi-value" data-bmi-value>22,9</div>
+                        <span class="bmi-category" data-bmi-category>Waga prawidłowa</span>
+                    </div>
+                    <div class="bmi-gauge" aria-hidden="true">
+                        <span data-bmi-gauge></span>
+                    </div>
+                    <ul class="bmi-guides" data-bmi-guides>
+                        <li><span>Zakres docelowy:</span> <strong data-bmi-range>60,4 – 76,7 kg</strong></li>
+                        <li><span>Ostatni zapis:</span> <strong data-bmi-last>Brak danych</strong></li>
+                    </ul>
+                    <div class="bmi-advice" data-bmi-advice>
+                        Utrzymuj aktywność fizyczną i zbilansowaną dietę, aby pozostać w zdrowym przedziale masy ciała.
+                    </div>
+                </div>
+                <div class="bmi-history" aria-label="Historia pomiarów">
+                    <header class="history-actions">
+                        <div class="history-summary">
+                            <span>Łącznie zapisów: <strong data-bmi-history-count>0</strong></span>
+                            <span>Najniższe BMI: <strong data-bmi-history-min>–</strong></span>
+                            <span>Najwyższe BMI: <strong data-bmi-history-max>–</strong></span>
+                        </div>
+                        <button class="btn-tertiary" type="button" data-bmi-clear>Wyczyść historię</button>
+                    </header>
+                    <div class="history-list" data-bmi-history role="list">
+                        <p class="history-empty">Brak zapisanych pomiarów. Oblicz BMI i dodaj wynik, aby śledzić postępy.</p>
+                    </div>
+                </div>
+                <div class="bmi-badges">
+                    <span class="bmi-badge">🎯 Cel: 18,5 – 24,9</span>
+                    <span class="bmi-badge">📅 Historia zapisów</span>
+                    <span class="bmi-badge">📊 Automatyczna analiza</span>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
+    </footer>
+    <script>
+        (() => {
+            const form = document.querySelector('[data-bmi-form]');
+            if (!form) return;
+
+            const systemSelect = form.querySelector('[data-bmi-system]');
+            const metricGroup = form.querySelectorAll('[data-bmi-metric-group]');
+            const imperialGroup = form.querySelector('[data-bmi-imperial-group]');
+            const weightMetric = form.querySelector('[data-bmi-weight]');
+            const heightMetric = form.querySelector('[data-bmi-height]');
+            const weightImperial = form.querySelector('[data-bmi-weight-imperial]');
+            const heightFeet = form.querySelector('[data-bmi-height-ft]');
+            const heightInches = form.querySelector('[data-bmi-height-in]');
+
+            const bmiValue = document.querySelector('[data-bmi-value]');
+            const bmiCategory = document.querySelector('[data-bmi-category]');
+            const bmiGauge = document.querySelector('[data-bmi-gauge]');
+            const bmiRange = document.querySelector('[data-bmi-range]');
+            const bmiAdvice = document.querySelector('[data-bmi-advice]');
+            const bmiLast = document.querySelector('[data-bmi-last]');
+            const historyContainer = document.querySelector('[data-bmi-history]');
+            const historyCount = document.querySelector('[data-bmi-history-count]');
+            const historyMin = document.querySelector('[data-bmi-history-min]');
+            const historyMax = document.querySelector('[data-bmi-history-max]');
+            const saveButton = form.querySelector('[data-bmi-save]');
+            const resetButton = form.querySelector('[data-bmi-reset]');
+            const clearButton = document.querySelector('[data-bmi-clear]');
+
+            const storageKey = 'max-bmi-history';
+
+            const categoryMap = [
+                { label: 'Niedowaga', min: 0, max: 18.49, color: 'rgba(250, 204, 21, 0.16)', accent: 'rgba(250, 204, 21, 0.85)', advice: 'Rozważ zwiększenie kaloryczności posiłków i konsultację z dietetykiem, aby utrzymać prawidłową masę ciała.' },
+                { label: 'Waga prawidłowa', min: 18.5, max: 24.99, color: 'rgba(34, 197, 94, 0.16)', accent: 'rgba(134, 239, 172, 0.95)', advice: 'Utrzymuj zbilansowaną dietę oraz regularną aktywność fizyczną, aby zachować obecny poziom.' },
+                { label: 'Nadwaga', min: 25, max: 29.99, color: 'rgba(250, 204, 21, 0.16)', accent: 'rgba(252, 211, 77, 0.9)', advice: 'Drobne modyfikacje diety i więcej ruchu pomogą zbliżyć się do zdrowego zakresu BMI.' },
+                { label: 'Otyłość', min: 30, max: 99, color: 'rgba(248, 113, 113, 0.18)', accent: 'rgba(248, 113, 113, 0.95)', advice: 'Skonsultuj się ze specjalistą w sprawie planu żywieniowego i aktywności, aby poprawić wyniki zdrowotne.' }
+            ];
+
+            const formatNumber = (value, fractionDigits = 1) =>
+                new Intl.NumberFormat('pl-PL', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }).format(value);
+
+            const loadHistory = () => {
+                try {
+                    const saved = localStorage.getItem(storageKey);
+                    if (!saved) return [];
+                    const parsed = JSON.parse(saved);
+                    if (!Array.isArray(parsed)) return [];
+                    return parsed
+                        .map((entry) => ({
+                            ...entry,
+                            timestamp: entry.timestamp ? new Date(entry.timestamp).toISOString() : new Date().toISOString()
+                        }))
+                        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                } catch (error) {
+                    console.error('Nie udało się odczytać historii BMI', error);
+                    return [];
+                }
+            };
+
+            let history = loadHistory();
+
+            const persistHistory = () => {
+                localStorage.setItem(storageKey, JSON.stringify(history));
+            };
+
+            const computeMetric = () => {
+                const weight = parseFloat(weightMetric.value);
+                const height = parseFloat(heightMetric.value);
+                if (!weight || !height) return null;
+                const heightMeters = height / 100;
+                const bmi = weight / (heightMeters * heightMeters);
+                return { bmi, weight, height, system: 'metric' };
+            };
+
+            const computeImperial = () => {
+                const weight = parseFloat(weightImperial.value);
+                const feet = parseFloat(heightFeet.value);
+                const inches = parseFloat(heightInches.value);
+                if (!weight || !feet) return null;
+                const totalInches = feet * 12 + (Number.isFinite(inches) ? inches : 0);
+                if (!totalInches) return null;
+                const bmi = (weight / (totalInches * totalInches)) * 703;
+                return { bmi, weight, height: totalInches, system: 'imperial' };
+            };
+
+            const getActiveComputation = () =>
+                systemSelect.value === 'imperial' ? computeImperial() : computeMetric();
+
+            const resolveCategory = (value) => categoryMap.find((category) => value >= category.min && value <= category.max) ?? categoryMap[categoryMap.length - 1];
+
+            const updateRange = (measurement) => {
+                if (!measurement) {
+                    bmiRange.textContent = '—';
+                    return;
+                }
+
+                if (measurement.system === 'imperial') {
+                    const inches = measurement.height;
+                    const minWeight = (18.5 * inches * inches) / 703;
+                    const maxWeight = (24.9 * inches * inches) / 703;
+                    bmiRange.textContent = `${formatNumber(minWeight, 1)} – ${formatNumber(maxWeight, 1)} lb`;
+                } else {
+                    const meters = measurement.height / 100;
+                    const minWeight = 18.5 * meters * meters;
+                    const maxWeight = 24.9 * meters * meters;
+                    bmiRange.textContent = `${formatNumber(minWeight, 1)} – ${formatNumber(maxWeight, 1)} kg`;
+                }
+            };
+
+            const renderHistory = () => {
+                historyContainer.innerHTML = '';
+
+                if (!history.length) {
+                    const empty = document.createElement('p');
+                    empty.className = 'history-empty';
+                    empty.textContent = 'Brak zapisanych pomiarów. Oblicz BMI i dodaj wynik, aby śledzić postępy.';
+                    historyContainer.appendChild(empty);
+                    historyCount.textContent = '0';
+                    historyMin.textContent = '–';
+                    historyMax.textContent = '–';
+                    bmiLast.textContent = 'Brak danych';
+                    return;
+                }
+
+                historyCount.textContent = history.length.toString();
+
+                const bmiValues = history.map((entry) => entry.bmi);
+                const minValue = Math.min(...bmiValues);
+                const maxValue = Math.max(...bmiValues);
+                historyMin.textContent = formatNumber(minValue, 1);
+                historyMax.textContent = formatNumber(maxValue, 1);
+
+                const formatter = new Intl.DateTimeFormat('pl-PL', {
+                    day: '2-digit',
+                    month: 'long',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                history.forEach((entry) => {
+                    const item = document.createElement('article');
+                    item.className = 'history-entry';
+                    const category = resolveCategory(entry.bmi);
+
+                    const title = document.createElement('strong');
+                    title.textContent = `${formatNumber(entry.bmi, 1)} BMI · ${category.label}`;
+                    item.appendChild(title);
+
+                    const subtitle = document.createElement('span');
+                    const date = entry.timestamp ? formatter.format(new Date(entry.timestamp)) : '—';
+                    const details = entry.system === 'imperial'
+                        ? `${formatNumber(entry.weight, 1)} lb · ${Math.floor(entry.height / 12)} ft ${(entry.height % 12).toFixed(0)} in`
+                        : `${formatNumber(entry.weight, 1)} kg · ${formatNumber(entry.height, 1)} cm`;
+                    subtitle.textContent = `${details} · ${date}`;
+                    item.appendChild(subtitle);
+
+                    historyContainer.appendChild(item);
+                });
+
+                const latest = history[0];
+                bmiLast.textContent = latest?.timestamp ? formatter.format(new Date(latest.timestamp)) : '—';
+            };
+
+            const updateView = () => {
+                const measurement = getActiveComputation();
+                if (!measurement || !Number.isFinite(measurement.bmi)) {
+                    bmiValue.textContent = '—';
+                    bmiCategory.textContent = 'Brak danych';
+                    bmiAdvice.textContent = 'Uzupełnij pola formularza, aby zobaczyć wynik BMI i wskazówki.';
+                    bmiGauge.style.transform = 'scaleX(0)';
+                    updateRange(null);
+                    return;
+                }
+
+                const bmi = measurement.bmi;
+                const category = resolveCategory(bmi);
+
+                bmiValue.textContent = formatNumber(bmi, 1);
+                bmiCategory.textContent = category.label;
+                bmiCategory.style.backgroundColor = category.color;
+                bmiCategory.style.color = category.accent;
+
+                bmiAdvice.textContent = category.advice;
+
+                const normalized = Math.min(Math.max(bmi / 40, 0), 1);
+                bmiGauge.style.transform = `scaleX(${normalized})`;
+
+                updateRange(measurement);
+            };
+
+            const toggleSystem = () => {
+                const isImperial = systemSelect.value === 'imperial';
+                metricGroup.forEach((group) => {
+                    group.style.display = isImperial ? 'none' : 'grid';
+                });
+                if (imperialGroup) {
+                    imperialGroup.classList.toggle('is-visible', isImperial);
+                }
+                updateView();
+            };
+
+            const resetForm = () => {
+                systemSelect.value = 'metric';
+                weightMetric.value = '70';
+                heightMetric.value = '175';
+                weightImperial.value = '154.3';
+                heightFeet.value = '5';
+                heightInches.value = '9';
+                toggleSystem();
+            };
+
+            const saveMeasurement = () => {
+                const measurement = getActiveComputation();
+                if (!measurement) return;
+                const entry = {
+                    ...measurement,
+                    bmi: measurement.bmi,
+                    timestamp: new Date().toISOString()
+                };
+                history = [entry, ...history].slice(0, 50);
+                persistHistory();
+                renderHistory();
+            };
+
+            const clearHistory = () => {
+                history = [];
+                persistHistory();
+                renderHistory();
+            };
+
+            systemSelect.addEventListener('change', toggleSystem);
+
+            [weightMetric, heightMetric, weightImperial, heightFeet, heightInches].forEach((input) => {
+                input?.addEventListener('input', () => {
+                    updateView();
+                });
+            });
+
+            saveButton?.addEventListener('click', saveMeasurement);
+            resetButton?.addEventListener('click', resetForm);
+            clearButton?.addEventListener('click', clearHistory);
+
+            toggleSystem();
+            updateView();
+            renderHistory();
+        })();
+    </script>
+</body>
+</html>
