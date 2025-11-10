@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Biblioteka gier – Max Playground</title>
-    <meta name="description" content="Nowa, interaktywna biblioteka gier Maxa. Filtruj tytuły, losuj pomysły i rozpocznij zabawę jednym kliknięciem." />
+    <title>Gry – Max Playground</title>
+    <meta name="description" content="Biblioteka gier Maxa - wszystkie dostępne w przeglądarce" />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <script defer src="../assets/js/site.js"></script>
@@ -41,81 +41,35 @@
             </div>
         </nav>
     </header>
+
     <main>
-        <section class="page-hero">
-            <h1>Biblioteka gier</h1>
-            <p>Wybierz grę na już albo odkrywaj losowe propozycje. Każdy tytuł uruchamia się w przeglądarce, bez instalacji i czekania.</p>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span>Łączna liczba gier</span>
-                    <strong data-games-count>11</strong>
-                    <small>Wszystkie działają bez instalacji.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Tryby rozgrywki</span>
-                    <strong><span data-games-solo>0</span> solo · <span data-games-multi>0</span> wspólne</strong>
-                    <small>Aktywuj filtr, by zobaczyć tylko swój tryb.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Średni poziom trudności</span>
-                    <strong data-games-difficulty>Średnia</strong>
-                    <small data-games-difficulty-note>Klasyczne tempo i równy poziom wyzwań.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Najczęstsza długość sesji</span>
-                    <strong data-games-duration>Standardowa (10–20 min)</strong>
-                    <small data-games-duration-note>Świetne na krótką sesję po lekcjach.</small>
-                </div>
-            </div>
+        <section class="simple-hero">
+            <h1>Gry</h1>
+            <p>Wybierz grę i zacznij grać w przeglądarce</p>
         </section>
 
-        <section class="game-toolbar" aria-label="Panel wyszukiwania gier">
-            <div class="game-toolbar__row">
-                <label class="game-search">
-                    <span role="img" aria-hidden="true">🔍</span>
-                    <span class="sr-only">Szukaj gier</span>
-                    <input type="search" placeholder="Wpisz nazwę, tryb lub gatunek..." data-game-search-input />
-                </label>
-                <button class="btn btn-secondary" type="button" data-random-game>Losuj grę dla mnie</button>
-            </div>
+        <section class="simple-toolbar">
+            <label class="search-box">
+                <span>🔍</span>
+                <input type="search" placeholder="Szukaj gry..." data-game-search-input />
+            </label>
+            <button class="btn btn-secondary" type="button" data-random-game>Losuj grę</button>
+        </section>
+
+        <div class="filters-wrapper">
             <div class="game-toolbar__filters" data-game-filters></div>
-            <div class="game-toolbar__row game-toolbar__row--footer">
-                <p class="game-toolbar__meta" data-game-active-count>Pokazujemy wszystkie 11 gier</p>
-                <a class="btn btn-ghost" href="../zmiany.html">Zobacz, co dodaliśmy ostatnio</a>
-            </div>
-        </section>
+        </div>
 
-        <section class="section game-featured" aria-label="Polecane gry">
-            <div class="section-header">
-                <div>
-                    <p class="section-eyebrow">Na dobry start</p>
-                    <h2 class="section-title">Polecane tytuły na dziś</h2>
-                </div>
-                <p>Wybieramy różne kombinacje gatunków i poziomów trudności przy każdym odświeżeniu strony.</p>
-            </div>
-            <div class="game-featured__list" data-game-featured></div>
-        </section>
-
-        <section class="section game-collections" aria-label="Szybkie kolekcje">
-            <div class="section-header">
-                <div>
-                    <p class="section-eyebrow">Szybkie skróty</p>
-                    <h2 class="section-title">Zestawy dobrane do Twojego nastroju</h2>
-                </div>
-                <p>Jednym kliknięciem wskakujesz do gier solo, kooperacyjnych lub klasyków retro.</p>
-            </div>
-            <div class="game-collections__grid" data-game-collections></div>
-        </section>
-
-        <section class="game-grid" data-game-grid></section>
+        <section class="simple-grid" data-game-grid></section>
 
         <div class="empty-state" data-empty-state>
-            <strong>Brak wyników wyszukiwania.</strong>
-            <p>Spróbuj użyć innego słowa kluczowego lub skorzystaj z losowania, aby znaleźć nową inspirację.</p>
+            <strong>Nie znaleziono gier</strong>
+            <p>Spróbuj wyszukać coś innego</p>
         </div>
     </main>
+
     <footer>
-        <p>Życzymy udanej rozgrywki! &middot; Max Playground</p>
+        <p>Max Playground &middot; Gry</p>
     </footer>
 </body>
 </html>
