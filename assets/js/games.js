@@ -318,7 +318,7 @@
           escapeAttribute(game.cover) +
           '" alt="' +
           escapeAttribute(game.coverAlt) +
-          '" loading="lazy" />' +
+          '" />' +
           "</div>" +
           '<div class="game-card__body">' +
           '<div class="game-card__meta">' +
