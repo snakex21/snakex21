@@ -216,7 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
     card.setAttribute("data-film-card", "");
     card.innerHTML = `
       <figure class="media-card__poster media-card__poster--compact">
-        <img src="${movie.image}" alt="Plakat filmu ${movie.title}">
+        <a href="${movie.link}" target="_blank" rel="noopener">
+          <img src="${movie.image}" alt="Plakat filmu ${movie.title}">
+        </a>
       </figure>
       <div class="media-card__body">
         <h3>${movie.title}</h3>
