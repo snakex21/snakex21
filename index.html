@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Max Hub – Portal wiedzy i zasobów</title>
-    <meta name="description" content="Kompleksowy portal z grami, narzędziami, filmami, muzyką i zasobami edukacyjnymi." />
+    <title>Max Hub</title>
+    <meta name="description" content="Portal zasobów - gry, narzędzia, filmy, muzyka." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="assets/css/site.css" />
     <script defer src="assets/js/site.js"></script>
@@ -17,23 +17,14 @@
                     <span class="nav-brand-icon">MX</span>
                     <div class="nav-brand-text">
                         <div class="nav-brand-title">Max Hub</div>
-                        <div class="nav-brand-subtitle">Portal zasobów</div>
                     </div>
                 </a>
             </div>
             <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">☰</button>
             <div class="nav-menu" data-nav-menu id="primary-navigation">
                 <a class="nav-link is-active" href="index.html">Start</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Narzędzia</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="Programy/programy.html">Wszystkie narzędzia</a>
-                        <a href="Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
                 <a class="nav-link" href="gry/gry.html">Gry</a>
+                <a class="nav-link" href="Programy/programy.html">Narzędzia</a>
                 <a class="nav-link" href="filmy/filmy glowna.html">Filmy</a>
                 <a class="nav-link" href="muzyka/muzyka.html">Muzyka</a>
                 <a class="nav-link" href="zmiany.html">Zmiany</a>
@@ -47,142 +38,40 @@
         </nav>
     </header>
     <main>
-        <!-- Hero Section - Portal Introduction -->
-        <section class="hero-portal" id="start">
-            <div class="hero-portal-content">
-                <div class="hero-portal-text">
-                    <h1 class="hero-portal-title">Max Hub</h1>
-                    <p class="hero-portal-lead">Kompleksowy portal z grami, narzędziami, filmami, muzyką i zasobami edukacyjnymi. Wszystko w jednym miejscu.</p>
-                    <p class="hero-portal-description">Odkrywaj, uczysz się i rozwijaj swoją kreatywność dzięki bogatemu zbiorowi narzędzi i zasobów.</p>
-                </div>
-            </div>
+        <!-- Hero Section -->
+        <section class="hero-minimal" id="start">
+            <h1>Max Hub</h1>
+            <p>Portal zasobów</p>
         </section>
 
-        <!-- Main Categories Grid -->
-        <section class="section section-categories" id="categories">
-            <div class="section-label">Główne kategorie</div>
-            <h2 class="section-title">Przejdź do sekcji</h2>
-            <div class="categories-grid">
-                <a href="gry/gry.html" class="category-card category-games">
-                    <div class="category-header">
-                        <span class="category-icon">🎮</span>
-                        <span class="category-name">Gry</span>
-                    </div>
-                    <p class="category-desc">Biblioteka gier, klasyki i autorskie pozycje. Zabawy online dostępne natychmiast w przeglądarce.</p>
-                    <div class="category-meta">10+ tytułów</div>
+        <!-- Main Links Grid -->
+        <section class="section section-links" id="links">
+            <div class="links-grid">
+                <a href="gry/gry.html" class="link-card">
+                    <span class="link-icon">🎮</span>
+                    <span class="link-text">Gry</span>
                 </a>
-                <a href="Programy/programy.html" class="category-card category-tools">
-                    <div class="category-header">
-                        <span class="category-icon">🛠️</span>
-                        <span class="category-name">Narzędzia</span>
-                    </div>
-                    <p class="category-desc">Generatory kolorów, czcionek, emoji i inne aplikacje dla twórców. Stwórz coś wyjątkowego.</p>
-                    <div class="category-meta">3+ aplikacji</div>
+                <a href="Programy/programy.html" class="link-card">
+                    <span class="link-icon">🛠️</span>
+                    <span class="link-text">Narzędzia</span>
                 </a>
-                <a href="filmy/filmy glowna.html" class="category-card category-movies">
-                    <div class="category-header">
-                        <span class="category-icon">🎬</span>
-                        <span class="category-name">Filmy</span>
-                    </div>
-                    <p class="category-desc">Kolekcje, playlisty, zwiastuny i rekomendacje. Zbuduj swoją bibliotekę filmów.</p>
-                    <div class="category-meta">Baza filmów</div>
+                <a href="filmy/filmy glowna.html" class="link-card">
+                    <span class="link-icon">🎬</span>
+                    <span class="link-text">Filmy</span>
                 </a>
-                <a href="muzyka/muzyka.html" class="category-card category-music">
-                    <div class="category-header">
-                        <span class="category-icon">🎵</span>
-                        <span class="category-name">Muzyka</span>
-                    </div>
-                    <p class="category-desc">Playlisty, stacje radiowe, utwory dostosowane do nastroju. Słuchaj wszędzie.</p>
-                    <div class="category-meta">Tysiące utworów</div>
+                <a href="muzyka/muzyka.html" class="link-card">
+                    <span class="link-icon">🎵</span>
+                    <span class="link-text">Muzyka</span>
                 </a>
-            </div>
-        </section>
-
-        <!-- Featured Content -->
-        <section class="section section-featured-content" id="featured-content">
-            <div class="section-label">Popularne</div>
-            <h2 class="section-title">Polecane zawartości</h2>
-            <div class="featured-content-grid">
-                <article class="featured-item featured-large">
-                    <div class="featured-content">
-                        <span class="featured-tag">Gry</span>
-                        <h3>Pełna biblioteka gier</h3>
-                        <p>Odwiedź bibliotekę i odkryj gry różnych gatunków. Od prostych minigier po bardziej zaawansowane projekty.</p>
-                        <a href="gry/gry.html" class="featured-link">Przejdź do gier →</a>
-                    </div>
-                </article>
-                <article class="featured-item">
-                    <div class="featured-content">
-                        <span class="featured-tag">Narzędzia</span>
-                        <h3>Generator kolorów</h3>
-                        <p>Szybka, intuicyjna generacja palet kolorów dla twoich projektów.</p>
-                        <a href="Programy/generator kolorow/generator kolorow.html" class="featured-link">Otwórz →</a>
-                    </div>
-                </article>
-                <article class="featured-item">
-                    <div class="featured-content">
-                        <span class="featured-tag">Muzyka</span>
-                        <h3>Strefa audio</h3>
-                        <p>Playlisty dostosowane do każdego momentu. Relaks, praca, energia.</p>
-                        <a href="muzyka/muzyka.html" class="featured-link">Słuchaj →</a>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- Stats/Features Section -->
-        <section class="section section-features" id="features">
-            <div class="section-label">O portalu</div>
-            <h2 class="section-title">Co cię czeka</h2>
-            <div class="features-grid">
-                <div class="feature-box">
-                    <div class="feature-number">10+</div>
-                    <h4>Gier do zagrania</h4>
-                    <p>Rozwijająca się biblioteka gier, od klasyki po nowości.</p>
-                </div>
-                <div class="feature-box">
-                    <div class="feature-number">3+</div>
-                    <h4>Narzędzi do pracy</h4>
-                    <p>Aplikacje dla twórców, generatory i narzędzia edytorskie.</p>
-                </div>
-                <div class="feature-box">
-                    <div class="feature-number">100%</div>
-                    <h4>Online bez instalacji</h4>
-                    <p>Wszystko działa w przeglądarce, bez pobierania ani rejestracji.</p>
-                </div>
-                <div class="feature-box">
-                    <div class="feature-number">24/7</div>
-                    <h4>Zawsze dostępne</h4>
-                    <p>Portal działa bez przerw, dostęp zawsze, gdziekolwiek jesteś.</p>
-                </div>
-                <div class="feature-box">
-                    <div class="feature-number">🌙</div>
-                    <h4>Tryb ciemny</h4>
-                    <p>Komfortowy wygląd w każdych warunkach oświetlenia.</p>
-                </div>
-                <div class="feature-box">
-                    <div class="feature-number">⚡</div>
-                    <h4>Szybkość</h4>
-                    <p>Responsywny interfejs i natychmiaste ładowanie zawartości.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Getting Started -->
-        <section class="section section-getting-started" id="getting-started">
-            <div class="getting-started-content">
-                <h2>Zacznij teraz</h2>
-                <p>Nie potrzebujesz niczego dodatkowego. Kliknij poniżej i zacznij przygodę.</p>
-                <div class="getting-started-buttons">
-                    <a href="gry/gry.html" class="btn btn-primary btn-lg">Wejdź do gier</a>
-                    <a href="Programy/programy.html" class="btn btn-secondary btn-lg">Otwórz narzędzia</a>
-                    <a href="zmiany.html" class="btn btn-outline btn-lg">Przeczytaj dziennik zmian</a>
-                </div>
+                <a href="zmiany.html" class="link-card">
+                    <span class="link-icon">📝</span>
+                    <span class="link-text">Zmiany</span>
+                </a>
             </div>
         </section>
     </main>
     <footer>
-        <p>Max Hub © 2024 · Portal zasobów i wiedzy · Projektu tworzony z dbałością o jakość</p>
+        <p>Max Hub © 2024</p>
     </footer>
 </body>
 </html>
