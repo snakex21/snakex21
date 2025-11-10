@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Biblioteka gier – Max Playground</title>
-    <meta name="description" content="Nowa, interaktywna biblioteka gier Maxa. Filtruj tytuły, losuj pomysły i rozpocznij zabawę jednym kliknięciem." />
+    <title>Gry – Max Hub</title>
+    <meta name="description" content="Biblioteka gier. Wybierz i zagraj bez instalacji." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <script defer src="../assets/js/site.js"></script>
@@ -14,108 +14,62 @@
 <body>
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+            <div class="nav-left">
+                <a class="nav-brand" href="../index.html">
+                    <span class="nav-brand-icon">MX</span>
+                    <div class="nav-brand-text">
+                        <div class="nav-brand-title">Max Hub</div>
                     </div>
-                </div>
-                <a class="nav-link is-active" href="gry.html">Gry</a>
+                </a>
+            </div>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">☰</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../index.html">Start</a>
+                <a class="nav-link" href="gry.html" class="is-active">Gry</a>
+                <a class="nav-link" href="../Programy/programy.html">Narzędzia</a>
                 <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
                 <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+                <a class="nav-link" href="../zmiany.html">Zmiany</a>
             </div>
             <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙</button>
                 <div class="header-clock">
                     <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
                 </div>
             </div>
         </nav>
     </header>
     <main>
-        <section class="page-hero">
-            <h1>Biblioteka gier</h1>
-            <p>Wybierz grę na już albo odkrywaj losowe propozycje. Każdy tytuł uruchamia się w przeglądarce, bez instalacji i czekania.</p>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span>Łączna liczba gier</span>
-                    <strong data-games-count>11</strong>
-                    <small>Wszystkie działają bez instalacji.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Tryby rozgrywki</span>
-                    <strong><span data-games-solo>0</span> solo · <span data-games-multi>0</span> wspólne</strong>
-                    <small>Aktywuj filtr, by zobaczyć tylko swój tryb.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Średni poziom trudności</span>
-                    <strong data-games-difficulty>Średnia</strong>
-                    <small data-games-difficulty-note>Klasyczne tempo i równy poziom wyzwań.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Najczęstsza długość sesji</span>
-                    <strong data-games-duration>Standardowa (10–20 min)</strong>
-                    <small data-games-duration-note>Świetne na krótką sesję po lekcjach.</small>
-                </div>
-            </div>
+        <!-- Hero Section -->
+        <section class="hero-minimal" id="start">
+            <h1>Gry</h1>
+            <p>Biblioteka gier</p>
         </section>
 
-        <section class="game-toolbar" aria-label="Panel wyszukiwania gier">
-            <div class="game-toolbar__row">
+        <!-- Search & Filter -->
+        <section class="section section-games-controls">
+            <div class="games-search-bar">
                 <label class="game-search">
                     <span role="img" aria-hidden="true">🔍</span>
                     <span class="sr-only">Szukaj gier</span>
-                    <input type="search" placeholder="Wpisz nazwę, tryb lub gatunek..." data-game-search-input />
+                    <input type="search" placeholder="Szukaj gier..." data-game-search-input />
                 </label>
-                <button class="btn btn-secondary" type="button" data-random-game>Losuj grę dla mnie</button>
+                <button class="btn btn-primary" type="button" data-random-game>Losuj</button>
             </div>
             <div class="game-toolbar__filters" data-game-filters></div>
-            <div class="game-toolbar__row game-toolbar__row--footer">
-                <p class="game-toolbar__meta" data-game-active-count>Pokazujemy wszystkie 11 gier</p>
-                <a class="btn btn-ghost" href="../zmiany.html">Zobacz, co dodaliśmy ostatnio</a>
-            </div>
         </section>
 
-        <section class="section game-featured" aria-label="Polecane gry">
-            <div class="section-header">
-                <div>
-                    <p class="section-eyebrow">Na dobry start</p>
-                    <h2 class="section-title">Polecane tytuły na dziś</h2>
-                </div>
-                <p>Wybieramy różne kombinacje gatunków i poziomów trudności przy każdym odświeżeniu strony.</p>
+        <!-- Games Grid -->
+        <section class="section section-games-grid">
+            <div class="game-grid" data-game-grid></div>
+            <div class="empty-state" data-empty-state>
+                <strong>Brak wyników.</strong>
+                <p>Spróbuj innego wyszukiwania.</p>
             </div>
-            <div class="game-featured__list" data-game-featured></div>
         </section>
-
-        <section class="section game-collections" aria-label="Szybkie kolekcje">
-            <div class="section-header">
-                <div>
-                    <p class="section-eyebrow">Szybkie skróty</p>
-                    <h2 class="section-title">Zestawy dobrane do Twojego nastroju</h2>
-                </div>
-                <p>Jednym kliknięciem wskakujesz do gier solo, kooperacyjnych lub klasyków retro.</p>
-            </div>
-            <div class="game-collections__grid" data-game-collections></div>
-        </section>
-
-        <section class="game-grid" data-game-grid></section>
-
-        <div class="empty-state" data-empty-state>
-            <strong>Brak wyników wyszukiwania.</strong>
-            <p>Spróbuj użyć innego słowa kluczowego lub skorzystaj z losowania, aby znaleźć nową inspirację.</p>
-        </div>
     </main>
     <footer>
-        <p>Życzymy udanej rozgrywki! &middot; Max Playground</p>
+        <p>Max Hub © 2025</p>
     </footer>
 </body>
 </html>
