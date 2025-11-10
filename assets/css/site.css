@@ -1851,9 +1851,8 @@ main.standalone-app {
 }
 
 .game-card:hover {
-  transform: translateY(-3px);
   border-color: var(--color-accent);
-  box-shadow: 0 12px 24px -12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 16px -8px rgba(99, 102, 241, 0.2);
 }
 
 .game-card h3 {
