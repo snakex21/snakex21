@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     article.setAttribute("data-film-card", "");
     article.innerHTML = `
       <figure class="media-card__poster">
-        <img src="${collection.cover}" alt="Plakat kolekcji ${collection.title}" loading="lazy">
+        <img src="${collection.cover}" alt="Plakat kolekcji ${collection.title}">
       </figure>
       <div class="media-card__body">
         <span class="badge">${collection.mood}</span>
