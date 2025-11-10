@@ -1833,7 +1833,7 @@ main.standalone-app {
 
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -2034,7 +2034,7 @@ main.standalone-app {
   }
 
   .game-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 0.8rem;
   }
 }
@@ -2064,7 +2064,7 @@ main.standalone-app {
   }
 
   .game-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 0.8rem;
   }
 
