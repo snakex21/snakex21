@@ -1833,13 +1833,13 @@ main.standalone-app {
 
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
 .game-card {
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: var(--radius-md);
   background: var(--color-surface-strong);
   border: 1px solid var(--color-border);
@@ -1848,26 +1848,70 @@ main.standalone-app {
   transition: all var(--transition-medium);
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.5rem;
 }
 
 .game-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--color-accent);
-  box-shadow: 0 12px 24px -12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 16px -12px rgba(99, 102, 241, 0.3);
 }
 
 .game-card h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .game-card p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
   flex: 1;
+  line-height: 1.3;
+}
+
+.game-card__title {
+  margin: 0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.game-card__description {
+  margin: 0 !important;
+  font-size: 0.8rem !important;
+  color: var(--color-text-muted) !important;
+  line-height: 1.3 !important;
+}
+
+.game-card__media {
+  display: none;
+}
+
+.game-card__meta {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.game-card__details {
+  display: none;
+}
+
+.game-card__tags {
+  display: none;
+}
+
+.game-card__footer {
+  margin-top: auto;
+}
+
+.game-card .btn {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
 }
 
 .empty-state {
@@ -1970,7 +2014,8 @@ main.standalone-app {
   }
 
   .game-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
   }
 }
 
@@ -1999,8 +2044,8 @@ main.standalone-app {
   }
 
   .game-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
   }
 
   .games-search-bar {
