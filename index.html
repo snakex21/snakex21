@@ -40,59 +40,119 @@
         </nav>
     </header>
     <main>
-        <section class="hero" id="start">
-            <div class="hero-content">
-                <span class="hero-eyebrow">Cześć! 👋</span>
-                <h1>Twoje centrum rozrywki i kreatywności</h1>
-                <p class="hero-lead">Gry, muzyka, filmy i narzędzia projektowe w jednym miejscu. Wszystko, czego potrzebujesz.</p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="gry/gry.html">Odkryj gry</a>
-                    <a class="btn btn-secondary" href="Programy/programy.html">Narzędzia kreatywne</a>
+        <!-- Hero Section -->
+        <section class="hero-new" id="start">
+            <div class="hero-new-content">
+                <div class="hero-new-text">
+                    <h1 class="hero-new-title">Witaj na Max Playground 🎮</h1>
+                    <p class="hero-new-subtitle">Centrum rozrywki, narzędzi twórcy i dobrych wrażeń. Wszystko czeka na kliknięcie.</p>
+                    <div class="hero-new-cta">
+                        <a href="gry/gry.html" class="btn btn-primary btn-lg">Zacznij od gier</a>
+                        <a href="Programy/programy.html" class="btn btn-secondary btn-lg">Odkryj narzędzia</a>
+                    </div>
+                </div>
+                <div class="hero-new-visual">
+                    <div class="hero-visual-item" style="animation-delay: 0s;">🎮</div>
+                    <div class="hero-visual-item" style="animation-delay: 0.2s;">🎨</div>
+                    <div class="hero-visual-item" style="animation-delay: 0.4s;">🎵</div>
+                    <div class="hero-visual-item" style="animation-delay: 0.6s;">🎬</div>
                 </div>
             </div>
         </section>
 
-        <section class="section" id="skroty">
+        <!-- Quick Access Grid -->
+        <section class="section section-quick-access" id="quick-access">
             <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Główne sekcje</span>
-                    <h2 class="section-title">Gdzie chcesz się wybrać?</h2>
-                </div>
+                <h2 class="section-title">Wybierz swoją przygodę</h2>
+                <p class="section-subtitle">Przejdź bezpośrednio do wybranej sekcji</p>
             </div>
-            <div class="cards-grid">
-                <article class="card">
-                    <span class="badge">🎮</span>
+            <div class="quick-access-grid">
+                <a href="gry/gry.html" class="quick-access-card card-games">
+                    <div class="card-icon">🎮</div>
                     <h3>Gry</h3>
-                    <p>Biblioteka gier pełna klasyków i autorskich mini-gier. Klasyka i autorskie pozycje czekają.</p>
-                    <a class="btn btn-primary" href="gry/gry.html">Wejdź do gier</a>
-                </article>
-                <article class="card">
-                    <span class="badge">🛠️</span>
+                    <p>Biblioteka gier pełna klasyków i autorskich pozycji. Od strategii do akcji.</p>
+                    <div class="card-arrow">→</div>
+                </a>
+                <a href="Programy/programy.html" class="quick-access-card card-tools">
+                    <div class="card-icon">🛠️</div>
                     <h3>Narzędzia</h3>
-                    <p>Generatory kolorów, czcionek i emoji. Wszystko do tworzenia i eksperymentów.</p>
-                    <a class="btn btn-primary" href="Programy/programy.html">Odwiedź laboratorium</a>
-                </article>
-                <article class="card">
-                    <span class="badge">🎬</span>
+                    <p>Generatory kolorów, czcionek i emoji. Stwórz coś nowego.</p>
+                    <div class="card-arrow">→</div>
+                </a>
+                <a href="filmy/filmy glowna.html" class="quick-access-card card-movies">
+                    <div class="card-icon">🎬</div>
                     <h3>Filmy</h3>
-                    <p>Kolekcje filmów, playlisty, pomysły na wieczór filmowy. Zbuduj swoje kino domowe.</p>
-                    <a class="btn btn-primary" href="filmy/filmy glowna.html">Przeglądaj filmy</a>
-                </article>
-                <article class="card">
-                    <span class="badge">🎵</span>
+                    <p>Kolekcje, playlisty, inspiracje na wieczór filmowy.</p>
+                    <div class="card-arrow">→</div>
+                </a>
+                <a href="muzyka/muzyka.html" class="quick-access-card card-music">
+                    <div class="card-icon">🎵</div>
                     <h3>Muzyka</h3>
-                    <p>Playlisty dostosowane do nastroju. Zanurz się w dźwiękach dopasowanych do Ciebie.</p>
-                    <a class="btn btn-primary" href="muzyka/muzyka.html">Posłuchaj teraz</a>
+                    <p>Playlisty dopasowane do każdego nastroju i okazji.</p>
+                    <div class="card-arrow">→</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Featured Highlights -->
+        <section class="section section-featured" id="featured">
+            <div class="featured-grid">
+                <article class="featured-card featured-card-primary">
+                    <div class="featured-badge">⭐ Nowe</div>
+                    <h3>Odkryj najlepsze gry tygodnia</h3>
+                    <p>Świeżo dodane pozycje, które powinnaś wypróbować. Każda działa w przeglądarce bez instalacji.</p>
+                    <a href="gry/gry.html" class="btn btn-primary btn-sm">Przejdź do biblioteki</a>
+                </article>
+                <article class="featured-card featured-card-secondary">
+                    <div class="featured-badge">💡 Porady</div>
+                    <h3>Stwórz piękną paletę kolorów</h3>
+                    <p>Użyj generatora palet, aby znaleźć idealne kolory do swoich projektów.</p>
+                    <a href="Programy/generator kolorow/generator kolorow.html" class="btn btn-secondary btn-sm">Wypróbuj generator</a>
+                </article>
+                <article class="featured-card featured-card-tertiary">
+                    <div class="featured-badge">📊 Statystyka</div>
+                    <h3>10+ gier czeka na Ciebie</h3>
+                    <p>Mamy bogatą kolekcję gier różnych gatunków, od casual do bardziej zaawansowanych.</p>
+                    <a href="gry/gry.html" class="btn btn-primary btn-sm">Przeglądaj gry</a>
                 </article>
             </div>
         </section>
 
-        <section class="callout" id="dolacz">
-            <h2>Gotowy na przygodę?</h2>
-            <p>Wybierz swoją przygodę. Wszystko czeka na kliknięcie.</p>
-            <div class="hero-actions">
-                <a class="btn btn-primary" href="gry/gry.html">Zagraj teraz</a>
-                <a class="btn btn-secondary" href="zmiany.html">Przeczytaj dziennik zmian</a>
+        <!-- Info Section -->
+        <section class="section section-info" id="info">
+            <div class="info-content">
+                <div class="info-item">
+                    <div class="info-icon">⚡</div>
+                    <h4>Szybko i responsywnie</h4>
+                    <p>Wszystkie aplikacje działają natychmiast, bez czekania na ładowanie.</p>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🎯</div>
+                    <h4>Zawsze dostępne</h4>
+                    <p>Twoje ulubione gry i narzędzia dostępne 24/7 w przeglądarce.</p>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🌙</div>
+                    <h4>Tryb jasny/ciemny</h4>
+                    <p>Wybierz wygląd pasujący do Twojego nastroju. Przeglądarka zapamięta wybór.</p>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">🚀</div>
+                    <h4>Ciągle rozwijane</h4>
+                    <p>Regularnie dodajemy nowe gry, narzędzia i funkcjonalności.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter/CTA -->
+        <section class="section section-final-cta" id="final-cta">
+            <div class="final-cta-content">
+                <h2>Zapisz sobie tę stronę! 📌</h2>
+                <p>Wracaj kiedy tylko masz chwilę wolnego czasu. Zawsze będzie tu coś ciekawego dla Ciebie.</p>
+                <div class="final-cta-buttons">
+                    <a href="gry/gry.html" class="btn btn-primary">Zagraj teraz</a>
+                    <a href="zmiany.html" class="btn btn-secondary">Przeczytaj zmiany</a>
+                </div>
             </div>
         </section>
     </main>
