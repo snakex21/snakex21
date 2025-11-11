@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Narzędzia – Max Playground</title>
-    <meta name="description" content="Generatory kolorów, czcionek i emoji" />
+    <title>Laboratorium narzędzi – Max Playground</title>
+    <meta name="description" content="Wszystkie programy Maxa w jednym miejscu. Generatory kolorów, czcionek i emoji wraz z opisami funkcji oraz szybkim dostępem." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <script defer src="../assets/js/site.js"></script>
@@ -14,44 +14,139 @@
 <body data-root="../">
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max</a>
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
             <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
             <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Start</a>
+                <a class="nav-link" href="../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a class="is-current" href="programy.html">Przegląd wszystkich programów</a>
+                        <a href="generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
                 <a class="nav-link" href="../gry/gry.html">Gry</a>
-                <a class="nav-link is-active" href="programy.html">Narzędzia</a>
+                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
                 <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
             </div>
             <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙</button>
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
             </div>
         </nav>
     </header>
-    
     <main>
-        <section class="minimal-hero">
-            <h1 class="minimal-title">🎨 <span class="gradient-text">Narzędzia</span></h1>
-            <p class="minimal-lead">Generatory dla Twoich projektów</p>
-            <div class="minimal-actions">
-                <button class="btn btn-primary" type="button" data-program-random="open">🎲 Losuj narzędzie</button>
+        <section class="page-hero programs-hero">
+            <span class="hero-eyebrow">Laboratorium narzędzi</span>
+            <h1>Programy i generatory, które przyspieszą Twoje pomysły</h1>
+            <p>Eksperymentuj z kolorami, typografią i emoji. Każde narzędzie działa w przeglądarce i pozwala szybko kopiować efekty do własnych projektów.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="generator kolorow/generator kolorow.html">Uruchom generator kolorów</a>
+                <button class="btn btn-secondary" type="button" data-program-random="open">Losuj narzędzie</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span>Dostępne narzędzia</span>
+                    <strong data-program-count>3</strong>
+                </div>
+                <div class="hero-stat">
+                    <span>Obszary zastosowań</span>
+                    <strong data-program-category-count>0</strong>
+                </div>
+                <div class="hero-stat">
+                    <span>Ostatnia aktualizacja</span>
+                    <strong data-program-last-update>Aktualne</strong>
+                </div>
             </div>
         </section>
 
-        <section class="section">
-            <div class="minimal-toolbar">
-                <label class="program-search">
-                    <span role="img" aria-hidden="true">🔍</span>
-                    <span class="sr-only">Wyszukaj narzędzie</span>
-                    <input type="search" placeholder="Szukaj narzędzia..." data-program-search />
-                </label>
+        <section class="section" id="przeglad">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Przegląd narzędzi</span>
+                    <h2 class="section-title">Wszystkie programy w jednym miejscu</h2>
+                    <p class="section-description">Wybierz narzędzie, które najlepiej pasuje do Twojego zadania. Możesz filtrować listę po kategoriach lub wyszukać konkretne funkcje.</p>
+                </div>
+                <div class="program-toolbar" role="search">
+                    <label class="program-search">
+                        <span role="img" aria-hidden="true">🔍</span>
+                        <span class="sr-only">Wyszukaj narzędzie</span>
+                        <input type="search" placeholder="Szukaj po nazwie lub funkcjach…" data-program-search />
+                    </label>
+                    <div class="program-filters" data-program-filters>
+                        <button class="btn btn-chip is-active" type="button" data-program-filter="all">Wszystkie</button>
+                    </div>
+                </div>
             </div>
-            
-            <div class="program-grid minimal-program-grid" data-program-grid></div>
+            <div class="programs-grid" data-programs-grid aria-live="polite"></div>
+            <p class="program-empty" data-program-empty hidden>Nie znaleziono narzędzia spełniającego kryteria. Spróbuj zmienić filtr lub wyszukiwane hasło.</p>
+        </section>
+
+        <section class="section programs-highlight" id="polecane-programy">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Polecane</span>
+                    <h2 class="section-title">Sprawdź wyróżnione narzędzie</h2>
+                    <p class="section-description">Losowo podpowiadamy moduł, który może Cię zainspirować. Zobacz, do czego służy i jakie funkcje oferuje.</p>
+                </div>
+                <button class="btn btn-secondary" type="button" data-program-random="refresh">Losuj inne</button>
+            </div>
+            <article class="highlight-card" data-program-highlight>
+                <span class="badge" data-program-highlight-meta>Ulubione narzędzie społeczności</span>
+                <h3 data-program-highlight-title>Generator kolorów</h3>
+                <p data-program-highlight-description>Losuj palety barw, zapisuj ulubione kombinacje i kopiuj kody HEX albo RGB jednym kliknięciem.</p>
+                <ul class="program-highlight-list" data-program-highlight-features></ul>
+                <div class="highlight-actions">
+                    <a class="btn btn-primary" data-program-highlight-link href="generator kolorow/generator kolorow.html">Uruchom narzędzie</a>
+                    <span class="badge" data-program-highlight-tags>Kolory • HEX • RGB</span>
+                </div>
+            </article>
+        </section>
+
+        <section class="section programs-tips" id="jak-korzystac">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Porady</span>
+                    <h2 class="section-title">Jak najlepiej wykorzystać programy</h2>
+                    <p class="section-description">Każde narzędzie ma kilka trików, które pozwolą Ci szybciej osiągnąć cel. Oto nasze ulubione kombinacje.</p>
+                </div>
+            </div>
+            <div class="cards-grid cards-grid--three">
+                <article class="card card--tip">
+                    <span class="badge">🎨 Palety</span>
+                    <h3>Łącz kolory w zestawy</h3>
+                    <p>Skopiuj kilka barw z generatora i wklej je do notatnika projektu. Dzięki temu zawsze wrócisz do wybranego motywu.</p>
+                </article>
+                <article class="card card--tip">
+                    <span class="badge">🅰 Typografia</span>
+                    <h3>Przygotuj podpisy w różnych stylach</h3>
+                    <p>Generator czcionek pozwala zapisać tekst w wielu wariantach. Wybierz ulubione i dodaj do biblioteki, aby móc je szybko wklejać.</p>
+                </article>
+                <article class="card card--tip">
+                    <span class="badge">😀 Emoji</span>
+                    <h3>Twórz gotowe wiadomości</h3>
+                    <p>Skorzystaj z sekcji emoji, aby przygotować szablony reakcji do wysyłki w komunikatorach i mediach społecznościowych.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="callout">
+            <h2>Masz pomysł na nowe narzędzie?</h2>
+            <p>Daj znać, czego brakuje w laboratorium Maxa. Dodajemy kolejne programy i chętnie wprowadzimy Twoją sugestię do planu rozwoju.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="mailto:kontakt@example.com">Wyślij propozycję</a>
+                <a class="btn btn-secondary" href="../zmiany.html">Sprawdź plan zmian</a>
+            </div>
         </section>
     </main>
-    
-    <footer class="minimal-footer">
-        <p>Max Playground © 2024</p>
+    <footer>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
     </footer>
 </body>
 </html>
