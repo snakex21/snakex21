@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Centrum filmowe – Max Playground</title>
-    <meta name="description" content="Kuratorowane kolekcje filmów i seriali Maxa. Przeglądaj, filtruj i planuj wieczory filmowe w nowoczesnym interfejsie." />
+    <title>Filmy – Max Playground</title>
+    <meta name="description" content="Kolekcje filmów i seriali" />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <script defer src="../assets/js/site.js"></script>
@@ -14,128 +14,41 @@
 <body>
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max</a>
             <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
             <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
+                <a class="nav-link" href="../index.html">Start</a>
                 <a class="nav-link" href="../gry/gry.html">Gry</a>
-                <a class="nav-link is-active" href="filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../Programy/programy.html">Narzędzia</a>
                 <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
             </div>
             <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙</button>
             </div>
         </nav>
     </header>
 
     <main>
-        <section class="hero hero--subpage hero--media" id="start">
-            <div class="hero-content">
-                <span class="hero-eyebrow">Wieczór filmowy</span>
-                <h1>Planer seansów Maxa</h1>
-                <p class="hero-lead">Odkrywaj dopracowane kolekcje filmów i seriali. W kilka sekund znajdziesz coś na rodzinny seans, nostalgiczny maraton lub szybką dawkę akcji.</p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" data-film-hero-link href="movies.html?series=TopGun">Otwórz kolekcję</a>
-                    <a class="btn btn-secondary" href="../muzyka/muzyka.html">Włącz soundtrack</a>
-                    <a class="btn btn-ghost" href="movies.html">Zobacz wszystkie filmy</a>
-                </div>
-                <div class="hero-highlight">
-                    <span class="badge">Polecane dziś</span>
-                    <span data-film-highlight>Zanurz się w kolekcjach dobranych ręcznie przez Maxa.</span>
-                </div>
-            </div>
-            <div class="hero-illustration hero-illustration--media">
-                <div class="hero-panel">
-                    <h2>Panel seansów</h2>
-                    <p>Monitoruj ulubione kolekcje i zapisuj inspiracje na kolejny wieczór.</p>
-                    <div class="panel-metrics">
-                        <div class="metric"><span>Kolekcje</span><strong data-film-collection-count>--</strong></div>
-                        <div class="metric"><span>Najczęściej wybierane</span><strong data-film-spotlight-title>Top Gun</strong></div>
-                        <div class="metric"><span>Dominujący klimat</span><strong data-film-spotlight-tags>Akcja</strong></div>
-                    </div>
-                    <a class="btn btn-secondary" href="../zmiany.html">Zobacz co nowego</a>
-                </div>
-            </div>
+        <section class="minimal-hero">
+            <h1 class="minimal-title">🎬 <span class="gradient-text">Filmy</span></h1>
+            <p class="minimal-lead">Kolekcje filmów i seriali</p>
         </section>
 
-        <section class="section" id="kolekcje">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Kolekcje</span>
-                    <h2 class="section-title">Kuratorowane zestawy filmowe</h2>
-                    <p class="section-description">Filmy i serie połączone we wspólne maratony. Wybierz klimat i przejdź prosto do gotowej playlisty z linkami do seansu.</p>
-                </div>
-                <div class="film-toolbar">
-                    <label class="visually-hidden" for="film-search">Wyszukaj kolekcję</label>
-                    <input class="input" id="film-search" type="search" placeholder="Szukaj po tytule lub gatunku" data-film-search />
-                    <button class="btn btn-secondary" type="button" data-film-random>Losuj kolekcję</button>
-                </div>
+        <section class="section">
+            <div class="minimal-toolbar">
+                <label class="collection-search">
+                    <span role="img" aria-hidden="true">🔍</span>
+                    <span class="sr-only">Szukaj kolekcji</span>
+                    <input type="search" placeholder="Szukaj kolekcji..." data-collection-search />
+                </label>
             </div>
-            <div class="media-grid" data-film-grid>
-                <!-- Karty generowane przez skrypt -->
-            </div>
-            <p class="empty-state" data-film-empty>Nie znaleziono kolekcji pasującej do wyszukiwania. Spróbuj innej frazy.</p>
-        </section>
-
-        <section class="section section--surface" id="planer">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Pomysły na seans</span>
-                    <h2 class="section-title">Planer maratonów filmowych</h2>
-                    <p class="section-description">Potrzebujesz inspiracji? Wybierz gotowy scenariusz i połącz go z muzyczną playlistą lub grą towarzyszącą.</p>
-                </div>
-            </div>
-            <div class="cards-grid cards-grid--three">
-                <article class="card">
-                    <span class="badge">🎬 Akcja &amp; adrenalina</span>
-                    <h3>Wieczór pełen pościgów</h3>
-                    <p>Połącz kolekcję „Szybcy i Wściekli” z zestawem wyścigowych kawałków w strefie muzycznej. Idealne na spotkanie z przyjaciółmi.</p>
-                    <div class="card-actions">
-                        <a class="btn btn-primary" href="movies.html?series=SzybcyIWściekli">Start maratonu</a>
-                        <a class="btn btn-ghost" href="../muzyka/muzyka.html">Dodaj playlistę</a>
-                    </div>
-                </article>
-                <article class="card">
-                    <span class="badge">🍿 Nostalgia</span>
-                    <h3>Rodzinny seans retro</h3>
-                    <p>Wróć do klasyków z kolekcji „Jaś Fasola” i „Zabójcza broń”. Krótki quiz z działu gier doda dodatkowej zabawy.</p>
-                    <div class="card-actions">
-                        <a class="btn btn-primary" href="movies.html?series=JasFasola">Oglądaj</a>
-                        <a class="btn btn-ghost" href="../gry/gry.html">Włącz grę</a>
-                    </div>
-                </article>
-                <article class="card">
-                    <span class="badge">🌆 Chill &amp; dramat</span>
-                    <h3>Wieczór na spokojnie</h3>
-                    <p>Wybierz klimatyczną „Zieloną Milę” lub „Ojca chrzestnego”, dodaj ciepłe światło i notuj w dzienniku zmian, co Cię poruszyło.</p>
-                    <div class="card-actions">
-                        <a class="btn btn-primary" href="movies.html?series=ZielonaMila">Zacznij seans</a>
-                        <a class="btn btn-ghost" href="../zmiany.html">Zapisz wrażenia</a>
-                    </div>
-                </article>
-            </div>
+            
+            <div class="collection-grid minimal-collection-grid" data-collection-grid></div>
         </section>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-content">
-            <p>Projektowane z pasją dla społeczności Maxa. Zanurz się w filmach, grach i muzyce kiedy tylko chcesz.</p>
-            <a class="btn btn-ghost" href="../zmiany.html">Dziennik zmian</a>
-        </div>
+    <footer class="minimal-footer">
+        <p>Max Playground © 2024</p>
     </footer>
 </body>
 </html>
