@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Zmiany – Max Playground</title>
-    <meta name="description" content="Historia zmian Max Playground" />
+    <title>Dziennik zmian – Max Playground</title>
+    <meta name="description" content="Historia rozwoju Max Playground. Sprawdź, jakie nowości pojawiły się na stronie i jakie aktualizacje są planowane." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="assets/css/site.css" />
     <script defer src="assets/js/site.js"></script>
@@ -12,51 +12,85 @@
 <body>
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="index.html"><span>MX</span>Max</a>
+            <a class="nav-brand" href="index.html"><span>MX</span>Max Playground</a>
             <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
             <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="index.html">Start</a>
+                <a class="nav-link" href="index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="Programy/programy.html">Przegląd wszystkich programów</a>
+                        <a href="Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                    </div>
+                </div>
                 <a class="nav-link" href="gry/gry.html">Gry</a>
-                <a class="nav-link" href="Programy/programy.html">Narzędzia</a>
+                <a class="nav-link" href="filmy/filmy glowna.html">Filmy</a>
                 <a class="nav-link" href="muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link is-active" href="zmiany.html" aria-current="page">Dziennik zmian</a>
             </div>
             <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙</button>
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
             </div>
         </nav>
     </header>
 
     <main>
-        <section class="minimal-hero">
-            <h1 class="minimal-title">Historia <span class="gradient-text">zmian</span></h1>
-            <p class="minimal-lead">Najważniejsze aktualizacje projektu</p>
+        <section class="hero hero--subpage">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Historia projektu</span>
+                <h1>Dziennik zmian Max Playground</h1>
+                <p class="hero-lead">Śledź, jak rozwija się centrum gier, filmów i muzyki Maxa. Dodaj własne pomysły, aby kolejne aktualizacje były jeszcze lepsze.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="filmy/filmy glowna.html">Zobacz nowe kolekcje filmowe</a>
+                    <a class="btn btn-secondary" href="muzyka/muzyka.html">Włącz odświeżony odtwarzacz</a>
+                </div>
+            </div>
         </section>
 
-        <section class="section">
-            <div class="changelog-timeline minimal-timeline">
-                <article class="changelog-entry minimal-entry">
-                    <time datetime="2024-11-29">29.11.2024</time>
-                    <h3>Minimalistyczny redesign</h3>
-                    <p>Nowy, czysty design z naciskiem na gry i łatwą nawigację</p>
+        <section class="section" id="timeline">
+            <div class="section-header">
+                <div>
+                    <span class="section-eyebrow">Ostatnie aktualizacje</span>
+                    <h2 class="section-title">Najważniejsze kamienie milowe</h2>
+                    <p class="section-description">Notujemy wszystkie większe zmiany interfejsu oraz treści, aby łatwo wrócić do poprzednich wersji.</p>
+                </div>
+            </div>
+            <div class="changelog-timeline">
+                <article class="changelog-entry">
+                    <time datetime="2024-11-29">29 listopada 2024</time>
+                    <h3>Nowa odsłona działów Filmy, Muzyka i Dziennik</h3>
+                    <p>Wprowadzono spójny wygląd podstron, dodano wyszukiwarki, losowe propozycje oraz czytelne karty z opisami kolekcji.</p>
+                    <ul>
+                        <li>Przebudowano stronę główną filmów oraz widok pojedynczych kolekcji.</li>
+                        <li>Dodano muzyczny panel z wyszukiwarką, licznikiem utworów i odświeżonym odtwarzaczem.</li>
+                        <li>Przygotowano nowy dziennik zmian z osią czasu.</li>
+                    </ul>
                 </article>
-                
-                <article class="changelog-entry minimal-entry">
-                    <time datetime="2024-05-23">23.05.2024</time>
-                    <h3>Muzyka i filmy</h3>
-                    <p>Dodano sekcję muzyczną i filmową</p>
+                <article class="changelog-entry">
+                    <time datetime="2024-05-23">23 maja 2024</time>
+                    <h3>Przebudowa sekcji filmów i start strefy muzycznej</h3>
+                    <p>Dodano pierwsze kolekcje filmowe oraz podstawową wersję odtwarzacza audio z losowaniem utworów.</p>
                 </article>
-                
-                <article class="changelog-entry minimal-entry">
-                    <time datetime="2024-04-04">04.04.2024</time>
+                <article class="changelog-entry">
+                    <time datetime="2024-04-04">4 kwietnia 2024</time>
                     <h3>Start projektu</h3>
-                    <p>Pierwsze wydanie z grami i narzędziami</p>
+                    <p>Udostępniono bazową wersję strony Maxa z katalogiem gier i narzędziami.</p>
                 </article>
             </div>
         </section>
     </main>
 
-    <footer class="minimal-footer">
-        <p>Max Playground © 2024</p>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>Masz pomysł na nową funkcję? Zapisz ją w dzienniku zmian lub wyślij wiadomość do Maxa.</p>
+            <a class="btn btn-ghost" href="mailto:max-playground@example.com">Napisz wiadomość</a>
+        </div>
     </footer>
 </body>
 </html>
