@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kolekcja filmowa – Max Playground</title>
-    <meta name="description" content="Szczegółowa lista filmów w wybranej kolekcji Maxa. Filtruj, losuj i włącz seans jednym kliknięciem." />
+    <title>Kolekcja – Max Playground</title>
+    <meta name="description" content="Szczegóły kolekcji filmowej" />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <script defer src="../assets/js/site.js"></script>
@@ -14,103 +14,45 @@
 <body>
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
+            <a class="nav-brand" href="../index.html"><span>MX</span>Max</a>
             <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
             <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
+                <a class="nav-link" href="../index.html">Start</a>
                 <a class="nav-link" href="../gry/gry.html">Gry</a>
-                <a class="nav-link is-active" href="filmy glowna.html" aria-current="page">Filmy</a>
+                <a class="nav-link" href="../Programy/programy.html">Narzędzia</a>
                 <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
             </div>
             <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙</button>
             </div>
         </nav>
     </header>
 
     <main>
-        <section class="hero hero--subpage hero--media">
-            <div class="hero-content">
-                <span class="hero-eyebrow">Kolekcja filmowa</span>
-                <h1 data-series-title>Wczytywanie kolekcji…</h1>
-                <p class="hero-lead" data-series-description>Trwa przygotowywanie listy filmów. Za moment pokażemy pełen repertuar.</p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" data-series-primary href="#lista">Przejdź do listy</a>
-                    <a class="btn btn-secondary" href="filmy glowna.html">Powrót do wszystkich kolekcji</a>
-                </div>
-                <div class="hero-highlight">
-                    <span class="badge" data-series-meta>-- tytułów</span>
-                    <span data-series-highlight>Znajdź idealny tytuł na dzisiejszy wieczór.</span>
-                </div>
-            </div>
-            <div class="hero-illustration hero-illustration--media">
-                <div class="hero-panel">
-                    <h2>Parametry seansu</h2>
-                    <p>Odkryj szczegóły kolekcji i zaplanuj maraton z ulubionym klimatem.</p>
-                    <div class="panel-metrics">
-                        <div class="metric"><span>Liczba filmów</span><strong data-series-count>0</strong></div>
-                        <div class="metric"><span>Dominujący gatunek</span><strong data-series-genre>—</strong></div>
-                        <div class="metric"><span>Rekomendacja</span><strong data-series-mood>—</strong></div>
-                    </div>
-                    <div class="hero-panel__actions">
-                        <button class="btn btn-secondary" type="button" data-series-random>Losuj tytuł</button>
-                    </div>
-                </div>
+        <section class="minimal-hero">
+            <a href="filmy glowna.html" class="btn btn-ghost" style="margin-bottom: 1rem;">← Powrót</a>
+            <h1 class="minimal-title" data-series-title>Wczytywanie...</h1>
+            <p class="minimal-lead" data-series-description>Ładowanie kolekcji</p>
+            <div class="minimal-actions">
+                <button class="btn btn-primary" type="button" data-series-random>🎲 Losuj film</button>
             </div>
         </section>
 
-        <section class="section" id="lista">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Lista tytułów</span>
-                    <h2 class="section-title" data-series-section-title>Przygotuj popcorn</h2>
-                    <p class="section-description" data-series-section-description>Wszystkie filmy tej kolekcji pojawią się poniżej – gotowe do odpalenia.</p>
-                </div>
-                <div class="film-toolbar">
-                    <label class="visually-hidden" for="film-filter">Filtruj filmy</label>
-                    <input class="input" id="film-filter" type="search" placeholder="Szukaj po tytule lub gatunku" data-film-filter />
-                    <button class="btn btn-secondary" type="button" data-film-random>Losuj tytuł</button>
-                </div>
+        <section class="section">
+            <div class="minimal-toolbar">
+                <label class="movie-search">
+                    <span role="img" aria-hidden="true">🔍</span>
+                    <span class="sr-only">Szukaj filmu</span>
+                    <input type="search" placeholder="Szukaj filmu..." data-movie-search />
+                </label>
             </div>
-            <div class="media-grid media-grid--compact" data-series-container>
-                <!-- Karty filmów generowane dynamicznie -->
-            </div>
-            <p class="empty-state" data-film-empty>Brak wyników dla wybranego filtra. Spróbuj innego tytułu lub gatunku.</p>
-        </section>
-
-        <section class="section" id="zobacz-tez">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Zobacz także</span>
-                    <h2 class="section-title">Inne kolekcje warte uwagi</h2>
-                    <p class="section-description">Nie możesz się zdecydować? Sprawdź propozycje, które świetnie komponują się z aktualną serią.</p>
-                </div>
-            </div>
-            <div class="media-grid media-grid--mini" data-series-suggestions>
-                <!-- Sugestie kolekcji -->
-            </div>
+            
+            <div class="movie-list minimal-movie-list" data-movie-list></div>
         </section>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-content">
-            <p>Masz sugestię nowej kolekcji? Zapisz ją w dzienniku zmian i pomóż rozwijać bazę filmów.</p>
-            <a class="btn btn-ghost" href="../zmiany.html">Dziennik zmian</a>
-        </div>
+    <footer class="minimal-footer">
+        <p>Max Playground © 2024</p>
     </footer>
 </body>
 </html>
