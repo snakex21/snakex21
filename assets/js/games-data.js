@@ -214,6 +214,22 @@ const gamesCatalog = [
     duration: "quick",
     spotlight:
       "Rozgrzewka dla refleksu – sprawdzi się na start wieczoru z grami lub w przerwie między innymi tytułami."
+  },
+  {
+    slug: "kulkowa-przygoda-3d",
+    title: "Kulkowa Przygoda 3D",
+    description:
+      "Steruj kulą w trójwymiarowym świecie, zbieraj złote monety i unikaj czerwonych przeszkód. Pełna gra 3D w przeglądarce!",
+    cover: "kulkowa-przygoda-3d/screenshot.jpg",
+    coverAlt: "Niebieska kula w kolorowym świecie 3D otoczonym monetami",
+    url: "kulkowa-przygoda-3d/kulkowa-przygoda-3d.html",
+    genres: ["3D", "Zręcznościowa", "Arcade"],
+    modes: ["Solo"],
+    tags: ["3D", "Nowoczesna grafika", "WebGL", "Refleks"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight:
+      "Pierwsza prawdziwa gra 3D w kolekcji – płynna rozgrywka, piękna grafika i satysfakcjonujące zbieranie monet w przestrzeni."
   }
 ];
 
