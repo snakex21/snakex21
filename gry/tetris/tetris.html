@@ -1,68 +1,191 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tetris – Max Playground</title>
-    <meta name="description" content="Nowa, pełnoekranowa wersja Tetrisa. Czyść linie, zdobywaj punkty, bij rekord i zatrzymuj grę jednym przyciskiem." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="../../assets/css/site.css" />
-    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tetris - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
-        .game-stage--tetris {
-            --tetris-surface: linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.95));
-            --tetris-border: rgba(148, 163, 184, 0.35);
-            --tetris-panel: rgba(15, 23, 42, 0.38);
-            --tetris-panel-border: rgba(148, 163, 184, 0.3);
-            --tetris-grid: rgba(148, 163, 184, 0.12);
-            --tetris-shadow: rgba(15, 23, 42, 0.55);
-            --tetris-highlight: rgba(255, 255, 255, 0.08);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .game-stage--tetris .game-stage__board {
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --panel-bg: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --panel-bg: #2a2a2a;
+        }
+
+        html {
+            background: var(--bg);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats {
+            display: flex;
             justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat span {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat strong {
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .stat.is-record strong {
+            color: #22c55e;
         }
 
         .tetris-app {
-            width: min(1080px, 100%);
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(260px, 0.9fr);
-            gap: clamp(1.25rem, 3vw, 2.25rem);
+            grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+            gap: 2rem;
             align-items: start;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .tetris-playfield {
             position: relative;
-            width: min(92vw, 440px);
-            padding: clamp(1rem, 3vw, 1.6rem);
-            border-radius: 28px;
-            background: var(--tetris-surface);
-            border: 1px solid var(--tetris-border);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 65px rgba(8, 47, 73, 0.52);
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
         }
 
         .tetris-playfield canvas {
             display: block;
             width: 100%;
             height: auto;
-            border-radius: 22px;
-            background: rgba(15, 23, 42, 0.82);
-            box-shadow: inset 0 1px 0 var(--tetris-highlight);
+            border-radius: 12px;
+            background: var(--bg);
         }
 
         .tetris-overlay {
             position: absolute;
-            inset: clamp(1rem, 3vw, 1.6rem);
-            border-radius: 22px;
-            border: 1px solid rgba(148, 163, 184, 0.45);
-            background: rgba(15, 23, 42, 0.88);
+            inset: 1.5rem;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(6px);
             display: grid;
             place-items: center;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transition: opacity 180ms ease, visibility 180ms ease;
+            transition: opacity 0.2s, visibility 0.2s;
         }
 
         .tetris-overlay.is-visible {
@@ -77,254 +200,218 @@
 
         .tetris-overlay__panel {
             text-align: center;
-            display: grid;
-            gap: 0.65rem;
-            color: #f8fafc;
+            color: #fff;
         }
 
         .tetris-overlay__panel h2 {
-            margin: 0;
-            font-size: clamp(1.4rem, 4vw, 1.8rem);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
+            margin: 0 0 0.5rem;
+            font-size: 1.8rem;
         }
 
         .tetris-overlay__panel p {
             margin: 0;
             font-size: 0.95rem;
-            color: rgba(226, 232, 240, 0.75);
+            color: rgba(255, 255, 255, 0.75);
         }
 
         .tetris-sidebar {
             display: grid;
-            gap: clamp(0.9rem, 2.4vw, 1.6rem);
-            align-content: start;
+            gap: 1.5rem;
         }
 
         .tetris-panel {
-            background: var(--tetris-panel);
-            border-radius: 22px;
-            border: 1px solid var(--tetris-panel-border);
-            padding: clamp(1rem, 3vw, 1.5rem);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            color: var(--color-text);
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px var(--shadow);
         }
 
         .tetris-panel h2 {
-            margin: 0 0 0.75rem;
-            font-size: 1.05rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(226, 232, 240, 0.78);
+            margin: 0 0 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .tetris-next canvas {
             width: 100%;
             height: auto;
-            border-radius: 18px;
-            background: rgba(15, 23, 42, 0.75);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            background: var(--bg);
         }
 
         .tetris-actions {
             display: flex;
-            flex-wrap: wrap;
             gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .tetris-actions button {
-            flex: 1 1 140px;
-            padding: 0.75rem 1.4rem;
-            border-radius: 16px;
-            border: 1px solid transparent;
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
             font-weight: 600;
             font-size: 0.95rem;
             cursor: pointer;
-            transition: transform 0.18s ease, box-shadow 0.2s ease, filter 0.18s ease;
+            transition: all 0.2s;
         }
 
         .tetris-actions button[data-action="toggle"] {
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-            color: #f8fafc;
-            box-shadow: 0 18px 40px rgba(14, 165, 233, 0.35);
+            background: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
         }
 
         .tetris-actions button[data-action="toggle"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 24px 55px rgba(14, 165, 233, 0.45);
+            background: #2563eb;
+            border-color: #2563eb;
         }
 
         .tetris-actions button[data-action="restart"] {
-            background: rgba(148, 163, 184, 0.18);
-            color: var(--color-text);
-            border-color: rgba(148, 163, 184, 0.35);
+            background: var(--card-bg);
+            color: var(--text);
         }
 
         .tetris-actions button[data-action="restart"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 35px rgba(148, 163, 184, 0.25);
-        }
-
-        .tetris-actions button:focus-visible {
-            outline: 2px solid rgba(56, 189, 248, 0.75);
-            outline-offset: 3px;
+            background: var(--border);
         }
 
         .tetris-help {
             margin: 0;
-            padding-left: 1rem;
+            padding-left: 1.25rem;
             display: grid;
             gap: 0.4rem;
-            color: rgba(226, 232, 240, 0.78);
-            font-size: 0.92rem;
+            font-size: 0.9rem;
         }
 
-        .tetris-help strong {
-            color: #f8fafc;
-        }
-
-        .tetris-panel .game-status {
-            margin-top: 1rem;
-        }
-
-        .game-score[data-score-best].is-record strong {
-            color: #22c55e;
+        .game-status {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
         @media (max-width: 960px) {
             .tetris-app {
                 grid-template-columns: 1fr;
-                justify-items: center;
             }
 
-            .tetris-sidebar {
-                width: min(92vw, 440px);
-            }
-        }
-
-        @media (max-width: 560px) {
-            .tetris-playfield {
-                padding: clamp(0.75rem, 4vw, 1rem);
+            .nav-links {
+                display: none;
             }
 
-            .tetris-playfield canvas {
-                border-radius: 18px;
+            nav {
+                padding: 1rem;
             }
 
-            .tetris-sidebar {
-                width: 100%;
-            }
-
-            .tetris-actions button {
-                flex: 1 1 120px;
+            h1 {
+                font-size: 2rem;
             }
         }
     </style>
-    <script defer src="../../assets/js/site.js"></script>
 </head>
-<body class="game-page" data-root="../../">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link is-active" href="../gry.html">Gry</a>
-                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
+
     <main>
-        <article class="game-stage game-stage--tetris">
-            <header class="game-stage__header">
-                <div>
-                    <span class="game-eyebrow">Klasyczna układanka</span>
-                    <h1>Tetris</h1>
-                    <p>Układaj spadające klocki, czyść linie i bij swój rekord. Wszystko mieści się teraz na jednej stronie bez dodatkowych okien.</p>
-                </div>
-                <div class="game-hud">
-                    <div class="game-score">
-                        <span>Wynik</span>
-                        <strong data-tetris-score>0</strong>
+        <div class="game-header">
+            <h1>🎮 Tetris</h1>
+            <p>Układaj spadające klocki, czyść linie i bij swój rekord</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span>Wynik</span>
+                <strong data-tetris-score>0</strong>
+            </div>
+            <div class="stat">
+                <span>Linie</span>
+                <strong data-tetris-lines>0</strong>
+            </div>
+            <div class="stat">
+                <span>Poziom</span>
+                <strong data-tetris-level>1</strong>
+            </div>
+            <div class="stat" data-score-best>
+                <span>Najlepszy</span>
+                <strong data-tetris-best>0</strong>
+            </div>
+        </div>
+
+        <div class="tetris-app">
+            <div class="tetris-playfield">
+                <canvas data-tetris-board width="320" height="640"></canvas>
+                <div class="tetris-overlay" data-tetris-overlay hidden>
+                    <div class="tetris-overlay__panel">
+                        <h2 data-overlay-title>Pauza</h2>
+                        <p data-overlay-subtitle>Wciśnij Spację, aby wrócić do gry</p>
                     </div>
-                    <div class="game-score">
-                        <span>Linie</span>
-                        <strong data-tetris-lines>0</strong>
-                    </div>
-                    <div class="game-score">
-                        <span>Poziom</span>
-                        <strong data-tetris-level>1</strong>
-                    </div>
-                    <div class="game-score" data-score-best>
-                        <span>Najlepszy wynik</span>
-                        <strong data-tetris-best>0</strong>
-                    </div>
-                </div>
-            </header>
-            <div class="game-stage__board">
-                <div class="tetris-app">
-                    <div class="tetris-playfield">
-                        <canvas data-tetris-board width="320" height="640" aria-label="Plansza Tetrisa"></canvas>
-                        <div class="tetris-overlay" data-tetris-overlay hidden>
-                            <div class="tetris-overlay__panel">
-                                <h2 data-overlay-title>Pauza</h2>
-                                <p data-overlay-subtitle>Wciśnij Spację, aby wrócić do gry.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <aside class="tetris-sidebar">
-                        <section class="tetris-panel tetris-next">
-                            <h2>Następny klocek</h2>
-                            <canvas data-tetris-preview width="144" height="144" aria-hidden="true"></canvas>
-                        </section>
-                        <section class="tetris-panel">
-                            <h2>Sterowanie</h2>
-                            <ul class="tetris-help">
-                                <li><strong>Strzałki ← →</strong> – przesuwają klocek.</li>
-                                <li><strong>Strzałka ↑ / X</strong> – obrót w prawo.</li>
-                                <li><strong>Z</strong> – obrót w lewo.</li>
-                                <li><strong>Strzałka ↓</strong> – szybszy spadek.</li>
-                                <li><strong>Spacja</strong> – wstrzymuje lub wznawia grę.</li>
-                                <li><strong>Shift + Spacja</strong> – natychmiastowy zrzut.</li>
-                            </ul>
-                            <div class="tetris-actions">
-                                <button type="button" data-action="toggle">Start</button>
-                                <button type="button" data-action="restart">Reset</button>
-                            </div>
-                            <p class="game-status" data-status aria-live="polite">Naciśnij „Start”, aby rozpocząć nową partię.</p>
-                        </section>
-                        <section class="tetris-panel">
-                            <h2>Wskazówki</h2>
-                            <ul class="tetris-help">
-                                <li>Kasuj kilka linii naraz, aby zdobyć mnożnik punktów.</li>
-                                <li>Po każdym 10. wierszu gra przyspiesza o jeden poziom.</li>
-                                <li>Twój rekord zapisujemy lokalnie, abyś mógł do niego wracać.</li>
-                            </ul>
-                        </section>
-                    </aside>
                 </div>
             </div>
-        </article>
+
+            <aside class="tetris-sidebar">
+                <section class="tetris-panel tetris-next">
+                    <h2>Następny klocek</h2>
+                    <canvas data-tetris-preview width="144" height="144"></canvas>
+                </section>
+
+                <section class="tetris-panel">
+                    <h2>Sterowanie</h2>
+                    <div class="tetris-actions">
+                        <button type="button" data-action="toggle">Start</button>
+                        <button type="button" data-action="restart">Reset</button>
+                    </div>
+                    <ul class="tetris-help">
+                        <li><strong>← →</strong> – przesuwaj klocek</li>
+                        <li><strong>↑ / X</strong> – obrót w prawo</li>
+                        <li><strong>Z</strong> – obrót w lewo</li>
+                        <li><strong>↓</strong> – szybszy spadek</li>
+                        <li><strong>Spacja</strong> – pauza/wznów</li>
+                        <li><strong>Shift + Spacja</strong> – zrzut</li>
+                    </ul>
+                    <p class="game-status" data-status>Naciśnij „Start", aby rozpocząć</p>
+                </section>
+
+                <section class="tetris-panel">
+                    <h2>Wskazówki</h2>
+                    <ul class="tetris-help">
+                        <li>Kasuj kilka linii naraz dla mnożnika punktów</li>
+                        <li>Co 10 wierszy gra przyspiesza o poziom</li>
+                        <li>Twój rekord jest zapisywany lokalnie</li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
     </main>
+
     <script>
+        // Motyw ciemny
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Tetris game
         (() => {
             const BOARD_WIDTH = 10;
             const BOARD_HEIGHT = 20;
@@ -494,9 +581,9 @@
                     for (let x = 0; x < BOARD_WIDTH; x += 1) {
                         const px = x * CELL_SIZE;
                         const py = y * CELL_SIZE;
-                        boardCtx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+                        boardCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
                         boardCtx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
-                        boardCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+                        boardCtx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
                         boardCtx.lineWidth = 1;
                         boardCtx.strokeRect(px + 0.5, py + 0.5, CELL_SIZE - 1, CELL_SIZE - 1);
                         const cell = state.board[y][x];
@@ -531,9 +618,9 @@
                 const py = y * size;
                 ctx.fillStyle = COLORS[type];
                 ctx.fillRect(px, py, size, size);
-                ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
-                ctx.lineWidth = Math.max(1, size * 0.08);
-                ctx.strokeRect(px + ctx.lineWidth / 2, py + ctx.lineWidth / 2, size - ctx.lineWidth, size - ctx.lineWidth);
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px + 1, py + 1, size - 2, size - 2);
             }
 
             function drawPreview() {
@@ -690,7 +777,7 @@
 
             function readBestScore() {
                 try {
-                    const value = localStorage.getItem('max-playground-tetris-best');
+                    const value = localStorage.getItem('hub-tetris-best');
                     return value ? Number(value) : 0;
                 } catch (error) {
                     return 0;
@@ -699,7 +786,7 @@
 
             function saveBestScore(value) {
                 try {
-                    localStorage.setItem('max-playground-tetris-best', String(value));
+                    localStorage.setItem('hub-tetris-best', String(value));
                 } catch (error) {
                     /* Ignorujemy brak dostępu do localStorage */
                 }
@@ -733,12 +820,10 @@
                 overlaySubtitle.textContent = subtitle;
                 overlay.hidden = false;
                 overlay.classList.add('is-visible');
-                overlay.setAttribute('aria-hidden', 'false');
             }
 
             function hideOverlay() {
                 overlay.classList.remove('is-visible');
-                overlay.setAttribute('aria-hidden', 'true');
                 overlay.hidden = true;
             }
 
@@ -754,7 +839,7 @@
                 isPaused = false;
                 isGameOver = false;
                 toggleButton.textContent = 'Pauza';
-                statusEl.textContent = 'Układaj klocki i czyść linie, by zdobywać punkty.';
+                statusEl.textContent = 'Układaj klocki i czyść linie, by zdobywać punkty';
                 bestCard.classList.remove('is-record');
                 hideOverlay();
                 updateHud();
@@ -766,8 +851,8 @@
                 }
                 isPaused = true;
                 toggleButton.textContent = 'Wznów';
-                showOverlay('Pauza', 'Wciśnij Spację lub „Wznów”, aby kontynuować.');
-                updateStatus('Gra wstrzymana.');
+                showOverlay('Pauza', 'Wciśnij Spację lub „Wznów", aby kontynuować');
+                updateStatus('Gra wstrzymana');
             }
 
             function resumeGame() {
@@ -784,7 +869,7 @@
                 isGameOver = true;
                 state.piece = null;
                 toggleButton.textContent = 'Zagraj ponownie';
-                showOverlay('Koniec gry', `Twój wynik: ${state.score}.`);
+                showOverlay('Koniec gry', `Twój wynik: ${state.score}`);
                 updateStatus('Gra zakończona. Spróbuj pobić rekord!');
                 updateHud();
             }
