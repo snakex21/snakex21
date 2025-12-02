@@ -1,121 +1,326 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Biblioteka gier – Max Playground</title>
-    <meta name="description" content="Nowa, interaktywna biblioteka gier Maxa. Filtruj tytuły, losuj pomysły i rozpocznij zabawę jednym kliknięciem." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="../assets/css/site.css" />
-    <script defer src="../assets/js/site.js"></script>
-    <script defer src="../assets/js/games-data.js"></script>
-    <script defer src="../assets/js/games.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gry - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --input-bg: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --input-bg: #2a2a2a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--text-secondary);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        .game-cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: var(--border);
+        }
+
+        .game-info {
+            padding: 1.25rem;
+        }
+
+        .game-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .game-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-secondary);
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 3rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link is-active" href="gry.html">Gry</a>
-                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+    <header>
+        <nav>
+            <a href="../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="gry.html" class="active">Gry</a>
+                <a href="../muzyka/muzyka.html">Muzyka</a>
+                <a href="../filmy/filmy glowna.html">Filmy</a>
+                <a href="../Programy/programy.html">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
+
     <main>
-        <section class="page-hero">
-            <h1>Biblioteka gier</h1>
-            <p>Wybierz grę na już albo odkrywaj losowe propozycje. Każdy tytuł uruchamia się w przeglądarce, bez instalacji i czekania.</p>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span>Łączna liczba gier</span>
-                    <strong data-games-count>11</strong>
-                    <small>Wszystkie działają bez instalacji.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Tryby rozgrywki</span>
-                    <strong><span data-games-solo>0</span> solo · <span data-games-multi>0</span> wspólne</strong>
-                    <small>Aktywuj filtr, by zobaczyć tylko swój tryb.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Średni poziom trudności</span>
-                    <strong data-games-difficulty>Średnia</strong>
-                    <small data-games-difficulty-note>Klasyczne tempo i równy poziom wyzwań.</small>
-                </div>
-                <div class="hero-stat">
-                    <span>Najczęstsza długość sesji</span>
-                    <strong data-games-duration>Standardowa (10–20 min)</strong>
-                    <small data-games-duration-note>Świetne na krótką sesję po lekcjach.</small>
-                </div>
-            </div>
-        </section>
+        <div class="page-header">
+            <h1>🎮 Gry</h1>
+            <p>Wybierz grę i zacznij zabawę</p>
+        </div>
 
-        <section class="game-toolbar" aria-label="Panel wyszukiwania gier">
-            <div class="game-toolbar__row">
-                <label class="game-search">
-                    <span role="img" aria-hidden="true">🔍</span>
-                    <span class="sr-only">Szukaj gier</span>
-                    <input type="search" placeholder="Wpisz nazwę, tryb lub gatunek..." data-game-search-input />
-                </label>
-                <button class="btn btn-secondary" type="button" data-random-game>Losuj grę dla mnie</button>
-            </div>
-            <div class="game-toolbar__filters" data-game-filters></div>
-            <div class="game-toolbar__row game-toolbar__row--footer">
-                <p class="game-toolbar__meta" data-game-active-count>Pokazujemy wszystkie 11 gier</p>
-                <a class="btn btn-ghost" href="../zmiany.html">Zobacz, co dodaliśmy ostatnio</a>
-            </div>
-        </section>
+        <div class="search-box">
+            <input
+                type="search"
+                class="search-input"
+                id="search"
+                placeholder="Szukaj gry..."
+                autocomplete="off"
+            >
+        </div>
 
-        <section class="section game-featured" aria-label="Polecane gry">
-            <div class="section-header">
-                <div>
-                    <p class="section-eyebrow">Na dobry start</p>
-                    <h2 class="section-title">Polecane tytuły na dziś</h2>
-                </div>
-                <p>Wybieramy różne kombinacje gatunków i poziomów trudności przy każdym odświeżeniu strony.</p>
-            </div>
-            <div class="game-featured__list" data-game-featured></div>
-        </section>
-
-        <section class="section game-collections" aria-label="Szybkie kolekcje">
-            <div class="section-header">
-                <div>
-                    <p class="section-eyebrow">Szybkie skróty</p>
-                    <h2 class="section-title">Zestawy dobrane do Twojego nastroju</h2>
-                </div>
-                <p>Jednym kliknięciem wskakujesz do gier solo, kooperacyjnych lub klasyków retro.</p>
-            </div>
-            <div class="game-collections__grid" data-game-collections></div>
-        </section>
-
-        <section class="game-grid" data-game-grid></section>
-
-        <div class="empty-state" data-empty-state>
-            <strong>Brak wyników wyszukiwania.</strong>
-            <p>Spróbuj użyć innego słowa kluczowego lub skorzystaj z losowania, aby znaleźć nową inspirację.</p>
+        <div class="games-grid" id="games-grid"></div>
+        <div class="no-results" id="no-results">
+            Nie znaleziono gier. Spróbuj innego wyszukiwania.
         </div>
     </main>
-    <footer>
-        <p>Życzymy udanej rozgrywki! &middot; Max Playground</p>
-    </footer>
+
+    <script src="../assets/js/games-data.js"></script>
+    <script>
+        // Renderuj gry
+        function renderGames(games) {
+            const grid = document.getElementById('games-grid');
+            const noResults = document.getElementById('no-results');
+
+            if (games.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+
+            grid.innerHTML = games.map(game => `
+                <a href="${game.url}" class="game-card">
+                    <img src="${game.cover}" alt="${game.coverAlt}" class="game-cover" onerror="this.style.display='none'">
+                    <div class="game-info">
+                        <div class="game-title">${game.title}</div>
+                        <div class="game-description">${game.description}</div>
+                        <div class="game-tags">
+                            ${game.modes.map(mode => `<span class="tag">${mode}</span>`).join('')}
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // Wyszukiwanie
+        const searchInput = document.getElementById('search');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = window.gamesCatalog.filter(game =>
+                game.title.toLowerCase().includes(query) ||
+                game.description.toLowerCase().includes(query) ||
+                game.genres.some(g => g.toLowerCase().includes(query)) ||
+                game.tags.some(t => t.toLowerCase().includes(query))
+            );
+            renderGames(filtered);
+        });
+
+        // Inicjalizacja
+        renderGames(window.gamesCatalog);
+
+        // Tryb ciemny
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
 </body>
 </html>
