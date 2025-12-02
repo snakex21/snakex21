@@ -1,278 +1,380 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kółko i krzyżyk – Max Playground</title>
-    <meta name="description" content="Graj w kółko i krzyżyk na jednym ekranie. Dwóch graczy na zmianę stawia X i O, a plansza dopasowuje się do Twojego urządzenia." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="../../assets/css/site.css" />
-    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kółko i krzyżyk - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
-        .game-stage--tictactoe {
-            --ttt-board-gap: clamp(0.6rem, 2vw, 1rem);
-            --ttt-tile-radius: 26px;
-            --ttt-accent-x: #38bdf8;
-            --ttt-accent-o: #f472b6;
-            --ttt-surface: linear-gradient(150deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.95));
-            --ttt-border: rgba(148, 163, 184, 0.35);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .game-stage--tictactoe .game-stage__board {
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent-x: #38bdf8;
+            --accent-o: #f472b6;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        html {
+            background: var(--bg);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats {
+            display: flex;
             justify-content: center;
-            gap: clamp(1rem, 3vw, 1.75rem);
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
 
-        .tictactoe-app {
-            width: min(920px, 100%);
-            display: grid;
-            gap: clamp(1rem, 3vw, 1.75rem);
-            justify-items: center;
+        .stat {
+            text-align: center;
+            padding: 1rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            min-width: 120px;
+            transition: all 0.2s;
         }
 
-        .tictactoe-board {
-            width: min(520px, 90vw);
+        .stat.is-active {
+            border-color: var(--accent-x);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .stat span {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat strong {
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .turn-display {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-board {
+            width: min(420px, 100%);
             aspect-ratio: 1 / 1;
-            background: var(--ttt-surface);
-            border-radius: calc(var(--ttt-tile-radius) * 1.4);
-            border: 1px solid var(--ttt-border);
-            padding: clamp(1rem, 3vw, 1.6rem);
+            margin: 0 auto 1.5rem;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: var(--ttt-board-gap);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 60px rgba(15, 23, 42, 0.55);
+            gap: 0.75rem;
         }
 
-        .tictactoe-cell {
-            border: none;
-            border-radius: var(--ttt-tile-radius);
-            background: rgba(15, 23, 42, 0.65);
-            color: #f8fafc;
+        .cell {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 3rem;
             font-weight: 700;
-            font-size: clamp(2.5rem, 6vw, 3.4rem);
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 35px rgba(8, 47, 73, 0.45);
-            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+            transition: all 0.2s;
         }
 
-        .tictactoe-cell:hover:not(:disabled) {
-            transform: translateY(-4px);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 28px 60px rgba(8, 47, 73, 0.55);
+        .cell:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+            border-color: var(--accent-x);
         }
 
-        .tictactoe-cell:disabled {
+        .cell:disabled {
             cursor: default;
             opacity: 0.9;
         }
 
-        .tictactoe-cell.is-x {
-            color: var(--ttt-accent-x);
+        .cell.is-x {
+            color: var(--accent-x);
         }
 
-        .tictactoe-cell.is-o {
-            color: var(--ttt-accent-o);
+        .cell.is-o {
+            color: var(--accent-o);
         }
 
-        .tictactoe-cell.is-winning {
-            background: rgba(45, 212, 191, 0.18);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 28px 70px rgba(45, 212, 191, 0.32);
+        .cell.is-winning {
+            background: #22c55e;
+            border-color: #16a34a;
+            color: #fff;
         }
 
-        .tictactoe-hud {
-            width: min(840px, 100%);
-            display: grid;
-            gap: clamp(0.75rem, 2vw, 1.25rem);
-            justify-items: center;
-        }
-
-        .tictactoe-turn {
-            font-size: clamp(1.05rem, 2.4vw, 1.35rem);
-            font-weight: 600;
-            color: var(--color-text);
+        .game-status {
             text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
         }
 
-        .game-stage--tictactoe .game-hud .game-score {
-            min-width: clamp(120px, 30vw, 160px);
-        }
-
-        .game-stage--tictactoe .game-hud .game-score.is-active {
-            border-color: rgba(56, 189, 248, 0.5);
-            box-shadow: 0 14px 25px rgba(56, 189, 248, 0.28);
-        }
-
-        .tictactoe-actions {
+        .game-actions {
             display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
             gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .tictactoe-actions button {
-            border-radius: 14px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            padding: 0.65rem 1.4rem;
+        .game-actions button {
+            padding: 0.75rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
             font-weight: 600;
-            font-size: 0.95rem;
-            background: rgba(30, 64, 175, 0.18);
-            color: var(--color-text);
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+            transition: all 0.2s;
         }
 
-        .tictactoe-actions button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 35px rgba(30, 64, 175, 0.28);
-            background: rgba(56, 189, 248, 0.22);
+        .game-actions button:hover {
+            background: var(--border);
+            transform: translateY(-1px);
         }
 
-        .tictactoe-actions button:focus-visible {
-            outline: 2px solid rgba(56, 189, 248, 0.75);
-            outline-offset: 3px;
+        .history {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
         }
 
-        .tictactoe-history {
-            width: min(520px, 100%);
-            padding: 1rem 1.25rem;
-            border-radius: 20px;
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            background: rgba(15, 23, 42, 0.08);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        }
-
-        .tictactoe-history h2 {
-            margin: 0 0 0.6rem;
+        .history h2 {
             font-size: 1.1rem;
-            letter-spacing: 0.04em;
+            margin-bottom: 0.75rem;
         }
 
-        .tictactoe-history p {
-            margin: 0;
-            color: var(--color-text-muted);
-            font-size: 0.92rem;
-        }
-
-        .tictactoe-history ol {
-            margin: 0;
-            padding-left: 1.1rem;
+        .history ol {
+            padding-left: 1.25rem;
             display: grid;
-            gap: 0.35rem;
-            color: var(--color-text-muted);
+            gap: 0.5rem;
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
 
-        @media (max-width: 720px) {
-            .tictactoe-board {
-                width: min(92vw, 420px);
-            }
+        .history-empty {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        @media (max-width: 520px) {
-            .tictactoe-board {
-                padding: 0.85rem;
-                gap: clamp(0.45rem, 4vw, 0.65rem);
-                border-radius: calc(var(--ttt-tile-radius) * 1.1);
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
             }
 
-            .tictactoe-cell {
-                border-radius: calc(var(--ttt-tile-radius) * 0.75);
+            nav {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .game-board {
+                gap: 0.5rem;
+            }
+
+            .cell {
+                font-size: 2.5rem;
             }
         }
     </style>
-    <script defer src="../../assets/js/site.js"></script>
 </head>
-<body class="game-page" data-root="../../">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link is-active" href="../gry.html">Gry</a>
-                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
+
     <main>
-        <article class="game-stage game-stage--tictactoe">
-            <header class="game-stage__header">
-                <div>
-                    <span class="game-eyebrow">Hot seat</span>
-                    <h1>Kółko i krzyżyk</h1>
-                    <p>Dwóch graczy przy jednym urządzeniu. Klikaj pola na zmianę, zbieraj wygrane rundy i obserwuj historię pojedynków bez opuszczania planszy.</p>
-                </div>
-                <div class="game-hud">
-                    <div class="game-score" data-player="x">
-                        <span>Wygrane X</span>
-                        <strong data-score-x>0</strong>
-                    </div>
-                    <div class="game-score" data-player="o">
-                        <span>Wygrane O</span>
-                        <strong data-score-o>0</strong>
-                    </div>
-                    <div class="game-score" data-player="draws">
-                        <span>Remisy</span>
-                        <strong data-score-draws>0</strong>
-                    </div>
-                </div>
-            </header>
+        <div class="game-header">
+            <h1>🎮 Kółko i krzyżyk</h1>
+            <p>Dwóch graczy przy jednym urządzeniu - klikaj pola na zmianę</p>
+        </div>
 
-            <div class="game-stage__board">
-                <div class="tictactoe-app">
-                    <div class="tictactoe-hud">
-                        <div class="tictactoe-turn" data-turn-display>Runda 1 · Tura gracza X</div>
-                        <div class="tictactoe-actions">
-                            <button type="button" data-action="next">Nowa runda</button>
-                            <button type="button" data-action="reset">Wyzeruj mecz</button>
-                        </div>
-                    </div>
-
-                    <div class="tictactoe-board" role="grid" aria-label="Plansza gry kółko i krzyżyk">
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 1" data-index="0"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 2" data-index="1"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 3" data-index="2"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 4" data-index="3"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 5" data-index="4"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 6" data-index="5"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 7" data-index="6"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 8" data-index="7"></button>
-                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 9" data-index="8"></button>
-                    </div>
-
-                    <p class="game-status" data-status aria-live="polite">Rozpocznij rundę i doprowadź do trzech swoich symboli w linii.</p>
-
-                    <section class="tictactoe-history" aria-live="polite">
-                        <h2>Historia partii</h2>
-                        <p data-history-empty>Jeszcze nie rozegrano żadnej partii.</p>
-                        <ol data-history></ol>
-                    </section>
-                </div>
+        <div class="stats">
+            <div class="stat" data-player="x">
+                <span>Wygrane X</span>
+                <strong data-score-x>0</strong>
             </div>
-        </article>
+            <div class="stat" data-player="o">
+                <span>Wygrane O</span>
+                <strong data-score-o>0</strong>
+            </div>
+            <div class="stat">
+                <span>Remisy</span>
+                <strong data-score-draws>0</strong>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="turn-display" data-turn-display>Runda 1 · Tura gracza X</div>
+
+            <div class="game-board">
+                <button type="button" class="cell" data-cell data-index="0"></button>
+                <button type="button" class="cell" data-cell data-index="1"></button>
+                <button type="button" class="cell" data-cell data-index="2"></button>
+                <button type="button" class="cell" data-cell data-index="3"></button>
+                <button type="button" class="cell" data-cell data-index="4"></button>
+                <button type="button" class="cell" data-cell data-index="5"></button>
+                <button type="button" class="cell" data-cell data-index="6"></button>
+                <button type="button" class="cell" data-cell data-index="7"></button>
+                <button type="button" class="cell" data-cell data-index="8"></button>
+            </div>
+
+            <p class="game-status" data-status>Rozpocznij rundę i doprowadź do trzech swoich symboli w linii</p>
+
+            <div class="game-actions">
+                <button type="button" data-action="next">Nowa runda</button>
+                <button type="button" data-action="reset">Wyzeruj mecz</button>
+            </div>
+
+            <div class="history">
+                <h2>Historia partii</h2>
+                <p class="history-empty" data-history-empty>Jeszcze nie rozegrano żadnej partii</p>
+                <ol data-history></ol>
+            </div>
+        </div>
     </main>
+
     <script>
+        // Motyw ciemny
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Tic-tac-toe game
         (() => {
             const cells = Array.from(document.querySelectorAll('[data-cell]'));
             const turnDisplay = document.querySelector('[data-turn-display]');
@@ -322,12 +424,8 @@
                 scoreCards.O.classList.toggle('is-active', state.current === 'O');
             }
 
-            function setStatus(text, variant = '') {
+            function setStatus(text) {
                 statusEl.textContent = text;
-                statusEl.classList.remove('won', 'lose');
-                if (variant) {
-                    statusEl.classList.add(variant);
-                }
             }
 
             function clearBoardUI() {
@@ -371,12 +469,12 @@
                 if (result.winner) {
                     state.scores[result.winner] += 1;
                     message = `Gracz ${result.winner} wygrywa rundę ${state.round}!`;
-                    setStatus(message, 'won');
+                    setStatus(message);
                     highlightCombo(result.combo);
                     turnDisplay.textContent = message;
                 } else {
                     state.scores.draws += 1;
-                    message = `Runda ${state.round} kończy się remisem.`;
+                    message = `Runda ${state.round} kończy się remisem`;
                     setStatus(message);
                     turnDisplay.textContent = message;
                 }
@@ -417,7 +515,7 @@
                 } else {
                     state.current = state.current === 'X' ? 'O' : 'X';
                     updateTurnDisplay();
-                    setStatus(`Twoim zadaniem jest ułożyć trzy symbole ${state.current} w linii.`);
+                    setStatus(`Twoim zadaniem jest ułożyć trzy symbole ${state.current} w linii`);
                 }
             }
 
@@ -439,7 +537,7 @@
 
                 clearBoardUI();
                 updateTurnDisplay();
-                setStatus('Rozpocznij rundę i doprowadź do trzech swoich symboli w linii.');
+                setStatus('Rozpocznij rundę i doprowadź do trzech swoich symboli w linii');
 
                 scoreXEl.textContent = state.scores.X;
                 scoreOEl.textContent = state.scores.O;
@@ -449,7 +547,7 @@
             cells.forEach((cell) => cell.addEventListener('click', handleCellClick));
             nextButton.addEventListener('click', () => {
                 if (!state.finished && state.moves > 0) {
-                    appendHistoryEntry(`Runda ${state.round} została przerwana.`);
+                    appendHistoryEntry(`Runda ${state.round} została przerwana`);
                 }
                 state.round += 1;
                 newRound();
