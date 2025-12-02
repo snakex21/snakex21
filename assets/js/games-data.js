@@ -172,8 +172,8 @@ const gamesCatalog = [
     title: "Koło fortuny",
     description:
       "Zakręć kołem, odgadnij hasło i zgarnij tytuł mistrza zgadywanek. Świetny format na wspólne domowe spotkania.",
-    cover: "kolo_fortuny/Kolo-fortuny-suchoscieralne-157cm.jpg",
-    coverAlt: "Duże koło fortuny na tle planszy z hasłami",
+    cover: "",
+    coverAlt: "Koło fortuny",
     url: "kolo_fortuny/kolo_fortuny.html",
     genres: ["Quiz", "Rodzinne"],
     modes: ["Wspólna gra"],
