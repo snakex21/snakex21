@@ -402,9 +402,12 @@
         }
 
         /* MOVE TILES */
+        let gameActive = true;
+
         document.onkeydown = directions;
 
         function directions(e) {
+            if (!gameActive) return;
             e = e || window.event;
 
             if (e.keyCode == '38') {
@@ -531,6 +534,7 @@
         }
 
         function reset() {
+            gameActive = true;
             buildGridOverlay();
             const status = document.getElementById('status');
             if (status) {
@@ -575,6 +579,7 @@
                 }
                 if (checker == 0) {
                     doc.innerHTML = '<p>Koniec gry! Spróbuj ponownie.</p>';
+                    gameActive = false;
                 }
             }
         }
