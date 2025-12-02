@@ -234,10 +234,13 @@
     <script src="../assets/js/movies-data.js"></script>
     <script>
         // Pobierz kolekcje z danych
-        const collections = Object.keys(window.moviesData || {}).map(key => ({
+        const moviesData = window.movieCollectionsData || {};
+        const moviesMeta = window.movieCollectionsMeta || {};
+
+        const collections = Object.keys(moviesData).map(key => ({
             id: key,
-            name: key.replace(/([A-Z])/g, ' $1').replace(/^_/, '').trim(),
-            count: window.moviesData[key].length,
+            name: moviesMeta[key]?.title || key.replace(/([A-Z])/g, ' $1').replace(/^_/, '').trim(),
+            count: moviesData[key].length,
             url: `movies.html?series=${key}`
         }));
 
