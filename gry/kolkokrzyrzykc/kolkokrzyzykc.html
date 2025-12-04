@@ -596,6 +596,13 @@
                     if (state.mode === 'ai' && state.current === state.aiPlayer && !state.finished) {
                         cells.forEach(c => c.disabled = true);
                         aiMove();
+                    } else if (state.mode === 'ai') {
+                        // Odblokuj puste komórki po ruchu AI
+                        cells.forEach((c, i) => {
+                            if (!state.board[i]) {
+                                c.disabled = false;
+                            }
+                        });
                     }
                 }
             }
