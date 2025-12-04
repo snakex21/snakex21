@@ -178,21 +178,29 @@
         .square::before {
             content: attr(data-piece);
             position: absolute;
+            /* Czarne figury - ciemne z jasnym konturem */
+            color: #1a1a1a;
             text-shadow:
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px 1px 0 #000,
-                1px 1px 0 #000,
-                0 0 3px rgba(0,0,0,0.5);
+                -1px -1px 0 rgba(255,255,255,0.3),
+                1px -1px 0 rgba(255,255,255,0.3),
+                -1px 1px 0 rgba(255,255,255,0.3),
+                1px 1px 0 rgba(255,255,255,0.3),
+                0 0 2px rgba(255,255,255,0.2);
         }
 
         .square.white-piece::before {
+            /* Białe figury - jasne z ciemnym konturem */
+            color: #ffffff;
             text-shadow:
                 -2px -2px 0 #000,
                 2px -2px 0 #000,
                 -2px 2px 0 #000,
                 2px 2px 0 #000,
-                0 0 5px rgba(0,0,0,0.8);
+                -1px 0 0 #000,
+                1px 0 0 #000,
+                0 -1px 0 #000,
+                0 1px 0 #000,
+                0 0 4px rgba(0,0,0,0.5);
         }
 
         .square.white {
