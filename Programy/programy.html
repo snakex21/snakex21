@@ -1,152 +1,258 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Laboratorium narzędzi – Max Playground</title>
-    <meta name="description" content="Wszystkie programy Maxa w jednym miejscu. Generatory kolorów, czcionek i emoji wraz z opisami funkcji oraz szybkim dostępem." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="../assets/css/site.css" />
-    <script defer src="../assets/js/site.js"></script>
-    <script defer src="../assets/js/programs-data.js"></script>
-    <script defer src="../assets/js/programs.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Narzędzia - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .tools-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .tool-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        .tool-icon {
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+
+        .tool-info {
+            flex: 1;
+        }
+
+        .tool-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .tool-arrow {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .tool-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .tool-arrow {
+                display: none;
+            }
+        }
+    </style>
 </head>
-<body data-root="../">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a class="is-current" href="programy.html">Przegląd wszystkich programów</a>
-                        <a href="generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link" href="../gry/gry.html">Gry</a>
-                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
+<body>
+    <header>
+        <nav>
+            <a href="../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry/gry.html">Gry</a>
+                <a href="../muzyka/muzyka.html">Muzyka</a>
+                <a href="../filmy/filmy glowna.html">Filmy</a>
+                <a href="programy.html" class="active">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
+
     <main>
-        <section class="page-hero programs-hero">
-            <span class="hero-eyebrow">Laboratorium narzędzi</span>
-            <h1>Programy i generatory, które przyspieszą Twoje pomysły</h1>
-            <p>Eksperymentuj z kolorami, typografią i emoji. Każde narzędzie działa w przeglądarce i pozwala szybko kopiować efekty do własnych projektów.</p>
-            <div class="hero-actions">
-                <a class="btn btn-primary" href="generator kolorow/generator kolorow.html">Uruchom generator kolorów</a>
-                <button class="btn btn-secondary" type="button" data-program-random="open">Losuj narzędzie</button>
-            </div>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span>Dostępne narzędzia</span>
-                    <strong data-program-count>3</strong>
-                </div>
-                <div class="hero-stat">
-                    <span>Obszary zastosowań</span>
-                    <strong data-program-category-count>0</strong>
-                </div>
-                <div class="hero-stat">
-                    <span>Ostatnia aktualizacja</span>
-                    <strong data-program-last-update>Aktualne</strong>
-                </div>
-            </div>
-        </section>
+        <div class="page-header">
+            <h1>🛠️ Narzędzia</h1>
+            <p>Przydatne generatory i narzędzia</p>
+        </div>
 
-        <section class="section" id="przeglad">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Przegląd narzędzi</span>
-                    <h2 class="section-title">Wszystkie programy w jednym miejscu</h2>
-                    <p class="section-description">Wybierz narzędzie, które najlepiej pasuje do Twojego zadania. Możesz filtrować listę po kategoriach lub wyszukać konkretne funkcje.</p>
+        <div class="tools-list">
+            <a href="generator kolorow/generator kolorow.html" class="tool-card">
+                <div class="tool-icon">🎨</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator kolorów</div>
+                    <div class="tool-description">Losuj palety, kopiuj kody HEX i RGB</div>
                 </div>
-                <div class="program-toolbar" role="search">
-                    <label class="program-search">
-                        <span role="img" aria-hidden="true">🔍</span>
-                        <span class="sr-only">Wyszukaj narzędzie</span>
-                        <input type="search" placeholder="Szukaj po nazwie lub funkcjach…" data-program-search />
-                    </label>
-                    <div class="program-filters" data-program-filters>
-                        <button class="btn btn-chip is-active" type="button" data-program-filter="all">Wszystkie</button>
-                    </div>
-                </div>
-            </div>
-            <div class="programs-grid" data-programs-grid aria-live="polite"></div>
-            <p class="program-empty" data-program-empty hidden>Nie znaleziono narzędzia spełniającego kryteria. Spróbuj zmienić filtr lub wyszukiwane hasło.</p>
-        </section>
+                <div class="tool-arrow">→</div>
+            </a>
 
-        <section class="section programs-highlight" id="polecane-programy">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Polecane</span>
-                    <h2 class="section-title">Sprawdź wyróżnione narzędzie</h2>
-                    <p class="section-description">Losowo podpowiadamy moduł, który może Cię zainspirować. Zobacz, do czego służy i jakie funkcje oferuje.</p>
+            <a href="generator czcionek/generator czcionek.html" class="tool-card">
+                <div class="tool-icon">🖋️</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator czcionek</div>
+                    <div class="tool-description">Zamieniaj tekst na różne style typograficzne</div>
                 </div>
-                <button class="btn btn-secondary" type="button" data-program-random="refresh">Losuj inne</button>
-            </div>
-            <article class="highlight-card" data-program-highlight>
-                <span class="badge" data-program-highlight-meta>Ulubione narzędzie społeczności</span>
-                <h3 data-program-highlight-title>Generator kolorów</h3>
-                <p data-program-highlight-description>Losuj palety barw, zapisuj ulubione kombinacje i kopiuj kody HEX albo RGB jednym kliknięciem.</p>
-                <ul class="program-highlight-list" data-program-highlight-features></ul>
-                <div class="highlight-actions">
-                    <a class="btn btn-primary" data-program-highlight-link href="generator kolorow/generator kolorow.html">Uruchom narzędzie</a>
-                    <span class="badge" data-program-highlight-tags>Kolory • HEX • RGB</span>
-                </div>
-            </article>
-        </section>
+                <div class="tool-arrow">→</div>
+            </a>
 
-        <section class="section programs-tips" id="jak-korzystac">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Porady</span>
-                    <h2 class="section-title">Jak najlepiej wykorzystać programy</h2>
-                    <p class="section-description">Każde narzędzie ma kilka trików, które pozwolą Ci szybciej osiągnąć cel. Oto nasze ulubione kombinacje.</p>
+            <a href="generator emoji/generator emoji.html" class="tool-card">
+                <div class="tool-icon">😀</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator emoji</div>
+                    <div class="tool-description">Przeglądaj i kopiuj emoji</div>
                 </div>
-            </div>
-            <div class="cards-grid cards-grid--three">
-                <article class="card card--tip">
-                    <span class="badge">🎨 Palety</span>
-                    <h3>Łącz kolory w zestawy</h3>
-                    <p>Skopiuj kilka barw z generatora i wklej je do notatnika projektu. Dzięki temu zawsze wrócisz do wybranego motywu.</p>
-                </article>
-                <article class="card card--tip">
-                    <span class="badge">🅰 Typografia</span>
-                    <h3>Przygotuj podpisy w różnych stylach</h3>
-                    <p>Generator czcionek pozwala zapisać tekst w wielu wariantach. Wybierz ulubione i dodaj do biblioteki, aby móc je szybko wklejać.</p>
-                </article>
-                <article class="card card--tip">
-                    <span class="badge">😀 Emoji</span>
-                    <h3>Twórz gotowe wiadomości</h3>
-                    <p>Skorzystaj z sekcji emoji, aby przygotować szablony reakcji do wysyłki w komunikatorach i mediach społecznościowych.</p>
-                </article>
-            </div>
-        </section>
-
-        <section class="callout">
-            <h2>Masz pomysł na nowe narzędzie?</h2>
-            <p>Daj znać, czego brakuje w laboratorium Maxa. Dodajemy kolejne programy i chętnie wprowadzimy Twoją sugestię do planu rozwoju.</p>
-            <div class="hero-actions">
-                <a class="btn btn-primary" href="mailto:kontakt@example.com">Wyślij propozycję</a>
-                <a class="btn btn-secondary" href="../zmiany.html">Sprawdź plan zmian</a>
-            </div>
-        </section>
+                <div class="tool-arrow">→</div>
+            </a>
+        </div>
     </main>
-    <footer>
-        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
-    </footer>
+
+    <script>
+        // Tryb ciemny
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
 </body>
 </html>
