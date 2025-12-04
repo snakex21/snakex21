@@ -224,6 +224,34 @@
             background: #2563eb;
         }
 
+        .mode-selection {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            background: var(--bg);
+        }
+
+        .mode-btn.active {
+            background: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
+        }
+
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -252,6 +280,15 @@
                 flex-direction: column;
                 gap: 0.5rem;
             }
+
+            .mode-selection {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .mode-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -276,6 +313,12 @@
         </div>
 
         <div class="game-container">
+            <div class="mode-selection">
+                <button class="mode-btn active" onclick="setMode('pvp')">👥 2 Graczy</button>
+                <button class="mode-btn" onclick="setMode('ai')">🤖 vs AI</button>
+                <button class="mode-btn" onclick="setMode('auto')">⚡ AI vs AI</button>
+            </div>
+
             <div class="game-info">
                 <div class="player-turn active" id="white-turn">⚪ Białe</div>
                 <div class="player-turn" id="black-turn">⚫ Czarne</div>
@@ -283,7 +326,7 @@
 
             <div id="chess-board"></div>
 
-            <div class="controls">
+            <div class="controls" id="controls-text">
                 <strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>
                 Gra dla dwóch graczy - na zmianę białe i czarne.
             </div>
@@ -313,6 +356,8 @@
         const board = [];
         let selectedPiece = null;
         let currentPlayer = 'white';
+        let gameMode = 'pvp'; // 'pvp', 'ai', 'auto'
+        let autoPlayInterval = null;
 
         // Figury szachowe (Unicode)
         const pieces = {
@@ -465,6 +510,12 @@
 
         // Obsługa kliknięcia na pole
         function handleSquareClick(row, col) {
+            // W trybie auto, nie pozwalaj na kliknięcia
+            if (gameMode === 'auto') return;
+
+            // W trybie AI, tylko białe mogą klikać (gracz)
+            if (gameMode === 'ai' && currentPlayer === 'black') return;
+
             if (selectedPiece) {
                 // Próba ruchu
                 if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
@@ -474,6 +525,15 @@
                     selectedPiece = null;
                     currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
                     updateTurnDisplay();
+                    drawBoard();
+
+                    // W trybie AI, po ruchu gracza, AI wykonuje swój ruch
+                    if (gameMode === 'ai' && currentPlayer === 'black') {
+                        setTimeout(() => {
+                            makeAIMove();
+                        }, 500); // 0.5 sekundy opóźnienia dla lepszego UX
+                    }
+                    return;
                 } else {
                     // Wybierz nową figurę jeśli kliknięto na swoją figurę
                     if (board[row][col] && board[row][col].color === currentPlayer) {
@@ -523,13 +583,105 @@
             }
         }
 
+        // Znajdź wszystkie możliwe ruchy dla danego koloru
+        function getAllValidMoves(color) {
+            const moves = [];
+            for (let fromRow = 0; fromRow < 8; fromRow++) {
+                for (let fromCol = 0; fromCol < 8; fromCol++) {
+                    const piece = board[fromRow][fromCol];
+                    if (piece && piece.color === color) {
+                        for (let toRow = 0; toRow < 8; toRow++) {
+                            for (let toCol = 0; toCol < 8; toCol++) {
+                                if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+                                    moves.push({ fromRow, fromCol, toRow, toCol });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+
+        // AI wykonuje ruch
+        function makeAIMove() {
+            const validMoves = getAllValidMoves(currentPlayer);
+            if (validMoves.length === 0) return;
+
+            // Wybierz losowy ruch
+            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+
+            // Wykonaj ruch
+            board[move.toRow][move.toCol] = board[move.fromRow][move.fromCol];
+            board[move.fromRow][move.fromCol] = null;
+
+            currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+            selectedPiece = null;
+            drawBoard();
+            updateTurnDisplay();
+
+            // W trybie vs AI, jeśli teraz jest tura gracza, przestań
+            // W trybie auto, kontynuuj
+            if (gameMode === 'auto') {
+                // Auto-play będzie kontynuował
+            } else if (gameMode === 'ai' && currentPlayer === 'black') {
+                // Po ruchu AI, czekaj na ruch gracza
+            }
+        }
+
+        // Zmiana trybu gry
+        function setMode(mode) {
+            gameMode = mode;
+
+            // Aktualizuj przyciski
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Zatrzymaj auto-play jeśli był aktywny
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+
+            // Aktualizuj tekst kontrolek
+            const controlsText = document.getElementById('controls-text');
+            if (mode === 'pvp') {
+                controlsText.innerHTML = '<strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>Gra dla dwóch graczy - na zmianę białe i czarne.';
+            } else if (mode === 'ai') {
+                controlsText.innerHTML = '<strong>Jak grać:</strong> Grasz jako białe. Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>AI gra jako czarne i wykonuje ruchy automatycznie.';
+            } else if (mode === 'auto') {
+                controlsText.innerHTML = '<strong>Tryb auto:</strong> Obserwuj jak AI gra przeciwko AI. Gra toczy się automatycznie. <br>Możesz zatrzymać i rozpocząć nową grę w dowolnym momencie.';
+                // Rozpocznij auto-play
+                autoPlayInterval = setInterval(() => {
+                    makeAIMove();
+                }, 1000); // 1 ruch na sekundę
+            }
+
+            resetGame();
+        }
+
         // Reset gry
         function resetGame() {
+            // Zatrzymaj auto-play jeśli był aktywny
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+
             initBoard();
             selectedPiece = null;
             currentPlayer = 'white';
             drawBoard();
             updateTurnDisplay();
+
+            // Jeśli tryb auto, rozpocznij auto-play
+            if (gameMode === 'auto') {
+                autoPlayInterval = setInterval(() => {
+                    makeAIMove();
+                }, 1000);
+            }
         }
 
         // Start gry
