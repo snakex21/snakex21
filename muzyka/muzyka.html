@@ -1,230 +1,601 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Strefa muzyczna – Max Playground</title>
-    <meta
-        name="description"
-        content="Nowy odtwarzacz w stylu Spotify z biblioteką Maxa. Kolejkuj utwory, przeglądaj playlistę i graj bezpośrednio z przeglądarki."
-    />
-    <link rel="icon" href="ikona.png" type="image/png" />
-    <link rel="stylesheet" href="../assets/css/site.css" />
-    <link rel="stylesheet" href="../assets/css/music.css" />
-    <script defer src="../assets/js/site.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Muzyka - Hub</title>
+    <link rel="icon" href="ikona.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --spotify-black: #000000;
+            --spotify-dark: #121212;
+            --spotify-gray: #181818;
+            --spotify-light-gray: #282828;
+            --spotify-green: #1db954;
+            --spotify-green-hover: #1ed760;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --border: #282828;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Spotify Circular', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--spotify-black);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: var(--spotify-dark);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "🎵";
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            overflow: hidden;
+        }
+
+        /* Sidebar - Library */
+        .sidebar {
+            background: var(--spotify-dark);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            background: var(--spotify-light-gray);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-input:focus {
+            outline: 2px solid var(--spotify-green);
+        }
+
+        .library-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .library-item {
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .library-item:hover {
+            background: var(--spotify-light-gray);
+        }
+
+        .library-item.active {
+            background: var(--spotify-light-gray);
+            border-left: 3px solid var(--spotify-green);
+        }
+
+        .library-item-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--spotify-green);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .library-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .library-item-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .library-item-artist {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Main Player Area */
+        .player-area {
+            background: linear-gradient(to bottom, var(--spotify-gray) 0%, var(--spotify-black) 100%);
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .now-playing {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .album-art {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 2rem;
+            background: var(--spotify-light-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .track-info {
+            margin-bottom: 2rem;
+        }
+
+        .track-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .track-artist {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .track-album {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Player Controls */
+        .player-controls {
+            margin-top: 2rem;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+        }
+
+        .control-btn:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            color: var(--spotify-green);
+        }
+
+        .play-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--spotify-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--spotify-black);
+            font-size: 1.5rem;
+        }
+
+        .play-btn:hover {
+            background: var(--spotify-green-hover);
+            transform: scale(1.05);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--spotify-light-gray);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-bar:hover .progress-fill::after {
+            opacity: 1;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--spotify-green);
+            border-radius: 3px;
+            position: relative;
+            transition: width 0.1s;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .progress-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Volume Control */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .volume-icon {
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .volume-slider {
+            width: 120px;
+            height: 4px;
+            background: var(--spotify-light-gray);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: var(--text-secondary);
+            border-radius: 2px;
+            transition: width 0.1s;
+        }
+
+        .volume-slider:hover .volume-fill {
+            background: var(--spotify-green);
+        }
+
+        /* Bottom Player Bar */
+        .player-bar {
+            background: var(--spotify-gray);
+            border-top: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-track-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-album-art {
+            width: 56px;
+            height: 56px;
+            background: var(--spotify-light-gray);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .bar-track-details {
+            min-width: 0;
+        }
+
+        .bar-track-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-track-artist {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .bar-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .bar-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bar-progress-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--spotify-light-gray);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .bar-progress-fill {
+            height: 100%;
+            background: var(--spotify-green);
+            border-radius: 2px;
+        }
+
+        .bar-time {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            min-width: 40px;
+        }
+
+        .bar-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .player-bar {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .bar-right {
+                display: none;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--spotify-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--spotify-light-gray);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #404040;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+    </style>
 </head>
-<body class="music-page">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="header-left">
+                <a href="../index.html" class="logo">Hub</a>
+                <nav class="nav-links">
+                    <a href="../gry/gry.html">Gry</a>
+                    <a href="muzyka.html" class="active">Muzyka</a>
+                    <a href="../filmy/filmy glowna.html">Filmy</a>
+                    <a href="../Programy/programy.html">Narzędzia</a>
+                </nav>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Sidebar Library -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>📚 Twoja biblioteka</h2>
+                    <div class="search-box">
+                        <input type="search" class="search-input" id="library-search" placeholder="Szukaj utworów...">
                     </div>
                 </div>
-                <a class="nav-link" href="../gry/gry.html">Gry</a>
-                <a class="nav-link" href="../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link is-active" href="muzyka.html" aria-current="page">Muzyka</a>
-                <a class="nav-link" href="../zmiany.html">Dziennik zmian</a>
-            </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                <div class="library-list" id="library-list">
+                    <!-- Populated by JS -->
                 </div>
-            </div>
-        </nav>
-    </header>
+            </aside>
 
-    <main>
-        <section class="hero hero--subpage hero--media">
-            <div class="hero-content">
-                <span class="hero-eyebrow">Strefa muzyczna</span>
-                <h1>Odtwarzacz Maxa w stylu Spotify</h1>
-                <p class="hero-lead">
-                    Wskocz do ulubionych hitów, buduj kolejkę i miksuj nastroje bez wychodzenia z przeglądarki. Wszystko sterujesz z jednego, nowoczesnego panelu.
-                </p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="#playlists">Przeglądaj bibliotekę</a>
-                    <a class="btn btn-secondary" href="../filmy/filmy glowna.html">Włącz seans filmowy</a>
-                </div>
-                <div class="hero-highlight">
-                    <span class="badge">Statystyki kolekcji</span>
-                    <span><strong id="track-count">0</strong> utworów gotowych do odtworzenia w dowolnej chwili.</span>
-                </div>
-            </div>
-            <div class="hero-illustration hero-illustration--media">
-                <div class="hero-panel">
-                    <h2>Panel dźwiękowy</h2>
-                    <p>Śledź co ostatnio grało, obserwuj aktywne tryby i uruchamiaj ulubione utwory jednym kliknięciem.</p>
-                    <div class="panel-metrics">
-                        <div class="metric"><span>Tryb miksu</span><strong id="autoplay-status">Losowo wyłączone</strong></div>
-                        <div class="metric"><span>Powtarzanie</span><strong id="loop-status">Brak</strong></div>
-                        <div class="metric"><span>Ostatnio grane</span><strong id="last-played">Jeszcze nic</strong></div>
+            <!-- Main Player -->
+            <main class="player-area">
+                <div class="now-playing" id="now-playing">
+                    <div class="empty-state">
+                        <h2>Witaj w odtwarzaczu!</h2>
+                        <p>Wybierz utwór z biblioteki aby rozpocząć odtwarzanie</p>
                     </div>
                 </div>
-            </div>
-        </section>
+            </main>
+        </div>
 
-        <section class="section music-dashboard" id="playlists">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Twoja strefa odsłuchu</span>
-                    <h2 class="section-title">Steruj muzyką jak w Spotify</h2>
-                    <p class="section-description">Wybierz utwór z biblioteki lub kolejki, włącz losowanie, zapętlaj i odkrywaj brzmienia z repozytorium Maxa.</p>
+        <!-- Bottom Player Bar -->
+        <div class="player-bar" id="player-bar" style="display: none;">
+            <div class="bar-track-info">
+                <div class="bar-album-art" id="bar-album-art">🎵</div>
+                <div class="bar-track-details">
+                    <div class="bar-track-title" id="bar-track-title">-</div>
+                    <div class="bar-track-artist" id="bar-track-artist">-</div>
                 </div>
             </div>
 
-            <div class="dashboard-grid">
-                <div class="player-column">
-                    <article class="now-playing-card" aria-live="polite">
-                        <div class="cover-wrapper">
-                            <div class="cover-art" data-cover data-has-image="false" data-initial="M"></div>
-                        </div>
-                        <div class="now-playing-meta">
-                            <span class="eyebrow">Teraz odtwarzane</span>
-                            <h2 data-title>Wybierz utwór</h2>
-                            <p data-artist>Twoja kolej na muzykę</p>
-                            <p class="now-playing-album" data-album></p>
-                        </div>
-                        <div class="player-timeline">
-                            <span data-current-time>0:00</span>
-                            <input type="range" value="0" min="0" max="1000" step="1" data-progress aria-label="Pozycja utworu" />
-                            <span data-duration>0:00</span>
-                        </div>
-                        <div class="player-controls">
-                            <div class="primary-controls">
-                                <button class="player-btn" data-action="shuffle" aria-pressed="false" aria-label="Przełącz losowe odtwarzanie">🔀</button>
-                                <button class="player-btn" data-action="prev" aria-label="Poprzedni utwór">⏮</button>
-                                <button class="player-btn player-btn--main" data-action="play" aria-label="Odtwórz">▶</button>
-                                <button class="player-btn" data-action="next" aria-label="Następny utwór">⏭</button>
-                                <button class="player-btn" data-action="loop" aria-label="Zmień tryb powtarzania">🔁</button>
-                            </div>
-                            <div class="secondary-controls">
-                                <button class="tag-btn" data-action="like" aria-pressed="false" aria-label="Dodaj do ulubionych">♡ Ulubiony</button>
-                                <button class="tag-btn" data-action="random" aria-label="Losuj dowolny utwór">Losuj utwór</button>
-                            </div>
-                        </div>
-                    </article>
-
-                    <section class="library-section" aria-labelledby="library-heading">
-                        <div class="library-header">
-                            <div>
-                                <span class="eyebrow">Twoja biblioteka</span>
-                                <h3 id="library-heading">Przeglądaj albumy i single</h3>
-                                <p>Dotknij karty, aby natychmiast odtworzyć, lub dodaj do kolejki ulubione brzmienia.</p>
-                            </div>
-                            <div class="library-actions">
-                                <label class="visually-hidden" for="library-search">Szukaj w bibliotece</label>
-                                <input id="library-search" class="input" type="search" placeholder="Filtruj bibliotekę" data-library-search />
-                                <button class="tag-btn" type="button" data-action="open-library">Pełna lista</button>
-                            </div>
-                        </div>
-                        <div class="library-grid" data-library-grid></div>
-                        <p class="library-empty" data-library-empty hidden>Brak wyników. Spróbuj innego wyszukiwania.</p>
-                    </section>
+            <div class="bar-controls">
+                <div class="bar-buttons">
+                    <button class="control-btn" id="bar-shuffle" title="Losuj">🔀</button>
+                    <button class="control-btn" id="bar-prev" title="Poprzedni">⏮️</button>
+                    <button class="control-btn play-btn" id="bar-play" title="Odtwórz">▶️</button>
+                    <button class="control-btn" id="bar-next" title="Następny">⏭️</button>
+                    <button class="control-btn" id="bar-repeat" title="Powtarzaj">🔁</button>
                 </div>
-
-                <aside class="queue-column">
-                    <div class="queue-card">
-                        <div class="queue-header">
-                            <div>
-                                <span class="eyebrow">Kolejka</span>
-                                <h3>Najbliższe utwory</h3>
-                            </div>
-                            <span class="queue-count" data-queue-count>0 utworów</span>
-                        </div>
-                        <div class="queue-search">
-                            <label class="visually-hidden" for="queue-search">Szukaj w kolejce</label>
-                            <input id="queue-search" class="input" type="search" placeholder="Szukaj po tytule lub artyście" data-search />
-                        </div>
-                        <div class="queue-actions">
-                            <button class="tag-btn" data-action="shuffle">Losowe</button>
-                            <button class="tag-btn" data-action="clear-search">Wyczyść</button>
-                        </div>
-                        <ol class="queue-list" data-queue role="listbox" aria-label="Lista utworów do odtworzenia"></ol>
-                        <p class="queue-empty" data-empty hidden>Brak wyników w kolejce. Usuń filtr lub dodaj nowe utwory.</p>
+                <div class="bar-progress">
+                    <span class="bar-time" id="bar-current-time">0:00</span>
+                    <div class="bar-progress-bar" id="bar-progress-bar">
+                        <div class="bar-progress-fill" id="bar-progress-fill"></div>
                     </div>
-                </aside>
+                    <span class="bar-time" id="bar-duration">0:00</span>
+                </div>
             </div>
-        </section>
-    </main>
 
-    <div class="library-drawer" data-library-drawer aria-hidden="true">
-        <div class="library-drawer__backdrop" data-action="close-library" aria-hidden="true"></div>
-        <div
-            class="library-drawer__panel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="library-drawer-title"
-            data-library-drawer-panel
-        >
-            <header class="library-drawer__header">
-                <div>
-                    <span class="eyebrow">Pełna biblioteka</span>
-                    <h2 id="library-drawer-title">Wszystkie utwory pod ręką</h2>
-                    <p>Przeglądaj, wyszukuj i odtwarzaj dowolny kawałek jednym kliknięciem.</p>
+            <div class="bar-right">
+                <button class="control-btn" id="bar-volume-icon" title="Głośność">🔊</button>
+                <div class="volume-slider" id="bar-volume-slider">
+                    <div class="volume-fill" id="bar-volume-fill"></div>
                 </div>
-                <div class="library-drawer__actions">
-                    <label class="visually-hidden" for="library-drawer-search">Filtruj utwory w bibliotece</label>
-                    <input
-                        id="library-drawer-search"
-                        class="input"
-                        type="search"
-                        placeholder="Szukaj po tytule, artyście lub albumie"
-                        data-library-drawer-search
-                    />
-                    <button class="tag-btn" type="button" data-action="close-library">Zamknij</button>
-                </div>
-            </header>
-            <div class="library-drawer__content">
-                <ul class="drawer-track-list" data-library-drawer-list role="listbox" aria-label="Pełna lista utworów"></ul>
-                <p class="drawer-empty" data-library-drawer-empty hidden>Brak wyników. Spróbuj innego hasła.</p>
             </div>
         </div>
     </div>
 
-    <footer class="player-footer" aria-label="Panel sterowania odtwarzaczem">
-        <div class="spotify-player" data-player-bar>
-            <div class="player-bar-left">
-                <div class="bar-cover" data-bar-cover data-has-image="false" data-initial="M"></div>
-                <div class="bar-meta">
-                    <span class="bar-title" data-bar-title>Wybierz utwór</span>
-                    <span class="bar-artist" data-bar-artist>Rozpocznij odtwarzanie, aby zobaczyć szczegóły</span>
-                </div>
-                <button class="player-btn player-btn--ghost" data-action="like" data-bar-like aria-pressed="false" aria-label="Dodaj do ulubionych">♡</button>
-            </div>
-            <div class="player-bar-center">
-                <div class="player-bar-controls">
-                    <button class="player-btn" data-action="shuffle" aria-pressed="false" aria-label="Przełącz losowe odtwarzanie">🔀</button>
-                    <button class="player-btn" data-action="prev" aria-label="Poprzedni utwór">⏮</button>
-                    <button class="player-btn player-btn--main" data-action="play" aria-label="Odtwórz">▶</button>
-                    <button class="player-btn" data-action="next" aria-label="Następny utwór">⏭</button>
-                    <button class="player-btn" data-action="loop" aria-label="Zmień tryb powtarzania">🔁</button>
-                </div>
-                <div class="player-bar-timeline">
-                    <span data-current-time>0:00</span>
-                    <input type="range" min="0" max="1000" value="0" step="1" data-progress aria-label="Pozycja utworu" />
-                    <span data-duration>0:00</span>
-                </div>
-            </div>
-            <div class="player-bar-right">
-                <button class="player-btn" type="button" data-action="open-library" aria-label="Otwórz bibliotekę">📚</button>
-                <button class="player-btn" data-action="mute" aria-label="Wycisz lub włącz dźwięk">🔊</button>
-                <input type="range" min="0" max="100" value="80" data-volume aria-label="Głośność" />
-                <div class="loop-indicator" data-loop-indicator>Tryb: brak powtarzania</div>
-            </div>
-        </div>
-    </footer>
+    <audio id="audio-player"></audio>
 
-    <script src="player.js"></script>
+    <script src="spotify-player.js"></script>
 </body>
 </html>

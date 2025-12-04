@@ -1,39 +1,153 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Wisielec – Max Playground</title>
-    <meta name="description" content="Zgaduj litery, odsłaniaj hasła i korzystaj z podpowiedzi w odświeżonej wersji gry wisielec na pełnym ekranie." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="../../assets/css/site.css" />
-    <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wisielec - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
-        .game-stage--hangman {
-            --hangman-surface: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.96));
-            --hangman-border: rgba(148, 163, 184, 0.35);
-            --hangman-highlight: #38bdf8;
-            --hangman-success: #34d399;
-            --hangman-danger: #f87171;
-            --hangman-muted: rgba(148, 163, 184, 0.45);
-            --hangman-text: #e2e8f0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .game-stage--hangman .game-stage__board {
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        html {
+            background: var(--bg);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats {
+            display: flex;
             justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat span {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat strong {
+            font-size: 1.5rem;
+            color: var(--text);
         }
 
         .hangman-app {
-            width: min(960px, 100%);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--shadow);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: clamp(1.25rem, 4vw, 2rem);
-            padding: clamp(1.5rem, 4vw, 2.5rem);
-            border-radius: 26px;
-            background: var(--hangman-surface);
-            border: 1px solid var(--hangman-border);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 28px 65px rgba(8, 47, 73, 0.5);
-            color: var(--hangman-text);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
         }
 
         .hangman-figure {
@@ -43,9 +157,9 @@
         }
 
         .hangman-figure svg {
-            width: clamp(220px, 32vw, 320px);
+            width: min(280px, 100%);
             height: auto;
-            stroke: var(--hangman-text);
+            stroke: var(--text);
             stroke-width: 6;
             fill: none;
             stroke-linecap: round;
@@ -53,7 +167,7 @@
 
         .hangman-figure [data-figure-part] {
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
         }
 
         .hangman-figure [data-figure-part].is-visible {
@@ -63,15 +177,15 @@
         .hangman-panel {
             display: flex;
             flex-direction: column;
-            gap: clamp(1rem, 3vw, 1.75rem);
+            gap: 1.5rem;
         }
 
         .hangman-word {
             display: flex;
             flex-wrap: wrap;
-            gap: clamp(0.4rem, 1.4vw, 0.75rem);
-            font-size: clamp(1.6rem, 4vw, 2.3rem);
-            letter-spacing: 0.18em;
+            gap: 0.5rem;
+            font-size: 2rem;
+            letter-spacing: 0.1em;
             font-weight: 700;
             text-transform: uppercase;
         }
@@ -80,106 +194,111 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 1.6rem;
-            padding: 0.1rem 0.35rem;
-            border-bottom: 3px solid rgba(148, 163, 184, 0.35);
+            min-width: 1.5rem;
+            padding: 0.1rem 0.3rem;
+            border-bottom: 3px solid var(--border);
         }
 
         .hangman-letter.is-revealed {
-            color: #f8fafc;
-            border-color: var(--hangman-highlight);
+            color: var(--text);
+            border-color: #3b82f6;
         }
 
         .hangman-topic {
-            margin: 0.4rem 0 0;
+            margin: 0;
             font-size: 0.95rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(226, 232, 240, 0.65);
+            font-weight: 600;
+            color: var(--text-secondary);
         }
 
         .hangman-hint {
             margin: 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            color: rgba(226, 232, 240, 0.75);
-        }
-
-        .hangman-keyboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-            gap: clamp(0.4rem, 1.6vw, 0.6rem);
-        }
-
-        .hangman-keyboard button {
-            padding: 0.6rem 0.4rem;
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            background: rgba(30, 64, 175, 0.25);
-            color: inherit;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .hangman-keyboard button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            background: rgba(56, 189, 248, 0.25);
-            border-color: rgba(56, 189, 248, 0.45);
-        }
-
-        .hangman-keyboard button:disabled {
-            opacity: 0.5;
-            cursor: default;
+            font-size: 0.9rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
         }
 
         .hangman-status {
             display: flex;
+            gap: 1.5rem;
             flex-wrap: wrap;
-            gap: 0.75rem 1.5rem;
         }
 
         .hangman-status__item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-            font-size: 0.95rem;
-            color: rgba(226, 232, 240, 0.78);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
         }
 
         .hangman-status__item strong {
-            font-size: 1.4rem;
-            color: #f8fafc;
+            display: inline;
+            font-size: 1.2rem;
+            color: var(--text);
+        }
+
+        .hangman-keyboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .hangman-keyboard button {
+            padding: 0.6rem 0.3rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hangman-keyboard button:hover:not(:disabled) {
+            background: #3b82f6;
+            color: #fff;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .hangman-keyboard button:disabled {
+            opacity: 0.4;
+            cursor: default;
         }
 
         .hangman-message {
-            min-height: 1.4rem;
+            min-height: 1.5rem;
             font-weight: 600;
-            color: var(--hangman-success);
+            color: #22c55e;
         }
 
         .hangman-message.is-lost {
-            color: var(--hangman-danger);
+            color: #ef4444;
         }
 
         .hangman-actions {
             display: flex;
-            flex-wrap: wrap;
             gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         .hangman-actions button {
-            border-radius: 999px;
-            padding: 0.6rem 1.4rem;
-            border: 1px solid rgba(56, 189, 248, 0.35);
-            background: rgba(56, 189, 248, 0.18);
-            color: #f1f5f9;
+            flex: 1;
+            min-width: 120px;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
             font-weight: 600;
-            transition: background 0.2s ease, transform 0.15s ease;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .hangman-actions button:hover:not(:disabled) {
-            background: rgba(56, 189, 248, 0.28);
+            background: var(--border);
             transform: translateY(-1px);
         }
 
@@ -188,313 +307,327 @@
             cursor: default;
         }
 
-        @media (max-width: 720px) {
-            .hangman-app {
-                grid-template-columns: 1fr;
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
             }
 
-            .hangman-figure svg {
-                width: min(260px, 70vw);
+            nav {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .hangman-app {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+
+            .hangman-word {
+                font-size: 1.5rem;
             }
         }
     </style>
-    <script defer src="../../assets/js/site.js"></script>
 </head>
-<body class="game-page" data-root="../../">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../../Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link is-active" href="../gry.html">Gry</a>
-                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
+
     <main>
-        <section class="game-stage game-stage--hangman">
-            <header class="game-stage__header">
-                <div>
-                    <span class="game-eyebrow">Klasyczna gra słowna</span>
-                    <h1>Wisielec</h1>
-                    <p>Wybieraj litery, odkrywaj hasła i w razie potrzeby korzystaj z podpowiedzi – cała rozgrywka mieści się teraz tuż pod paskiem nawigacji.</p>
+        <div class="game-header">
+            <h1>🎮 Wisielec</h1>
+            <p>Zgaduj litery i odkrywaj ukryte hasła</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span>Pozostałe próby</span>
+                <strong data-hangman-tries>6</strong>
+            </div>
+            <div class="stat">
+                <span>Odgadnięte</span>
+                <strong data-hangman-wins>0</strong>
+            </div>
+            <div class="stat">
+                <span>Błędne</span>
+                <strong data-hangman-mistakes>0</strong>
+            </div>
+            <div class="stat">
+                <span>Łącznie prób</span>
+                <strong data-hangman-max>6</strong>
+            </div>
+        </div>
+
+        <div class="hangman-app">
+            <div class="hangman-figure">
+                <svg viewBox="0 0 240 320">
+                    <line x1="20" y1="300" x2="220" y2="300" stroke-width="12" />
+                    <line x1="60" y1="300" x2="60" y2="30" stroke-width="12" />
+                    <line x1="60" y1="30" x2="180" y2="30" stroke-width="12" />
+                    <line x1="180" y1="30" x2="180" y2="70" stroke-width="12" />
+                    <circle cx="180" cy="95" r="28" data-figure-part="head" />
+                    <line x1="180" y1="123" x2="180" y2="200" data-figure-part="body" />
+                    <line x1="180" y1="150" x2="150" y2="180" data-figure-part="arm-left" />
+                    <line x1="180" y1="150" x2="210" y2="180" data-figure-part="arm-right" />
+                    <line x1="180" y1="200" x2="160" y2="250" data-figure-part="leg-left" />
+                    <line x1="180" y1="200" x2="200" y2="250" data-figure-part="leg-right" />
+                </svg>
+            </div>
+
+            <div class="hangman-panel">
+                <div class="hangman-word" data-hangman-word></div>
+                <p class="hangman-topic" data-hangman-topic></p>
+                <p class="hangman-hint" data-hangman-hint hidden></p>
+                <div class="hangman-status">
+                    <div class="hangman-status__item">
+                        Błędne litery: <strong data-hangman-mistakes>0</strong>
+                    </div>
+                    <div class="hangman-status__item">
+                        Łącznie prób: <strong data-hangman-max>6</strong>
+                    </div>
                 </div>
-                <div class="game-hud">
-                    <div class="game-score">
-                        <span>Pozostałe próby</span>
-                        <strong data-hangman-tries>6</strong>
-                    </div>
-                    <div class="game-score">
-                        <span>Hasła odgadnięte</span>
-                        <strong data-hangman-wins>0</strong>
-                    </div>
-                </div>
-            </header>
-            <div class="game-stage__board">
-                <div class="game-board">
-                    <div class="game-board__inner hangman-app">
-                        <div class="hangman-figure" aria-hidden="true">
-                            <svg viewBox="0 0 240 320" role="presentation">
-                                <line x1="20" y1="300" x2="220" y2="300" stroke-width="12" />
-                                <line x1="60" y1="300" x2="60" y2="30" stroke-width="12" />
-                                <line x1="60" y1="30" x2="180" y2="30" stroke-width="12" />
-                                <line x1="180" y1="30" x2="180" y2="70" stroke-width="12" />
-                                <circle cx="180" cy="95" r="28" data-figure-part="head" />
-                                <line x1="180" y1="123" x2="180" y2="200" data-figure-part="body" />
-                                <line x1="180" y1="150" x2="150" y2="180" data-figure-part="arm-left" />
-                                <line x1="180" y1="150" x2="210" y2="180" data-figure-part="arm-right" />
-                                <line x1="180" y1="200" x2="160" y2="250" data-figure-part="leg-left" />
-                                <line x1="180" y1="200" x2="200" y2="250" data-figure-part="leg-right" />
-                            </svg>
-                        </div>
-                        <div class="hangman-panel">
-                            <div class="hangman-word" data-hangman-word aria-live="polite"></div>
-                            <p class="hangman-topic" data-hangman-topic></p>
-                            <p class="hangman-hint" data-hangman-hint hidden></p>
-                            <div class="hangman-status">
-                                <div class="hangman-status__item">
-                                    <span>Błędne litery</span>
-                                    <strong data-hangman-mistakes>0</strong>
-                                </div>
-                                <div class="hangman-status__item">
-                                    <span>Łącznie prób</span>
-                                    <strong data-hangman-max>6</strong>
-                                </div>
-                            </div>
-                            <p class="hangman-message" data-hangman-message aria-live="assertive"></p>
-                            <div class="hangman-keyboard" data-hangman-keyboard></div>
-                            <div class="hangman-actions">
-                                <button type="button" data-hangman-hint-button>Podpowiedź</button>
-                                <button type="button" data-hangman-reset>Nowe hasło</button>
-                            </div>
-                        </div>
-                    </div>
+                <p class="hangman-message" data-hangman-message></p>
+                <div class="hangman-keyboard" data-hangman-keyboard></div>
+                <div class="hangman-actions">
+                    <button type="button" data-hangman-hint-button>Podpowiedź</button>
+                    <button type="button" data-hangman-reset>Nowe hasło</button>
                 </div>
             </div>
-        </section>
+        </div>
     </main>
+
+    <script>
+        // Motyw ciemny
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Wisielec game
+        (() => {
+            const categories = [
+                {
+                    topic: "Drużyny Premier League",
+                    entries: [
+                        { word: "EVERTON", hint: "Klub z niebieskiej części Liverpoolu" },
+                        { word: "LIVERPOOL", hint: "Czerwoni z Anfield" },
+                        { word: "SWANSEA", hint: "Pierwszy walijski klub w Premier League" },
+                        { word: "CHELSEA", hint: "Londyński klub ze Stamford Bridge" },
+                        { word: "HULL", hint: "Tygrysy z Kingston upon Hull" },
+                        { word: "MANCHESTER-CITY", hint: "Mistrzowie z Etihad Stadium" },
+                        { word: "NEWCASTLE-UNITED", hint: "Sroki z St James' Park" }
+                    ]
+                },
+                {
+                    topic: "Filmy",
+                    entries: [
+                        { word: "OBCY", hint: "Kultowy horror science fiction Ridleya Scotta" },
+                        { word: "BRUDNY-HARRY", hint: "Ikoniczny policjant grany przez Clinta Eastwooda" },
+                        { word: "GLADIATOR", hint: "Epicki dramat o generale Maximusa" },
+                        { word: "GDZIE-JEST-NEMO", hint: "Animacja Pixara o poszukiwaniach rybki" },
+                        { word: "SZCZĘKI", hint: "Klasyk Stevena Spielberga o wielkim żarłaczu" }
+                    ]
+                },
+                {
+                    topic: "Miasta",
+                    entries: [
+                        { word: "MANCHESTER", hint: "Miasto w północnej Anglii" },
+                        { word: "MEDIOLAN", hint: "Włoska stolica mody" },
+                        { word: "MADRYT", hint: "Stolica Hiszpanii" },
+                        { word: "AMSTERDAM", hint: "Stolica Holandii słynąca z kanałów" },
+                        { word: "PRAGA", hint: "Stolica Czech nad Wełtawą" }
+                    ]
+                }
+            ];
+            const words = categories.flatMap((category) =>
+                category.entries.map((entry) => ({ ...entry, topic: category.topic }))
+            );
+            const letters = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZĄĆĘŁŃÓŚŹŻ");
+            const keyboard = document.querySelector('[data-hangman-keyboard]');
+            const wordElement = document.querySelector('[data-hangman-word]');
+            const topicElement = document.querySelector('[data-hangman-topic]');
+            const hintElement = document.querySelector('[data-hangman-hint]');
+            const hintButton = document.querySelector('[data-hangman-hint-button]');
+            const resetButton = document.querySelector('[data-hangman-reset]');
+            const messageElement = document.querySelector('[data-hangman-message]');
+            const triesElement = document.querySelector('[data-hangman-tries]');
+            const winsElement = document.querySelector('[data-hangman-wins]');
+            const mistakesElement = document.querySelector('[data-hangman-mistakes]');
+            const maxElement = document.querySelector('[data-hangman-max]');
+            const figureParts = Array.from(document.querySelectorAll('[data-figure-part]'));
+            const maxMistakes = figureParts.length;
+            let activeWord = null;
+            let guessed = new Set();
+            let wrongGuesses = new Set();
+            let gamesWon = 0;
+            let lastWord = null;
+            maxElement.textContent = String(maxMistakes);
+
+            function renderKeyboard() {
+                keyboard.innerHTML = letters
+                    .map(
+                        (letter) =>
+                            `<button type="button" data-letter="${letter}">${letter}</button>`
+                    )
+                    .join("");
+            }
+
+            function chooseWord() {
+                let candidate = words[Math.floor(Math.random() * words.length)];
+                if (lastWord && words.length > 1) {
+                    let safety = 0;
+                    while (candidate.word === lastWord.word && safety < 10) {
+                        candidate = words[Math.floor(Math.random() * words.length)];
+                        safety += 1;
+                    }
+                }
+                lastWord = candidate;
+                return candidate;
+            }
+
+            function revealWord() {
+                const display = activeWord.word.split("").map((char) => {
+                    if (!letters.includes(char)) {
+                        return `<span class="hangman-letter is-revealed">${char}</span>`;
+                    }
+                    const isRevealed = guessed.has(char);
+                    return `<span class="hangman-letter${isRevealed ? " is-revealed" : ""}">${isRevealed ? char : ""}</span>`;
+                });
+                wordElement.innerHTML = display.join("");
+            }
+
+            function updateFigure() {
+                figureParts.forEach((part, index) => {
+                    part.classList.toggle("is-visible", index < wrongGuesses.size);
+                });
+            }
+
+            function updateHud() {
+                const triesLeft = maxMistakes - wrongGuesses.size;
+                triesElement.textContent = String(triesLeft);
+                winsElement.textContent = String(gamesWon);
+                mistakesElement.textContent = String(wrongGuesses.size);
+            }
+
+            function setKeyboardState(disabled) {
+                keyboard.querySelectorAll('button').forEach((button) => {
+                    const letter = button.dataset.letter;
+                    const isUsed = guessed.has(letter) || wrongGuesses.has(letter);
+                    button.disabled = disabled || isUsed;
+                });
+            }
+
+            function endGame(won) {
+                setKeyboardState(true);
+                messageElement.classList.toggle('is-lost', !won);
+                if (won) {
+                    messageElement.textContent = `Brawo! Hasło to "${activeWord.word}"`;
+                    gamesWon += 1;
+                } else {
+                    messageElement.textContent = `Niestety! Szukane słowo to "${activeWord.word}"`;
+                }
+                updateHud();
+            }
+
+            function checkState() {
+                const allLetters = new Set(activeWord.word.split("").filter((char) => letters.includes(char)));
+                const won = Array.from(allLetters).every((char) => guessed.has(char));
+                if (won) {
+                    endGame(true);
+                    return;
+                }
+                if (wrongGuesses.size >= maxMistakes) {
+                    endGame(false);
+                }
+            }
+
+            function handleGuess(letter) {
+                if (!letters.includes(letter)) {
+                    return;
+                }
+                if (guessed.has(letter) || wrongGuesses.has(letter)) {
+                    return;
+                }
+                if (activeWord.word.includes(letter)) {
+                    guessed.add(letter);
+                } else {
+                    wrongGuesses.add(letter);
+                }
+                revealWord();
+                updateFigure();
+                updateHud();
+                checkState();
+                setKeyboardState(false);
+            }
+
+            function resetGame() {
+                activeWord = chooseWord();
+                guessed = new Set();
+                wrongGuesses = new Set();
+                messageElement.textContent = "";
+                messageElement.classList.remove('is-lost');
+                hintElement.hidden = true;
+                hintElement.textContent = "";
+                if (topicElement) {
+                    topicElement.textContent = `Temat: ${activeWord.topic}`;
+                }
+                hintButton.disabled = false;
+                revealWord();
+                updateFigure();
+                updateHud();
+                setKeyboardState(false);
+            }
+
+            renderKeyboard();
+            resetButton.addEventListener('click', resetGame);
+            hintButton.addEventListener('click', () => {
+                hintElement.hidden = false;
+                hintElement.textContent = `Podpowiedź: ${activeWord.hint}`;
+                hintButton.disabled = true;
+            });
+            keyboard.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-letter]');
+                if (!button || button.disabled) {
+                    return;
+                }
+                handleGuess(button.dataset.letter);
+            });
+            window.addEventListener('keydown', (event) => {
+                const letter = event.key.toUpperCase();
+                if (letters.includes(letter)) {
+                    handleGuess(letter);
+                }
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    if (messageElement.textContent) {
+                        resetGame();
+                    }
+                }
+            });
+            resetGame();
+        })();
+    </script>
 </body>
-<script>
-    (() => {
-        const categories = [
-            {
-                topic: "Drużyny Premier League",
-                entries: [
-                    { word: "EVERTON", hint: "Klub z niebieskiej części Liverpoolu" },
-                    { word: "LIVERPOOL", hint: "Czerwoni z Anfield" },
-                    { word: "SWANSEA", hint: "Pierwszy walijski klub w Premier League" },
-                    { word: "CHELSEA", hint: "Londyński klub ze Stamford Bridge" },
-                    { word: "HULL", hint: "Tygrysy z Kingston upon Hull" },
-                    { word: "MANCHESTER-CITY", hint: "Mistrzowie z Etihad Stadium" },
-                    { word: "NEWCASTLE-UNITED", hint: "Sroki z St James' Park" }
-                ]
-            },
-            {
-                topic: "Filmy",
-                entries: [
-                    { word: "OBCY", hint: "Kultowy horror science fiction Ridleya Scotta" },
-                    { word: "BRUDNY-HARRY", hint: "Ikoniczny policjant grany przez Clinta Eastwooda" },
-                    { word: "GLADIATOR", hint: "Epicki dramat o generale Maximusa" },
-                    { word: "GDZIE-JEST-NEMO", hint: "Animacja Pixara o poszukiwaniach rybki" },
-                    { word: "SZCZĘKI", hint: "Klasyk Stevena Spielberga o wielkim żarłaczu" }
-                ]
-            },
-            {
-                topic: "Miasta",
-                entries: [
-                    { word: "MANCHESTER", hint: "Miasto w północnej Anglii" },
-                    { word: "MEDIOLAN", hint: "Włoska stolica mody" },
-                    { word: "MADRYT", hint: "Stolica Hiszpanii" },
-                    { word: "AMSTERDAM", hint: "Stolica Holandii słynąca z kanałów" },
-                    { word: "PRAGA", hint: "Stolica Czech nad Wełtawą" }
-                ]
-            }
-        ];
-        const words = categories.flatMap((category) =>
-            category.entries.map((entry) => ({ ...entry, topic: category.topic }))
-        );
-        const letters = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZĄĆĘŁŃÓŚŹŻ");
-        const keyboard = document.querySelector('[data-hangman-keyboard]');
-        const wordElement = document.querySelector('[data-hangman-word]');
-        const topicElement = document.querySelector('[data-hangman-topic]');
-        const hintElement = document.querySelector('[data-hangman-hint]');
-        const hintButton = document.querySelector('[data-hangman-hint-button]');
-        const resetButton = document.querySelector('[data-hangman-reset]');
-        const messageElement = document.querySelector('[data-hangman-message]');
-        const triesElement = document.querySelector('[data-hangman-tries]');
-        const winsElement = document.querySelector('[data-hangman-wins]');
-        const mistakesElement = document.querySelector('[data-hangman-mistakes]');
-        const maxElement = document.querySelector('[data-hangman-max]');
-        const figureParts = Array.from(document.querySelectorAll('[data-figure-part]'));
-        const maxMistakes = figureParts.length;
-        let activeWord = null;
-        let guessed = new Set();
-        let wrongGuesses = new Set();
-        let gamesWon = 0;
-        let lastWord = null;
-        maxElement.textContent = String(maxMistakes);
-
-        function renderKeyboard() {
-            keyboard.innerHTML = letters
-                .map(
-                    (letter) =>
-                        `<button type="button" data-letter="${letter}">${letter}</button>`
-                )
-                .join("");
-        }
-
-        function chooseWord() {
-            let candidate = words[Math.floor(Math.random() * words.length)];
-            if (lastWord && words.length > 1) {
-                let safety = 0;
-                while (candidate.word === lastWord.word && safety < 10) {
-                    candidate = words[Math.floor(Math.random() * words.length)];
-                    safety += 1;
-                }
-            }
-            lastWord = candidate;
-            return candidate;
-        }
-
-        function revealWord() {
-            const display = activeWord.word.split("").map((char) => {
-                if (!letters.includes(char)) {
-                    return `<span class="hangman-letter is-revealed">${char}</span>`;
-                }
-                const isRevealed = guessed.has(char);
-                return `<span class="hangman-letter${isRevealed ? " is-revealed" : ""}">${isRevealed ? char : ""}</span>`;
-            });
-            wordElement.innerHTML = display.join("");
-        }
-
-        function updateFigure() {
-            figureParts.forEach((part, index) => {
-                part.classList.toggle("is-visible", index < wrongGuesses.size);
-            });
-        }
-
-        function updateHud() {
-            const triesLeft = maxMistakes - wrongGuesses.size;
-            triesElement.textContent = String(triesLeft);
-            winsElement.textContent = String(gamesWon);
-            mistakesElement.textContent = String(wrongGuesses.size);
-        }
-
-        function setKeyboardState(disabled) {
-            keyboard.querySelectorAll('button').forEach((button) => {
-                const letter = button.dataset.letter;
-                const isUsed = guessed.has(letter) || wrongGuesses.has(letter);
-                button.disabled = disabled || isUsed;
-            });
-        }
-
-        function endGame(won) {
-            setKeyboardState(true);
-            messageElement.classList.toggle('is-lost', !won);
-            if (won) {
-                messageElement.textContent = `Brawo! Hasło to "${activeWord.word}".`;
-                gamesWon += 1;
-            } else {
-                messageElement.textContent = `Niestety! Szukane słowo to "${activeWord.word}".`;
-            }
-            updateHud();
-        }
-
-        function checkState() {
-            const allLetters = new Set(activeWord.word.split("").filter((char) => letters.includes(char)));
-            const won = Array.from(allLetters).every((char) => guessed.has(char));
-            if (won) {
-                endGame(true);
-                return;
-            }
-            if (wrongGuesses.size >= maxMistakes) {
-                endGame(false);
-            }
-        }
-
-        function handleGuess(letter) {
-            if (!letters.includes(letter)) {
-                return;
-            }
-            if (guessed.has(letter) || wrongGuesses.has(letter)) {
-                return;
-            }
-            if (activeWord.word.includes(letter)) {
-                guessed.add(letter);
-            } else {
-                wrongGuesses.add(letter);
-            }
-            revealWord();
-            updateFigure();
-            updateHud();
-            checkState();
-            setKeyboardState(false);
-        }
-
-        function resetGame() {
-            activeWord = chooseWord();
-            guessed = new Set();
-            wrongGuesses = new Set();
-            messageElement.textContent = "";
-            messageElement.classList.remove('is-lost');
-            hintElement.hidden = true;
-            hintElement.textContent = "";
-            if (topicElement) {
-                topicElement.textContent = `Temat: ${activeWord.topic}`;
-            }
-            hintButton.disabled = false;
-            revealWord();
-            updateFigure();
-            updateHud();
-            setKeyboardState(false);
-        }
-
-        renderKeyboard();
-        resetButton.addEventListener('click', resetGame);
-        hintButton.addEventListener('click', () => {
-            hintElement.hidden = false;
-            hintElement.textContent = `Podpowiedź: ${activeWord.hint}`;
-            hintButton.disabled = true;
-        });
-        keyboard.addEventListener('click', (event) => {
-            const button = event.target.closest('button[data-letter]');
-            if (!button || button.disabled) {
-                return;
-            }
-            handleGuess(button.dataset.letter);
-        });
-        window.addEventListener('keydown', (event) => {
-            const letter = event.key.toUpperCase();
-            if (letters.includes(letter)) {
-                handleGuess(letter);
-            }
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                if (messageElement.textContent) {
-                    resetGame();
-                }
-            }
-        });
-        resetGame();
-    })();
-</script>
 </html>
