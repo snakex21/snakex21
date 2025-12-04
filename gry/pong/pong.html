@@ -180,7 +180,14 @@
             color: var(--text);
         }
 
-        .restart-btn {
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .restart-btn, .start-btn {
             padding: 0.75rem 1.5rem;
             background: #3b82f6;
             color: #fff;
@@ -189,10 +196,26 @@
             font-weight: 600;
             cursor: pointer;
             font-size: 1rem;
+            transition: all 0.2s;
         }
 
-        .restart-btn:hover {
+        .restart-btn:hover, .start-btn:hover {
             background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .start-btn {
+            background: #10b981;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+        }
+
+        .start-btn:hover {
+            background: #059669;
+        }
+
+        .hidden {
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -248,7 +271,10 @@
             <div class="controls" id="controls-text">
                 <strong>Sterowanie:</strong> <span id="control-info">Ruch myszą w pionie porusza paletką</span>
             </div>
-            <button class="restart-btn" onclick="restartGame()">Zagraj ponownie</button>
+            <div class="btn-group">
+                <button class="start-btn" id="start-btn" onclick="startGame()">▶ START</button>
+                <button class="restart-btn hidden" id="restart-btn" onclick="restartGame()">Zagraj ponownie</button>
+            </div>
         </div>
     </main>
 
@@ -273,8 +299,13 @@
         const canvas = document.getElementById('pong-canvas');
         const ctx = canvas.getContext('2d');
         const controlInfo = document.getElementById('control-info');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
 
         let gameMode = 'ai'; // 'ai' lub 'coop'
+        let gameStarted = false;
+        let scoringCooldown = false;
+        let gameInterval = null;
 
         // Paletki
         const paddleWidth = 30;
@@ -306,8 +337,8 @@
             y: canvas.height / 2,
             radius: 20,
             speed: 10,
-            velocityX: 5,
-            velocityY: 5,
+            velocityX: 0,
+            velocityY: 0,
             color: 'white'
         };
 
@@ -339,7 +370,7 @@
 
         // Kontrola myszą (tryb AI)
         canvas.addEventListener('mousemove', (evt) => {
-            if (gameMode === 'ai') {
+            if (gameMode === 'ai' && gameStarted) {
                 let rect = canvas.getBoundingClientRect();
                 leftPaddle.y = evt.clientY - rect.top - leftPaddle.height / 2;
             }
@@ -363,12 +394,34 @@
                    b.y - b.radius < p.y + p.height;
         }
 
-        // Reset piłki
+        // Reset piłki z cooldownem
         function resetBall() {
+            scoringCooldown = true;
+            ball.velocityX = 0;
+            ball.velocityY = 0;
             ball.x = canvas.width / 2;
             ball.y = canvas.height / 2;
-            ball.velocityX = -ball.velocityX;
             ball.speed = 10;
+
+            // Pauza 2 sekundy przed następną rundą
+            setTimeout(() => {
+                ball.velocityX = (Math.random() > 0.5 ? 1 : -1) * 5;
+                ball.velocityY = (Math.random() * 4) - 2;
+                scoringCooldown = false;
+            }, 2000);
+        }
+
+        // Start gry
+        function startGame() {
+            gameStarted = true;
+            startBtn.classList.add('hidden');
+            restartBtn.classList.remove('hidden');
+            ball.velocityX = 5;
+            ball.velocityY = 3;
+
+            if (!gameInterval) {
+                gameInterval = setInterval(gameLoop, 1000 / 50);
+            }
         }
 
         // Restart gry
@@ -376,16 +429,19 @@
             leftPaddle.score = 0;
             rightPaddle.score = 0;
             ball.speed = 10;
-            ball.velocityX = 5;
-            ball.velocityY = 5;
+            scoringCooldown = false;
             resetBall();
         }
 
         // Update
         function update() {
-            // Ruch piłki
-            ball.x += ball.velocityX;
-            ball.y += ball.velocityY;
+            if (!gameStarted) return;
+
+            // Ruch piłki tylko gdy nie ma cooldowna
+            if (!scoringCooldown) {
+                ball.x += ball.velocityX;
+                ball.y += ball.velocityY;
+            }
 
             if (gameMode === 'ai') {
                 // AI dla prawej paletki
@@ -418,7 +474,7 @@
 
             // Kolizja z paletkami
             let player = (ball.x < canvas.width / 2) ? leftPaddle : rightPaddle;
-            if (collision(ball, player)) {
+            if (collision(ball, player) && !scoringCooldown) {
                 ball.velocityX = -ball.velocityX;
 
                 let cp = ball.y - (player.y + player.height / 2);
@@ -430,13 +486,15 @@
                 ball.speed += 0.5;
             }
 
-            // Punkty
-            if (ball.x - ball.radius < 0) {
-                rightPaddle.score++;
-                resetBall();
-            } else if (ball.x + ball.radius > canvas.width) {
-                leftPaddle.score++;
-                resetBall();
+            // Punkty - tylko gdy nie ma cooldowna
+            if (!scoringCooldown) {
+                if (ball.x - ball.radius < 0) {
+                    rightPaddle.score++;
+                    resetBall();
+                } else if (ball.x + ball.radius > canvas.width) {
+                    leftPaddle.score++;
+                    resetBall();
+                }
             }
 
             // Wygranie gry
@@ -465,6 +523,15 @@
 
             // Piłka
             drawCircle(ball.x, ball.y, ball.radius, ball.color);
+
+            // Tekst START jeśli gra nie wystartowała
+            if (!gameStarted) {
+                ctx.fillStyle = 'white';
+                ctx.font = '3em fantasy';
+                ctx.textAlign = 'center';
+                ctx.fillText('Kliknij START aby rozpocząć', canvas.width / 2, canvas.height / 2);
+                ctx.textAlign = 'left';
+            }
         }
 
         // Główna pętla gry
@@ -473,8 +540,8 @@
             render();
         }
 
-        // Start gry
-        setInterval(gameLoop, 1000 / 50);
+        // Początkowe renderowanie
+        render();
 
         // Przełączanie trybu
         const modeButtons = document.querySelectorAll('.mode-btn');
@@ -490,7 +557,22 @@
                     controlInfo.textContent = 'W/S - lewa paletka · ↑/↓ - prawa paletka';
                 }
 
-                restartGame();
+                // Reset gry przy zmianie trybu
+                gameStarted = false;
+                if (gameInterval) {
+                    clearInterval(gameInterval);
+                    gameInterval = null;
+                }
+                startBtn.classList.remove('hidden');
+                restartBtn.classList.add('hidden');
+                leftPaddle.score = 0;
+                rightPaddle.score = 0;
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+                ball.velocityX = 0;
+                ball.velocityY = 0;
+                scoringCooldown = false;
+                render();
             });
         });
     </script>
