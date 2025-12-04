@@ -172,6 +172,27 @@
             cursor: pointer;
             transition: all 0.2s;
             user-select: none;
+            position: relative;
+        }
+
+        .square::before {
+            content: attr(data-piece);
+            position: absolute;
+            text-shadow:
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000,
+                0 0 3px rgba(0,0,0,0.5);
+        }
+
+        .square.white-piece::before {
+            text-shadow:
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000,
+                2px 2px 0 #000,
+                0 0 5px rgba(0,0,0,0.8);
         }
 
         .square.white {
@@ -252,6 +273,45 @@
             border-color: #3b82f6;
         }
 
+        .color-selection {
+            display: none;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .color-selection.show {
+            display: flex;
+        }
+
+        .color-btn {
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-btn:hover {
+            background: var(--bg);
+        }
+
+        .color-btn.active {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -289,6 +349,15 @@
             .mode-btn {
                 width: 100%;
             }
+
+            .color-selection {
+                flex-direction: column;
+            }
+
+            .color-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -317,6 +386,12 @@
                 <button class="mode-btn active" onclick="setMode('pvp')">👥 2 Graczy</button>
                 <button class="mode-btn" onclick="setMode('ai')">🤖 vs AI</button>
                 <button class="mode-btn" onclick="setMode('auto')">⚡ AI vs AI</button>
+            </div>
+
+            <div class="color-selection" id="color-selection">
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Grasz jako:</span>
+                <button class="color-btn active" onclick="setPlayerColor('white')">⚪ Białe (zaczynam)</button>
+                <button class="color-btn" onclick="setPlayerColor('black')">⚫ Czarne (AI zaczyna)</button>
             </div>
 
             <div class="game-info">
@@ -358,6 +433,7 @@
         let currentPlayer = 'white';
         let gameMode = 'pvp'; // 'pvp', 'ai', 'auto'
         let autoPlayInterval = null;
+        let playerColor = 'white'; // Kolor gracza w trybie AI
 
         // Figury szachowe (Unicode)
         const pieces = {
@@ -430,7 +506,10 @@
                     square.dataset.col = col;
 
                     if (board[row][col]) {
-                        square.textContent = board[row][col].symbol;
+                        square.dataset.piece = board[row][col].symbol;
+                        if (board[row][col].color === 'white') {
+                            square.classList.add('white-piece');
+                        }
                     }
 
                     square.addEventListener('click', () => handleSquareClick(row, col));
@@ -513,8 +592,8 @@
             // W trybie auto, nie pozwalaj na kliknięcia
             if (gameMode === 'auto') return;
 
-            // W trybie AI, tylko białe mogą klikać (gracz)
-            if (gameMode === 'ai' && currentPlayer === 'black') return;
+            // W trybie AI, tylko kolor gracza może klikać
+            if (gameMode === 'ai' && currentPlayer !== playerColor) return;
 
             if (selectedPiece) {
                 // Próba ruchu
@@ -528,7 +607,8 @@
                     drawBoard();
 
                     // W trybie AI, po ruchu gracza, AI wykonuje swój ruch
-                    if (gameMode === 'ai' && currentPlayer === 'black') {
+                    const aiColor = playerColor === 'white' ? 'black' : 'white';
+                    if (gameMode === 'ai' && currentPlayer === aiColor) {
                         setTimeout(() => {
                             makeAIMove();
                         }, 500); // 0.5 sekundy opóźnienia dla lepszego UX
@@ -629,6 +709,25 @@
             }
         }
 
+        // Zmiana koloru gracza
+        function setPlayerColor(color) {
+            playerColor = color;
+
+            // Aktualizuj przyciski
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Aktualizuj tekst kontrolek
+            const controlsText = document.getElementById('controls-text');
+            const aiColor = color === 'white' ? 'czarne' : 'białe';
+            const playerColorName = color === 'white' ? 'białe' : 'czarne';
+            controlsText.innerHTML = `<strong>Jak grać:</strong> Grasz jako ${playerColorName}. Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>AI gra jako ${aiColor} i wykonuje ruchy automatycznie.`;
+
+            resetGame();
+        }
+
         // Zmiana trybu gry
         function setMode(mode) {
             gameMode = mode;
@@ -645,12 +744,22 @@
                 autoPlayInterval = null;
             }
 
+            // Pokaż/ukryj wybór koloru
+            const colorSelection = document.getElementById('color-selection');
+            if (mode === 'ai') {
+                colorSelection.classList.add('show');
+            } else {
+                colorSelection.classList.remove('show');
+            }
+
             // Aktualizuj tekst kontrolek
             const controlsText = document.getElementById('controls-text');
             if (mode === 'pvp') {
                 controlsText.innerHTML = '<strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>Gra dla dwóch graczy - na zmianę białe i czarne.';
             } else if (mode === 'ai') {
-                controlsText.innerHTML = '<strong>Jak grać:</strong> Grasz jako białe. Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>AI gra jako czarne i wykonuje ruchy automatycznie.';
+                const aiColor = playerColor === 'white' ? 'czarne' : 'białe';
+                const playerColorName = playerColor === 'white' ? 'białe' : 'czarne';
+                controlsText.innerHTML = `<strong>Jak grać:</strong> Grasz jako ${playerColorName}. Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>AI gra jako ${aiColor} i wykonuje ruchy automatycznie.`;
             } else if (mode === 'auto') {
                 controlsText.innerHTML = '<strong>Tryb auto:</strong> Obserwuj jak AI gra przeciwko AI. Gra toczy się automatycznie. <br>Możesz zatrzymać i rozpocząć nową grę w dowolnym momencie.';
                 // Rozpocznij auto-play
@@ -681,6 +790,12 @@
                 autoPlayInterval = setInterval(() => {
                     makeAIMove();
                 }, 1000);
+            }
+            // Jeśli tryb AI i gracz gra jako czarne, AI zaczyna (białe)
+            else if (gameMode === 'ai' && playerColor === 'black') {
+                setTimeout(() => {
+                    makeAIMove();
+                }, 500);
             }
         }
 
