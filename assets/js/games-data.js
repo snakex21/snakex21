@@ -120,20 +120,20 @@ const gamesCatalog = [
       "Kultowa gra, która błyskawicznie podnosi poziom adrenaliny – liczy się refleks i precyzyjne strzały."
   },
   {
-    slug: "pong-coop",
-    title: "Pong (Co-op)",
+    slug: "pong",
+    title: "Pong",
     description:
-      "Kooperacyjna wersja kultowego Ponga. Sterujecie wspólnie jedną paletką i wspólnie walczycie o jak najdłuższe odbicia.",
-    cover: "pongcoop/pong(coop).JPG",
-    coverAlt: "Dwóch graczy wspólnie sterujących paletką w Pong (Co-op)",
-    url: "pongcoop/pongcoop.html",
-    genres: ["Arcade", "Kooperacja"],
-    modes: ["Dwóch graczy", "Kooperacja"],
-    tags: ["Wspólna zabawa", "Refleks"],
+      "Kultowa gra arcade w dwóch trybach: zagraj solo przeciwko AI lub we dwóch przeciwko sobie. Odbijaj piłkę i zdobywaj punkty!",
+    cover: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Klasyczna gra Pong z paletkami i piłką",
+    url: "pong/pong.html",
+    genres: ["Arcade", "Retro"],
+    modes: ["Solo", "Dwóch graczy"],
+    tags: ["vs AI", "Rywalizacja", "Refleks"],
     difficulty: "casual",
     duration: "quick",
     spotlight:
-      "Idealne, gdy chcesz zagrać z kimś obok – szybkie wejście, zero konfiguracji i dużo śmiechu."
+      "Wybierz tryb: zagraj sam przeciwko AI lub we dwóch na jednej klawiaturze. Klasyka w najczystszej postaci!"
   },
   {
     slug: "tic-tac-toe-ai",
@@ -198,22 +198,6 @@ const gamesCatalog = [
     duration: "medium",
     spotlight:
       "Dobry sposób na szybkie sprawdzenie wiedzy – idealny przed kolejnym zakupem lub testem z hardware'u."
-  },
-  {
-    slug: "ping-pong",
-    title: "Ping Pong",
-    description:
-      "Pojedynek inspirowany klasycznym Pongiem, ale z klimatem tenisa stołowego. Zaproś znajomego i sprawdź refleks.",
-    cover: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=800&q=80",
-    coverAlt: "Piłeczka pingpongowa leżąca na stole tenisowym",
-    url: "pingpong/Ping-pong.html",
-    genres: ["Sport", "Rywalizacja"],
-    modes: ["Dwóch graczy"],
-    tags: ["Dynamiczne wymiany", "Rywalizacja"],
-    difficulty: "classic",
-    duration: "quick",
-    spotlight:
-      "Rozgrzewka dla refleksu – sprawdzi się na start wieczoru z grami lub w przerwie między innymi tytułami."
   }
 ];
 
