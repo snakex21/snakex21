@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fiszki - Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --accent: #007aff;
+            --accent-hover: #0056b3;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --danger: #dc3545;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --accent: #0a84ff;
+            --accent-hover: #0060df;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--bg); /* W programy.html jest header-bg, tu użyjemy bg dla spójności */
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1; /* To kluczowe! Popycha przycisk trybu ciemnego do prawej */
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        /* Session Summary Styles */
+        .session-summary {
+            width: 100%;
+            margin-top: 1.5rem;
+            text-align: left;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .session-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .session-item:last-child { border-bottom: none; }
+        .session-icon { font-size: 1.5rem; }
+        .session-content { flex: 1; }
+        .session-q { font-weight: 600; font-size: 1rem; }
+        .session-a { font-size: 0.9rem; color: var(--text-secondary); }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            background: var(--card-bg);
+            padding: 0.5rem;
+            gap: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Views */
+        .view-section {
+            display: none;
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .view-section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Study View CSS */
+        .scene {
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: var(--bg);
+            border-color: var(--accent);
+            border-width: 2px;
+        }
+
+        .card-label {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .card-content {
+            font-size: 1.5rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            max-width: 600px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Editor View CSS */
+        .editor-form {
+            width: 100%;
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-direction: column;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        input[type="text"] {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        /* Distractors / Zmyłki Styles */
+        .distractors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .distractor-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-small {
+            padding: 0 1rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+        }
+        .btn-small:hover { background: var(--border); }
+
+        .btn-add {
+            background: var(--accent);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .card-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .list-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .list-q { font-weight: 600; }
+        .list-a { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 2rem;
+        }
+
+        /* Modal Importu */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        /* Utilities */
+        button.secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* QUIZ STYLES */
+        .quiz-header { text-align: center; margin-bottom: 2rem; }
+        .score-badge { background: var(--accent); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; }
+        
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45%, 1fr)); /* Auto dopasowanie */
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .quiz-option {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 1rem;
+            min-height: 80px; /* Stała wysokość dla estetyki */
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            color: var(--text);
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .quiz-option:hover { border-color: var(--accent); transform: translateY(-2px); }
+        
+        /* Stan zaznaczenia przed zatwierdzeniem */
+        .quiz-option.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .quiz-option.correct { background: var(--success) !important; border-color: var(--success) !important; color: white; }
+        .quiz-option.wrong { background: var(--danger) !important; border-color: var(--danger) !important; color: white; opacity: 0.7; }
+        .quiz-option.missed { border: 2px dashed var(--success); opacity: 0.7; } /* Nie zaznaczona poprawna */
+
+        #quiz-submit-btn {
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 300px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none; /* Domyślnie ukryty */
+        }
+        #quiz-submit-btn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        @media (max-width: 600px) { .quiz-grid { grid-template-columns: 1fr 1fr; } } /* Na mobilkach 2 kolumny są ok przy 8 opcjach */
+
+        /* STATS TABLE */
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .stats-table th, .stats-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .stats-table th { background: var(--card-bg); font-weight: 600; color: var(--text-secondary); }
+        .stat-bad { color: var(--danger); font-weight: bold; }
+        .stat-good { color: var(--success); font-weight: bold; }
+        .stat-bar-bg { width: 100px; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        .stat-bar-fill { height: 100%; background: var(--success); }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('study')">🎓 Tryb Nauki</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">🧠 Tryb Quizu</button>
+        <button class="tab-btn" onclick="switchTab('stats')">📊 Statystyki</button>
+        <button class="tab-btn" onclick="switchTab('editor')">✏️ Edytor / Pytania</button>
+    </div>
+
+    <!-- SEKCJA 1: NAUKA -->
+    <main id="view-study" class="view-section active">
+        <div class="scene" onclick="flipCard()">
+            <div class="card" id="card">
+                <div class="card-face card-front">
+                    <div class="card-label">Pytanie</div>
+                    <div class="card-content" id="front-text">Brak kart!</div>
+                </div>
+                <div class="card-face card-back">
+                    <div class="card-label">Odpowiedź</div>
+                    <div class="card-content" id="back-text">Dodaj je w zakładce Edytor.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="secondary" onclick="prevCard()">← Poprzednia</button>
+            <div style="font-family: monospace; color: var(--text-secondary);" id="progress">0 / 0</div>
+            <button class="secondary" onclick="nextCard()">Następna →</button>
+        </div>
+        
+        <button class="secondary" onclick="shuffleCards()" style="margin-top: 1rem;">🔀 Pomieszaj karty</button>
+    </main>
+
+    <!-- SEKCJA 2: QUIZ -->
+    <main id="view-quiz" class="view-section">
+        <div id="quiz-start" style="text-align: center;">
+            <h2>Sprawdź swoją wiedzę!</h2>
+            <p style="color: var(--text-secondary); margin: 1rem 0;">Wylosujemy pytania, a Ty wskażesz poprawną odpowiedź spośród 4 opcji.</p>
+            <button class="btn-add" onclick="startQuiz()">▶️ Rozpocznij Quiz</button>
+        </div>
+
+        <div id="quiz-game" style="display: none; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="quiz-header">
+                <span class="score-badge">Punkty: <span id="quiz-score">0</span></span>
+                <p style="margin-top: 1rem; font-size: 1.5rem; font-weight: bold;" id="quiz-question">Pytanie...</p>
+            </div>
+            
+            <div class="quiz-grid" id="quiz-options">
+                <!-- Opcje generowane przez JS -->
+            </div>
+            
+            <button id="quiz-submit-btn" onclick="submitMultiAnswer()">Zatwierdź odpowiedź</button>
+            <div id="quiz-message" style="margin-top: 1rem; min-height: 1.5rem; font-weight: bold; white-space: pre-line;"></div>
+        </div>
+    </main>
+
+    <!-- SEKCJA 3: STATYSTYKI -->
+    <main id="view-stats" class="view-section">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2>Twoje Postępy</h2>
+            <p style="color: var(--text-secondary);">Zobacz, które pytania sprawiają Ci trudność.</p>
+        </div>
+
+        <div style="width: 100%; overflow-x: auto;">
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Pytanie</th>
+                        <th>Skuteczność</th>
+                        <th>Poprawne</th>
+                        <th>Błędy</th>
+                    </tr>
+                </thead>
+                <tbody id="stats-body">
+                    <!-- JS generated -->
+                </tbody>
+            </table>
+        </div>
+        
+        <button class="secondary" onclick="resetStats()" style="margin-top: 2rem; color: var(--danger); border-color: var(--danger);">🗑️ Resetuj statystyki</button>
+    </main>
+
+    <!-- SEKCJA 4: EDYTOR -->
+    <main id="view-editor" class="view-section">
+        <div class="editor-form">
+            <h2>Dodaj nową fiszkę</h2>
+            <div class="input-group">
+                <input type="text" id="input-q" placeholder="Wpisz pytanie (np. Wymień kolory flagi PL)">
+                
+                <div style="margin-top: 0.5rem;">
+                    <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: bold; color: var(--success);">✅ Poprawne odpowiedzi:</label>
+                    <div id="correct-container" class="distractors-list">
+                         <!-- Tu będą inputy -->
+                    </div>
+                    <button class="secondary" style="width: 100%; margin-top: 5px; border-color: var(--success);" onclick="addCorrectInput()">+ Dodaj poprawną odpowiedź</button>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: bold; color: var(--danger);">❌ Zmyłki (opcjonalne):</label>
+                    <div id="distractors-container" class="distractors-list">
+                        <!-- Tu pojawią się dodatkowe pola -->
+                    </div>
+                    <button class="secondary" style="width: 100%; margin-top: 5px; border-style: dashed;" onclick="addDistractorInput()">+ Dodaj błędną odpowiedź (Zmyłkę)</button>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addManualCard()">➕ Zapisz Fiszkę</button>
+        </div>
+
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3>Twoje karty (<span id="count-display">0</span>)</h3>
+            <button class="secondary" onclick="openImportModal()">📥 Importuj z AI / JSON</button>
+        </div>
+
+        <div id="card-list" class="card-list">
+            <!-- Tutaj pojawią się karty -->
+            <div class="empty-state">Lista jest pusta. Dodaj coś!</div>
+        </div>
+    </main>
+
+    <!-- Modal Importu -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                <h2>Importuj z AI</h2>
+                <button class="secondary" onclick="closeImportModal()">✕</button>
+            </div>
+            
+            <p style="margin-bottom:0.5rem; color:var(--text-secondary); font-size:0.9rem;">
+                Format JSON: <code>[{"q":"Pytanie", "a":"Odp", "wrong":["Zła1", "Zła2", "Zła3"]}]</code>
+            </p>
+            
+            <button onclick="copyAiPrompt()" style="width: 100%; margin-bottom: 1rem; background: #e9ecef; border: 1px dashed var(--text-secondary); padding: 0.5rem; cursor: pointer;">
+                📋 Skopiuj gotowy Prompt dla AI
+            </button>
+
+            <textarea id="import-area" placeholder='[{"q": "...", "a": "..."}]'></textarea>
+
+            <div style="display:flex; justify-content:flex-end; gap:1rem;">
+                <button class="secondary" onclick="loadExample()">Przykład</button>
+                <button class="btn-add" style="padding:0.5rem 1rem;" onclick="processImport()">Zapisz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DANE ---
+        let cards = [];
+        let currentIndex = 0;
+
+        // Inicjalizacja i Ładowanie Danych
+        function loadData() {
+            const saved = localStorage.getItem('fiszki_data');
+            if (saved) {
+                cards = JSON.parse(saved);
+                // Migracja starych danych (dodanie obiektu stats jeśli nie istnieje)
+                cards.forEach(c => {
+                    if (!c.stats) c.stats = { correct: 0, wrong: 0 };
+                });
+            } else {
+                cards = [
+                    { q: "Witaj w kreatorze!", a: "Edytuj mnie w zakładce Edytor.", stats: { correct: 0, wrong: 0 } },
+                    { q: "Co to HTML?", a: "HyperText Markup Language", stats: { correct: 0, wrong: 0 } }
+                ];
+            }
+        }
+        
+        function saveData() {
+            localStorage.setItem('fiszki_data', JSON.stringify(cards));
+        }
+
+        loadData();
+
+        // --- ZMIENNE DOM ---
+        const cardElement = document.getElementById('card');
+        const frontText = document.getElementById('front-text');
+        const backText = document.getElementById('back-text');
+        const progressElement = document.getElementById('progress');
+        
+        const inputQ = document.getElementById('input-q');
+        const inputA = document.getElementById('input-a');
+        const cardListContainer = document.getElementById('card-list');
+        const countDisplay = document.getElementById('count-display');
+
+        // --- INICJALIZACJA ---
+        renderList();
+        updateStudyCard();
+
+        // --- ZARZĄDZANIE WIDOKAMI ---
+        function switchTab(tabName) {
+            // Update przycisków
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update widoków
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            document.getElementById(`view-${tabName}`).classList.add('active');
+
+            if (tabName === 'study') {
+                currentIndex = 0;
+                updateStudyCard();
+            }
+            if (tabName === 'quiz') {
+                document.getElementById('quiz-start').style.display = 'block';
+                document.getElementById('quiz-game').style.display = 'none';
+            }
+            if (tabName === 'stats') {
+                renderStats();
+            }
+        }
+
+        // --- LOGIKA QUIZU ---
+        let quizScore = 0;
+        let isAnswering = false;
+        let sessionLog = []; // Przechowuje wyniki obecnej sesji
+
+        function startQuiz() {
+            if (cards.length < 4) {
+                alert("Potrzebujesz minimum 4 fiszek, aby uruchomić quiz!");
+                switchTab('editor');
+                return;
+            }
+            
+            document.getElementById('quiz-start').style.display = 'none';
+            document.getElementById('quiz-game').style.display = 'flex';
+            
+            // Reset zmiennych sesji
+            quizScore = 0;
+            sessionLog = [];
+            
+            document.getElementById('quiz-score').textContent = "0";
+            shuffleCards(); // Mieszamy kolejność pytań
+            nextQuizQuestion();
+        }
+
+        // Zmienne globalne dla quizu
+        let currentOptions = []; // przechowuje aktualne opcje na ekranie
+        let isMultiSelect = false;
+
+        function nextQuizQuestion() {
+            if (currentIndex >= cards.length) {
+                // RAPORT KOŃCOWY
+                let summaryHtml = `
+                    <h2>Koniec Quizu!</h2>
+                    <p style="font-size: 1.2rem; margin-bottom: 1rem;">Twój wynik: <b>${quizScore} / ${cards.length}</b></p>
+                    <button class="btn-add" onclick="location.reload()">Zagraj jeszcze raz</button>
+                    <div class="session-summary">
+                `;
+                sessionLog.forEach(log => {
+                    summaryHtml += `
+                        <div class="session-item" style="border-left: 5px solid ${log.ok ? 'var(--success)' : 'var(--danger)'}">
+                            <div class="session-icon">${log.ok ? '✅' : '❌'}</div>
+                            <div class="session-content">
+                                <div class="session-q">${log.q}</div>
+                                <div class="session-a">Poprawna: ${log.correctAnswer}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                summaryHtml += `</div>`;
+                document.getElementById('quiz-game').innerHTML = summaryHtml;
+                return;
+            }
+
+            const current = cards[currentIndex];
+            document.getElementById('quiz-question').textContent = current.q;
+            document.getElementById('quiz-message').textContent = "";
+            const submitBtn = document.getElementById('quiz-submit-btn');
+
+            // 1. Normalizacja poprawnych odpowiedzi (Array)
+            let corrects = Array.isArray(current.a) ? current.a : [current.a];
+            
+            // 2. Czy tryb Multiselect?
+            isMultiSelect = corrects.length > 1;
+            
+            if (isMultiSelect) {
+                document.getElementById('quiz-message').textContent = `(Wybierz ${corrects.length} poprawne odpowiedzi)`;
+                document.getElementById('quiz-message').style.color = "var(--text-secondary)";
+                submitBtn.style.display = 'block';
+            } else {
+                submitBtn.style.display = 'none';
+            }
+
+            // 3. Budowanie puli odpowiedzi
+            let options = [...corrects];
+
+            // 4. Ile zmyłek potrzebujemy? 
+            // Dążymy do 4 opcji dla Single, 8 dla Multi (ale elastycznie)
+            let totalSlots = isMultiSelect ? 8 : 4;
+            let slotsNeeded = totalSlots - options.length;
+
+            // 5. Dodaj manualne zmyłki
+            if (current.wrong && Array.isArray(current.wrong)) {
+                options.push(...current.wrong); // Bierzemy wszystkie manualne
+            }
+            // Oblicz ile jeszcze brakuje do totalSlots
+            slotsNeeded = totalSlots - options.length;
+
+            // 6. Jeśli nadal brakuje, dobierz losowe z innych kart
+            if (slotsNeeded > 0) {
+                let pool = [];
+                // Zbierz odpowiedzi z innych kart (płaska lista)
+                cards.forEach(c => {
+                    if (c.q === current.q) return; // Pomiń samą siebie
+                    let ans = Array.isArray(c.a) ? c.a : [c.a];
+                    pool.push(...ans);
+                });
+
+                // Usuń duplikaty i te, które już są w opcjach
+                pool = pool.filter(ans => !options.includes(ans));
+                // Pomieszaj pule
+                pool.sort(() => Math.random() - 0.5);
+
+                // Dobierz
+                options.push(...pool.slice(0, slotsNeeded));
+            }
+
+            // Ogranicz do totalSlots (jeśli manualnych było za dużo)
+            options = options.slice(0, totalSlots);
+
+            // Pomieszaj finalne opcje
+            options.sort(() => Math.random() - 0.5);
+            currentOptions = options;
+
+            // Renderuj
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach((opt, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.dataset.val = opt;
+                
+                if (isMultiSelect) {
+                    btn.onclick = () => toggleOption(btn);
+                } else {
+                    btn.onclick = () => checkSingleAnswer(btn, opt, corrects[0]);
+                }
+                optionsContainer.appendChild(btn);
+            });
+
+            isAnswering = true;
+        }
+
+        // --- Logika Pojedynczego Wyboru ---
+        function checkSingleAnswer(btn, selected, correct) {
+            if (!isAnswering) return;
+            isAnswering = false;
+            
+            processResult(selected === correct, [correct]);
+            
+            const allBtns = document.querySelectorAll('.quiz-option');
+            if (selected === correct) {
+                btn.classList.add('correct');
+            } else {
+                btn.classList.add('wrong');
+                allBtns.forEach(b => {
+                    if (b.dataset.val === correct) b.classList.add('correct');
+                });
+            }
+            
+            nextStep();
+        }
+
+        // --- Logika Wielokrotnego Wyboru ---
+        function toggleOption(btn) {
+            if (!isAnswering) return;
+            btn.classList.toggle('selected');
+        }
+
+        function submitMultiAnswer() {
+            if (!isAnswering) return;
+            isAnswering = false;
+            document.getElementById('quiz-submit-btn').style.display = 'none';
+
+            const current = cards[currentIndex];
+            const corrects = Array.isArray(current.a) ? current.a : [current.a];
+            
+            const selectedBtns = document.querySelectorAll('.quiz-option.selected');
+            const selectedVals = Array.from(selectedBtns).map(b => b.dataset.val);
+
+            // Sprawdź czy zbiory są identyczne
+            // 1. Ilość musi się zgadzać
+            // 2. Każdy wybrany musi być w poprawnych
+            let allGood = (selectedVals.length === corrects.length) && 
+                          selectedVals.every(val => corrects.includes(val));
+
+            processResult(allGood, corrects);
+
+            // Wizualizacja
+            const allBtns = document.querySelectorAll('.quiz-option');
+            allBtns.forEach(btn => {
+                const val = btn.dataset.val;
+                const isSelected = btn.classList.contains('selected');
+                const isCorrect = corrects.includes(val);
+
+                btn.classList.remove('selected'); // zdejmij styl selected
+
+                if (isCorrect) {
+                    if (isSelected) {
+                        btn.classList.add('correct'); // Dobrze zaznaczony
+                    } else {
+                        btn.classList.add('missed'); // Zapomniany poprawny
+                    }
+                } else {
+                    if (isSelected) {
+                        btn.classList.add('wrong'); // Źle zaznaczony
+                    }
+                }
+            });
+
+            nextStep();
+        }
+
+        // --- Wspólne Funkcje ---
+        function processResult(isSuccess, correctArrDisplay) {
+            const currentCard = cards[currentIndex];
+            
+            sessionLog.push({
+                q: currentCard.q,
+                correctAnswer: correctArrDisplay.join(", "),
+                ok: isSuccess
+            });
+
+            const msg = document.getElementById('quiz-message');
+            
+            if (isSuccess) {
+                quizScore++;
+                currentCard.stats.correct++;
+                document.getElementById('quiz-score').textContent = quizScore;
+                msg.textContent = "Świetnie! 🎉";
+                msg.style.color = "var(--success)";
+            } else {
+                currentCard.stats.wrong++;
+                msg.textContent = `Błąd! Poprawne: ${correctArrDisplay.join(", ")}`;
+                msg.style.color = "var(--danger)";
+            }
+            saveData();
+        }
+
+        function nextStep() {
+            setTimeout(() => {
+                currentIndex++;
+                nextQuizQuestion();
+            }, 2500); // Dłuższy czas na analizę błędów w multiselect
+        }
+
+        // --- LOGIKA NAUKI (STUDY) ---
+        function updateStudyCard() {
+            cardElement.classList.remove('is-flipped');
+            
+            setTimeout(() => {
+                if (cards.length === 0) {
+                    frontText.textContent = "Brak kart";
+                    backText.textContent = "Dodaj coś w edytorze";
+                    progressElement.textContent = "0 / 0";
+                    return;
+                }
+
+                if (currentIndex >= cards.length) currentIndex = 0;
+
+                const current = cards[currentIndex];
+                frontText.textContent = current.q;
+                
+                // Obsługa tablicy odpowiedzi
+                let answerText = "";
+                if (Array.isArray(current.a)) {
+                    answerText = current.a.join("\n\n"); // Każda w nowej linii
+                } else {
+                    answerText = current.a; // Kompatybilność wsteczna
+                }
+
+                backText.textContent = answerText;
+                backText.style.whiteSpace = "pre-line"; // Ważne dla nowych linii
+                progressElement.textContent = `${currentIndex + 1} / ${cards.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            if (cards.length > 0) cardElement.classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+                updateStudyCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateStudyCard();
+            }
+        }
+
+        function shuffleCards() {
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            currentIndex = 0;
+            updateStudyCard();
+        }
+
+        // --- LOGIKA EDYTORA (EDITOR) ---
+        
+        // Inicjalizacja: dodaj jedno pole na start przy ładowaniu
+        window.addEventListener('load', () => {
+             // Jeśli kontener pusty (przy odświeżeniu), dodajmy 1 input
+             if(document.getElementById('correct-container').children.length === 0) addCorrectInput();
+        });
+
+        function addDistractorInput() {
+            const container = document.getElementById('distractors-container');
+            const div = document.createElement('div');
+            div.className = 'distractor-row';
+            div.innerHTML = `
+                <input type="text" class="input-wrong" placeholder="Zmyłka (np. Kraków)">
+                <button class="btn-small" onclick="this.parentElement.remove()" style="color:var(--danger)">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addCorrectInput() {
+            const container = document.getElementById('correct-container');
+            const div = document.createElement('div');
+            div.className = 'distractor-row';
+            div.innerHTML = `
+                <input type="text" class="input-correct" placeholder="Poprawna (np. Warszawa)">
+                <button class="btn-small" onclick="removeCorrectInput(this)" style="color:var(--text-secondary)">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeCorrectInput(btn) {
+            const container = document.getElementById('correct-container');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            } else {
+                alert("Musi być przynajmniej jedna poprawna odpowiedź!");
+            }
+        }
+
+        function addManualCard() {
+            const q = inputQ.value.trim();
+            
+            // Zbieranie poprawnych
+            const correctInputs = document.querySelectorAll('.input-correct');
+            const correctAnswers = [];
+            correctInputs.forEach(inp => {
+                if(inp.value.trim()) correctAnswers.push(inp.value.trim());
+            });
+
+            if (!q || correctAnswers.length === 0) {
+                alert("Wpisz pytanie i minimum jedną poprawną odpowiedź!");
+                return;
+            }
+
+            // Zbieranie zmyłek
+            const wrongInputs = document.querySelectorAll('.input-wrong');
+            const wrongAnswers = [];
+            wrongInputs.forEach(inp => {
+                if(inp.value.trim()) wrongAnswers.push(inp.value.trim());
+            });
+
+            cards.push({ 
+                q, 
+                a: correctAnswers, // Teraz to tablica!
+                wrong: wrongAnswers,
+                stats: { correct: 0, wrong: 0 } 
+            });
+            
+            saveData();
+            
+            // Reset formularza
+            inputQ.value = '';
+            document.getElementById('correct-container').innerHTML = '';
+            addCorrectInput(); // Przywróć jedno pole
+            document.getElementById('distractors-container').innerHTML = '';
+            
+            renderList();
+        }
+
+        function removeCard(index) {
+            if (confirm("Usunąć tę fiszkę?")) {
+                cards.splice(index, 1);
+                saveData();
+                renderList();
+            }
+        }
+
+        function renderList() {
+            cardListContainer.innerHTML = '';
+            countDisplay.textContent = cards.length;
+
+            if (cards.length === 0) {
+                cardListContainer.innerHTML = '<div class="empty-state">Lista jest pusta.</div>';
+                return;
+            }
+
+            cards.forEach((card, index) => {
+                let ansDisplay = Array.isArray(card.a) ? card.a.join(", ") : card.a;
+
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <div class="list-text">
+                        <span class="list-q">${escapeHtml(card.q)}</span>
+                        <span class="list-a">${escapeHtml(ansDisplay)}</span>
+                    </div>
+                    <button class="btn-delete" onclick="removeCard(${index})">🗑️</button>
+                `;
+                cardListContainer.appendChild(item);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // --- IMPORT ---
+        const importModal = document.getElementById('import-modal');
+        const importArea = document.getElementById('import-area');
+
+        function openImportModal() { importModal.classList.add('active'); }
+        function closeImportModal() { importModal.classList.remove('active'); }
+
+        function loadExample() {
+            importArea.value = `[
+  {"q": "Co to CPU?", "a": "Procesor"},
+  {"q": "Co to RAM?", "a": "Pamięć operacyjna"}
+]`;
+        }
+
+        function renderStats() {
+            const tbody = document.getElementById('stats-body');
+            tbody.innerHTML = '';
+
+            // Sortujemy: najpierw te z największą liczbą błędów
+            const sortedCards = [...cards].sort((a, b) => b.stats.wrong - a.stats.wrong);
+
+            if (sortedCards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">Brak danych. Rozwiąż quiz!</td></tr>';
+                return;
+            }
+
+            sortedCards.forEach(c => {
+                const total = c.stats.correct + c.stats.wrong;
+                let percent = 0;
+                if (total > 0) percent = Math.round((c.stats.correct / total) * 100);
+
+                const tr = document.createElement('tr');
+                
+                // Kolor paska: Czerwony jeśli < 50%, Zielony jeśli >= 50%
+                const barColor = percent < 50 ? '#dc3545' : '#28a745';
+                
+                tr.innerHTML = `
+                    <td>${escapeHtml(c.q)}</td>
+                    <td>
+                        <div class="stat-bar-bg">
+                            <div class="stat-bar-fill" style="width: ${percent}%; background: ${barColor}"></div>
+                        </div>
+                        ${percent}%
+                    </td>
+                    <td class="stat-good">${c.stats.correct}</td>
+                    <td class="stat-bad">${c.stats.wrong}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function resetStats() {
+            if(confirm("Czy na pewno chcesz wyzerować statystyki wszystkich pytań?")) {
+                cards.forEach(c => {
+                    c.stats.correct = 0;
+                    c.stats.wrong = 0;
+                });
+                saveData();
+                renderStats();
+            }
+        }
+
+        function processImport() {
+            try {
+                const raw = importArea.value;
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    // Dodaj strukturę stats do nowych kart
+                    const newCards = parsed.map(c => ({
+                        ...c,
+                        stats: { correct: 0, wrong: 0 }
+                    }));
+                    
+                    cards = cards.concat(newCards);
+                    saveData();
+                    renderList();
+                    closeImportModal();
+                    alert(`Dodano ${newCards.length} nowych fiszek!`);
+                } else {
+                    alert("Format JSON musi być tablicą []");
+                }
+            } catch (e) {
+                alert("Błąd formatu JSON!");
+            }
+        }
+
+        function copyAiPrompt() {
+            const promptText = 'Wygeneruj 10 fiszek na temat [TEMAT] w formacie JSON. UWAGA: Pole "a" (odpowiedź) MUSI być tablicą stringów (nawet jeśli jest jedna). Format: [{"q": "Pytanie", "a": ["Odp1"], "wrong": ["Zła1"]}]. Jeśli pytanie ma wiele poprawnych odpowiedzi, daj je wszystkie w "a": ["Odp1", "Odp2"]. Błędne w "wrong".';
+            navigator.clipboard.writeText(promptText).then(() => {
+                alert("Skopiowano! Wklej prompt do AI.");
+            });
+        }
+
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>
