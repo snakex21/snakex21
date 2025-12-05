@@ -1,116 +1,337 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Generator emoji – Max Playground</title>
-    <meta name="description" content="Przeglądaj tematyczne zestawy emoji i kopiuj je do swoich wiadomości. Idealne do szybkiego reagowania i ozdabiania postów." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css" />
-    <link rel="stylesheet" href="../../assets/css/site.css" />
-    <link rel="stylesheet" href="style.css" />
-    <script defer src="../../assets/js/site.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generator emoji - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --emoji-hover: #e9ecef;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --emoji-hover: #3a3a3a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .emoji-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .category {
+            margin-bottom: 2.5rem;
+        }
+
+        .category:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .emoji-item {
+            font-size: 2rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            user-select: none;
+        }
+
+        .emoji-item:hover {
+            background: var(--emoji-hover);
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .emoji-item:active {
+            transform: scale(0.95);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            nav {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .emoji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            }
+
+            .emoji-item {
+                font-size: 1.5rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
 </head>
-<body class="app-page app-page--emoji" data-root="../../">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../programy.html">Przegląd wszystkich programów</a>
-                        <a href="../generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="../generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a class="is-current" href="generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link" href="../../gry/gry.html">Gry</a>
-                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
-    <main class="standalone-app standalone-app--light">
-        <section class="app-hero">
-            <div class="app-hero__content">
-                <span class="badge">Generator</span>
-                <h1>Generator emoji</h1>
-                <p>Znajdź emotki do każdej sytuacji. Zestawy podzieliliśmy na kategorie, abyś mógł szybko skopiować gotowe kombinacje do rozmów i postów.</p>
+
+    <main>
+        <h1>😀 Generator emoji</h1>
+        <p class="subtitle">Kliknij emoji aby skopiować do schowka</p>
+
+        <div class="emoji-container">
+            <div class="category">
+                <h3 class="category-title">Buźki & Ludzie</h3>
+                <div class="emoji-grid" id="faces"></div>
             </div>
-            <div class="app-hero__actions">
-                <a class="btn btn-secondary" href="../programy.html">← Wróć do listy programów</a>
+
+            <div class="category">
+                <h3 class="category-title">Zwierzęta i Natura</h3>
+                <div class="emoji-grid" id="animals"></div>
             </div>
-        </section>
-        <div class="standalone-app__inner standalone-app__inner--column">
-            <section class="emoji-panel card">
-                <h2>Zestawy emoji</h2>
-                <p class="emoji-panel__description">Kliknij i skopiuj cały akapit, aby natychmiast wstawić go do wiadomości lub notatki. Emotki zachowują kolejność oraz układ.</p>
-                <div class="emoji-groups">
-                <article class="emoji-group">
-                    <h3>Minki & Ludzie</h3>
-                    <p class="emoji-sample">😀 😬 😁 😂 😃 😄 😅 😆 😇 😉 😊 🙂 🙃 ☺️ 😋 😌 😍 😘 😗 😙 😚 😜 😝 😛 🤑 🤓 😎 🤗 😏 😶 😐 😑 😒 🙄 🤔 😳 😞 😟 😠 😡 😔 😕 🙁 ☹️ 😣 😖 😫 😩 😤 😮 😱 😨 😰 😯 😦 😧 😢 😥 😪 😓 😭 😵 😲 🤐 😷 🤒 🤕 😴 💤 💩 😈 👿 👹 👺 💀 👻 👽 🤖 😺 😸 😹 😻 😼 😽</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Biali emoji</h3>
-                    <p class="emoji-sample">👦🏻 👧🏻 👨🏻 👩🏻 👴🏻 👵🏻 👶🏻 👱🏻 👮🏻 👲🏻 👳🏻 👷🏻 👸🏻 💂🏻 🎅🏻 👼🏻 💆🏻 💇🏻 👰🏻 🙍🏻 🙎🏻 🙅🏻 🙆🏻 💁🏻 🙋🏻 🙇🏻 🙌🏻 🙏🏻 🚶🏻 🏃🏻 💃🏻 💪🏻 👈🏻 👉🏻 ☝️🏻 👆🏻 🖕🏻 👇🏻 ✌️🏻 🖖🏻 🤘🏻 🖐🏻 ✊🏻 ✋🏻 👊🏻 👌🏻 👍🏻 👎🏻 👋🏻 👏🏻 👐🏻</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Kremowo biali emoji</h3>
-                    <p class="emoji-sample">👦🏼 👧🏼 👨🏼 👩🏼 👴🏼 👵🏼 👶🏼 👱🏼 👮🏼 👲🏼 👳🏼 👷🏼 👸🏼 💂🏼 🎅🏼 👼🏼 💆🏼 💇🏼 👰🏼 🙍🏼 🙎🏼 🙅🏼 🙆🏼 💁🏼 🙋🏼 🙇🏼 🙌🏼 🙏🏼 🚶🏼 🏃🏼 💃🏼 💪🏼 👈🏼 👉🏼 ☝️🏼 👆🏼 🖕🏼 👇🏼 ✌️🏼 🖖🏼 🤘🏼 🖐🏼 ✊🏼 ✋🏼 👊🏼 👌🏼 👍🏼 👎🏼 👋🏼 👏🏼 👐🏼</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Średnio biali emoji</h3>
-                    <p class="emoji-sample">👦🏽 👧🏽 👨🏽 👩🏽 👴🏽 👵🏽 👶🏽 👱🏽 👮🏽 👲🏽 👳🏽 👷🏽 👸🏽 💂🏽 🎅🏽 👼🏽 💆🏽 💇🏽 👰🏽 🙍🏽 🙎🏽 🙅🏽 🙆🏽 💁🏽 🙋🏽 🙇🏽 🙌🏽 🙏🏽 🚶🏽 🏃🏽 💃🏽 💪🏽 👈🏽 👉🏽 ☝️🏽 👆🏽 🖕🏽 👇🏽 ✌️🏽 🖖🏽 🤘🏽 🖐🏽 ✊🏽 ✋🏽 👊🏽 👌🏽 👍🏽 👎🏽 👋🏽 👏🏽 👐🏽</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Ciemnoczarni emoji</h3>
-                    <p class="emoji-sample">👦🏾 👧🏾 👨🏾 👩🏾 👴🏾 👵🏾 👶🏾 👱🏾 👮🏾 👲🏾 👳🏾 👷🏾 👸🏾 💂🏾 🎅🏾 👼🏾 💆🏾 💇🏾 👰🏾 🙍🏾 🙎🏾 🙅🏾 🙆🏾 💁🏾 🙋🏾 🙇🏾 🙌🏾 🙏🏾 🚶🏾 🏃🏾 💃🏾 💪🏾 👈🏾 👉🏾 ☝️🏾 👆🏾 🖕🏾 👇🏾 ✌️🏾 🖖🏾 🤘🏾 🖐🏾 ✊🏾 ✋🏾 👊🏾 👌🏾 👍🏾 👎🏾 👋🏾 👏🏾 👐🏾</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Czarni emoji</h3>
-                    <p class="emoji-sample">👦🏿 👧🏿 👨🏿 👩🏿 👴🏿 👵🏿 👶🏿 👱🏿 👮🏿 👲🏿 👳🏿 👷🏿 👸🏿 💂🏿 🎅🏿 👼🏿 💆🏿 💇🏿 👰🏿 🙍🏿 🙎🏿 🙅🏿 🙆🏿 💁🏿 🙋🏿 🙇🏿 🙌🏿 🙏🏿 🚶🏿 🏃🏿 💃🏿 💪🏿 👈🏿 👉🏿 ☝️🏿 👆🏿 🖕🏿 👇🏿 ✌️🏿 🖖🏿 🤘🏿 🖐🏿 ✊🏿 ✋🏿 👊🏿 👌🏿 👍🏿 👎🏿 👋🏿 👏🏿 👐🏿</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Zwierzęta i fauna</h3>
-                    <p class="emoji-sample">🐶 🐱 🐭 🐹 🐰 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐽 🐸 🐙 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🐣 🐥 🐺 🐗 🐴 🦄 🐝 🐛 🐌 🐞 🐜 🕷 🦂 🦀 🐍 🐢 🐠 🐟 🐡 🐬 🐳 🐋 🐊 🐆 🐅 🐃 🐂 🐄 🐪 🐫 🐘 🐐 🐏 🐑 🐎 🐖 🐀 🐁 🐓 🦃 🕊 🐕 🐩 🐈 🐇 🐿 🐾 🐉 🐲 🌵 🎄 🌲 🌳 🌴 🌱 🌿 ☘ 🍀 🎍 🎋</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Jedzenie i picie</h3>
-                    <p class="emoji-sample">🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🍈 🍒 🍑 🍍 🍅 🍆 🌶 🌽 🍠 🍯 🍞 🧀 🍗 🍖 🍤 🍳 🍔 🍟 🌭 🍕 🍝 🌮 🌯 🍜 🍲 🍥 🍣 🍱 🍛 🍙 🍚 🍘 🍢 🍡 🍧 🍨 🍦 🍰 🎂 🍮 🍬 🍭 🍫 🍿 🍩 🍪 🍺 🍻 🍷 🍸 🍹 🍾 🍶 🍵 ☕️ 🍼 🍴 🍽</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Aktywność i sporty</h3>
-                    <p class="emoji-sample">⚽️ 🏀 🏈 ⚾️ 🎾 🏐 🏉 🎱 ⛳️ 🏌 🏓 🏸 🏒 🏑 🏏 🎿 ⛷ 🏂 ⛸ 🏹 🎣 🚣 🏊 🏄 🛀 ⛹ 🏋 🚴 🚵 🏇 🕴 🏆 🎽 🏅 🎖 🎗 🏵 🎫 🎟 🎭 🎨 🎪 🎤 🎧 🎼 🎹 🎷 🎺 🎸 🎻 🎬 🎮 👾 🎯 🎲 🎰 🎳</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Podróże i miejsca</h3>
-                    <p class="emoji-sample">🚗 🚕 🚙 🚌 🚎 🏎 🚓 🚑 🚒 🚐 🚚 🚛 🚜 🏍 🚲 🚨 🚔 🚍 🚘 🚖 🚡 🚠 🚟 🚃 🚋 🚝 🚄 🚅 🚈 🚞 🚂 🚆 🚇 🚊 🚉 🚁 🛩 ✈️ 🛫 🛬 ⛵️ 🛥 🚤 ⛴ 🛳 🚀 🛰 💺 ⚓️ 🚧 ⛽️ 🚏 🚦 🚥 🏁 🚢 🎡 🎢 🎠 🏗 🌁 🗼 🏭 ⛲️ 🎑 ⛰ 🏔 🗻 🌋 🗾 🏕 ⛺️ 🏞 🛣 🛤 🌅 🌄 🏜 🏖 🏝 🌇 🌆 🏙 🌃 🌉</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Objekty</h3>
-                    <p class="emoji-sample">⌚️ 📱 📲 💻 ⌨ 🖥 🖨 🖱 🖲 🕹 🗜 💽 💾 💿 📀 📼 📷 📸 📹 🎥 📽 🎞 📞 ☎️ 📟 📠 📺 📻 🎙 🎚 🎛 ⏱ ⏲ ⏰ 🕰 ⏳ ⌛️ 📡 🔋 🔌 💡 🔦 🕯 🗑 🛢 💸 💵 💴 💶 💷 💰 💳 💎 ⚖ 🔧 🔨 ⚒ 🛠 ⛏ 🔩 ⚙ ⛓ 🔫 💣 🔪 🗡 ⚔ 🛡 🚬 ☠ ⚰ ⚱ 🏺 🔮 📿 💈 ⚗ 🔭 🔬 🕳 💊 💉 🌡 🏷 🔖 🚽 🚿 🛁 🔑</p>
-                </article>
-                <article class="emoji-group">
-                    <h3>Symbole</h3>
-                    <p class="emoji-sample">❤️ 💛 💙 💜 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮ ✝️ ☪ 🕉 ☸ ✡️ 🔯 🕎 ☯️ ☦ 🛐 ⛎ ♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️ 🆔 ⚛ 🈳 🈹 ☢ ☣ 📴 📳 🈶 🈚️ 🈸 🈺 🈷️ ✴️ 🆚 🉑 💮 🉐 ㊙️ ㊗️ 🈴 🈵 🈲 🅰️ 🅱️ 🆎 🆑 🅾️ 🆘 ⛔️ 📛 🚫 ❌ ⭕️ 💢 ♨️ 🚷 🚯 🚳 🚱 🔞 📵 ❗️ ❕ ❓ ❔ ‼️ ⁉️</p>
-                </article>
-                </div>
-            </section>
+
+            <div class="category">
+                <h3 class="category-title">Jedzenie & Picie</h3>
+                <div class="emoji-grid" id="food"></div>
+            </div>
+
+            <div class="category">
+                <h3 class="category-title">Aktywności & Sport</h3>
+                <div class="emoji-grid" id="activities"></div>
+            </div>
+
+            <div class="category">
+                <h3 class="category-title">Podróże & Miejsca</h3>
+                <div class="emoji-grid" id="travel"></div>
+            </div>
+
+            <div class="category">
+                <h3 class="category-title">Obiekty</h3>
+                <div class="emoji-grid" id="objects"></div>
+            </div>
+
+            <div class="category">
+                <h3 class="category-title">Symbole</h3>
+                <div class="emoji-grid" id="symbols"></div>
+            </div>
         </div>
     </main>
-    <footer>
-        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
-    </footer>
+
+    <div class="notification" id="notification">Skopiowano! ✓</div>
+
+    <script>
+        // Theme toggle
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Emoji categories
+        const emojiData = {
+            faces: ['😀', '😬', '😁', '😂', '😃', '😄', '😅', '😆', '😇', '😉', '😊', '🙂', '🙃', '☺️', '😋', '😌', '😍', '😘', '😗', '😙', '😚', '😜', '😝', '😛', '🤑', '🤓', '😎', '🤗', '😏', '😶', '😐', '😑', '😒', '🙄', '🤔', '😳', '😞', '😟', '😠', '😡', '😔', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '😤', '😮', '😱', '😨', '😰', '😯', '😦', '😧', '😢', '😥', '😪', '😓', '😭', '😵', '😲', '🤐', '😷', '🤒', '🤕', '😴', '💤', '💩', '😈', '👿', '👹', '👺', '💀', '👻', '👽', '🤖', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'],
+            animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐙', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🐌', '🐞', '🐜', '🕷', '🦂', '🦀', '🐍', '🐢', '🐠', '🐟', '🐡', '🐬', '🐳', '🐋', '🐊', '🐆', '🐅', '🐃', '🐂', '🐄', '🐪', '🐫', '🐘', '🐐', '🐏', '🐑', '🐎', '🐖', '🐀', '🐁', '🐓', '🦃', '🕊', '🐕', '🐩', '🐈', '🐇', '🐿', '🐾', '🐉', '🐲', '🌵', '🎄', '🌲', '🌳', '🌴', '🌱', '🌿', '☘', '🍀', '🎍', '🎋'],
+            food: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🍍', '🍅', '🍆', '🌶', '🌽', '🍠', '🍯', '🍞', '🧀', '🍗', '🍖', '🍤', '🍳', '🍔', '🍟', '🌭', '🍕', '🍝', '🌮', '🌯', '🍜', '🍲', '🍥', '🍣', '🍱', '🍛', '🍙', '🍚', '🍘', '🍢', '🍡', '🍧', '🍨', '🍦', '🍰', '🎂', '🍮', '🍬', '🍭', '🍫', '🍿', '🍩', '🍪', '🍺', '🍻', '🍷', '🍸', '🍹', '🍾', '🍶', '🍵', '☕️', '🍼', '🍴', '🍽'],
+            activities: ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🏐', '🏉', '🎱', '⛳️', '🏌', '🏓', '🏸', '🏒', '🏑', '🏏', '🎿', '⛷', '🏂', '⛸', '🏹', '🎣', '🚣', '🏊', '🏄', '🛀', '⛹', '🏋', '🚴', '🚵', '🏇', '🕴', '🏆', '🎽', '🏅', '🎖', '🎗', '🏵', '🎫', '🎟', '🎭', '🎨', '🎪', '🎤', '🎧', '🎼', '🎹', '🎷', '🎺', '🎸', '🎻', '🎬', '🎮', '👾', '🎯', '🎲', '🎰', '🎳'],
+            travel: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🏍', '🚲', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋', '🚝', '🚄', '🚅', '🚈', '🚞', '🚂', '🚆', '🚇', '🚊', '🚉', '🚁', '🛩', '✈️', '🛫', '🛬', '⛵️', '🛥', '🚤', '⛴', '🛳', '🚀', '🛰', '💺', '⚓️', '🚧', '⛽️', '🚏', '🚦', '🚥', '🏁', '🚢', '🎡', '🎢', '🎠', '🏗', '🌁', '🗼', '🏭', '⛲️', '🎑', '⛰', '🏔', '🗻', '🌋', '🗾', '🏕', '⛺️', '🏞', '🛣', '🛤', '🌅', '🌄', '🏜', '🏖', '🏝', '🌇', '🌆', '🏙', '🌃', '🌉'],
+            objects: ['⌚️', '📱', '📲', '💻', '⌨', '🖥', '🖨', '🖱', '🖲', '🕹', '🗜', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽', '🎞', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙', '🎚', '🎛', '⏱', '⏲', '⏰', '🕰', '⏳', '⌛️', '📡', '🔋', '🔌', '💡', '🔦', '🕯', '🗑', '🛢', '💸', '💵', '💴', '💶', '💷', '💰', '💳', '💎', '⚖', '🔧', '🔨', '⚒', '🛠', '⛏', '🔩', '⚙', '⛓', '🔫', '💣', '🔪', '🗡', '⚔', '🛡', '🚬', '☠', '⚰', '⚱', '🏺', '🔮', '📿', '💈', '⚗', '🔭', '🔬', '🕳', '💊', '💉', '🌡', '🏷', '🔖', '🚽', '🚿', '🛁', '🔑'],
+            symbols: ['❤️', '💛', '💙', '💜', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮', '✝️', '☪', '🕉', '☸', '✡️', '🔯', '🕎', '☯️', '☦', '🛐', '⛎', '♈️', '♉️', '♊️', '♋️', '♌️', '♍️', '♎️', '♏️', '♐️', '♑️', '♒️', '♓️', '🆔', '⚛', '🈳', '🈹', '☢', '☣', '📴', '📳', '🈶', '🈚️', '🈸', '🈺', '🈷️', '✴️', '🆚', '🉑', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘', '⛔️', '📛', '🚫', '❌', '⭕️', '💢', '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '❗️', '❕', '❓', '❔', '‼️', '⁉️', '💯', '🔅', '🔆', '🔱', '⚜', '〽️', '⚠️', '🚸', '🔰', '♻️', '🈯️', '💹', '❇️', '✳️', '❎', '✅', '💠', '🌀', '➿', '🌐', 'Ⓜ️', '🏧', '🈂️', '🛂', '🛃', '🛄', '🛅', '♿️', '🚭', '🚾', '🅿️', '🚰', '🚹', '🚺', '🚼', '🚻', '🚮', '🎦', '📶', '🈁', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓', '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+        };
+
+        // Populate emoji grids
+        function populateEmoji() {
+            for (const [category, emojis] of Object.entries(emojiData)) {
+                const container = document.getElementById(category);
+                emojis.forEach(emoji => {
+                    const item = document.createElement('div');
+                    item.className = 'emoji-item';
+                    item.textContent = emoji;
+                    item.addEventListener('click', () => copyEmoji(emoji));
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        // Copy emoji to clipboard
+        function copyEmoji(emoji) {
+            navigator.clipboard.writeText(emoji).then(() => {
+                showNotification();
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = emoji;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification();
+            });
+        }
+
+        // Show notification
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize
+        populateEmoji();
+    </script>
 </body>
 </html>
