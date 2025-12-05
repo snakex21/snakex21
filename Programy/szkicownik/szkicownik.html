@@ -126,6 +126,22 @@
             border-radius: 4px;
         }
 
+        .selection-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(217, 70, 239, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+        }
+
         /* Cursor styles for tools */
         .cursor-draw { cursor: crosshair; }
         .cursor-move { cursor: move; }
@@ -158,25 +174,42 @@
             <button class="btn-tool active" id="tool-brush" title="Pędzel">✏️</button>
             <button class="btn-tool" id="tool-eraser" title="Gumka">🧼</button>
             <button class="btn-tool" id="tool-text" title="Tekst">🔤</button>
-            <button class="btn-tool" id="tool-select" title="Zaznacz i przesuń">✂️</button>
+            <button class="btn-tool" id="tool-select" title="Zaznacz, przesuń, obróć, skaluj">✂️</button>
         </div>
-        
+
         <div class="tool-group">
             <input type="color" id="color-picker" value="#000000" title="Kolor">
             <input type="range" id="size-picker" min="1" max="50" value="5" title="Grubość / Rozmiar">
         </div>
 
         <div class="tool-group">
+            <button class="btn-tool active" id="mode-copy" title="Tryb: Kopiuj obszar (nie usuwa)">📄</button>
+            <button class="btn-tool" id="mode-cut" title="Tryb: Wytnij obszar (usuwa z tła)">✂️</button>
+        </div>
+
+        <div class="tool-group">
+            <button class="btn-tool" id="action-copy" title="Kopiuj do schowka (Ctrl+C)">📋</button>
+            <button class="btn-tool" id="action-paste" title="Wklej ze schowka (Ctrl+V)">📌</button>
+            <button class="btn-tool" id="action-commit" title="Zatwierdź zaznaczenie (Enter)" style="color: #10b981;">✓</button>
+        </div>
+
+        <div class="tool-group">
+            <button class="btn-tool" id="action-flip-h" title="Odbij poziomo">↔️</button>
+            <button class="btn-tool" id="action-flip-v" title="Odbij pionowo">↕️</button>
+        </div>
+
+        <div class="tool-group">
             <label for="img-upload" class="btn-tool" title="Wgraj zdjęcie">🖼️</label>
             <input type="file" id="img-upload" accept="image/*">
 
-            <button class="btn-tool" id="action-undo" title="Cofnij">↩️</button>
+            <button class="btn-tool" id="action-undo" title="Cofnij (Ctrl+Z)">↩️</button>
             <button class="btn-tool" id="action-clear" title="Wyczyść wszystko" style="color: #ef4444;">🗑️</button>
             <button class="btn-tool" id="action-save" title="Zapisz" style="color: #10b981;">💾</button>
         </div>
     </div>
 
     <div class="canvas-container" id="canvas-container">
+        <div class="selection-hint" id="selection-hint">Zaznacz obszar do edycji</div>
         <canvas id="canvas"></canvas>
     </div>
 
@@ -200,6 +233,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
+        const selectionHint = document.getElementById('selection-hint');
         
         // Tools
         const tools = {
@@ -214,6 +248,13 @@
         const btnUndo = document.getElementById('action-undo');
         const btnClear = document.getElementById('action-clear');
         const btnSave = document.getElementById('action-save');
+        const btnCopy = document.getElementById('action-copy');
+        const btnPaste = document.getElementById('action-paste');
+        const btnCommit = document.getElementById('action-commit');
+        const btnFlipH = document.getElementById('action-flip-h');
+        const btnFlipV = document.getElementById('action-flip-v');
+        const btnModeCopy = document.getElementById('mode-copy');
+        const btnModeCut = document.getElementById('mode-cut');
         const imgUpload = document.getElementById('img-upload');
 
         let isDrawing = false;
@@ -224,9 +265,16 @@
         // Selection / Move Variables
         let isSelecting = false;
         let isMoving = false;
+        let isRotating = false;
+        let isScaling = false;
         let startX, startY; // Start coords for selection box
-        let selection = null; // { x, y, w, h, imageData, canvasSnapshot }
+        let selection = null; // { x, y, w, h, rotation, scale, imageData, backgroundSnapshot, backgroundImage }
         let dragOffset = { x: 0, y: 0 };
+        let activeHandle = null; // Which resize handle is being dragged
+        let clipboard = null; // For copy/paste
+        let selectionMode = 'copy'; // 'copy' or 'cut'
+        const HANDLE_SIZE = 8;
+        const ROTATE_HANDLE_OFFSET = 30;
 
         // --- INIT & RESIZE ---
         function resizeCanvas() {
@@ -268,6 +316,112 @@
         canvas.addEventListener('touchend', (e) => { e.preventDefault(); handleEnd(e); });
         canvas.addEventListener('mouseout', handleEnd);
 
+        // --- SELECTION HELPER FUNCTIONS ---
+
+        function getSelectionHandles() {
+            if (!selection) return [];
+            const { x, y, w, h } = selection;
+            return [
+                { type: 'nw', x: x, y: y, cursor: 'nw-resize' },
+                { type: 'n', x: x + w/2, y: y, cursor: 'n-resize' },
+                { type: 'ne', x: x + w, y: y, cursor: 'ne-resize' },
+                { type: 'e', x: x + w, y: y + h/2, cursor: 'e-resize' },
+                { type: 'se', x: x + w, y: y + h, cursor: 'se-resize' },
+                { type: 's', x: x + w/2, y: y + h, cursor: 's-resize' },
+                { type: 'sw', x: x, y: y + h, cursor: 'sw-resize' },
+                { type: 'w', x: x, y: y + h/2, cursor: 'w-resize' },
+                { type: 'rotate', x: x + w/2, y: y - ROTATE_HANDLE_OFFSET, cursor: 'grab' }
+            ];
+        }
+
+        function drawSelectionBorder() {
+            if (!selection || !selection.imageData) return;
+
+            const { x, y, w, h } = selection;
+
+            // Draw dashed border
+            ctx.save();
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = '#d946ef';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, w, h);
+            ctx.setLineDash([]);
+
+            // Draw handles
+            const handles = getSelectionHandles();
+            handles.forEach(handle => {
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#d946ef';
+                ctx.lineWidth = 2;
+
+                if (handle.type === 'rotate') {
+                    // Rotation handle - circle
+                    ctx.beginPath();
+                    ctx.arc(handle.x, handle.y, HANDLE_SIZE, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Draw line connecting to top
+                    ctx.beginPath();
+                    ctx.moveTo(x + w/2, y);
+                    ctx.lineTo(handle.x, handle.y);
+                    ctx.stroke();
+                } else {
+                    // Regular resize handles - squares
+                    ctx.fillRect(handle.x - HANDLE_SIZE/2, handle.y - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE);
+                    ctx.strokeRect(handle.x - HANDLE_SIZE/2, handle.y - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE);
+                }
+            });
+
+            ctx.restore();
+        }
+
+        function getHandleAtPoint(x, y) {
+            if (!selection) return null;
+            const handles = getSelectionHandles();
+            for (let handle of handles) {
+                const dx = x - handle.x;
+                const dy = y - handle.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist <= HANDLE_SIZE) {
+                    return handle;
+                }
+            }
+            return null;
+        }
+
+        function isPointInSelection(x, y) {
+            if (!selection) return false;
+            return x >= selection.x && x <= selection.x + selection.w &&
+                   y >= selection.y && y <= selection.y + selection.h;
+        }
+
+        function drawSelection() {
+            if (!selection || !selection.imageData) return;
+
+            ctx.save();
+
+            const centerX = selection.x + selection.w / 2;
+            const centerY = selection.y + selection.h / 2;
+
+            // Apply transformations
+            ctx.translate(centerX, centerY);
+            if (selection.rotation) {
+                ctx.rotate(selection.rotation);
+            }
+            ctx.translate(-centerX, -centerY);
+
+            // Draw the selection image
+            const tempCan = document.createElement('canvas');
+            tempCan.width = selection.w;
+            tempCan.height = selection.h;
+            tempCan.getContext('2d').putImageData(selection.imageData, 0, 0);
+
+            ctx.drawImage(tempCan, selection.x, selection.y, selection.w, selection.h);
+
+            ctx.restore();
+        }
+
         // --- HANDLERS ---
 
         function handleStart(e) {
@@ -279,24 +433,51 @@
             }
 
             if (currentTool === 'select') {
+                selectionHint.style.display = 'none';
+
+                // Check if clicking on a handle
+                const handle = getHandleAtPoint(x, y);
+                if (handle) {
+                    if (handle.type === 'rotate') {
+                        isRotating = true;
+                        canvas.style.cursor = 'grabbing';
+                    } else {
+                        isScaling = true;
+                        activeHandle = handle.type;
+                        canvas.style.cursor = handle.cursor;
+                    }
+                    startX = x;
+                    startY = y;
+                    return;
+                }
+
                 // If we have a selection and click inside it -> Start Moving
-                if (selection && 
-                    x >= selection.x && x <= selection.x + selection.w &&
-                    y >= selection.y && y <= selection.y + selection.h) {
-                    
+                if (selection && selection.imageData && isPointInSelection(x, y)) {
                     isMoving = true;
                     dragOffset.x = x - selection.x;
                     dragOffset.y = y - selection.y;
                     canvas.style.cursor = 'move';
+                } else if (selection && selection.imageData) {
+                    // Click outside active selection -> Commit it (don't start new)
+                    commitSelection();
                 } else {
-                    // Click outside -> Commit previous selection and start new one
-                    if (selection) commitSelection();
-                    
+                    // No active selection -> Start new selection
                     isSelecting = true;
                     startX = x;
                     startY = y;
                     // Save snapshot BEFORE drawing the selection box
-                    selection = { canvasSnapshot: canvas.toDataURL() }; 
+                    const canvasSnapshot = canvas.toDataURL();
+                    const snapshotImg = new Image();
+                    snapshotImg.src = canvasSnapshot;
+                    snapshotImg.onload = () => {
+                        if (selection && !selection.imageData) {
+                            selection.canvasSnapshotImage = snapshotImg;
+                        }
+                    };
+                    selection = {
+                        canvasSnapshot: canvasSnapshot,
+                        canvasSnapshotImage: snapshotImg
+                    };
                 }
                 return;
             }
@@ -312,14 +493,26 @@
         function handleMove(e) {
             const { x, y } = getCoords(e);
 
+            // Update cursor when hovering over handles
+            if (currentTool === 'select' && selection && !isSelecting && !isMoving && !isRotating && !isScaling) {
+                const handle = getHandleAtPoint(x, y);
+                if (handle) {
+                    canvas.style.cursor = handle.cursor;
+                } else if (isPointInSelection(x, y)) {
+                    canvas.style.cursor = 'move';
+                } else {
+                    canvas.style.cursor = 'crosshair';
+                }
+            }
+
             if (currentTool === 'select') {
                 if (isSelecting) {
                     // Restore clean state to remove previous rectangle
-                    const img = new Image();
-                    img.src = selection.canvasSnapshot;
-                    // We need immediate redraw, so we skip onload for smoothness (assuming DataURL is fast enough in RAM)
-                    ctx.drawImage(img, 0, 0); 
-                    
+                    if (selection.canvasSnapshotImage) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(selection.canvasSnapshotImage, 0, 0);
+                    }
+
                     // Draw dashed rectangle
                     ctx.beginPath();
                     ctx.setLineDash([5, 5]);
@@ -327,24 +520,62 @@
                     ctx.lineWidth = 2;
                     ctx.strokeRect(startX, startY, x - startX, y - startY);
                     ctx.setLineDash([]);
-                } else if (isMoving && selection.imageData) {
-                    // Clear canvas to the state with the HOLE
-                    const bgImg = new Image();
-                    bgImg.src = selection.backgroundSnapshot;
-                    ctx.drawImage(bgImg, 0, 0);
+                } else if (isRotating && selection.imageData && selection.backgroundImage) {
+                    // Calculate rotation angle
+                    const centerX = selection.x + selection.w / 2;
+                    const centerY = selection.y + selection.h / 2;
+                    const angle = Math.atan2(y - centerY, x - centerX);
+                    selection.rotation = angle + Math.PI / 2; // Adjust for initial orientation
 
+                    // Redraw - synchronous with preloaded image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(selection.backgroundImage, 0, 0);
+                    drawSelection();
+                    drawSelectionBorder();
+                } else if (isScaling && selection.imageData && selection.backgroundImage) {
+                    // Calculate new dimensions based on handle
+                    const dx = x - startX;
+                    const dy = y - startY;
+
+                    const oldX = selection.x;
+                    const oldY = selection.y;
+                    const oldW = selection.w;
+                    const oldH = selection.h;
+
+                    // Apply scaling based on which handle is being dragged
+                    if (activeHandle.includes('e')) {
+                        selection.w = Math.max(20, oldW + dx);
+                    }
+                    if (activeHandle.includes('w')) {
+                        selection.w = Math.max(20, oldW - dx);
+                        selection.x = oldX + (oldW - selection.w);
+                    }
+                    if (activeHandle.includes('s')) {
+                        selection.h = Math.max(20, oldH + dy);
+                    }
+                    if (activeHandle.includes('n')) {
+                        selection.h = Math.max(20, oldH - dy);
+                        selection.y = oldY + (oldH - selection.h);
+                    }
+
+                    startX = x;
+                    startY = y;
+
+                    // Redraw - synchronous with preloaded image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(selection.backgroundImage, 0, 0);
+                    drawSelection();
+                    drawSelectionBorder();
+                } else if (isMoving && selection.imageData && selection.backgroundImage) {
                     // Update position
                     selection.x = x - dragOffset.x;
                     selection.y = y - dragOffset.y;
 
-                    // Draw the floating selection
-                    // We need a temp canvas to convert ImageData to drawable image
-                    const tempCan = document.createElement('canvas');
-                    tempCan.width = selection.w;
-                    tempCan.height = selection.h;
-                    tempCan.getContext('2d').putImageData(selection.imageData, 0, 0);
-                    
-                    ctx.drawImage(tempCan, selection.x, selection.y);
+                    // Redraw - synchronous with preloaded image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(selection.backgroundImage, 0, 0);
+                    drawSelection();
+                    drawSelectionBorder();
                 }
                 return;
             }
@@ -359,7 +590,7 @@
                 if (isSelecting) {
                     isSelecting = false;
                     const { x, y } = getCoords(e); // End coords
-                    
+
                     let w = x - startX;
                     let h = y - startY;
 
@@ -381,42 +612,55 @@
                     img.src = selection.canvasSnapshot;
                     img.onload = () => {
                         ctx.drawImage(img, 0, 0);
-                        
+
                         // 1. Grab pixels
                         const selectedData = ctx.getImageData(startX, startY, w, h);
-                        
-                        // 2. Cut (Fill white)
-                        ctx.fillStyle = "#ffffff";
-                        ctx.fillRect(startX, startY, w, h);
-                        
-                        // 3. Save state with HOLE
-                        const backgroundWithHole = canvas.toDataURL();
 
-                        // 4. Update selection object
-                        selection = {
-                            x: startX,
-                            y: startY,
-                            w: w,
-                            h: h,
-                            imageData: selectedData,
-                            backgroundSnapshot: backgroundWithHole
+                        let backgroundWithHole;
+                        const bgImg = new Image();
+
+                        if (selectionMode === 'cut') {
+                            // 2. Cut mode - Fill white (remove from background)
+                            ctx.fillStyle = "#ffffff";
+                            ctx.fillRect(startX, startY, w, h);
+                            backgroundWithHole = canvas.toDataURL();
+                        } else {
+                            // 2. Copy mode - Keep background as is
+                            backgroundWithHole = selection.canvasSnapshot;
+                        }
+
+                        // 3. Load background image
+                        bgImg.src = backgroundWithHole;
+                        bgImg.onload = () => {
+                            // 4. Update selection object with preloaded image
+                            selection = {
+                                x: startX,
+                                y: startY,
+                                w: w,
+                                h: h,
+                                rotation: 0,
+                                imageData: selectedData,
+                                backgroundSnapshot: backgroundWithHole,
+                                backgroundImage: bgImg
+                            };
+
+                            // 5. Draw initial state
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(bgImg, 0, 0);
+                            drawSelection();
+                            drawSelectionBorder();
                         };
-
-                        // 5. Immediately draw the image back on top (so it looks like it's selected)
-                        const tempCan = document.createElement('canvas');
-                        tempCan.width = w; tempCan.height = h;
-                        tempCan.getContext('2d').putImageData(selectedData, 0, 0);
-                        ctx.drawImage(tempCan, startX, startY);
-                        
-                        // Draw selection border
-                        ctx.setLineDash([5, 5]);
-                        ctx.strokeStyle = '#d946ef';
-                        ctx.strokeRect(startX, startY, w, h);
-                        ctx.setLineDash([]);
                     };
                 } else if (isMoving) {
                     isMoving = false;
-                    canvas.style.cursor = 'default';
+                    canvas.style.cursor = 'crosshair';
+                } else if (isRotating) {
+                    isRotating = false;
+                    canvas.style.cursor = 'crosshair';
+                } else if (isScaling) {
+                    isScaling = false;
+                    activeHandle = null;
+                    canvas.style.cursor = 'crosshair';
                 }
                 return;
             }
@@ -460,14 +704,17 @@
 
         function commitSelection() {
             if (!selection) return;
-            // The canvas currently has the drawing from the last 'mousemove'
-            // which includes the background hole + the image at new position.
-            // We just need to save this as the new permanent state.
+
+            // Make sure we have the final rendering on canvas
+            if (selection.backgroundImage) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(selection.backgroundImage, 0, 0);
+                drawSelection(); // Draw without border
+            }
+
+            // Clear selection
             selection = null;
             saveState();
-            
-            // Redraw to remove any potential selection artifacts (like border if we added it)
-            // But since 'handleMove' draws clean image, we are mostly good.
         }
 
         // --- HISTORY & UTILS ---
@@ -501,14 +748,24 @@
 
         function setActiveTool(tool) {
             if(selection) commitSelection();
-            
+
             currentTool = tool;
             Object.values(tools).forEach(btn => btn.classList.remove('active'));
             tools[tool].classList.add('active');
 
-            if(tool === 'select') canvas.style.cursor = 'crosshair';
-            else if(tool === 'text') canvas.style.cursor = 'text';
-            else canvas.style.cursor = 'crosshair';
+            if(tool === 'select') {
+                canvas.style.cursor = 'crosshair';
+                if (!selection) {
+                    selectionHint.style.display = 'block';
+                    setTimeout(() => {
+                        selectionHint.style.display = 'none';
+                    }, 2000);
+                }
+            } else {
+                selectionHint.style.display = 'none';
+                if(tool === 'text') canvas.style.cursor = 'text';
+                else canvas.style.cursor = 'crosshair';
+            }
         }
 
         // --- LISTENERS ---
@@ -517,6 +774,27 @@
         });
 
         btnUndo.addEventListener('click', undo);
+        btnCopy.addEventListener('click', copySelection);
+        btnPaste.addEventListener('click', pasteSelection);
+        btnCommit.addEventListener('click', () => {
+            if (selection) {
+                commitSelection();
+            }
+        });
+        btnFlipH.addEventListener('click', flipSelectionHorizontal);
+        btnFlipV.addEventListener('click', flipSelectionVertical);
+
+        // Selection mode toggle
+        btnModeCopy.addEventListener('click', () => {
+            selectionMode = 'copy';
+            btnModeCopy.classList.add('active');
+            btnModeCut.classList.remove('active');
+        });
+        btnModeCut.addEventListener('click', () => {
+            selectionMode = 'cut';
+            btnModeCut.classList.add('active');
+            btnModeCopy.classList.remove('active');
+        });
         btnClear.addEventListener('click', () => {
             if (confirm('Wyczyścić?')) {
                 ctx.fillStyle = "#ffffff";
@@ -568,10 +846,150 @@
             }
         });
 
+        // Copy/Paste functions
+        function copySelection() {
+            if (!selection || !selection.imageData) {
+                alert('Najpierw zaznacz obszar do skopiowania!');
+                return;
+            }
+            clipboard = {
+                imageData: selection.imageData,
+                w: selection.w,
+                h: selection.h
+            };
+        }
+
+        function pasteSelection() {
+            if (!clipboard) {
+                alert('Schowek jest pusty! Najpierw skopiuj coś (Ctrl+C).');
+                return;
+            }
+
+            if (selection) commitSelection();
+
+            // Get current canvas as background
+            const backgroundSnapshot = canvas.toDataURL();
+            const bgImg = new Image();
+            bgImg.src = backgroundSnapshot;
+
+            bgImg.onload = () => {
+                // Create new selection from clipboard with preloaded background
+                selection = {
+                    x: 50,
+                    y: 50,
+                    w: clipboard.w,
+                    h: clipboard.h,
+                    rotation: 0,
+                    imageData: clipboard.imageData,
+                    backgroundSnapshot: backgroundSnapshot,
+                    backgroundImage: bgImg
+                };
+
+                // Draw pasted selection
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(bgImg, 0, 0);
+                drawSelection();
+                drawSelectionBorder();
+
+                // Switch to select tool
+                setActiveTool('select');
+            };
+        }
+
+        // Flip functions
+        function flipSelectionHorizontal() {
+            if (!selection || !selection.imageData) {
+                alert('Najpierw zaznacz obszar do odbicia!');
+                return;
+            }
+
+            // Create temp canvas to flip
+            const tempCan = document.createElement('canvas');
+            tempCan.width = selection.w;
+            tempCan.height = selection.h;
+            const tempCtx = tempCan.getContext('2d');
+
+            // Put original image
+            tempCtx.putImageData(selection.imageData, 0, 0);
+
+            // Flip horizontally
+            const flippedCan = document.createElement('canvas');
+            flippedCan.width = selection.w;
+            flippedCan.height = selection.h;
+            const flippedCtx = flippedCan.getContext('2d');
+
+            flippedCtx.translate(selection.w, 0);
+            flippedCtx.scale(-1, 1);
+            flippedCtx.drawImage(tempCan, 0, 0);
+
+            // Get flipped imageData
+            selection.imageData = flippedCtx.getImageData(0, 0, selection.w, selection.h);
+
+            // Redraw - use preloaded background image if available
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (selection.backgroundImage) {
+                ctx.drawImage(selection.backgroundImage, 0, 0);
+            }
+            drawSelection();
+            drawSelectionBorder();
+        }
+
+        function flipSelectionVertical() {
+            if (!selection || !selection.imageData) {
+                alert('Najpierw zaznacz obszar do odbicia!');
+                return;
+            }
+
+            // Create temp canvas to flip
+            const tempCan = document.createElement('canvas');
+            tempCan.width = selection.w;
+            tempCan.height = selection.h;
+            const tempCtx = tempCan.getContext('2d');
+
+            // Put original image
+            tempCtx.putImageData(selection.imageData, 0, 0);
+
+            // Flip vertically
+            const flippedCan = document.createElement('canvas');
+            flippedCan.width = selection.w;
+            flippedCan.height = selection.h;
+            const flippedCtx = flippedCan.getContext('2d');
+
+            flippedCtx.translate(0, selection.h);
+            flippedCtx.scale(1, -1);
+            flippedCtx.drawImage(tempCan, 0, 0);
+
+            // Get flipped imageData
+            selection.imageData = flippedCtx.getImageData(0, 0, selection.w, selection.h);
+
+            // Redraw - use preloaded background image if available
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (selection.backgroundImage) {
+                ctx.drawImage(selection.backgroundImage, 0, 0);
+            }
+            drawSelection();
+            drawSelectionBorder();
+        }
+
         // Key Shortcuts
         window.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
-            if (e.key === 'Delete' && selection) { 
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                undo();
+            }
+            if (e.ctrlKey && e.key === 'c') {
+                e.preventDefault();
+                copySelection();
+            }
+            if (e.ctrlKey && e.key === 'v') {
+                e.preventDefault();
+                pasteSelection();
+            }
+            if (e.key === 'Enter' && selection) {
+                e.preventDefault();
+                commitSelection();
+            }
+            if (e.key === 'Delete' && selection) {
                 // Delete selected area (fill with white in background snapshot)
                 const bgImg = new Image();
                 bgImg.src = selection.backgroundSnapshot;
@@ -580,6 +998,10 @@
                     selection = null;
                     saveState();
                 };
+            }
+            if (e.key === 'Escape' && selection) {
+                // Cancel selection
+                commitSelection();
             }
         });
 
