@@ -509,7 +509,13 @@
             x = Math.max(0, Math.min(x, rect.width));
             y = Math.max(0, Math.min(y, rect.height));
 
-            const imageData = spectrumCtx.getImageData(x, y, 1, 1).data;
+            // Scale coordinates from display size to canvas size
+            const scaleX = spectrumCanvas.width / rect.width;
+            const scaleY = spectrumCanvas.height / rect.height;
+            const canvasX = Math.floor(x * scaleX);
+            const canvasY = Math.floor(y * scaleY);
+
+            const imageData = spectrumCtx.getImageData(canvasX, canvasY, 1, 1).data;
             const rgb = { r: imageData[0], g: imageData[1], b: imageData[2] };
 
             updateColor(rgb);
@@ -539,7 +545,6 @@
             const colorString = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
             currentColorDiv.style.backgroundColor = colorString;
-            document.body.style.backgroundColor = colorString;
 
             redInput.value = rgb.r;
             greenInput.value = rgb.g;
