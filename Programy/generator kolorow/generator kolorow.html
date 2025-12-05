@@ -1,110 +1,654 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Generator kolorów – Max Playground</title>
-    <meta name="description" content="Interaktywny generator kolorów. Losuj barwy, kopiuj kody HEX i RGB oraz zapisuj swoje ulubione kombinacje." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
-    <link rel="stylesheet" href="../../assets/css/site.css" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
-    <script defer src="../../assets/js/site.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generator kolorów - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .picker-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .swatches {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .picker-area {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spectrum-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #spectrum-canvas {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .color-cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid white;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transform: translate(-50%, -50%);
+        }
+
+        .hue-container {
+            width: 30px;
+            position: relative;
+        }
+
+        #hue-canvas {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-group input {
+            width: 60px;
+            padding: 0.25rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .hex-input {
+            width: 120px !important;
+        }
+
+        .mode-toggle {
+            padding: 0.5rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .mode-toggle:hover {
+            background: #2563eb;
+        }
+
+        .save-section {
+            text-align: center;
+        }
+
+        .save-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .current-color {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .save-btn {
+            padding: 0.75rem 2rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            nav {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .picker-area {
+                flex-direction: column;
+            }
+
+            .hue-container {
+                width: 100%;
+                height: 30px;
+            }
+
+            #hue-canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .input-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
 </head>
-<body class="app-page app-page--dark" data-root="../../">
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="../../index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="../programy.html">Przegląd wszystkich programów</a>
-                        <a class="is-current" href="generator kolorow.html">Generator kolorów</a>
-                        <a href="../generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="../generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link" href="../../gry/gry.html">Gry</a>
-                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
-    <main class="standalone-app standalone-app--dark">
-        <section class="app-hero">
-            <div class="app-hero__content">
-                <span class="badge">Generator</span>
-                <h1>Generator kolorów</h1>
-                <p>Manipuluj spektrum barw, przełączaj się między trybami HEX i RGB oraz zapisuj ulubione odcienie, aby budować własne palety.</p>
+
+    <main>
+        <h1>🎨 Generator kolorów</h1>
+        <p class="subtitle">Wybierz kolor, skopiuj kod i zapisz ulubione odcienie</p>
+
+        <div class="picker-container">
+            <div class="swatches" id="default-swatches"></div>
+
+            <div class="picker-area">
+                <div class="spectrum-container">
+                    <canvas id="spectrum-canvas" width="300" height="200"></canvas>
+                    <div id="spectrum-cursor" class="color-cursor"></div>
+                </div>
+                <div class="hue-container">
+                    <canvas id="hue-canvas" width="30" height="200"></canvas>
+                    <div id="hue-cursor" class="color-cursor"></div>
+                </div>
             </div>
-            <div class="app-hero__actions">
-                <a class="btn btn-secondary" href="../programy.html">← Wróć do listy programów</a>
+
+            <div class="controls">
+                <div id="rgb-controls">
+                    <div class="input-group">
+                        <label>R:</label>
+                        <input type="number" id="red" min="0" max="255" value="255">
+                    </div>
+                    <div class="input-group">
+                        <label>G:</label>
+                        <input type="number" id="green" min="0" max="255" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label>B:</label>
+                        <input type="number" id="blue" min="0" max="255" value="0">
+                    </div>
+                </div>
+                <div id="hex-controls" style="display: none;">
+                    <div class="input-group">
+                        <label>#</label>
+                        <input type="text" id="hex" class="hex-input" value="FF0000">
+                    </div>
+                </div>
+                <button class="mode-toggle" onclick="toggleMode()">Przełącz RGB/HEX</button>
             </div>
-        </section>
-        <div class="standalone-app__inner">
-            <div class="color-picker-panel">
-                <div class="panel-row">
-                    <div class="swatches default-swatches"></div>
-                </div>
-                <div class="panel-row">
-                    <div class="spectrum-map">
-                        <button id="spectrum-cursor" class="color-cursor"></button>
-                        <canvas id="spectrum-canvas"></canvas>
-                    </div>
-                    <div class="hue-map">
-                        <button id="hue-cursor" class="color-cursor"></button>
-                        <canvas id="hue-canvas"></canvas>
-                    </div>
-                </div>
-                <div class="panel-row">
-                    <div id="rgb-fields" class="field-group value-fields rgb-fields active">
-                        <div class="field-group">
-                            <label class="field-label" for="red">R:</label>
-                            <input id="red" class="field-input rgb-input" type="number" max="255" min="0" />
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label" for="green">G:</label>
-                            <input id="green" class="field-input rgb-input" type="number" max="255" min="0" />
-                        </div>
-                        <div class="field-group">
-                            <label class="field-label" for="blue">B:</label>
-                            <input id="blue" class="field-input rgb-input" type="number" max="255" min="0" />
-                        </div>
-                    </div>
-                    <div id="hex-field" class="field-group value-fields hex-field">
-                        <label class="field-label" for="hex">#:</label>
-                        <input id="hex" class="field-input" type="text" />
-                    </div>
-                    <button id="mode-toggle" class="button mode-toggle">Tryb</button>
-                </div>
-                <div class="panel-row">
-                    <h2 class="panel-header">Kolory zapisane</h2>
-                    <div id="user-swatches" class="swatches custom-swatches"></div>
-                    <button id="add-swatch" class="button add-swatch">
-                        <span id="color-indicator" class="color-indicator"></span>
-                        <span>Zapisane kolory (znikną po odświeżeniu strony)</span>
-                    </button>
-                </div>
+
+            <div class="save-section">
+                <h3>Aktualny kolor</h3>
+                <div id="current-color" class="current-color"></div>
+                <button class="save-btn" onclick="saveColor()">💾 Zapisz kolor</button>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem;">Zapisane kolory</h3>
+                <div class="swatches" id="saved-swatches"></div>
             </div>
         </div>
     </main>
-    <footer>
-        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
-    </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.3.0/tinycolor.min.js"></script>
-    <script src="https://codepen.io/dariocorsi/pen/aKEBxW/de198bdaf7bb0bf03ac880d82fdfa5d5.js"></script>
-    <script src="./script.js"></script>
+
+    <script>
+        // Theme toggle
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Color picker
+        const spectrumCanvas = document.getElementById('spectrum-canvas');
+        const spectrumCtx = spectrumCanvas.getContext('2d');
+        const spectrumCursor = document.getElementById('spectrum-cursor');
+
+        const hueCanvas = document.getElementById('hue-canvas');
+        const hueCtx = hueCanvas.getContext('2d');
+        const hueCursor = document.getElementById('hue-cursor');
+
+        const currentColorDiv = document.getElementById('current-color');
+        const redInput = document.getElementById('red');
+        const greenInput = document.getElementById('green');
+        const blueInput = document.getElementById('blue');
+        const hexInput = document.getElementById('hex');
+
+        let currentHue = 0;
+        let currentColor = { r: 255, g: 0, b: 0 };
+        let isRgbMode = true;
+
+        // Default colors
+        const defaultColors = [
+            '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+            '#FFFFFF', '#000000', '#FF8800', '#8800FF', '#00FF88', '#FF0088'
+        ];
+
+        function init() {
+            createDefaultSwatches();
+            drawHueCanvas();
+            drawSpectrumCanvas(currentHue);
+            updateColor({ r: 255, g: 0, b: 0 });
+            setupEventListeners();
+            loadSavedColors();
+        }
+
+        function createDefaultSwatches() {
+            const container = document.getElementById('default-swatches');
+            defaultColors.forEach(color => {
+                const swatch = document.createElement('button');
+                swatch.className = 'swatch';
+                swatch.style.backgroundColor = color;
+                swatch.onclick = () => {
+                    const rgb = hexToRgb(color);
+                    updateColor(rgb);
+                    const hue = rgbToHue(rgb);
+                    currentHue = hue;
+                    drawSpectrumCanvas(hue);
+                    positionCursorsFromColor(rgb, hue);
+                };
+                container.appendChild(swatch);
+            });
+        }
+
+        function drawHueCanvas() {
+            const gradient = hueCtx.createLinearGradient(0, 0, 0, hueCanvas.height);
+            gradient.addColorStop(0, 'hsl(0, 100%, 50%)');
+            gradient.addColorStop(0.17, 'hsl(300, 100%, 50%)');
+            gradient.addColorStop(0.33, 'hsl(240, 100%, 50%)');
+            gradient.addColorStop(0.5, 'hsl(180, 100%, 50%)');
+            gradient.addColorStop(0.67, 'hsl(120, 100%, 50%)');
+            gradient.addColorStop(0.83, 'hsl(60, 100%, 50%)');
+            gradient.addColorStop(1, 'hsl(0, 100%, 50%)');
+            hueCtx.fillStyle = gradient;
+            hueCtx.fillRect(0, 0, hueCanvas.width, hueCanvas.height);
+        }
+
+        function drawSpectrumCanvas(hue) {
+            const hueColor = `hsl(${hue}, 100%, 50%)`;
+            spectrumCtx.fillStyle = hueColor;
+            spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+            const whiteGradient = spectrumCtx.createLinearGradient(0, 0, spectrumCanvas.width, 0);
+            whiteGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            whiteGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            spectrumCtx.fillStyle = whiteGradient;
+            spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+            const blackGradient = spectrumCtx.createLinearGradient(0, 0, 0, spectrumCanvas.height);
+            blackGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            blackGradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+            spectrumCtx.fillStyle = blackGradient;
+            spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+        }
+
+        function setupEventListeners() {
+            let isDraggingSpectrum = false;
+            let isDraggingHue = false;
+
+            spectrumCanvas.addEventListener('mousedown', (e) => {
+                isDraggingSpectrum = true;
+                pickSpectrumColor(e);
+            });
+
+            hueCanvas.addEventListener('mousedown', (e) => {
+                isDraggingHue = true;
+                pickHueColor(e);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDraggingSpectrum) pickSpectrumColor(e);
+                if (isDraggingHue) pickHueColor(e);
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDraggingSpectrum = false;
+                isDraggingHue = false;
+            });
+
+            redInput.addEventListener('input', updateFromRgb);
+            greenInput.addEventListener('input', updateFromRgb);
+            blueInput.addEventListener('input', updateFromRgb);
+            hexInput.addEventListener('input', updateFromHex);
+        }
+
+        function pickSpectrumColor(e) {
+            const rect = spectrumCanvas.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+
+            x = Math.max(0, Math.min(x, rect.width));
+            y = Math.max(0, Math.min(y, rect.height));
+
+            const imageData = spectrumCtx.getImageData(x, y, 1, 1).data;
+            const rgb = { r: imageData[0], g: imageData[1], b: imageData[2] };
+
+            updateColor(rgb);
+            positionSpectrumCursor(x, y);
+        }
+
+        function pickHueColor(e) {
+            const rect = hueCanvas.getBoundingClientRect();
+            let y = e.clientY - rect.top;
+            y = Math.max(0, Math.min(y, rect.height));
+
+            const hue = 360 * (y / rect.height);
+            currentHue = hue;
+            drawSpectrumCanvas(hue);
+
+            const rect2 = spectrumCanvas.getBoundingClientRect();
+            const x = parseFloat(spectrumCursor.style.left) || rect2.width / 2;
+            const y2 = parseFloat(spectrumCursor.style.top) || rect2.height / 2;
+
+            pickSpectrumColor({ clientX: rect2.left + x, clientY: rect2.top + y2 });
+            positionHueCursor(y);
+        }
+
+        function updateColor(rgb) {
+            currentColor = rgb;
+            const hex = rgbToHex(rgb);
+            const colorString = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+
+            currentColorDiv.style.backgroundColor = colorString;
+            document.body.style.backgroundColor = colorString;
+
+            redInput.value = rgb.r;
+            greenInput.value = rgb.g;
+            blueInput.value = rgb.b;
+            hexInput.value = hex.substring(1);
+        }
+
+        function updateFromRgb() {
+            const rgb = {
+                r: parseInt(redInput.value) || 0,
+                g: parseInt(greenInput.value) || 0,
+                b: parseInt(blueInput.value) || 0
+            };
+            updateColor(rgb);
+        }
+
+        function updateFromHex() {
+            const hex = '#' + hexInput.value.replace('#', '');
+            const rgb = hexToRgb(hex);
+            if (rgb) updateColor(rgb);
+        }
+
+        function positionSpectrumCursor(x, y) {
+            spectrumCursor.style.left = x + 'px';
+            spectrumCursor.style.top = y + 'px';
+        }
+
+        function positionHueCursor(y) {
+            hueCursor.style.top = y + 'px';
+            hueCursor.style.left = '15px';
+        }
+
+        function positionCursorsFromColor(rgb, hue) {
+            // This is simplified - a full implementation would convert RGB back to spectrum position
+            const rect = spectrumCanvas.getBoundingClientRect();
+            positionSpectrumCursor(rect.width / 2, rect.height / 2);
+
+            const hueY = (hue / 360) * hueCanvas.height;
+            positionHueCursor(hueY);
+        }
+
+        function toggleMode() {
+            isRgbMode = !isRgbMode;
+            document.getElementById('rgb-controls').style.display = isRgbMode ? 'flex' : 'none';
+            document.getElementById('hex-controls').style.display = isRgbMode ? 'none' : 'flex';
+        }
+
+        function saveColor() {
+            const hex = rgbToHex(currentColor);
+            const saved = JSON.parse(localStorage.getItem('savedColors') || '[]');
+            if (!saved.includes(hex)) {
+                saved.push(hex);
+                localStorage.setItem('savedColors', JSON.stringify(saved));
+                addSavedSwatch(hex);
+            }
+        }
+
+        function loadSavedColors() {
+            const saved = JSON.parse(localStorage.getItem('savedColors') || '[]');
+            saved.forEach(color => addSavedSwatch(color));
+        }
+
+        function addSavedSwatch(color) {
+            const container = document.getElementById('saved-swatches');
+            const swatch = document.createElement('button');
+            swatch.className = 'swatch';
+            swatch.style.backgroundColor = color;
+            swatch.onclick = () => {
+                const rgb = hexToRgb(color);
+                updateColor(rgb);
+            };
+            container.appendChild(swatch);
+        }
+
+        function rgbToHex(rgb) {
+            return '#' + [rgb.r, rgb.g, rgb.b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHue(rgb) {
+            const r = rgb.r / 255;
+            const g = rgb.g / 255;
+            const b = rgb.b / 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h = 0;
+
+            if (max !== min) {
+                const d = max - min;
+                if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+                else if (max === g) h = ((b - r) / d + 2) / 6;
+                else h = ((r - g) / d + 4) / 6;
+            }
+
+            return Math.round(h * 360);
+        }
+
+        init();
+    </script>
 </body>
 </html>
