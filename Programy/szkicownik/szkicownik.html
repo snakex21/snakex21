@@ -126,6 +126,22 @@
             border-radius: 4px;
         }
 
+        .selection-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(217, 70, 239, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+        }
+
         /* Cursor styles for tools */
         .cursor-draw { cursor: crosshair; }
         .cursor-move { cursor: move; }
@@ -167,8 +183,13 @@
         </div>
 
         <div class="tool-group">
-            <button class="btn-tool" id="action-copy" title="Kopiuj (Ctrl+C)">📋</button>
-            <button class="btn-tool" id="action-paste" title="Wklej (Ctrl+V)">📄</button>
+            <button class="btn-tool active" id="mode-copy" title="Tryb: Kopiuj obszar (nie usuwa)">📄</button>
+            <button class="btn-tool" id="mode-cut" title="Tryb: Wytnij obszar (usuwa z tła)">✂️</button>
+        </div>
+
+        <div class="tool-group">
+            <button class="btn-tool" id="action-copy" title="Kopiuj do schowka (Ctrl+C)">📋</button>
+            <button class="btn-tool" id="action-paste" title="Wklej ze schowka (Ctrl+V)">📌</button>
             <button class="btn-tool" id="action-flip-h" title="Odbij poziomo">↔️</button>
             <button class="btn-tool" id="action-flip-v" title="Odbij pionowo">↕️</button>
         </div>
@@ -184,6 +205,7 @@
     </div>
 
     <div class="canvas-container" id="canvas-container">
+        <div class="selection-hint" id="selection-hint">Zaznacz obszar do edycji</div>
         <canvas id="canvas"></canvas>
     </div>
 
@@ -207,6 +229,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
+        const selectionHint = document.getElementById('selection-hint');
         
         // Tools
         const tools = {
@@ -225,6 +248,8 @@
         const btnPaste = document.getElementById('action-paste');
         const btnFlipH = document.getElementById('action-flip-h');
         const btnFlipV = document.getElementById('action-flip-v');
+        const btnModeCopy = document.getElementById('mode-copy');
+        const btnModeCut = document.getElementById('mode-cut');
         const imgUpload = document.getElementById('img-upload');
 
         let isDrawing = false;
@@ -242,6 +267,7 @@
         let dragOffset = { x: 0, y: 0 };
         let activeHandle = null; // Which resize handle is being dragged
         let clipboard = null; // For copy/paste
+        let selectionMode = 'copy'; // 'copy' or 'cut'
         const HANDLE_SIZE = 8;
         const ROTATE_HANDLE_OFFSET = 30;
 
@@ -402,6 +428,8 @@
             }
 
             if (currentTool === 'select') {
+                selectionHint.style.display = 'none';
+
                 // Check if clicking on a handle
                 const handle = getHandleAtPoint(x, y);
                 if (handle) {
@@ -573,14 +601,19 @@
                         // 1. Grab pixels
                         const selectedData = ctx.getImageData(startX, startY, w, h);
 
-                        // 2. Cut (Fill white)
-                        ctx.fillStyle = "#ffffff";
-                        ctx.fillRect(startX, startY, w, h);
+                        let backgroundWithHole;
 
-                        // 3. Save state with HOLE
-                        const backgroundWithHole = canvas.toDataURL();
+                        if (selectionMode === 'cut') {
+                            // 2. Cut mode - Fill white (remove from background)
+                            ctx.fillStyle = "#ffffff";
+                            ctx.fillRect(startX, startY, w, h);
+                            backgroundWithHole = canvas.toDataURL();
+                        } else {
+                            // 2. Copy mode - Keep background as is
+                            backgroundWithHole = selection.canvasSnapshot;
+                        }
 
-                        // 4. Update selection object
+                        // 3. Update selection object
                         selection = {
                             x: startX,
                             y: startY,
@@ -591,9 +624,14 @@
                             backgroundSnapshot: backgroundWithHole
                         };
 
-                        // 5. Draw the selection and border
-                        drawSelection();
-                        drawSelectionBorder();
+                        // 4. Restore background and draw selection
+                        const bgImg = new Image();
+                        bgImg.src = backgroundWithHole;
+                        bgImg.onload = () => {
+                            ctx.drawImage(bgImg, 0, 0);
+                            drawSelection();
+                            drawSelectionBorder();
+                        };
                     };
                 } else if (isMoving) {
                     isMoving = false;
@@ -689,14 +727,24 @@
 
         function setActiveTool(tool) {
             if(selection) commitSelection();
-            
+
             currentTool = tool;
             Object.values(tools).forEach(btn => btn.classList.remove('active'));
             tools[tool].classList.add('active');
 
-            if(tool === 'select') canvas.style.cursor = 'crosshair';
-            else if(tool === 'text') canvas.style.cursor = 'text';
-            else canvas.style.cursor = 'crosshair';
+            if(tool === 'select') {
+                canvas.style.cursor = 'crosshair';
+                if (!selection) {
+                    selectionHint.style.display = 'block';
+                    setTimeout(() => {
+                        selectionHint.style.display = 'none';
+                    }, 2000);
+                }
+            } else {
+                selectionHint.style.display = 'none';
+                if(tool === 'text') canvas.style.cursor = 'text';
+                else canvas.style.cursor = 'crosshair';
+            }
         }
 
         // --- LISTENERS ---
@@ -709,6 +757,18 @@
         btnPaste.addEventListener('click', pasteSelection);
         btnFlipH.addEventListener('click', flipSelectionHorizontal);
         btnFlipV.addEventListener('click', flipSelectionVertical);
+
+        // Selection mode toggle
+        btnModeCopy.addEventListener('click', () => {
+            selectionMode = 'copy';
+            btnModeCopy.classList.add('active');
+            btnModeCut.classList.remove('active');
+        });
+        btnModeCut.addEventListener('click', () => {
+            selectionMode = 'cut';
+            btnModeCut.classList.add('active');
+            btnModeCopy.classList.remove('active');
+        });
         btnClear.addEventListener('click', () => {
             if (confirm('Wyczyścić?')) {
                 ctx.fillStyle = "#ffffff";
