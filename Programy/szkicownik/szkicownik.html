@@ -190,6 +190,10 @@
         <div class="tool-group">
             <button class="btn-tool" id="action-copy" title="Kopiuj do schowka (Ctrl+C)">📋</button>
             <button class="btn-tool" id="action-paste" title="Wklej ze schowka (Ctrl+V)">📌</button>
+            <button class="btn-tool" id="action-commit" title="Zatwierdź zaznaczenie (Enter)" style="color: #10b981;">✓</button>
+        </div>
+
+        <div class="tool-group">
             <button class="btn-tool" id="action-flip-h" title="Odbij poziomo">↔️</button>
             <button class="btn-tool" id="action-flip-v" title="Odbij pionowo">↕️</button>
         </div>
@@ -246,6 +250,7 @@
         const btnSave = document.getElementById('action-save');
         const btnCopy = document.getElementById('action-copy');
         const btnPaste = document.getElementById('action-paste');
+        const btnCommit = document.getElementById('action-commit');
         const btnFlipH = document.getElementById('action-flip-h');
         const btnFlipV = document.getElementById('action-flip-v');
         const btnModeCopy = document.getElementById('mode-copy');
@@ -447,20 +452,32 @@
                 }
 
                 // If we have a selection and click inside it -> Start Moving
-                if (selection && isPointInSelection(x, y)) {
+                if (selection && selection.imageData && isPointInSelection(x, y)) {
                     isMoving = true;
                     dragOffset.x = x - selection.x;
                     dragOffset.y = y - selection.y;
                     canvas.style.cursor = 'move';
+                } else if (selection && selection.imageData) {
+                    // Click outside active selection -> Commit it (don't start new)
+                    commitSelection();
                 } else {
-                    // Click outside -> Commit previous selection and start new one
-                    if (selection) commitSelection();
-
+                    // No active selection -> Start new selection
                     isSelecting = true;
                     startX = x;
                     startY = y;
                     // Save snapshot BEFORE drawing the selection box
-                    selection = { canvasSnapshot: canvas.toDataURL() };
+                    const canvasSnapshot = canvas.toDataURL();
+                    const snapshotImg = new Image();
+                    snapshotImg.src = canvasSnapshot;
+                    snapshotImg.onload = () => {
+                        if (selection && !selection.imageData) {
+                            selection.canvasSnapshotImage = snapshotImg;
+                        }
+                    };
+                    selection = {
+                        canvasSnapshot: canvasSnapshot,
+                        canvasSnapshotImage: snapshotImg
+                    };
                 }
                 return;
             }
@@ -491,9 +508,10 @@
             if (currentTool === 'select') {
                 if (isSelecting) {
                     // Restore clean state to remove previous rectangle
-                    const img = new Image();
-                    img.src = selection.canvasSnapshot;
-                    ctx.drawImage(img, 0, 0);
+                    if (selection.canvasSnapshotImage) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(selection.canvasSnapshotImage, 0, 0);
+                    }
 
                     // Draw dashed rectangle
                     ctx.beginPath();
@@ -758,6 +776,11 @@
         btnUndo.addEventListener('click', undo);
         btnCopy.addEventListener('click', copySelection);
         btnPaste.addEventListener('click', pasteSelection);
+        btnCommit.addEventListener('click', () => {
+            if (selection) {
+                commitSelection();
+            }
+        });
         btnFlipH.addEventListener('click', flipSelectionHorizontal);
         btnFlipV.addEventListener('click', flipSelectionVertical);
 
@@ -961,6 +984,10 @@
             if (e.ctrlKey && e.key === 'v') {
                 e.preventDefault();
                 pasteSelection();
+            }
+            if (e.key === 'Enter' && selection) {
+                e.preventDefault();
+                commitSelection();
             }
             if (e.key === 'Delete' && selection) {
                 // Delete selected area (fill with white in background snapshot)
