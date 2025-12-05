@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dyktafon - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #f43f5e; /* Rose */
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #fb7185;
+            --input-bg: #222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Recorder Styles */
+        .recorder-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualizer-container {
+            width: 100%;
+            height: 120px;
+            background: var(--input-bg);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 2rem;
+            color: var(--text);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .btn-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-record {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-record:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.4);
+        }
+
+        .btn-record.recording {
+            animation: pulse 2s infinite;
+            background: #fff;
+            border: 4px solid var(--accent);
+            color: var(--accent);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(244, 63, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+        }
+
+        .btn-icon {
+            font-size: 2rem;
+        }
+
+        /* Recordings List */
+        .recordings-list {
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .recording-item {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .audio-player {
+            flex: 1;
+            height: 40px;
+        }
+
+        .download-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: var(--text);
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            background: var(--card-hover);
+            border-color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            h1 { font-size: 2rem; }
+            .recording-item { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🎙️ Dyktafon</h1>
+            <p>Nagrywaj notatki głosowe i dźwięki w wysokiej jakości</p>
+        </div>
+
+        <div class="recorder-card">
+            <div class="visualizer-container">
+                <canvas id="visualizer"></canvas>
+            </div>
+
+            <div class="timer" id="timer">00:00</div>
+
+            <div class="controls">
+                <button class="btn-circle btn-record" id="record-btn">
+                    <span class="btn-icon">●</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="recordings-list" id="recordings-list">
+            <!-- Nagrania pojawią się tutaj -->
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- RECORDER LOGIC ---
+        const recordBtn = document.getElementById('record-btn');
+        const timerEl = document.getElementById('timer');
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        const recordingsList = document.getElementById('recordings-list');
+
+        let mediaRecorder;
+        let chunks = [];
+        let isRecording = false;
+        let startTime;
+        let timerInterval;
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let source;
+        let animationId;
+
+        // Init Canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Audio Setup for Visualizer
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+
+                // Recorder Setup
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    chunks = [];
+                    const audioUrl = URL.createObjectURL(blob);
+                    addRecording(audioUrl);
+                    
+                    // Stop tracks
+                    stream.getTracks().forEach(track => track.stop());
+                    audioContext.close();
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                startTime = Date.now();
+                
+                // UI Updates
+                recordBtn.classList.add('recording');
+                recordBtn.innerHTML = '<span class="btn-icon">■</span>'; // Square for stop
+                
+                // Start Timer & Visualizer
+                timerInterval = setInterval(updateTimer, 1000);
+                drawVisualizer();
+
+            } catch (err) {
+                console.error("Błąd mikrofonu:", err);
+                alert("Nie można uzyskać dostępu do mikrofonu.");
+            }
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            isRecording = false;
+            
+            // UI Updates
+            recordBtn.classList.remove('recording');
+            recordBtn.innerHTML = '<span class="btn-icon">●</span>';
+            
+            clearInterval(timerInterval);
+            cancelAnimationFrame(animationId);
+            
+            // Reset Visualizer
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            timerEl.textContent = "00:00";
+        }
+
+        function updateTimer() {
+            const diff = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(diff / 60).toString().padStart(2, '0');
+            const secs = (diff % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${mins}:${secs}`;
+        }
+
+        function drawVisualizer() {
+            if(!isRecording) return;
+            animationId = requestAnimationFrame(drawVisualizer);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            canvasCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--input-bg');
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const barWidth = (canvas.width / dataArray.length) * 2.5;
+            let barHeight;
+            let x = 0;
+            
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+
+            for(let i = 0; i < dataArray.length; i++) {
+                barHeight = dataArray[i] / 2;
+                
+                canvasCtx.fillStyle = accentColor;
+                // Draw centered bars
+                canvasCtx.fillRect(x, (canvas.height - barHeight) / 2, barWidth, barHeight);
+                
+                x += barWidth + 1;
+            }
+        }
+
+        function addRecording(url) {
+            const div = document.createElement('div');
+            div.className = 'recording-item';
+            
+            const date = new Date().toLocaleTimeString();
+            
+            div.innerHTML = `
+                <div style="font-weight:600; min-width:80px;">${date}</div>
+                <audio controls src="${url}" class="audio-player"></audio>
+                <a href="${url}" download="nagranie_${Date.now()}.webm" class="download-btn">Pobierz</a>
+            `;
+            
+            recordingsList.prepend(div);
+        }
+
+    </script>
+</body>
+</html>
