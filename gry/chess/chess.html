@@ -317,6 +317,64 @@
             color: var(--text);
         }
 
+        .promotion-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .promotion-overlay.show {
+            display: flex;
+        }
+
+        .promotion-modal {
+            background: var(--card-bg);
+            border: 3px solid #3b82f6;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .promotion-modal h3 {
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .promotion-choices {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .promotion-btn {
+            width: 80px;
+            height: 80px;
+            font-size: 3rem;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .promotion-btn:hover {
+            background: var(--card-bg);
+            border-color: #3b82f6;
+            transform: scale(1.1);
+        }
+
         .restart-btn {
             padding: 0.75rem 1.5rem;
             background: #3b82f6;
@@ -517,6 +575,13 @@
             <p id="game-over-text"></p>
             <button class="restart-btn" onclick="resetGame()">Zagraj ponownie</button>
         </div>
+
+        <div class="promotion-overlay" id="promotion-overlay">
+            <div class="promotion-modal">
+                <h3>Wybierz figurę do promocji</h3>
+                <div class="promotion-choices" id="promotion-choices"></div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -545,6 +610,7 @@
         let playerColor = 'white'; // Kolor gracza w trybie AI
         let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
         let gameOver = false;
+        let pendingPromotion = null; // { row, col, color }
 
         // Figury szachowe (Unicode)
         const pieces = {
@@ -577,29 +643,29 @@
             }
 
             // Białe figury
-            board[7][0] = { type: 'rook', color: 'white', symbol: pieces.white.rook };
-            board[7][1] = { type: 'knight', color: 'white', symbol: pieces.white.knight };
-            board[7][2] = { type: 'bishop', color: 'white', symbol: pieces.white.bishop };
-            board[7][3] = { type: 'queen', color: 'white', symbol: pieces.white.queen };
-            board[7][4] = { type: 'king', color: 'white', symbol: pieces.white.king };
-            board[7][5] = { type: 'bishop', color: 'white', symbol: pieces.white.bishop };
-            board[7][6] = { type: 'knight', color: 'white', symbol: pieces.white.knight };
-            board[7][7] = { type: 'rook', color: 'white', symbol: pieces.white.rook };
+            board[7][0] = { type: 'rook', color: 'white', symbol: pieces.white.rook, hasMoved: false };
+            board[7][1] = { type: 'knight', color: 'white', symbol: pieces.white.knight, hasMoved: false };
+            board[7][2] = { type: 'bishop', color: 'white', symbol: pieces.white.bishop, hasMoved: false };
+            board[7][3] = { type: 'queen', color: 'white', symbol: pieces.white.queen, hasMoved: false };
+            board[7][4] = { type: 'king', color: 'white', symbol: pieces.white.king, hasMoved: false };
+            board[7][5] = { type: 'bishop', color: 'white', symbol: pieces.white.bishop, hasMoved: false };
+            board[7][6] = { type: 'knight', color: 'white', symbol: pieces.white.knight, hasMoved: false };
+            board[7][7] = { type: 'rook', color: 'white', symbol: pieces.white.rook, hasMoved: false };
             for (let i = 0; i < 8; i++) {
-                board[6][i] = { type: 'pawn', color: 'white', symbol: pieces.white.pawn };
+                board[6][i] = { type: 'pawn', color: 'white', symbol: pieces.white.pawn, hasMoved: false };
             }
 
             // Czarne figury
-            board[0][0] = { type: 'rook', color: 'black', symbol: pieces.black.rook };
-            board[0][1] = { type: 'knight', color: 'black', symbol: pieces.black.knight };
-            board[0][2] = { type: 'bishop', color: 'black', symbol: pieces.black.bishop };
-            board[0][3] = { type: 'queen', color: 'black', symbol: pieces.black.queen };
-            board[0][4] = { type: 'king', color: 'black', symbol: pieces.black.king };
-            board[0][5] = { type: 'bishop', color: 'black', symbol: pieces.black.bishop };
-            board[0][6] = { type: 'knight', color: 'black', symbol: pieces.black.knight };
-            board[0][7] = { type: 'rook', color: 'black', symbol: pieces.black.rook };
+            board[0][0] = { type: 'rook', color: 'black', symbol: pieces.black.rook, hasMoved: false };
+            board[0][1] = { type: 'knight', color: 'black', symbol: pieces.black.knight, hasMoved: false };
+            board[0][2] = { type: 'bishop', color: 'black', symbol: pieces.black.bishop, hasMoved: false };
+            board[0][3] = { type: 'queen', color: 'black', symbol: pieces.black.queen, hasMoved: false };
+            board[0][4] = { type: 'king', color: 'black', symbol: pieces.black.king, hasMoved: false };
+            board[0][5] = { type: 'bishop', color: 'black', symbol: pieces.black.bishop, hasMoved: false };
+            board[0][6] = { type: 'knight', color: 'black', symbol: pieces.black.knight, hasMoved: false };
+            board[0][7] = { type: 'rook', color: 'black', symbol: pieces.black.rook, hasMoved: false };
             for (let i = 0; i < 8; i++) {
-                board[1][i] = { type: 'pawn', color: 'black', symbol: pieces.black.pawn };
+                board[1][i] = { type: 'pawn', color: 'black', symbol: pieces.black.pawn, hasMoved: false };
             }
         }
 
@@ -699,7 +765,51 @@
                     break;
 
                 case 'king':
-                    isBasicMoveValid = rowDiff <= 1 && colDiff <= 1;
+                    // Normalny ruch króla
+                    if (rowDiff <= 1 && colDiff <= 1) {
+                        isBasicMoveValid = true;
+                    }
+                    // Roszada
+                    else if (!piece.hasMoved && rowDiff === 0 && colDiff === 2) {
+                        // Roszada krótka (w prawo)
+                        if (toCol === fromCol + 2) {
+                            const rook = board[fromRow][7];
+                            if (rook && rook.type === 'rook' && !rook.hasMoved &&
+                                !board[fromRow][fromCol + 1] && !board[fromRow][fromCol + 2]) {
+                                // Sprawdź czy król nie jest w szachu i nie przechodzi przez szach
+                                if (!skipCheckValidation) {
+                                    if (isKingInCheck(piece.color)) {
+                                        isBasicMoveValid = false;
+                                    } else if (wouldMoveCauseCheck(fromRow, fromCol, fromRow, fromCol + 1)) {
+                                        isBasicMoveValid = false;
+                                    } else {
+                                        isBasicMoveValid = true;
+                                    }
+                                } else {
+                                    isBasicMoveValid = true;
+                                }
+                            }
+                        }
+                        // Roszada długa (w lewo)
+                        else if (toCol === fromCol - 2) {
+                            const rook = board[fromRow][0];
+                            if (rook && rook.type === 'rook' && !rook.hasMoved &&
+                                !board[fromRow][fromCol - 1] && !board[fromRow][fromCol - 2] && !board[fromRow][fromCol - 3]) {
+                                // Sprawdź czy król nie jest w szachu i nie przechodzi przez szach
+                                if (!skipCheckValidation) {
+                                    if (isKingInCheck(piece.color)) {
+                                        isBasicMoveValid = false;
+                                    } else if (wouldMoveCauseCheck(fromRow, fromCol, fromRow, fromCol - 1)) {
+                                        isBasicMoveValid = false;
+                                    } else {
+                                        isBasicMoveValid = true;
+                                    }
+                                } else {
+                                    isBasicMoveValid = true;
+                                }
+                            }
+                        }
+                    }
                     break;
             }
 
@@ -859,6 +969,60 @@
             }
         }
 
+        // Pokazanie UI promocji pionka
+        function showPromotionUI(row, col, color) {
+            pendingPromotion = { row, col, color };
+
+            const choicesDiv = document.getElementById('promotion-choices');
+            choicesDiv.innerHTML = '';
+
+            const promotionPieces = ['queen', 'rook', 'bishop', 'knight'];
+            promotionPieces.forEach(type => {
+                const btn = document.createElement('button');
+                btn.className = 'promotion-btn';
+                btn.textContent = pieces[color][type];
+                btn.onclick = () => completePromotion(type);
+                choicesDiv.appendChild(btn);
+            });
+
+            document.getElementById('promotion-overlay').classList.add('show');
+        }
+
+        // Ukończ promocję pionka
+        function completePromotion(newType) {
+            if (!pendingPromotion) return;
+
+            const { row, col, color } = pendingPromotion;
+
+            // Zamień pionka na wybraną figurę
+            board[row][col] = {
+                type: newType,
+                color: color,
+                symbol: pieces[color][newType],
+                hasMoved: true
+            };
+
+            // Ukryj UI
+            document.getElementById('promotion-overlay').classList.remove('show');
+            pendingPromotion = null;
+
+            // Kontynuuj grę
+            currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+            updateTurnDisplay();
+            drawBoard();
+            checkGameOver();
+
+            // W trybie AI, po promocji gracza, AI wykonuje swój ruch
+            if (!gameOver && gameMode === 'ai') {
+                const aiColor = playerColor === 'white' ? 'black' : 'white';
+                if (currentPlayer === aiColor) {
+                    setTimeout(() => {
+                        makeAIMove();
+                    }, 500);
+                }
+            }
+        }
+
         // Obsługa kliknięcia na pole
         function handleSquareClick(row, col) {
             // Nie pozwalaj na ruchy gdy gra się skończyła
@@ -873,10 +1037,38 @@
             if (selectedPiece) {
                 // Próba ruchu
                 if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
+                    const movingPiece = board[selectedPiece.row][selectedPiece.col];
+
                     // Wykonaj ruch
-                    board[row][col] = board[selectedPiece.row][selectedPiece.col];
+                    board[row][col] = movingPiece;
                     board[selectedPiece.row][selectedPiece.col] = null;
+                    movingPiece.hasMoved = true;
+
+                    // Roszada - przesuń wieżę
+                    if (movingPiece.type === 'king' && Math.abs(col - selectedPiece.col) === 2) {
+                        if (col > selectedPiece.col) {
+                            // Roszada krótka
+                            const rook = board[row][7];
+                            board[row][5] = rook;
+                            board[row][7] = null;
+                            rook.hasMoved = true;
+                        } else {
+                            // Roszada długa
+                            const rook = board[row][0];
+                            board[row][3] = rook;
+                            board[row][0] = null;
+                            rook.hasMoved = true;
+                        }
+                    }
+
                     selectedPiece = null;
+
+                    // Sprawdź promocję pionka
+                    if (movingPiece.type === 'pawn' && (row === 0 || row === 7)) {
+                        showPromotionUI(row, col, movingPiece.color);
+                        return; // Czekaj na wybór promocji
+                    }
+
                     currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
                     updateTurnDisplay();
                     drawBoard();
@@ -1033,8 +1225,37 @@
             }
 
             // Wykonaj ruch
-            board[move.toRow][move.toCol] = board[move.fromRow][move.fromCol];
+            const movingPiece = board[move.fromRow][move.fromCol];
+            board[move.toRow][move.toCol] = movingPiece;
             board[move.fromRow][move.fromCol] = null;
+            movingPiece.hasMoved = true;
+
+            // Roszada - przesuń wieżę
+            if (movingPiece.type === 'king' && Math.abs(move.toCol - move.fromCol) === 2) {
+                if (move.toCol > move.fromCol) {
+                    // Roszada krótka
+                    const rook = board[move.toRow][7];
+                    board[move.toRow][5] = rook;
+                    board[move.toRow][7] = null;
+                    rook.hasMoved = true;
+                } else {
+                    // Roszada długa
+                    const rook = board[move.toRow][0];
+                    board[move.toRow][3] = rook;
+                    board[move.toRow][0] = null;
+                    rook.hasMoved = true;
+                }
+            }
+
+            // Promocja pionka - AI zawsze wybiera hetmana
+            if (movingPiece.type === 'pawn' && (move.toRow === 0 || move.toRow === 7)) {
+                board[move.toRow][move.toCol] = {
+                    type: 'queen',
+                    color: movingPiece.color,
+                    symbol: pieces[movingPiece.color].queen,
+                    hasMoved: true
+                };
+            }
 
             currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
             selectedPiece = null;
@@ -1135,7 +1356,9 @@
 
             // Zresetuj stan gry
             gameOver = false;
+            pendingPromotion = null;
             document.getElementById('game-over-message').classList.remove('show');
+            document.getElementById('promotion-overlay').classList.remove('show');
 
             initBoard();
             selectedPiece = null;
