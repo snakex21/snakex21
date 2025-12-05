@@ -219,8 +219,87 @@
             background: #90ee90 !important;
         }
 
+        .square.in-check {
+            background: #ff4444 !important;
+            animation: check-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes check-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .square:hover {
             opacity: 0.8;
+        }
+
+        .game-over-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border: 3px solid #3b82f6;
+            border-radius: 16px;
+            padding: 2rem 3rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .game-over-message.show {
+            display: block;
+        }
+
+        .game-over-message h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .game-over-message p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .difficulty-selection {
+            display: none;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .difficulty-selection.show {
+            display: flex;
+        }
+
+        .difficulty-btn {
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .difficulty-btn:hover {
+            background: var(--bg);
+        }
+
+        .difficulty-btn.active {
+            background: #f59e0b;
+            color: #fff;
+            border-color: #f59e0b;
         }
 
         .controls {
@@ -366,6 +445,15 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .difficulty-selection {
+                flex-direction: row;
+            }
+
+            .difficulty-btn {
+                flex: 1;
+                min-width: 80px;
+            }
         }
     </style>
 </head>
@@ -402,6 +490,13 @@
                 <button class="color-btn" onclick="setPlayerColor('black')">⚫ Czarne (AI zaczyna)</button>
             </div>
 
+            <div class="difficulty-selection" id="difficulty-selection">
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Poziom AI:</span>
+                <button class="difficulty-btn" onclick="setDifficulty('easy')">😊 Łatwy</button>
+                <button class="difficulty-btn active" onclick="setDifficulty('medium')">🤔 Średni</button>
+                <button class="difficulty-btn" onclick="setDifficulty('hard')">😤 Trudny</button>
+            </div>
+
             <div class="game-info">
                 <div class="player-turn active" id="white-turn">⚪ Białe</div>
                 <div class="player-turn" id="black-turn">⚫ Czarne</div>
@@ -415,6 +510,12 @@
             </div>
 
             <button class="restart-btn" onclick="resetGame()">Nowa gra</button>
+        </div>
+
+        <div class="game-over-message" id="game-over-message">
+            <h2 id="game-over-title"></h2>
+            <p id="game-over-text"></p>
+            <button class="restart-btn" onclick="resetGame()">Zagraj ponownie</button>
         </div>
     </main>
 
@@ -442,6 +543,8 @@
         let gameMode = 'pvp'; // 'pvp', 'ai', 'auto'
         let autoPlayInterval = null;
         let playerColor = 'white'; // Kolor gracza w trybie AI
+        let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
+        let gameOver = false;
 
         // Figury szachowe (Unicode)
         const pieces = {
@@ -505,6 +608,14 @@
             const boardElement = document.getElementById('chess-board');
             boardElement.innerHTML = '';
 
+            // Znajdź króla w szachu
+            let checkedKingPos = null;
+            if (isKingInCheck('white')) {
+                checkedKingPos = findKing('white');
+            } else if (isKingInCheck('black')) {
+                checkedKingPos = findKing('black');
+            }
+
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     const square = document.createElement('div');
@@ -512,6 +623,11 @@
                     square.className += (row + col) % 2 === 0 ? ' white' : ' black';
                     square.dataset.row = row;
                     square.dataset.col = col;
+
+                    // Podświetl króla w szachu
+                    if (checkedKingPos && row === checkedKingPos.row && col === checkedKingPos.col) {
+                        square.classList.add('in-check');
+                    }
 
                     if (board[row][col]) {
                         square.dataset.piece = board[row][col].symbol;
@@ -527,7 +643,7 @@
         }
 
         // Sprawdzanie czy ruch jest możliwy
-        function isValidMove(fromRow, fromCol, toRow, toCol) {
+        function isValidMove(fromRow, fromCol, toRow, toCol, skipCheckValidation = false) {
             const piece = board[fromRow][fromCol];
             if (!piece) return false;
 
@@ -539,44 +655,62 @@
                 return false;
             }
 
+            let isBasicMoveValid = false;
+
             switch (piece.type) {
                 case 'pawn':
                     if (piece.color === 'white') {
                         // Ruch do przodu
-                        if (fromCol === toCol && toRow === fromRow - 1 && !board[toRow][toCol]) return true;
+                        if (fromCol === toCol && toRow === fromRow - 1 && !board[toRow][toCol]) isBasicMoveValid = true;
                         // Pierwszy ruch - 2 pola
-                        if (fromRow === 6 && fromCol === toCol && toRow === 4 && !board[toRow][toCol] && !board[5][toCol]) return true;
+                        else if (fromRow === 6 && fromCol === toCol && toRow === 4 && !board[toRow][toCol] && !board[5][toCol]) isBasicMoveValid = true;
                         // Bicie
-                        if (rowDiff === 1 && colDiff === 1 && toRow === fromRow - 1 && board[toRow][toCol]) return true;
+                        else if (rowDiff === 1 && colDiff === 1 && toRow === fromRow - 1 && board[toRow][toCol]) isBasicMoveValid = true;
                     } else {
                         // Ruch do przodu
-                        if (fromCol === toCol && toRow === fromRow + 1 && !board[toRow][toCol]) return true;
+                        if (fromCol === toCol && toRow === fromRow + 1 && !board[toRow][toCol]) isBasicMoveValid = true;
                         // Pierwszy ruch - 2 pola
-                        if (fromRow === 1 && fromCol === toCol && toRow === 3 && !board[toRow][toCol] && !board[2][toCol]) return true;
+                        else if (fromRow === 1 && fromCol === toCol && toRow === 3 && !board[toRow][toCol] && !board[2][toCol]) isBasicMoveValid = true;
                         // Bicie
-                        if (rowDiff === 1 && colDiff === 1 && toRow === fromRow + 1 && board[toRow][toCol]) return true;
+                        else if (rowDiff === 1 && colDiff === 1 && toRow === fromRow + 1 && board[toRow][toCol]) isBasicMoveValid = true;
                     }
-                    return false;
+                    break;
 
                 case 'rook':
-                    if (fromRow !== toRow && fromCol !== toCol) return false;
-                    return isPathClear(fromRow, fromCol, toRow, toCol);
+                    if (fromRow === toRow || fromCol === toCol) {
+                        isBasicMoveValid = isPathClear(fromRow, fromCol, toRow, toCol);
+                    }
+                    break;
 
                 case 'knight':
-                    return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+                    isBasicMoveValid = (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+                    break;
 
                 case 'bishop':
-                    if (rowDiff !== colDiff) return false;
-                    return isPathClear(fromRow, fromCol, toRow, toCol);
+                    if (rowDiff === colDiff) {
+                        isBasicMoveValid = isPathClear(fromRow, fromCol, toRow, toCol);
+                    }
+                    break;
 
                 case 'queen':
-                    if (fromRow !== toRow && fromCol !== toCol && rowDiff !== colDiff) return false;
-                    return isPathClear(fromRow, fromCol, toRow, toCol);
+                    if (fromRow === toRow || fromCol === toCol || rowDiff === colDiff) {
+                        isBasicMoveValid = isPathClear(fromRow, fromCol, toRow, toCol);
+                    }
+                    break;
 
                 case 'king':
-                    return rowDiff <= 1 && colDiff <= 1;
+                    isBasicMoveValid = rowDiff <= 1 && colDiff <= 1;
+                    break;
             }
-            return false;
+
+            if (!isBasicMoveValid) return false;
+
+            // Sprawdź czy ruch nie wystawia własnego króla na szach
+            if (!skipCheckValidation && wouldMoveCauseCheck(fromRow, fromCol, toRow, toCol)) {
+                return false;
+            }
+
+            return true;
         }
 
         // Sprawdzanie czy droga jest wolna
@@ -595,8 +729,141 @@
             return true;
         }
 
+        // Sprawdzanie czy pole jest atakowane przez przeciwnika
+        function isSquareUnderAttack(row, col, byColor) {
+            for (let fromRow = 0; fromRow < 8; fromRow++) {
+                for (let fromCol = 0; fromCol < 8; fromCol++) {
+                    const piece = board[fromRow][fromCol];
+                    if (piece && piece.color === byColor) {
+                        if (isValidMove(fromRow, fromCol, row, col, true)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Znajdź króla danego koloru
+        function findKing(color) {
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = board[row][col];
+                    if (piece && piece.type === 'king' && piece.color === color) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Sprawdzanie czy król jest w szachu
+        function isKingInCheck(color) {
+            const king = findKing(color);
+            if (!king) return false;
+
+            const opponentColor = color === 'white' ? 'black' : 'white';
+            return isSquareUnderAttack(king.row, king.col, opponentColor);
+        }
+
+        // Sprawdzanie czy ruch spowoduje szach własnego króla
+        function wouldMoveCauseCheck(fromRow, fromCol, toRow, toCol) {
+            // Zapisz stan
+            const movingPiece = board[fromRow][fromCol];
+            const capturedPiece = board[toRow][toCol];
+
+            // Wykonaj ruch tymczasowo
+            board[toRow][toCol] = movingPiece;
+            board[fromRow][fromCol] = null;
+
+            // Sprawdź czy własny król jest w szachu
+            const inCheck = isKingInCheck(movingPiece.color);
+
+            // Cofnij ruch
+            board[fromRow][fromCol] = movingPiece;
+            board[toRow][toCol] = capturedPiece;
+
+            return inCheck;
+        }
+
+        // Sprawdzanie czy jest mat
+        function isCheckmate(color) {
+            // Musi być w szachu
+            if (!isKingInCheck(color)) return false;
+
+            // Sprawdź czy jest jakikolwiek legalny ruch
+            for (let fromRow = 0; fromRow < 8; fromRow++) {
+                for (let fromCol = 0; fromCol < 8; fromCol++) {
+                    const piece = board[fromRow][fromCol];
+                    if (piece && piece.color === color) {
+                        for (let toRow = 0; toRow < 8; toRow++) {
+                            for (let toCol = 0; toCol < 8; toCol++) {
+                                if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+                                    return false; // Jest legalny ruch, nie ma mata
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true; // Brak legalnych ruchów + szach = mat
+        }
+
+        // Sprawdzanie czy jest pat
+        function isStalemate(color) {
+            // Nie może być w szachu
+            if (isKingInCheck(color)) return false;
+
+            // Sprawdź czy jest jakikolwiek legalny ruch
+            for (let fromRow = 0; fromRow < 8; fromRow++) {
+                for (let fromCol = 0; fromCol < 8; fromCol++) {
+                    const piece = board[fromRow][fromCol];
+                    if (piece && piece.color === color) {
+                        for (let toRow = 0; toRow < 8; toRow++) {
+                            for (let toCol = 0; toCol < 8; toCol++) {
+                                if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+                                    return false; // Jest legalny ruch
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true; // Brak legalnych ruchów bez szacha = pat
+        }
+
+        // Sprawdzanie końca gry
+        function checkGameOver() {
+            if (gameOver) return;
+
+            if (isCheckmate(currentPlayer)) {
+                gameOver = true;
+                const winner = currentPlayer === 'white' ? 'Czarne' : 'Białe';
+                showGameOver(`Szach-mat! ${winner} wygrywają!`, `${winner} pokonały ${currentPlayer === 'white' ? 'białe' : 'czarne'}.`);
+            } else if (isStalemate(currentPlayer)) {
+                gameOver = true;
+                showGameOver('Pat! Remis', 'Brak legalnych ruchów. Gra zakończona remisem.');
+            }
+        }
+
+        // Pokazanie komunikatu końca gry
+        function showGameOver(title, text) {
+            document.getElementById('game-over-title').textContent = title;
+            document.getElementById('game-over-text').textContent = text;
+            document.getElementById('game-over-message').classList.add('show');
+
+            // Zatrzymaj auto-play jeśli aktywny
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
         // Obsługa kliknięcia na pole
         function handleSquareClick(row, col) {
+            // Nie pozwalaj na ruchy gdy gra się skończyła
+            if (gameOver) return;
+
             // W trybie auto, nie pozwalaj na kliknięcia
             if (gameMode === 'auto') return;
 
@@ -614,12 +881,17 @@
                     updateTurnDisplay();
                     drawBoard();
 
+                    // Sprawdź koniec gry
+                    checkGameOver();
+
                     // W trybie AI, po ruchu gracza, AI wykonuje swój ruch
-                    const aiColor = playerColor === 'white' ? 'black' : 'white';
-                    if (gameMode === 'ai' && currentPlayer === aiColor) {
-                        setTimeout(() => {
-                            makeAIMove();
-                        }, 500); // 0.5 sekundy opóźnienia dla lepszego UX
+                    if (!gameOver) {
+                        const aiColor = playerColor === 'white' ? 'black' : 'white';
+                        if (gameMode === 'ai' && currentPlayer === aiColor) {
+                            setTimeout(() => {
+                                makeAIMove();
+                            }, 500); // 0.5 sekundy opóźnienia dla lepszego UX
+                        }
                     }
                     return;
                 } else {
@@ -681,7 +953,11 @@
                         for (let toRow = 0; toRow < 8; toRow++) {
                             for (let toCol = 0; toCol < 8; toCol++) {
                                 if (isValidMove(fromRow, fromCol, toRow, toCol)) {
-                                    moves.push({ fromRow, fromCol, toRow, toCol });
+                                    moves.push({
+                                        fromRow, fromCol, toRow, toCol,
+                                        piece: piece.type,
+                                        captures: board[toRow][toCol] ? board[toRow][toCol].type : null
+                                    });
                                 }
                             }
                         }
@@ -691,13 +967,70 @@
             return moves;
         }
 
+        // Ocena ruchu dla AI (wyższe = lepsze)
+        function evaluateMove(move) {
+            let score = 0;
+
+            // Wartości figur
+            const pieceValues = { pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 0 };
+
+            // Bicia są dobre
+            if (move.captures) {
+                score += pieceValues[move.captures] * 10;
+            }
+
+            // Kontrola centrum (trudny poziom)
+            if (aiDifficulty === 'hard') {
+                const centerRows = [3, 4];
+                const centerCols = [3, 4];
+                if (centerRows.includes(move.toRow) && centerCols.includes(move.toCol)) {
+                    score += 2;
+                }
+            }
+
+            return score;
+        }
+
         // AI wykonuje ruch
         function makeAIMove() {
-            const validMoves = getAllValidMoves(currentPlayer);
-            if (validMoves.length === 0) return;
+            if (gameOver) return;
 
-            // Wybierz losowy ruch
-            const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            const validMoves = getAllValidMoves(currentPlayer);
+            if (validMoves.length === 0) {
+                checkGameOver();
+                return;
+            }
+
+            let move;
+
+            if (aiDifficulty === 'easy') {
+                // Łatwy: losowy ruch
+                move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            } else if (aiDifficulty === 'medium') {
+                // Średni: preferuj bicia, inaczej losowy
+                const captureMoves = validMoves.filter(m => m.captures);
+                if (captureMoves.length > 0) {
+                    move = captureMoves[Math.floor(Math.random() * captureMoves.length)];
+                } else {
+                    move = validMoves[Math.floor(Math.random() * validMoves.length)];
+                }
+            } else { // hard
+                // Trudny: oceniaj ruchy i wybierz najlepszy
+                let bestMoves = [];
+                let bestScore = -Infinity;
+
+                for (const m of validMoves) {
+                    const score = evaluateMove(m);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMoves = [m];
+                    } else if (score === bestScore) {
+                        bestMoves.push(m);
+                    }
+                }
+
+                move = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+            }
 
             // Wykonaj ruch
             board[move.toRow][move.toCol] = board[move.fromRow][move.fromCol];
@@ -708,13 +1041,8 @@
             drawBoard();
             updateTurnDisplay();
 
-            // W trybie vs AI, jeśli teraz jest tura gracza, przestań
-            // W trybie auto, kontynuuj
-            if (gameMode === 'auto') {
-                // Auto-play będzie kontynuował
-            } else if (gameMode === 'ai' && currentPlayer === 'black') {
-                // Po ruchu AI, czekaj na ruch gracza
-            }
+            // Sprawdź koniec gry
+            checkGameOver();
         }
 
         // Zmiana koloru gracza
@@ -736,6 +1064,17 @@
             resetGame();
         }
 
+        // Zmiana poziomu trudności AI
+        function setDifficulty(difficulty) {
+            aiDifficulty = difficulty;
+
+            // Aktualizuj przyciski
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
         // Zmiana trybu gry
         function setMode(mode) {
             gameMode = mode;
@@ -752,12 +1091,19 @@
                 autoPlayInterval = null;
             }
 
-            // Pokaż/ukryj wybór koloru
+            // Pokaż/ukryj wybór koloru i trudności
             const colorSelection = document.getElementById('color-selection');
+            const difficultySelection = document.getElementById('difficulty-selection');
+
             if (mode === 'ai') {
                 colorSelection.classList.add('show');
+                difficultySelection.classList.add('show');
+            } else if (mode === 'auto') {
+                colorSelection.classList.remove('show');
+                difficultySelection.classList.add('show');
             } else {
                 colorSelection.classList.remove('show');
+                difficultySelection.classList.remove('show');
             }
 
             // Aktualizuj tekst kontrolek
@@ -786,6 +1132,10 @@
                 clearInterval(autoPlayInterval);
                 autoPlayInterval = null;
             }
+
+            // Zresetuj stan gry
+            gameOver = false;
+            document.getElementById('game-over-message').classList.remove('show');
 
             initBoard();
             selectedPiece = null;
