@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Formatter Kodu - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <!-- Biblioteki JS Beautify (HTML/CSS/JS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
+    <!-- Biblioteka Prism (Kolorowanie składni) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #4f46e5; /* Indigo */
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #6366f1;
+            --input-bg: #1e1e1e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; flex: 1; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; transition: 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--text); }
+        #theme-toggle { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            gap: 1rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 1rem;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 1rem;
+            min-width: 150px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            margin-left: auto;
+        }
+
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .editor-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-height: 0;
+        }
+
+        .pane-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        textarea, pre {
+            flex: 1;
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            resize: none;
+            overflow: auto;
+            line-height: 1.5;
+        }
+
+        /* Override Prism Styles for Theme Compatibility */
+        code[class*="language-"], pre[class*="language-"] {
+            text-shadow: none !important;
+            font-family: 'Consolas', 'Monaco', monospace !important;
+        }
+        
+        /* Dark/Light adjustments for Prism */
+        [data-theme="light"] pre[class*="language-"] {
+            background: #ffffff !important;
+            color: #333 !important;
+        }
+        [data-theme="dark"] pre[class*="language-"] {
+            background: #1e1e1e !important;
+        }
+
+        textarea:focus { outline: none; border-color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .editor-grid { grid-template-columns: 1fr; }
+            main { height: auto; }
+            textarea { min-height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>&lt;/&gt; Formatter Kodu</h1>
+            <p>Uporządkuj kod HTML, CSS, JS, Python i SQL</p>
+        </div>
+
+        <div class="controls-bar">
+            <select id="language-select">
+                <option value="html">HTML / XML</option>
+                <option value="css">CSS</option>
+                <option value="js">JavaScript / JSON</option>
+                <option value="sql">SQL</option>
+                <option value="python">Python (Fix Indent)</option>
+            </select>
+
+            <button class="btn" onclick="pasteCode()">📋 Wklej</button>
+            <button class="btn" onclick="clearCode()" style="color: #ef4444;">🗑️ Wyczyść</button>
+            
+            <button class="btn btn-primary" onclick="formatCode()">✨ Formatuj</button>
+            <button class="btn btn-primary" onclick="copyResult()">Kopiuj wynik</button>
+        </div>
+
+        <div class="editor-grid">
+            <div class="editor-pane">
+                <span class="pane-label">Kod źródłowy (Brudny)</span>
+                <textarea id="input-code" placeholder="Wklej tutaj swój kod..." spellcheck="false"></textarea>
+            </div>
+            <div class="editor-pane">
+                <span class="pane-label">Wynik (Czysty + Kolorowany)</span>
+                <!-- Prism.js wymaga znacznika pre > code -->
+                <pre id="output-pre"><code id="output-code" class="language-html"></code></pre>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- FORMATTER LOGIC ---
+        const input = document.getElementById('input-code');
+        const outputCode = document.getElementById('output-code');
+        const outputPre = document.getElementById('output-pre');
+        const langSelect = document.getElementById('language-select');
+
+        function formatCode() {
+            const source = input.value;
+            const lang = langSelect.value;
+            let formatted = '';
+
+            // Wybór silnika formatowania
+            try {
+                if (lang === 'html') {
+                    formatted = html_beautify(source, { indent_size: 4, wrap_line_length: 80 });
+                    outputCode.className = 'language-html';
+                } 
+                else if (lang === 'css') {
+                    formatted = css_beautify(source, { indent_size: 4 });
+                    outputCode.className = 'language-css';
+                } 
+                else if (lang === 'js') {
+                    formatted = js_beautify(source, { indent_size: 4 });
+                    outputCode.className = 'language-javascript';
+                }
+                else if (lang === 'sql') {
+                    formatted = formatSQL(source);
+                    outputCode.className = 'language-sql';
+                }
+                else if (lang === 'python') {
+                    formatted = formatPython(source);
+                    outputCode.className = 'language-python';
+                }
+            } catch (e) {
+                formatted = "Błąd formatowania: " + e.message;
+            }
+
+            // Wstawienie i kolorowanie
+            outputCode.textContent = formatted;
+            Prism.highlightElement(outputCode);
+        }
+
+        // Prosty Formatter SQL (Regex)
+        function formatSQL(sql) {
+            return sql
+                .replace(/\s+/g, ' ') // Remove extra spaces
+                .replace(/\s*,\s*/g, ',\n    ') // Break commas
+                .replace(/\s+(FROM|WHERE|AND|OR|ORDER BY|GROUP BY|limit|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|HAVING|VALUES|UPDATE|SET|DELETE|INSERT INTO|CREATE TABLE|ALTER TABLE|ADD|DROP)/gi, '\n$1') // Break keywords
+                .replace(/\(/g, '(\n    ') // Break parenthesis
+                .replace(/\)/g, '\n)')
+                .trim();
+        }
+
+        // Prosty Python Fixer (Naprawia wcięcia)
+        function formatPython(code) {
+            // 1. Zamień tabulatory na 4 spacje
+            let fixed = code.replace(/\t/g, '    ');
+            // 2. Usuń wielokrotne puste linie
+            fixed = fixed.replace(/\n\s*\n\s*\n/g, '\n\n');
+            // 3. Usuń spacje na końcach linii
+            fixed = fixed.split('\n').map(line => line.trimEnd()).join('\n');
+            return fixed;
+        }
+
+        async function pasteCode() {
+            try {
+                const text = await navigator.clipboard.readText();
+                input.value = text;
+                formatCode();
+            } catch (err) { alert('Brak dostępu do schowka'); }
+        }
+
+        function clearCode() {
+            input.value = '';
+            outputCode.textContent = '';
+        }
+
+        function copyResult() {
+            navigator.clipboard.writeText(outputCode.textContent).then(() => {
+                alert('Skopiowano!');
+            });
+        }
+
+        // Auto-format on change (optional, maybe distracting for big files, so disabled)
+        // input.addEventListener('input', formatCode);
+        
+        // Change syntax highlighting when select changes
+        langSelect.addEventListener('change', () => {
+            if(input.value) formatCode();
+        });
+
+    </script>
+</body>
+</html>

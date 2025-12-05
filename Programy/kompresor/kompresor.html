@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kompresor Obrazów - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #8b5cf6; /* Violet */
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #a78bfa;
+            --input-bg: #222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Compressor UI */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .upload-area {
+            grid-column: 1 / -1;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            background: var(--card-bg);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--accent);
+            background: var(--card-hover);
+        }
+
+        .upload-area input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        select {
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .preview-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .image-preview-container {
+            width: 100%;
+            height: 250px;
+            background: var(--input-bg); /* Checkerboard pattern could be added here */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        #preview-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label { color: var(--text-secondary); font-size: 0.8rem; }
+        .stat-value { font-weight: bold; }
+        .stat-value.good { color: #10b981; }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background: var(--text-secondary); cursor: not-allowed; }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            h1 { font-size: 2rem; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🖼️ Kompresor Obrazów</h1>
+            <p>Zmniejsz rozmiar zdjęć i zmień format (JPG, PNG, WEBP)</p>
+        </div>
+
+        <div class="upload-area" id="drop-zone">
+            <!-- Dodano obsługę JFIF, BMP, AVIF, ICO -->
+            <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg, image/webp, image/bmp, image/avif, .jfif, .ico">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📂</div>
+            <h3>Kliknij lub upuść zdjęcie tutaj</h3>
+            <p style="color: var(--text-secondary)">Obsługuje: JPG, PNG, WEBP, JFIF, AVIF, BMP, ICO</p>
+        </div>
+
+        <div class="grid-container" id="editor-container" style="display: none; margin-top: 2rem;">
+            <!-- Settings -->
+            <div class="settings-card">
+                <h3>Ustawienia</h3>
+                
+                <div class="setting-group">
+                    <label>Jakość kompresji: <span id="quality-value">80%</span></label>
+                    <input type="range" id="quality" min="1" max="100" value="80">
+                </div>
+
+                <div class="setting-group">
+                    <label>Format wyjściowy</label>
+                    <select id="format">
+                        <option value="image/jpeg">JPG (Dobry do zdjęć)</option>
+                        <option value="image/png">PNG (Bezstratny)</option>
+                        <option value="image/webp" selected>WEBP (Najlepsza kompresja)</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label>Skalowanie (Szerokość)</label>
+                    <select id="scale">
+                        <option value="1">Oryginalna wielkość</option>
+                        <option value="0.75">75%</option>
+                        <option value="0.5">50%</option>
+                        <option value="0.25">25%</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="preview-card">
+                <div class="image-preview-container">
+                    <img id="preview-img" alt="Podgląd">
+                </div>
+                
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-label">Oryginał</span>
+                        <span class="stat-value" id="original-size">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Po kompresji</span>
+                        <span class="stat-value good" id="compressed-size">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Oszczędność</span>
+                        <span class="stat-value good" id="savings">--</span>
+                    </div>
+                </div>
+
+                <button class="btn" id="download-btn">Pobierz obraz ⬇️</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- COMPRESSOR LOGIC ---
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const editorContainer = document.getElementById('editor-container');
+        const previewImg = document.getElementById('preview-img');
+        const qualityInput = document.getElementById('quality');
+        const qualityValue = document.getElementById('quality-value');
+        const formatSelect = document.getElementById('format');
+        const scaleSelect = document.getElementById('scale');
+        const downloadBtn = document.getElementById('download-btn');
+        
+        // Stats
+        const originalSizeEl = document.getElementById('original-size');
+        const compressedSizeEl = document.getElementById('compressed-size');
+        const savingsEl = document.getElementById('savings');
+
+        let originalFile = null;
+        let originalImage = new Image();
+
+        // Drag & Drop visual feedback
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                alert("To nie jest obrazek!");
+                return;
+            }
+
+            originalFile = file;
+            originalSizeEl.textContent = formatBytes(file.size);
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+                originalImage.onload = () => {
+                    editorContainer.style.display = 'grid';
+                    compressImage(); // Initial compression
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function compressImage() {
+            if (!originalImage.src) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const scale = parseFloat(scaleSelect.value);
+            const width = originalImage.width * scale;
+            const height = originalImage.height * scale;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Draw image on canvas
+            ctx.drawImage(originalImage, 0, 0, width, height);
+
+            const format = formatSelect.value;
+            const quality = parseInt(qualityInput.value) / 100;
+
+            // Compress
+            const dataUrl = canvas.toDataURL(format, quality);
+            
+            // Update preview
+            previewImg.src = dataUrl;
+
+            // Calculate size
+            const head = 'data:' + format + ';base64,';
+            const size = Math.round((dataUrl.length - head.length) * 3 / 4);
+            
+            compressedSizeEl.textContent = formatBytes(size);
+            
+            // Savings
+            const saving = ((originalFile.size - size) / originalFile.size) * 100;
+            savingsEl.textContent = saving > 0 ? `-${saving.toFixed(1)}%` : '+0%';
+            savingsEl.style.color = saving > 0 ? '#10b981' : '#ef4444';
+
+            // Setup download
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.download = `skompresowane-${new Date().getTime()}.${format.split('/')[1]}`;
+                link.href = dataUrl;
+                link.click();
+            };
+        }
+
+        // Listeners for settings
+        qualityInput.addEventListener('input', (e) => {
+            qualityValue.textContent = e.target.value + '%';
+            compressImage();
+        });
+        formatSelect.addEventListener('change', compressImage);
+        scaleSelect.addEventListener('change', compressImage);
+
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+
+    </script>
+</body>
+</html>
