@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Generator emoji - Hub</title>
+    <title>Generator Emoji - Hub</title>
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
@@ -18,9 +18,11 @@
             --text-secondary: #666;
             --border: #e0e0e0;
             --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
             --header-bg: #ffffff;
             --shadow: rgba(0, 0, 0, 0.1);
-            --emoji-hover: #e9ecef;
+            --accent: #3b82f6;
+            --emoji-hover: #e2e8f0;
         }
 
         [data-theme="dark"] {
@@ -29,9 +31,11 @@
             --text-secondary: #aaa;
             --border: #333;
             --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
             --header-bg: #1a1a1a;
             --shadow: rgba(0, 0, 0, 0.3);
-            --emoji-hover: #3a3a3a;
+            --accent: #60a5fa;
+            --emoji-hover: #475569;
         }
 
         body {
@@ -39,8 +43,7 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
-            min-height: 100vh;
-            transition: background 0.3s;
+            transition: background 0.3s, color 0.3s;
         }
 
         header {
@@ -77,6 +80,7 @@
         .nav-links a {
             color: var(--text-secondary);
             text-decoration: none;
+            transition: color 0.2s;
         }
 
         .nav-links a:hover,
@@ -98,110 +102,107 @@
             padding: 3rem 2rem;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
+        .page-header {
             text-align: center;
             margin-bottom: 3rem;
         }
 
-        .emoji-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
         }
 
-        .category {
-            margin-bottom: 2.5rem;
-        }
-
-        .category:last-child {
-            margin-bottom: 0;
-        }
-
-        .category-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text);
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
         }
 
         .emoji-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 0.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
         }
 
-        .emoji-item {
-            font-size: 2rem;
-            padding: 0.75rem;
-            background: var(--bg);
+        .emoji-card {
+            background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
+            border-radius: 12px;
+            padding: 1.5rem;
             transition: all 0.2s;
-            text-align: center;
+        }
+
+        .emoji-card:hover {
+            box-shadow: 0 8px 16px var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .emoji-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Container for individual emojis */
+        .emoji-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+
+        /* Single Clickable Emoji Style */
+        .single-emoji {
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: transform 0.1s, background-color 0.2s;
             user-select: none;
+            line-height: 1;
         }
 
-        .emoji-item:hover {
-            background: var(--emoji-hover);
-            transform: scale(1.1);
-            box-shadow: 0 2px 8px var(--shadow);
+        .single-emoji:hover {
+            transform: scale(1.3);
+            background-color: var(--emoji-hover);
+            z-index: 10;
         }
 
-        .emoji-item:active {
+        .single-emoji:active {
             transform: scale(0.95);
         }
 
-        .notification {
+        /* Toast notification */
+        #toast {
             position: fixed;
             bottom: 2rem;
-            right: 2rem;
-            background: #10b981;
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transform: translateY(1rem);
-            transition: all 0.3s;
-            pointer-events: none;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .notification.show {
-            opacity: 1;
-            transform: translateY(0);
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
         }
 
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            nav {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .emoji-grid {
-                grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-            }
-
-            .emoji-item {
-                font-size: 1.5rem;
-                padding: 0.5rem;
-            }
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            h1 { font-size: 2rem; }
+            .emoji-grid { grid-template-columns: 1fr; }
+            .single-emoji { font-size: 1.5rem; padding: 4px; }
         }
     </style>
 </head>
@@ -220,56 +221,170 @@
     </header>
 
     <main>
-        <h1>😀 Generator emoji</h1>
-        <p class="subtitle">Kliknij emoji aby skopiować do schowka</p>
+        <div class="page-header">
+            <h1>😀 Generator Emoji</h1>
+            <p>Kliknij wybraną emotkę, aby ją skopiować</p>
+        </div>
 
-        <div class="emoji-container">
-            <div class="category">
-                <h3 class="category-title">Buźki & Ludzie</h3>
-                <div class="emoji-grid" id="faces"></div>
+        <div class="emoji-grid">
+            <div class="emoji-card">
+                <div class="emoji-title">Minki & Ludzie</div>
+                <div class="emoji-content">😀 😬 😁 😂 😃 😄 😅 😆 😇 😉 😊 🙂 🙃 ☺️ 😋 😌 😍 😘 😗 😙 😚 😜 😝 😛 🤑 🤓 😎 🤗 😏 😶 😐 😑 😒 🙄 🤔 😳 😞 😟 😠 😡 😔 😕 🙁 ☹️ 😣 😖 😫 😩 😤 😮 😱 😨 😰 😯 😦 😧 😢 😥 😪 😓 😭 😵 😲 🤐 😷 🤒 🤕 😴 💤 💩 😈 👿 👹 👺 💀 👻 👽 🤖 😺 😸 😹 😻 😼 😽</div>
             </div>
 
-            <div class="category">
-                <h3 class="category-title">Zwierzęta i Natura</h3>
-                <div class="emoji-grid" id="animals"></div>
+            <div class="emoji-card">
+                <div class="emoji-title">Zwierzęta i fauna</div>
+                <div class="emoji-content">🐶 🐱 🐭 🐹 🐰 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐽 🐸 🐙 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🐣 🐥 🐺 🐗 🐴 🦄 🐝 🐛 🐌 🐞 🐜 🕷 🦂 🦀 🐍 🐢 🐠 🐟 🐡 🐬 🐳 🐋 🐊 🐆 🐅 🐃 🐂 🐄 🐪 🐫 🐘 🐐 🐏 🐑 🐎 🐖 🐀 🐁 🐓 🦃 🕊 🐕 🐩 🐈 🐇 🐿 🐾 🐉 🐲 🌵 🎄 🌲 🌳 🌴 🌱 🌿 ☘ 🍀 🎍 🎋</div>
             </div>
 
-            <div class="category">
-                <h3 class="category-title">Jedzenie & Picie</h3>
-                <div class="emoji-grid" id="food"></div>
+            <div class="emoji-card">
+                <div class="emoji-title">Jedzenie i picie</div>
+                <div class="emoji-content">🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🍈 🍒 🍑 🍍 🍅 🍆 🌶 🌽 🍠 🍯 🍞 🧀 🍗 🍖 🍤 🍳 🍔 🍟 🌭 🍕 🍝 🌮 🌯 🍜 🍲 🍥 🍣 🍱 🍛 🍙 🍚 🍘 🍢 🍡 🍧 🍨 🍦 🍰 🎂 🍮 🍬 🍭 🍫 🍿 🍩 🍪 🍺 🍻 🍷 🍸 🍹 🍾 🍶 🍵 ☕️ 🍼 🍴 🍽</div>
             </div>
 
-            <div class="category">
-                <h3 class="category-title">Aktywności & Sport</h3>
-                <div class="emoji-grid" id="activities"></div>
+            <div class="emoji-card">
+                <div class="emoji-title">Aktywność i sporty</div>
+                <div class="emoji-content">⚽️ 🏀 🏈 ⚾️ 🎾 🏐 🏉 🎱 ⛳️ 🏌 🏓 🏸 🏒 🏑 🏏 🎿 ⛷ 🏂 ⛸ 🏹 🎣 🚣 🏊 🏄 🛀 ⛹ 🏋 🚴 🚵 🏇 🕴 🏆 🎽 🏅 🎖 🎗 🏵 🎫 🎟 🎭 🎨 🎪 🎤 🎧 🎼 🎹 🎷 🎺 🎸 🎻 🎬 🎮 👾 🎯 🎲 🎰 🎳</div>
             </div>
 
-            <div class="category">
-                <h3 class="category-title">Podróże & Miejsca</h3>
-                <div class="emoji-grid" id="travel"></div>
+            <div class="emoji-card">
+                <div class="emoji-title">Podróże i miejsca</div>
+                <div class="emoji-content">🚗 🚕 🚙 🚌 🚎 🏎 🚓 🚑 🚒 🚐 🚚 🚛 🚜 🏍 🚲 🚨 🚔 🚍 🚘 🚖 🚡 🚠 🚟 🚃 🚋 🚝 🚄 🚅 🚈 🚞 🚂 🚆 🚇 🚊 🚉 🚁 🛩 ✈️ 🛫 🛬 ⛵️ 🛥 🚤 ⛴ 🛳 🚀 🛰 💺 ⚓️ 🚧 ⛽️ 🚏 🚦 🚥 🏁 🚢 🎡 🎢 🎠 🏗 🌁 🗼 🏭 ⛲️ 🎑 ⛰ 🏔 🗻 🌋 🗾 🏕 ⛺️ 🏞 🛣 🛤 🌅 🌄 🏜 🏖 🏝 🌇 🌆 🏙 🌃 🌉</div>
             </div>
 
-            <div class="category">
-                <h3 class="category-title">Obiekty</h3>
-                <div class="emoji-grid" id="objects"></div>
+            <div class="emoji-card">
+                <div class="emoji-title">Obiekty</div>
+                <div class="emoji-content">⌚️ 📱 📲 💻 ⌨ 🖥 🖨 🖱 🖲 🕹 🗜 💽 💾 💿 📀 📼 📷 📸 📹 🎥 📽 🎞 📞 ☎️ 📟 📠 📺 📻 🎙 🎚 🎛 ⏱ ⏲ ⏰ 🕰 ⏳ ⌛️ 📡 🔋 🔌 💡 🔦 🕯 🗑 🛢 💸 💵 💴 💶 💷 💰 💳 💎 ⚖ 🔧 🔨 ⚒ 🛠 ⛏ 🔩 ⚙ ⛓ 🔫 💣 🔪 🗡 ⚔ 🛡 🚬 ☠ ⚰ ⚱ 🏺 🔮 📿 💈 ⚗ 🔭 🔬 🕳 💊 💉 🌡 🏷 🔖 🚽 🚿 🛁 🔑</div>
             </div>
 
-            <div class="category">
-                <h3 class="category-title">Symbole</h3>
-                <div class="emoji-grid" id="symbols"></div>
+            <div class="emoji-card">
+                <div class="emoji-title">Symbole</div>
+                <div class="emoji-content">❤️ 💛 💙 💜 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮ ✝️ ☪ 🕉 ☸ ✡️ 🔯 🕎 ☯️ ☦ 🛐 ⛎ ♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️ 🆔 ⚛ 🈳 🈹 ☢ ☣ 📴 📳 🈶 🈚️ 🈸 🈺 🈷️ ✴️ 🆚 🉑 💮 🉐 ㊙️ ㊗️ 🈴 🈵 🈲 🅰️ 🅱️ 🆎 🆑 🅾️ 🆘 ⛔️ 📛 🚫 ❌ ⭕️ 💢 ♨️ 🚷 🚯 🚳 🚱 🔞 📵 ❗️ ❕ ❓ ❔ ‼️ ⁉️</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Gesty i Ręce</div>
+                <div class="emoji-content">👋 🤚 🖐 ✋ 🖖 👌 🤏 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 👍 👎 ✊ 👊 👏 🙌 👐 🤲 🤝 🙏 💅 🤳 💪 🧠 🦴 👀 👁 👄 💋 👣 👂 👃 👶 👧 🧒 👦</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Pogoda, Kosmos i Natura</div>
+                <div class="emoji-content">☀️ 🌤 ⛅️ ☁️ 🌦 🌧 ⛈ 🌩 🌨 ❄️ ☃️ 🌬 💨 🌪 🌫 🌈 ☔️ ⚡️ ✨ ⭐️ 🌟 🌙 🌚 🌑 🌕 🌻 🌼 🌷 🌹 🥀 🌺 🌸 🌲 🌳 🌴 🌵 🌊 🔥 💧 🌍 🌎 🌏 🪐 ☄️ 🌋</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Ubrania i Akcesoria</div>
+                <div class="emoji-content">👓 🕶 👔 👕 👖 🧣 🧤 🧥 🧦 👗 👘 👙 👚 👛 👜 👝 🎒 👞 👟 👠 👡 👢 👑 👒 🎩 🎓 🧢 ⛑ 💍 💄 🎀 🌂 ☂️ 💼</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Flagi</div>
+                <div class="emoji-content">🏳️ 🏳️‍🌈 🏁 🚩 🇵🇱 🇺🇦 🇺🇸 🇬🇧 🇩🇪 🇫🇷 🇪🇸 🇮🇹 🇪🇺 🇯🇵 🇰🇷 🇨🇳 🇧🇷 🇨🇦 🇦🇺 🇦🇹 🇧🇪 🇨🇭 🇨🇿 🇩🇰 🇫🇮 🇬🇷 🇭🇷 🇮🇪 🇳🇱 🇳🇴 🇵🇹 🇸🇪 🇹🇷</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Muzyka i Dźwięk</div>
+                <div class="emoji-content">🎼 🎵 🎶 🎤 🎧 🎷 🎸 🎹 🎺 🎻 🥁 📻 📺 🔇 🔈 🔉 🔊 🔔 🔕 📣 📢</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Budynki i Miejsca</div>
+                <div class="emoji-content">🏠 🏡 🏢 🏣 🏥 🏦 🏨 💒 🏰 🗼 🗽 ⛺ 🏭 🏫 🏟️ 🏯 ⛺ 🎪 🏘️ 🏚️ 🏛️ 🏗️ 🏙️ 🌃 🎰 ⛪ 🕌 🕍 🕋 ⛩️</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Znaki Zodiaku i Symbole</div>
+                <div class="emoji-content">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓ ⛎ 🔯 🕎 ☯️ ☦️ ☪️ ✝️ ☸️ 🕉️</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Strzałki i Znaki</div>
+                <div class="emoji-content">⬆️ ↗️ ➡️ ↘️ ⬇️ ↙️ ⬅️ ↖️ ↕️ ↔️ ↩️ ↪️ ⤴️ ⤵️ 🔃 🔄 🔙 🔚 🔛 🔜 🔝 ➕ ➖ ➗ ✖️ ♾️ 💲 💱 ™️ © ® 〰️ ➰ ➿ ✔️ ☑️</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Biuro i Nauka</div>
+                <div class="emoji-content">💼 📁 📂 📅 📆 📇 📈 📉 📊 📋 📌 📍 📎 📏 📐 ✂️ 🖊️ 📝 ✏️ 🔍 🔬 🔭 💊 💉 🧬 🧮 📚 📖 🔖 🔗 🗑️ 📧 📩 📮 📪</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Czas i Zegary</div>
+                <div class="emoji-content">⌚ ⏰ ⏱️ ⏲️ ⌛ ⏳ 🕛 🕧 🕐 🕜 🕑 🕝 🕒 🕞 🕓 🕟 🕔 🕠 🕕 🕡 🕖 🕢 🕗 🕣 🕘 🕤 🕙 🕥 🕚 🕦</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Miłość i Emocje</div>
+                <div class="emoji-content">💘 💝 💖 💗 💓 💞 💕 💟 ❣️ 💔 ❤️ 🧡 💛 💚 💙 💜 🤎 🖤 🤍 💌 💋 💍 💎 💐 💏 💑</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Święta i Impreza</div>
+                <div class="emoji-content">🎆 🎇 🎈 🎉 🎊 🎋 🎍 🎎 🎏 🎐 🎑 🧧 🎀 🎁 🎗️ 🎟️ 🎫 🕯️ 🎃 🎄 🎅 🤶 🥚 🐰</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Geometria i Kolory</div>
+                <div class="emoji-content">🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪ 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜ ◼️ ◻️ ◾ ◽ ▪️ ▫️ 🔶 🔷 🔸 🔹 🔺 🔻 💠 🔘</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Fantastyka i Postacie</div>
+                <div class="emoji-content">🦸 🦹 🧙 🧚 🧛 🧜 🧝 🧞 🧟 🧖 🧗 🧘 🕴️ 🕵️ 💂 👸 🤴 👰 🤵 🤰 🤱 👼 🎅 🤶 🎎 👾 👽 🤖 👻 👺 👹</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Narzędzia i Warsztat</div>
+                <div class="emoji-content">🔨 🪓 ⛏️ ⚒️ 🛠️ 🗡️ ⚔️ 🔫 🛡️ 🔧 🔩 ⚙️ 🗜️ ⚖️ 🔗 ⛓️ 🧰 🧲 🪜 🧱 🧨 💣 🪤 🦯 🩹 🩺 💈 🧯 🛒</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Dom i Higiena</div>
+                <div class="emoji-content">🚪 🛏️ 🛋️ 🪑 🚽 🚿 🛁 🧼 🧽 🧴 🪣 🧹 🧺 🧻 🔑 🗝️ 🧸 🪆 🖼️ 🪞 🪟 🧶 🧵 🧥 🥼 👖 👕 👔</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Alfabet (Literki)</div>
+                <div class="emoji-content">🇦 🇧 🇨 🇩 🇪 🇫 🇬 🇭 🇮 🇯 🇰 🇱 🇲 🇳 🇴 🇵 🇶 🇷 🇸 🇹 🇺 🇻 🇼 🇽 🇾 🇿</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Transport (Woda i Powietrze)</div>
+                <div class="emoji-content">✈️ 🛫 🛬 🛩️ 🚁 🛸 🚀 🛰️ 💺 🛶 ⛵ 🚤 🛥️ 🛳️ ⛴️ 🚢 ⚓</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Rośliny i Kwiaty</div>
+                <div class="emoji-content">🌵 🎄 🌲 🌳 🌴 🌱 🌿 ☘️ 🍀 🎍 🎋 🍃 🍂 🍁 🌾 🌺 🌻 🌹 🥀 🌷 🌼 🌸 💐 🍄</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Chiński Zodiak</div>
+                <div class="emoji-content">🐀 🐂 🐅 🐇 🐉 🐍 🐎 🐐 🐒 🐓 🐕 🐖</div>
+            </div>
+
+            <div class="emoji-card">
+                <div class="emoji-title">Cyfry i Znaki Specjalne</div>
+                <div class="emoji-content">0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 🔢 #️⃣ *️⃣ 🅰️ 🅱️ 🆎 🆑 🅾️ 🆘 🆔 🆕 🆓 🆒 🆗 🆙 🆚 🈁 🈂️</div>
+            </div>
+            
+            <div class="emoji-card">
+                <div class="emoji-title">Odcienie skóry</div>
+                <div class="emoji-content">👦🏻 👧🏻 👨🏻 👩🏻 👴🏻 👵🏻 👶🏻 👦🏼 👧🏼 👨🏼 👩🏼 👴🏼 👵🏼 👶🏼 👦🏽 👧🏽 👨🏽 👩🏽 👴🏽 👵🏽 👶🏽 👦🏾 👧🏾 👨🏾 👩🏾 👴🏾 👵🏾 👶🏾 👦🏿 👧🏿 👨🏿 👩🏿 👴🏿 👵🏿 👶🏿</div>
             </div>
         </div>
     </main>
 
-    <div class="notification" id="notification">Skopiowano! ✓</div>
+    <div id="toast">
+        <span id="toast-icon"></span>
+        <span id="toast-text">Skopiowano!</span>
+    </div>
 
     <script>
-        // Theme toggle
+        // --- 1. THEME TOGGLE (Logic) ---
+        const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
         const savedTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-theme', savedTheme);
-
-        const themeToggle = document.getElementById('theme-toggle');
         themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
         themeToggle.addEventListener('click', () => {
@@ -280,58 +395,58 @@
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
         });
 
-        // Emoji categories
-        const emojiData = {
-            faces: ['😀', '😬', '😁', '😂', '😃', '😄', '😅', '😆', '😇', '😉', '😊', '🙂', '🙃', '☺️', '😋', '😌', '😍', '😘', '😗', '😙', '😚', '😜', '😝', '😛', '🤑', '🤓', '😎', '🤗', '😏', '😶', '😐', '😑', '😒', '🙄', '🤔', '😳', '😞', '😟', '😠', '😡', '😔', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '😤', '😮', '😱', '😨', '😰', '😯', '😦', '😧', '😢', '😥', '😪', '😓', '😭', '😵', '😲', '🤐', '😷', '🤒', '🤕', '😴', '💤', '💩', '😈', '👿', '👹', '👺', '💀', '👻', '👽', '🤖', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿', '😾'],
-            animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐙', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🐌', '🐞', '🐜', '🕷', '🦂', '🦀', '🐍', '🐢', '🐠', '🐟', '🐡', '🐬', '🐳', '🐋', '🐊', '🐆', '🐅', '🐃', '🐂', '🐄', '🐪', '🐫', '🐘', '🐐', '🐏', '🐑', '🐎', '🐖', '🐀', '🐁', '🐓', '🦃', '🕊', '🐕', '🐩', '🐈', '🐇', '🐿', '🐾', '🐉', '🐲', '🌵', '🎄', '🌲', '🌳', '🌴', '🌱', '🌿', '☘', '🍀', '🎍', '🎋'],
-            food: ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🍍', '🍅', '🍆', '🌶', '🌽', '🍠', '🍯', '🍞', '🧀', '🍗', '🍖', '🍤', '🍳', '🍔', '🍟', '🌭', '🍕', '🍝', '🌮', '🌯', '🍜', '🍲', '🍥', '🍣', '🍱', '🍛', '🍙', '🍚', '🍘', '🍢', '🍡', '🍧', '🍨', '🍦', '🍰', '🎂', '🍮', '🍬', '🍭', '🍫', '🍿', '🍩', '🍪', '🍺', '🍻', '🍷', '🍸', '🍹', '🍾', '🍶', '🍵', '☕️', '🍼', '🍴', '🍽'],
-            activities: ['⚽️', '🏀', '🏈', '⚾️', '🎾', '🏐', '🏉', '🎱', '⛳️', '🏌', '🏓', '🏸', '🏒', '🏑', '🏏', '🎿', '⛷', '🏂', '⛸', '🏹', '🎣', '🚣', '🏊', '🏄', '🛀', '⛹', '🏋', '🚴', '🚵', '🏇', '🕴', '🏆', '🎽', '🏅', '🎖', '🎗', '🏵', '🎫', '🎟', '🎭', '🎨', '🎪', '🎤', '🎧', '🎼', '🎹', '🎷', '🎺', '🎸', '🎻', '🎬', '🎮', '👾', '🎯', '🎲', '🎰', '🎳'],
-            travel: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🏍', '🚲', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋', '🚝', '🚄', '🚅', '🚈', '🚞', '🚂', '🚆', '🚇', '🚊', '🚉', '🚁', '🛩', '✈️', '🛫', '🛬', '⛵️', '🛥', '🚤', '⛴', '🛳', '🚀', '🛰', '💺', '⚓️', '🚧', '⛽️', '🚏', '🚦', '🚥', '🏁', '🚢', '🎡', '🎢', '🎠', '🏗', '🌁', '🗼', '🏭', '⛲️', '🎑', '⛰', '🏔', '🗻', '🌋', '🗾', '🏕', '⛺️', '🏞', '🛣', '🛤', '🌅', '🌄', '🏜', '🏖', '🏝', '🌇', '🌆', '🏙', '🌃', '🌉'],
-            objects: ['⌚️', '📱', '📲', '💻', '⌨', '🖥', '🖨', '🖱', '🖲', '🕹', '🗜', '💽', '💾', '💿', '📀', '📼', '📷', '📸', '📹', '🎥', '📽', '🎞', '📞', '☎️', '📟', '📠', '📺', '📻', '🎙', '🎚', '🎛', '⏱', '⏲', '⏰', '🕰', '⏳', '⌛️', '📡', '🔋', '🔌', '💡', '🔦', '🕯', '🗑', '🛢', '💸', '💵', '💴', '💶', '💷', '💰', '💳', '💎', '⚖', '🔧', '🔨', '⚒', '🛠', '⛏', '🔩', '⚙', '⛓', '🔫', '💣', '🔪', '🗡', '⚔', '🛡', '🚬', '☠', '⚰', '⚱', '🏺', '🔮', '📿', '💈', '⚗', '🔭', '🔬', '🕳', '💊', '💉', '🌡', '🏷', '🔖', '🚽', '🚿', '🛁', '🔑'],
-            symbols: ['❤️', '💛', '💙', '💜', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮', '✝️', '☪', '🕉', '☸', '✡️', '🔯', '🕎', '☯️', '☦', '🛐', '⛎', '♈️', '♉️', '♊️', '♋️', '♌️', '♍️', '♎️', '♏️', '♐️', '♑️', '♒️', '♓️', '🆔', '⚛', '🈳', '🈹', '☢', '☣', '📴', '📳', '🈶', '🈚️', '🈸', '🈺', '🈷️', '✴️', '🆚', '🉑', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈲', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘', '⛔️', '📛', '🚫', '❌', '⭕️', '💢', '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '❗️', '❕', '❓', '❔', '‼️', '⁉️', '💯', '🔅', '🔆', '🔱', '⚜', '〽️', '⚠️', '🚸', '🔰', '♻️', '🈯️', '💹', '❇️', '✳️', '❎', '✅', '💠', '🌀', '➿', '🌐', 'Ⓜ️', '🏧', '🈂️', '🛂', '🛃', '🛄', '🛅', '♿️', '🚭', '🚾', '🅿️', '🚰', '🚹', '🚺', '🚼', '🚻', '🚮', '🎦', '📶', '🈁', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓', '0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
-        };
+        // --- 2. EMOJI SPLITTER & CLICK HANDLER ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const contents = document.querySelectorAll('.emoji-content');
 
-        // Populate emoji grids
-        function populateEmoji() {
-            for (const [category, emojis] of Object.entries(emojiData)) {
-                const container = document.getElementById(category);
+            contents.forEach(contentDiv => {
+                // Pobieramy surowy tekst z divów
+                const rawText = contentDiv.innerText;
+                
+                // Dzielimy tekst na tablicę, używając białych znaków (spacje, entery) jako separatora
+                // .filter usuwa puste elementy powstałe przy podwójnych spacjach
+                const emojis = rawText.split(/\s+/).filter(e => e.trim().length > 0);
+
+                // Czyścimy div
+                contentDiv.innerHTML = '';
+
+                // Tworzymy przycisk dla każdego emoji
                 emojis.forEach(emoji => {
-                    const item = document.createElement('div');
-                    item.className = 'emoji-item';
-                    item.textContent = emoji;
-                    item.addEventListener('click', () => copyEmoji(emoji));
-                    container.appendChild(item);
+                    const span = document.createElement('span');
+                    span.className = 'single-emoji';
+                    span.textContent = emoji;
+                    span.onclick = () => copyEmoji(emoji);
+                    contentDiv.appendChild(span);
                 });
-            }
-        }
+            });
+        });
 
-        // Copy emoji to clipboard
-        function copyEmoji(emoji) {
-            navigator.clipboard.writeText(emoji).then(() => {
-                showNotification();
-            }).catch(() => {
-                // Fallback for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = emoji;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showNotification();
+        // --- 3. COPY FUNCTION & TOAST ---
+        
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toast-text');
+        const toastIcon = document.getElementById('toast-icon');
+        let toastTimeout;
+
+        function copyEmoji(char) {
+            navigator.clipboard.writeText(char).then(() => {
+                showToast(char);
+            }).catch(err => {
+                console.error('Błąd kopiowania:', err);
             });
         }
 
-        // Show notification
-        function showNotification() {
-            const notification = document.getElementById('notification');
-            notification.classList.add('show');
-            setTimeout(() => {
-                notification.classList.remove('show');
+        function showToast(char) {
+            toastText.textContent = `Skopiowano: ${char}`;
+            toastIcon.textContent = "✅";
+            toast.classList.add('show');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
             }, 2000);
         }
-
-        // Initialize
-        populateEmoji();
     </script>
 </body>
 </html>

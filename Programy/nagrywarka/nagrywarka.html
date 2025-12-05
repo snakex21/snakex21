@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nagrywarka Ekranu - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #ef4444; /* Czerwony - REC */
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #f87171;
+            --input-bg: #222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Recorder Styles */
+        .recorder-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .placeholder-text {
+            color: #666;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .rec-indicator {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .rec-indicator.active {
+            opacity: 1;
+        }
+
+        .rec-dot {
+            width: 12px;
+            height: 12px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-start {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-start:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-start:disabled { background: var(--text-secondary); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-stop {
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        .btn-stop:hover { opacity: 0.9; }
+        .btn-stop:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+        .btn-download:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            h1 { font-size: 2rem; }
+            .controls { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🎥 Nagrywarka Ekranu</h1>
+            <p>Nagrywaj pulpit i aplikacje bez instalowania programów</p>
+        </div>
+
+        <div class="recorder-container">
+            <div class="video-wrapper">
+                <div class="rec-indicator" id="rec-indicator">
+                    <div class="rec-dot"></div>
+                    <span>NAGRYWANIE</span>
+                </div>
+                
+                <video id="preview" autoplay muted playsinline></video>
+                
+                <div class="placeholder-text" id="placeholder">
+                    <span style="font-size: 3rem;">🖥️</span>
+                    <span>Kliknij "Rozpocznij", aby wybrać ekran</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-start" id="start-btn">
+                    <span>●</span> Rozpocznij
+                </button>
+                <button class="btn btn-stop" id="stop-btn" disabled>
+                    <span>■</span> Zatrzymaj
+                </button>
+                <a id="download-link" style="text-decoration: none;">
+                    <button class="btn btn-download" id="download-btn">
+                        <span>💾</span> Pobierz nagranie
+                    </button>
+                </a>
+            </div>
+
+            <div class="info-card">
+                💡 Nagrywanie odbywa się lokalnie w przeglądarce. Żadne dane nie są wysyłane na serwer. 
+                Pamiętaj, aby w oknie wyboru zaznaczyć opcję "Udostępnij dźwięk", jeśli chcesz nagrywać audio.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- RECORDER LOGIC ---
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const downloadLink = document.getElementById('download-link');
+        const preview = document.getElementById('preview');
+        const placeholder = document.getElementById('placeholder');
+        const recIndicator = document.getElementById('rec-indicator');
+
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        startBtn.addEventListener('click', async () => {
+            try {
+                // Zapytaj o ekran i dźwięk
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { mediaSource: "screen" },
+                    audio: true // Wymaga zaznaczenia opcji w oknie dialogowym przeglądarki
+                });
+
+                // Ustaw podgląd
+                preview.srcObject = stream;
+                placeholder.style.display = 'none';
+                
+                // Konfiguracja nagrywania
+                // Preferowane kodeki: VP9 (najlepszy), VP8 (kompatybilny)
+                const mimeType = MediaRecorder.isTypeSupported("video/webm; codecs=vp9") 
+                               ? "video/webm; codecs=vp9" 
+                               : "video/webm";
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: "video/webm" });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Przygotuj podgląd nagranego wideo
+                    preview.srcObject = null;
+                    preview.src = url;
+                    preview.controls = true;
+                    preview.muted = false; // Odcisz, żeby sprawdzić dźwięk
+
+                    // Przygotuj przycisk pobierania
+                    downloadLink.href = url;
+                    downloadLink.download = `nagranie-${new Date().getTime()}.webm`;
+                    downloadBtn.style.display = 'flex';
+                    
+                    // Reset UI
+                    stopBtn.disabled = true;
+                    startBtn.disabled = false;
+                    startBtn.innerText = "Nagraj nowe";
+                    recIndicator.classList.remove('active');
+                    
+                    // Zatrzymaj ścieżki (wyłącz ikonę nagrywania na karcie)
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                // Start nagrywania
+                recordedChunks = [];
+                mediaRecorder.start();
+                
+                // Update UI
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                downloadBtn.style.display = 'none';
+                preview.controls = false;
+                preview.muted = true; // Wycisz podgląd na żywo (żeby nie było echa)
+                recIndicator.classList.add('active');
+
+                // Obsługa zatrzymania przez pasek przeglądarki "Zatrzymaj udostępnianie"
+                stream.getVideoTracks()[0].onended = () => {
+                    if (mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                };
+
+            } catch (err) {
+                console.error("Błąd: " + err);
+                // Użytkownik mógł anulować wybór
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        });
+
+    </script>
+</body>
+</html>
