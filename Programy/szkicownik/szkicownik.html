@@ -263,7 +263,7 @@
         let isRotating = false;
         let isScaling = false;
         let startX, startY; // Start coords for selection box
-        let selection = null; // { x, y, w, h, rotation, scale, imageData, backgroundSnapshot }
+        let selection = null; // { x, y, w, h, rotation, scale, imageData, backgroundSnapshot, backgroundImage }
         let dragOffset = { x: 0, y: 0 };
         let activeHandle = null; // Which resize handle is being dragged
         let clipboard = null; // For copy/paste
@@ -502,20 +502,19 @@
                     ctx.lineWidth = 2;
                     ctx.strokeRect(startX, startY, x - startX, y - startY);
                     ctx.setLineDash([]);
-                } else if (isRotating && selection.imageData) {
+                } else if (isRotating && selection.imageData && selection.backgroundImage) {
                     // Calculate rotation angle
                     const centerX = selection.x + selection.w / 2;
                     const centerY = selection.y + selection.h / 2;
                     const angle = Math.atan2(y - centerY, x - centerX);
                     selection.rotation = angle + Math.PI / 2; // Adjust for initial orientation
 
-                    // Redraw
-                    const bgImg = new Image();
-                    bgImg.src = selection.backgroundSnapshot;
-                    ctx.drawImage(bgImg, 0, 0);
+                    // Redraw - synchronous with preloaded image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(selection.backgroundImage, 0, 0);
                     drawSelection();
                     drawSelectionBorder();
-                } else if (isScaling && selection.imageData) {
+                } else if (isScaling && selection.imageData && selection.backgroundImage) {
                     // Calculate new dimensions based on handle
                     const dx = x - startX;
                     const dy = y - startY;
@@ -544,21 +543,19 @@
                     startX = x;
                     startY = y;
 
-                    // Redraw
-                    const bgImg = new Image();
-                    bgImg.src = selection.backgroundSnapshot;
-                    ctx.drawImage(bgImg, 0, 0);
+                    // Redraw - synchronous with preloaded image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(selection.backgroundImage, 0, 0);
                     drawSelection();
                     drawSelectionBorder();
-                } else if (isMoving && selection.imageData) {
+                } else if (isMoving && selection.imageData && selection.backgroundImage) {
                     // Update position
                     selection.x = x - dragOffset.x;
                     selection.y = y - dragOffset.y;
 
-                    // Redraw
-                    const bgImg = new Image();
-                    bgImg.src = selection.backgroundSnapshot;
-                    ctx.drawImage(bgImg, 0, 0);
+                    // Redraw - synchronous with preloaded image
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(selection.backgroundImage, 0, 0);
                     drawSelection();
                     drawSelectionBorder();
                 }
@@ -602,6 +599,7 @@
                         const selectedData = ctx.getImageData(startX, startY, w, h);
 
                         let backgroundWithHole;
+                        const bgImg = new Image();
 
                         if (selectionMode === 'cut') {
                             // 2. Cut mode - Fill white (remove from background)
@@ -613,21 +611,23 @@
                             backgroundWithHole = selection.canvasSnapshot;
                         }
 
-                        // 3. Update selection object
-                        selection = {
-                            x: startX,
-                            y: startY,
-                            w: w,
-                            h: h,
-                            rotation: 0,
-                            imageData: selectedData,
-                            backgroundSnapshot: backgroundWithHole
-                        };
-
-                        // 4. Restore background and draw selection
-                        const bgImg = new Image();
+                        // 3. Load background image
                         bgImg.src = backgroundWithHole;
                         bgImg.onload = () => {
+                            // 4. Update selection object with preloaded image
+                            selection = {
+                                x: startX,
+                                y: startY,
+                                w: w,
+                                h: h,
+                                rotation: 0,
+                                imageData: selectedData,
+                                backgroundSnapshot: backgroundWithHole,
+                                backgroundImage: bgImg
+                            };
+
+                            // 5. Draw initial state
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
                             ctx.drawImage(bgImg, 0, 0);
                             drawSelection();
                             drawSelectionBorder();
@@ -686,14 +686,17 @@
 
         function commitSelection() {
             if (!selection) return;
-            // The canvas currently has the drawing from the last 'mousemove'
-            // which includes the background hole + the image at new position.
-            // We just need to save this as the new permanent state.
+
+            // Make sure we have the final rendering on canvas
+            if (selection.backgroundImage) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(selection.backgroundImage, 0, 0);
+                drawSelection(); // Draw without border
+            }
+
+            // Clear selection
             selection = null;
             saveState();
-            
-            // Redraw to remove any potential selection artifacts (like border if we added it)
-            // But since 'handleMove' draws clean image, we are mostly good.
         }
 
         // --- HISTORY & UTILS ---
@@ -841,21 +844,13 @@
 
             if (selection) commitSelection();
 
-            // Restore background
+            // Get current canvas as background
+            const backgroundSnapshot = canvas.toDataURL();
             const bgImg = new Image();
-            if (selection && selection.backgroundSnapshot) {
-                bgImg.src = selection.backgroundSnapshot;
-            } else {
-                bgImg.src = canvas.toDataURL();
-            }
+            bgImg.src = backgroundSnapshot;
 
             bgImg.onload = () => {
-                ctx.drawImage(bgImg, 0, 0);
-
-                // Save background before pasting
-                const backgroundSnapshot = canvas.toDataURL();
-
-                // Create new selection from clipboard
+                // Create new selection from clipboard with preloaded background
                 selection = {
                     x: 50,
                     y: 50,
@@ -863,10 +858,13 @@
                     h: clipboard.h,
                     rotation: 0,
                     imageData: clipboard.imageData,
-                    backgroundSnapshot: backgroundSnapshot
+                    backgroundSnapshot: backgroundSnapshot,
+                    backgroundImage: bgImg
                 };
 
                 // Draw pasted selection
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(bgImg, 0, 0);
                 drawSelection();
                 drawSelectionBorder();
 
@@ -904,10 +902,11 @@
             // Get flipped imageData
             selection.imageData = flippedCtx.getImageData(0, 0, selection.w, selection.h);
 
-            // Redraw
-            const bgImg = new Image();
-            bgImg.src = selection.backgroundSnapshot;
-            ctx.drawImage(bgImg, 0, 0);
+            // Redraw - use preloaded background image if available
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (selection.backgroundImage) {
+                ctx.drawImage(selection.backgroundImage, 0, 0);
+            }
             drawSelection();
             drawSelectionBorder();
         }
@@ -940,10 +939,11 @@
             // Get flipped imageData
             selection.imageData = flippedCtx.getImageData(0, 0, selection.w, selection.h);
 
-            // Redraw
-            const bgImg = new Image();
-            bgImg.src = selection.backgroundSnapshot;
-            ctx.drawImage(bgImg, 0, 0);
+            // Redraw - use preloaded background image if available
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (selection.backgroundImage) {
+                ctx.drawImage(selection.backgroundImage, 0, 0);
+            }
             drawSelection();
             drawSelectionBorder();
         }
