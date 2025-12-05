@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Licznik Słów - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #db2777; /* Różowy */
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #f472b6;
+            --input-bg: #222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Counter Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 1.1rem;
+            font-family: inherit;
+            line-height: 1.8;
+            resize: vertical;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--card-hover);
+            border-color: var(--text-secondary);
+        }
+
+        .btn-clear {
+            color: #ef4444;
+        }
+        
+        .btn-clear:hover {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            h1 { font-size: 2rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>📊 Licznik Słów</h1>
+            <p>Analizuj tekst w czasie rzeczywistym</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number" id="word-count">0</span>
+                <span class="stat-label">Słowa</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="char-count">0</span>
+                <span class="stat-label">Znaki</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="char-no-space-count">0</span>
+                <span class="stat-label">Znaki (bez spacji)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="para-count">0</span>
+                <span class="stat-label">Akapity</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="read-time">0m</span>
+                <span class="stat-label">Czas czytania</span>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <textarea id="text-input" placeholder="Zacznij pisać lub wklej tekst tutaj..." spellcheck="false"></textarea>
+            
+            <div class="controls">
+                <button class="btn btn-clear" id="clear-btn">Wyczyść</button>
+                <button class="btn" id="copy-btn">Kopiuj tekst</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- COUNTER LOGIC ---
+        const textInput = document.getElementById('text-input');
+        const wordCount = document.getElementById('word-count');
+        const charCount = document.getElementById('char-count');
+        const charNoSpaceCount = document.getElementById('char-no-space-count');
+        const paraCount = document.getElementById('para-count');
+        const readTime = document.getElementById('read-time');
+        const clearBtn = document.getElementById('clear-btn');
+        const copyBtn = document.getElementById('copy-btn');
+
+        function analyzeText() {
+            const text = textInput.value;
+
+            // Znaki
+            charCount.textContent = text.length;
+
+            // Znaki bez spacji
+            const noSpaces = text.replace(/\s/g, '').length;
+            charNoSpaceCount.textContent = noSpaces;
+
+            // Słowa (dzielimy po białych znakach, filtrujemy puste)
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            wordCount.textContent = words.length;
+
+            // Akapity (dzielimy po nowej linii, filtrujemy puste)
+            const paras = text.split(/\n+/).filter(para => para.trim().length > 0);
+            paraCount.textContent = paras.length;
+
+            // Czas czytania (średnio 200 słów na minutę)
+            const time = Math.ceil(words.length / 200);
+            readTime.textContent = time < 1 ? '< 1m' : `~${time}m`;
+        }
+
+        textInput.addEventListener('input', analyzeText);
+
+        // Buttons
+        clearBtn.addEventListener('click', () => {
+            if(confirm("Czy na pewno chcesz usunąć cały tekst?")) {
+                textInput.value = '';
+                analyzeText();
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            textInput.select();
+            textInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(textInput.value).then(() => {
+                const original = copyBtn.textContent;
+                copyBtn.textContent = 'Skopiowano!';
+                setTimeout(() => copyBtn.textContent = original, 1500);
+            });
+        });
+
+    </script>
+</body>
+</html>

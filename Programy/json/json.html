@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Formatter JSON - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #f59e0b; /* Amber */
+            --input-bg: #ffffff;
+            
+            /* Syntax highlighting */
+            --key-color: #d97706;
+            --string-color: #16a34a;
+            --number-color: #2563eb;
+            --bool-color: #dc2626;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #fbbf24;
+            --input-bg: #111;
+
+            /* Syntax highlighting dark */
+            --key-color: #fbbf24;
+            --string-color: #4ade80;
+            --number-color: #60a5fa;
+            --bool-color: #f87171;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* Editor Layout */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            flex: 1;
+            min-height: 0; /* Important for flex child scrolling */
+        }
+
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-height: 0;
+        }
+
+        .panel-header {
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-area {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            padding: 1rem;
+            resize: none;
+            color: var(--text);
+            overflow: auto;
+            white-space: pre;
+        }
+
+        textarea.code-area {
+            outline: none;
+        }
+
+        textarea.code-area:focus {
+            border-color: var(--accent);
+        }
+
+        /* Syntax Highlighting */
+        .json-key { color: var(--key-color); }
+        .json-string { color: var(--string-color); }
+        .json-number { color: var(--number-color); }
+        .json-boolean { color: var(--bool-color); }
+        .json-null { color: var(--bool-color); }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 100px;
+        }
+
+        .btn:hover {
+            background: var(--card-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            min-height: 1.5em;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-links { display: none; }
+            .editor-container { grid-template-columns: 1fr; }
+            .actions { flex-direction: row; }
+            main { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>{ } Formatter JSON</h1>
+            <p>Formatuj, waliduj i naprawiaj kod JSON</p>
+            <div id="status-msg" class="error-msg"></div>
+        </div>
+
+        <div class="editor-container">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span>Wejście</span>
+                    <button class="btn" style="padding: 0.2rem 0.5rem; min-width: auto;" id="paste-btn">Wklej</button>
+                </div>
+                <textarea id="input-json" class="code-area" placeholder='Wklej brudny JSON tutaj... np. {"id":1,"name":"test"}' spellcheck="false"></textarea>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="format-btn">
+                    <span>✨</span> Formatuj
+                </button>
+                <button class="btn" id="minify-btn">
+                    <span>📦</span> Minify
+                </button>
+                <button class="btn" id="copy-btn">
+                    <span>📋</span> Kopiuj
+                </button>
+                <button class="btn" id="clear-btn" style="color: #ef4444;">
+                    <span>🗑️</span> Czyść
+                </button>
+            </div>
+
+            <div class="editor-panel">
+                <div class="panel-header">Wynik</div>
+                <div id="output-json" class="code-area" contenteditable="true" spellcheck="false"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- JSON LOGIC ---
+        const inputArea = document.getElementById('input-json');
+        const outputArea = document.getElementById('output-json');
+        const statusMsg = document.getElementById('status-msg');
+        
+        // Buttons
+        const formatBtn = document.getElementById('format-btn');
+        const minifyBtn = document.getElementById('minify-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const pasteBtn = document.getElementById('paste-btn');
+
+        function parseInput() {
+            const raw = inputArea.value.trim();
+            if (!raw) return null;
+            try {
+                const parsed = JSON.parse(raw);
+                statusMsg.textContent = "";
+                return parsed;
+            } catch (e) {
+                statusMsg.textContent = "Błąd składni: " + e.message;
+                return null;
+            }
+        }
+
+        // Syntax Highlighting
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, null, 4);
+            }
+            
+            // Escape HTML entities
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        formatBtn.addEventListener('click', () => {
+            const obj = parseInput();
+            if (obj) {
+                const str = JSON.stringify(obj, null, 4); // Indent 4 spaces
+                outputArea.innerHTML = syntaxHighlight(str);
+            }
+        });
+
+        minifyBtn.addEventListener('click', () => {
+            const obj = parseInput();
+            if (obj) {
+                const str = JSON.stringify(obj);
+                outputArea.textContent = str; // No highlight for minified
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const text = outputArea.innerText; // Get raw text from highlighted
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const original = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<span>✅</span> OK!';
+                setTimeout(() => copyBtn.innerHTML = original, 1500);
+            });
+        });
+
+        clearBtn.addEventListener('click', () => {
+            inputArea.value = '';
+            outputArea.innerHTML = '';
+            statusMsg.textContent = '';
+        });
+
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                inputArea.value = text;
+            } catch (err) {
+                console.error('Failed to read clipboard', err);
+            }
+        });
+
+    </script>
+</body>
+</html>
