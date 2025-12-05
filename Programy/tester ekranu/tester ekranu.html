@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tester Ekranu - Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --accent: #007aff;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --accent: #0a84ff;
+            --border: #333;
+            --card-bg: #2a2a2a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Zapobiega paskom przewijania podczas testu */
+        }
+
+        /* Menu główne */
+        header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logo {
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 2rem;
+            z-index: 10;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        /* Ekran testowy (Overlay) */
+        #test-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 100;
+            display: none;
+            cursor: none; /* Ukryj kursor podczas testu */
+        }
+
+        /* Informacja o wyjściu */
+        #info-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            pointer-events: none;
+            text-align: center;
+            z-index: 101;
+            display: none;
+        }
+
+        /* Specyficzne dla Ghosting Test */
+        #ghosting-canvas {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .stats-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 1.2rem;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            display: none;
+            z-index: 102;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="../programy.html" class="logo">← Powrót do Narzędzi</a>
+        <button id="theme-toggle">🌙</button>
+    </header>
+
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h1 style="margin-bottom: 1rem;">📺 Tester Ekranu</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; text-align: center; max-width: 600px;">
+            Zaleca się włączenie trybu pełnoekranowego (F11) przed rozpoczęciem testów.
+            <br>Naciśnij <b>ESC</b> lub kliknij dwukrotnie, aby wyjść z testu.
+        </p>
+
+        <div class="controls">
+            <button onclick="startPixelTest()">
+                🎨 Martwe Piksele
+            </button>
+            <button onclick="startGhostingTest()">
+                👻 Test Ghostingu (Hz)
+            </button>
+            <button onclick="startGradientTest()">
+                🌈 Gradienty
+            </button>
+        </div>
+    </div>
+
+    <!-- Warstwa testowa -->
+    <div id="test-layer">
+        <canvas id="ghosting-canvas"></canvas>
+    </div>
+    
+    <div id="info-overlay">Kliknij, aby zmienić kolor<br>ESC aby wyjść</div>
+    <div id="stats-panel" class="stats-panel">FPS: <span id="fps-counter">0</span> | Speed: 960px/s</div>
+
+    <script>
+        const testLayer = document.getElementById('test-layer');
+        const infoOverlay = document.getElementById('info-overlay');
+        const canvas = document.getElementById('ghosting-canvas');
+        const ctx = canvas.getContext('2d');
+        const statsPanel = document.getElementById('stats-panel');
+        const fpsCounter = document.getElementById('fps-counter');
+
+        let activeTest = null;
+        let colorIndex = 0;
+        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF', '#000000'];
+        let animationId;
+        
+        // Zmienne do Ghosting Test
+        let lastTime = 0;
+        let xPos = 0;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        // Obsługa motywu
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Logika Testów
+        function enterFullScreen() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(e => console.log(e));
+            }
+        }
+
+        function exitTest() {
+            activeTest = null;
+            testLayer.style.display = 'none';
+            infoOverlay.style.display = 'none';
+            statsPanel.style.display = 'none';
+            canvas.style.display = 'none';
+            testLayer.style.background = 'black';
+            testLayer.style.cursor = 'default';
+            cancelAnimationFrame(animationId);
+            
+            // Przywróć kursor
+            document.body.style.cursor = 'default';
+        }
+
+        // 1. Test Pikseli
+        function startPixelTest() {
+            activeTest = 'pixels';
+            colorIndex = 0;
+            testLayer.style.display = 'block';
+            testLayer.style.background = colors[0];
+            infoOverlay.style.display = 'block';
+            infoOverlay.innerHTML = "Kliknij: Zmień kolor<br>ESC: Wyjście";
+            
+            // Ukryj info po 2 sekundach
+            setTimeout(() => {
+                infoOverlay.style.display = 'none';
+            }, 2000);
+        }
+
+        // 2. Test Gradientów
+        function startGradientTest() {
+            activeTest = 'gradient';
+            testLayer.style.display = 'block';
+            testLayer.style.background = 'linear-gradient(to right, black, white)';
+            infoOverlay.style.display = 'block';
+            infoOverlay.innerHTML = "Kliknij: Zmień typ<br>ESC: Wyjście";
+             setTimeout(() => { infoOverlay.style.display = 'none'; }, 2000);
+        }
+
+        // 3. Test Ghostingu
+        function startGhostingTest() {
+            activeTest = 'ghosting';
+            testLayer.style.display = 'block';
+            canvas.style.display = 'block';
+            statsPanel.style.display = 'block';
+            
+            // Ustawienia Canvas
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            xPos = 0;
+            lastTime = performance.now();
+            requestAnimationFrame(ghostingLoop);
+        }
+
+        function ghostingLoop(timestamp) {
+            if (activeTest !== 'ghosting') return;
+
+            const dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            // Licznik FPS
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fpsCounter.textContent = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+            }
+
+            // Czyszczenie tła
+            ctx.fillStyle = '#222'; // Ciemnoszare tło dla kontrastu
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Rysowanie pasów (Grid)
+            ctx.strokeStyle = '#444';
+            ctx.beginPath();
+            for(let i=0; i<canvas.width; i+=100) {
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+            }
+            ctx.stroke();
+
+            // Prędkość: 960 pikseli na sekundę
+            const speed = 960; 
+            const move = (speed * dt) / 1000;
+            xPos = (xPos + move) % canvas.width;
+
+            // 1. Rząd: Biały kwadrat (High Contrast)
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(xPos, 200, 50, 50);
+            ctx.fillStyle = '#FFF';
+            ctx.font = '14px Arial';
+            ctx.fillText("960 px/s (White)", 20, 190);
+
+            // 2. Rząd: Cyjan (Mid Contrast)
+            ctx.fillStyle = '#00FFFF';
+            ctx.fillRect(xPos, 350, 50, 50);
+            ctx.fillText("960 px/s (Cyan)", 20, 340);
+
+            // 3. Rząd: Tekst (Czytelność w ruchu)
+            ctx.fillStyle = '#FF00FF';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText("TEXT READABILITY TEST", xPos, 500);
+
+            animationId = requestAnimationFrame(ghostingLoop);
+        }
+
+        // Obsługa zdarzeń
+        testLayer.addEventListener('click', () => {
+            if (activeTest === 'pixels') {
+                colorIndex = (colorIndex + 1) % colors.length;
+                testLayer.style.background = colors[colorIndex];
+            } else if (activeTest === 'gradient') {
+                const grads = [
+                    'linear-gradient(to right, black, white)',
+                    'linear-gradient(to right, red, black)',
+                    'linear-gradient(to right, green, black)',
+                    'linear-gradient(to right, blue, black)',
+                    'linear-gradient(to bottom, black, white)'
+                ];
+                colorIndex = (colorIndex + 1) % grads.length;
+                testLayer.style.background = grads[colorIndex];
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                exitTest();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (activeTest === 'ghosting') {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
