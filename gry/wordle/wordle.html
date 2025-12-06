@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle - Hub</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --text: #fff;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f0f0;
+            --text: #333;
+            --header-bg: #fff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .board-container {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tile.filled {
+            border-color: #555;
+            animation: pop 0.1s;
+        }
+
+        .tile.correct {
+            background: #538d4e;
+            border-color: #538d4e;
+        }
+
+        .tile.present {
+            background: #b59f3b;
+            border-color: #b59f3b;
+        }
+
+        .tile.absent {
+            background: #3a3a3c;
+            border-color: #3a3a3c;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .key-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .key {
+            padding: 15px;
+            background: #818384;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .key.big {
+            padding: 15px 20px;
+        }
+
+        .key.correct {
+            background: #538d4e;
+        }
+
+        .key.present {
+            background: #b59f3b;
+        }
+
+        .key.absent {
+            background: #3a3a3c;
+        }
+
+        @keyframes pop {
+            50% {
+                transform: scale(1.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+
+    <div class="game-container">
+        <div class="board-container" id="board"></div>
+        <div class="keyboard" id="keyboard"></div>
+    </div>
+
+    <script>
+        const words = ["ALARM", "BAGNO", "DOMEK", "EKRAN", "FIRMA", "HALAS", "ISKRA", "KUBEK", "LAMPA", "NIGDY", "OBIAD", "PRACA", "RADIO", "SKLEP", "TRAWA", "ZEGAR"];
+        let secret = words[Math.floor(Math.random() * words.length)];
+        let grid = Array(6).fill().map(() => Array(5).fill(""));
+        let currentRow = 0;
+        let currentCol = 0;
+        let gameOver = false;
+
+        const boardEl = document.getElementById('board');
+        const keyboardEl = document.getElementById('keyboard');
+
+        function init() {
+            for (let r = 0; r < 6; r++) {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'row';
+                for (let c = 0; c < 5; c++) {
+                    const tile = document.createElement('div');
+                    tile.id = `tile-${r}-${c}`;
+                    tile.className = 'tile';
+                    rowEl.appendChild(tile);
+                }
+                boardEl.appendChild(rowEl);
+            }
+            renderKeyboard();
+        }
+
+        function renderKeyboard() {
+            const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+            keyboardEl.innerHTML = '';
+
+            rows.forEach((rowStr, i) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'key-row';
+
+                if (i === 2) {
+                    const enter = document.createElement('div');
+                    enter.className = 'key big';
+                    enter.innerText = 'ENTER';
+                    enter.onclick = submit;
+                    rowDiv.appendChild(enter);
+                }
+
+                rowStr.split('').forEach(char => {
+                    const key = document.createElement('div');
+                    key.className = 'key';
+                    key.id = `key-${char}`;
+                    key.innerText = char;
+                    key.onclick = () => type(char);
+                    rowDiv.appendChild(key);
+                });
+
+                if (i === 2) {
+                    const back = document.createElement('div');
+                    back.className = 'key big';
+                    back.innerText = '⌫';
+                    back.onclick = backspace;
+                    rowDiv.appendChild(back);
+                }
+
+                keyboardEl.appendChild(rowDiv);
+            });
+        }
+
+        function type(char) {
+            if (gameOver || currentCol > 4) return;
+            grid[currentRow][currentCol] = char;
+            const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+            tile.innerText = char;
+            tile.classList.add('filled');
+            currentCol++;
+        }
+
+        function backspace() {
+            if (gameOver || currentCol === 0) return;
+            currentCol--;
+            grid[currentRow][currentCol] = "";
+            const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
+            tile.innerText = "";
+            tile.classList.remove('filled');
+        }
+
+        function submit() {
+            if (gameOver || currentCol !== 5) return;
+            const guess = grid[currentRow].join("");
+
+            let secretArr = secret.split("");
+            const status = Array(5).fill('absent');
+
+            for (let i = 0; i < 5; i++) {
+                if (guess[i] === secretArr[i]) {
+                    status[i] = 'correct';
+                    secretArr[i] = null;
+                }
+            }
+
+            for (let i = 0; i < 5; i++) {
+                if (status[i] !== 'correct' && secretArr.includes(guess[i])) {
+                    status[i] = 'present';
+                    secretArr[secretArr.indexOf(guess[i])] = null;
+                }
+            }
+
+            for (let i = 0; i < 5; i++) {
+                const tile = document.getElementById(`tile-${currentRow}-${i}`);
+                const key = document.getElementById(`key-${guess[i]}`);
+
+                setTimeout(() => {
+                    tile.classList.add(status[i]);
+                    if (status[i] === 'correct') key.className = 'key correct';
+                    else if (status[i] === 'present' && !key.classList.contains('correct')) key.className = 'key present';
+                    else if (!key.classList.contains('correct') && !key.classList.contains('present')) key.className = 'key absent';
+                }, i * 200);
+            }
+
+            if (guess === secret) {
+                gameOver = true;
+                setTimeout(() => alert("Wygrałeś!"), 1500);
+            } else if (currentRow === 5) {
+                gameOver = true;
+                setTimeout(() => alert(`Koniec! Słowo to: ${secret}`), 1500);
+            }
+
+            currentRow++;
+            currentCol = 0;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            if (key === 'ENTER') submit();
+            else if (key === 'BACKSPACE') backspace();
+            else if (/^[A-Z]$/.test(key)) type(key);
+        });
+
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

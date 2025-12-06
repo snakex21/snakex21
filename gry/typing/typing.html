@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tester Szybkości Pisania - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #eab308;
+            --correct: #22c55e;
+            --error: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #facc15;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        nav {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 3rem;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-value {
+            color: var(--accent);
+        }
+
+        .word-display {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            font-size: 1.5rem;
+            line-height: 2;
+            margin-bottom: 2rem;
+            width: 100%;
+            height: 160px;
+            overflow: hidden;
+            position: relative;
+            user-select: none;
+            box-shadow: 0 4px 20px var(--shadow);
+            /* Enable smooth scrolling */
+            scroll-behavior: smooth;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+
+        .word {
+            margin-right: 0.5em;
+            padding: 0.1em 0.3em;
+            border-radius: 4px;
+            scroll-margin-top: 60px;
+            /* Offset for scrolling */
+        }
+
+        .word.current {
+            background: rgba(234, 179, 8, 0.2);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .word.correct {
+            color: var(--correct);
+        }
+
+        .word.error {
+            color: var(--error);
+            text-decoration: line-through;
+        }
+
+        .input-area {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text);
+            text-align: center;
+            font-family: 'Roboto Mono', monospace;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: all 0.2s;
+        }
+
+        .btn-restart {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .btn-restart:hover {
+            opacity: 0.9;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .time-btn {
+            padding: 0.4rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .time-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Result Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .result-wpm {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="time-options">
+            <button class="time-btn" data-time="15">15s</button>
+            <button class="time-btn" data-time="30">30s</button>
+            <button class="time-btn active" data-time="60">60s</button>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">Czas</span>
+                <span class="stat-value" id="timer">60</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">WPM</span>
+                <span class="stat-value" id="wpm">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Dokładność</span>
+                <span class="stat-value" id="accuracy">100%</span>
+            </div>
+        </div>
+
+        <div class="word-display" id="word-display"></div>
+
+        <div class="input-area">
+            <input type="text" id="input-field" placeholder="Zacznij pisać..." autocomplete="off">
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-restart" id="btn-restart">↻ Restart</button>
+        </div>
+    </main>
+
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2>Koniec czasu! 🏁</h2>
+            <div class="result-wpm" id="final-wpm">0</div>
+            <p>Słów na minutę (WPM)</p>
+
+            <div class="result-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Dokładność</span>
+                    <span class="stat-value" id="final-acc">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Poprawne słowa</span>
+                    <span class="stat-value" id="final-correct">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Błędy</span>
+                    <span class="stat-value" id="final-errors">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Znaki</span>
+                    <span class="stat-value" id="final-chars">0</span>
+                </div>
+            </div>
+
+            <button class="btn btn-restart" onclick="resetGame()">Spróbuj ponownie</button>
+        </div>
+    </div>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Typing Test Logic
+        const wordsList = [
+            "czas", "rok", "człowiek", "dzień", "sprawa", "życie", "ręka", "praca", "słowo", "miejsce",
+            "rzecz", "oczy", "dom", "pan", "świat", "samochód", "woda", "droga", "dziecko", "głowa",
+            "kobieta", "noc", "przyjaciel", "szkoła", "ziemia", "pokój", "drzwi", "miasto", "głos", "twarz",
+            "strona", "morze", "serce", "ojciec", "wiatr", "siła", "góra", "koniec", "książka", "Bóg",
+            "stół", "okno", "ulica", "problem", "rodzina", "las", "chwila", "imię", "pieniądz", "historia",
+            "słońce", "śmierć", "wojna", "ciało", "ludzie", "prawo", "muzyka", "obraz", "pole", "uwaga",
+            "wieś", "kraj", "matka", "powietrze", "ręka", "noga", "niebo", "ogień", "światło", "związek",
+            "przykład", "myśl", "rozmowa", "sens", "serce", "miłość", "nadzieja", "wiara", "wolność", "prawda",
+            "dobro", "piękno", "natura", "kultura", "sztuka", "nauka", "wiedza", "rozum", "duch", "dusza"
+        ];
+
+        let timeLeft = 60;
+        let timeLimit = 60;
+        let timer = null;
+        let isPlaying = false;
+        let currentWordIndex = 0;
+        let correctWords = 0;
+        let errorWords = 0;
+        let totalChars = 0;
+        let words = [];
+
+        const wordDisplay = document.getElementById('word-display');
+        const inputField = document.getElementById('input-field');
+        const timerDisplay = document.getElementById('timer');
+        const wpmDisplay = document.getElementById('wpm');
+        const accDisplay = document.getElementById('accuracy');
+        const resultModal = document.getElementById('result-modal');
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function initGame() {
+            words = shuffle([...wordsList, ...wordsList, ...wordsList]); // Triple list for enough words
+            wordDisplay.innerHTML = '';
+            words.forEach(word => {
+                const span = document.createElement('span');
+                span.innerText = word;
+                span.className = 'word';
+                wordDisplay.appendChild(span);
+            });
+
+            wordDisplay.firstChild.classList.add('current');
+            inputField.value = '';
+            inputField.focus();
+
+            timeLeft = timeLimit;
+            timerDisplay.innerText = timeLeft;
+            wpmDisplay.innerText = '0';
+            accDisplay.innerText = '100%';
+
+            currentWordIndex = 0;
+            correctWords = 0;
+            errorWords = 0;
+            totalChars = 0;
+            isPlaying = false;
+            clearInterval(timer);
+            resultModal.style.display = 'none';
+
+            // Reset scroll
+            wordDisplay.scrollTop = 0;
+        }
+
+        function startGame() {
+            if (isPlaying) return;
+            isPlaying = true;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+
+                // Calculate WPM on the fly
+                const timeElapsed = timeLimit - timeLeft;
+                const wpm = Math.round((correctWords / timeElapsed) * 60) || 0;
+                wpmDisplay.innerText = wpm;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            isPlaying = false;
+            inputField.disabled = true;
+
+            const wpm = Math.round((correctWords / timeLimit) * 60);
+            const total = correctWords + errorWords;
+            const acc = total === 0 ? 0 : Math.round((correctWords / total) * 100);
+
+            document.getElementById('final-wpm').innerText = wpm;
+            document.getElementById('final-acc').innerText = acc + '%';
+            document.getElementById('final-correct').innerText = correctWords;
+            document.getElementById('final-errors').innerText = errorWords;
+            document.getElementById('final-chars').innerText = totalChars;
+
+            resultModal.style.display = 'flex';
+        }
+
+        function resetGame() {
+            inputField.disabled = false;
+            initGame();
+        }
+
+        inputField.addEventListener('input', (e) => {
+            if (!isPlaying && timeLeft > 0) startGame();
+
+            const typed = e.target.value;
+            const currentWord = words[currentWordIndex];
+            const wordElements = wordDisplay.querySelectorAll('.word');
+
+            // Handle space (word submission)
+            if (typed.endsWith(' ')) {
+                const trimmedTyped = typed.trim();
+
+                if (trimmedTyped === currentWord) {
+                    wordElements[currentWordIndex].classList.add('correct');
+                    correctWords++;
+                    totalChars += currentWord.length;
+                } else {
+                    wordElements[currentWordIndex].classList.add('error');
+                    errorWords++;
+                }
+
+                wordElements[currentWordIndex].classList.remove('current');
+                currentWordIndex++;
+
+                if (currentWordIndex < words.length) {
+                    const nextWord = wordElements[currentWordIndex];
+                    nextWord.classList.add('current');
+
+                    // Improved Scrolling Logic
+                    // We check if the next word is in a new row relative to the previous one
+                    // Or simply ensure it's visible.
+
+                    // Simple logic: scroll into view if needed
+                    const containerRect = wordDisplay.getBoundingClientRect();
+                    const wordRect = nextWord.getBoundingClientRect();
+
+                    // If word is in the bottom half or below, scroll it to center
+                    if (wordRect.bottom > containerRect.bottom - 40) {
+                        nextWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+
+                inputField.value = '';
+
+                // Update accuracy
+                const total = correctWords + errorWords;
+                const acc = total === 0 ? 100 : Math.round((correctWords / total) * 100);
+                accDisplay.innerText = acc + '%';
+            }
+        });
+
+        // Time options
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                timeLimit = parseInt(btn.dataset.time);
+                resetGame();
+            });
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', resetGame);
+
+        // Init
+        initGame();
+    </script>
+</body>
+
+</html>

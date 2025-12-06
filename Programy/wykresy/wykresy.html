@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generator Wykresów - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #3b82f6;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #60a5fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .chart-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .chart-type-btn {
+            padding: 0.8rem 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .chart-type-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .chart-type-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .chart-type-btn .icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .chart-type-btn .name {
+            font-size: 0.75rem;
+        }
+
+        /* Color Scheme */
+        .color-schemes {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .color-scheme {
+            display: flex;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-scheme:hover,
+        .color-scheme.active {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .color-scheme span {
+            width: 16px;
+            height: 24px;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-generate:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Chart Area */
+        .chart-area {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #chart-canvas {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .chart-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chart-actions button {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-actions button:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>📊 Generator Wykresów</h1>
+            <p>Twórz piękne wykresy z własnych danych</p>
+        </div>
+
+        <div class="container">
+            <div class="sidebar">
+                <div class="form-group">
+                    <label>Typ wykresu</label>
+                    <div class="chart-types">
+                        <div class="chart-type-btn active" data-type="bar">
+                            <span class="icon">📊</span>
+                            <span class="name">Słupkowy</span>
+                        </div>
+                        <div class="chart-type-btn" data-type="line">
+                            <span class="icon">📈</span>
+                            <span class="name">Liniowy</span>
+                        </div>
+                        <div class="chart-type-btn" data-type="pie">
+                            <span class="icon">🥧</span>
+                            <span class="name">Kołowy</span>
+                        </div>
+                        <div class="chart-type-btn" data-type="doughnut">
+                            <span class="icon">🍩</span>
+                            <span class="name">Pierścieniowy</span>
+                        </div>
+                        <div class="chart-type-btn" data-type="area">
+                            <span class="icon">📉</span>
+                            <span class="name">Obszarowy</span>
+                        </div>
+                        <div class="chart-type-btn" data-type="horizontal">
+                            <span class="icon">📶</span>
+                            <span class="name">Poziomy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tytuł wykresu</label>
+                    <input type="text" id="chart-title" placeholder="np. Sprzedaż 2024">
+                </div>
+
+                <div class="form-group">
+                    <label>Etykiety (oddziel przecinkiem)</label>
+                    <input type="text" id="chart-labels" placeholder="np. Sty, Lut, Mar, Kwi, Maj">
+                </div>
+
+                <div class="form-group">
+                    <label>Dane (oddziel przecinkiem)</label>
+                    <textarea id="chart-data" placeholder="np. 100, 150, 120, 180, 200"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Schemat kolorów</label>
+                    <div class="color-schemes">
+                        <div class="color-scheme active" data-scheme="blue">
+                            <span style="background: #3b82f6;"></span>
+                            <span style="background: #60a5fa;"></span>
+                            <span style="background: #93c5fd;"></span>
+                        </div>
+                        <div class="color-scheme" data-scheme="rainbow">
+                            <span style="background: #ef4444;"></span>
+                            <span style="background: #f97316;"></span>
+                            <span style="background: #eab308;"></span>
+                            <span style="background: #22c55e;"></span>
+                            <span style="background: #3b82f6;"></span>
+                        </div>
+                        <div class="color-scheme" data-scheme="green">
+                            <span style="background: #22c55e;"></span>
+                            <span style="background: #4ade80;"></span>
+                            <span style="background: #86efac;"></span>
+                        </div>
+                        <div class="color-scheme" data-scheme="purple">
+                            <span style="background: #8b5cf6;"></span>
+                            <span style="background: #a78bfa;"></span>
+                            <span style="background: #c4b5fd;"></span>
+                        </div>
+                        <div class="color-scheme" data-scheme="warm">
+                            <span style="background: #ef4444;"></span>
+                            <span style="background: #f97316;"></span>
+                            <span style="background: #eab308;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-generate" id="btn-generate">✨ Generuj wykres</button>
+            </div>
+
+            <div class="chart-area">
+                <div class="empty-state" id="empty-state">
+                    <div class="icon">📊</div>
+                    <h3>Brak wykresu</h3>
+                    <p>Wprowadź dane i kliknij "Generuj wykres"</p>
+                </div>
+                <canvas id="chart-canvas" style="display: none;"></canvas>
+                <div class="chart-actions" id="chart-actions" style="display: none;">
+                    <button id="btn-download-png">📥 Pobierz PNG</button>
+                    <button id="btn-download-jpg">🖼️ Pobierz JPG</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Chart Logic
+        const canvas = document.getElementById('chart-canvas');
+        const ctx = canvas.getContext('2d');
+        const emptyState = document.getElementById('empty-state');
+        const chartActions = document.getElementById('chart-actions');
+
+        let chartType = 'bar';
+        let colorScheme = 'blue';
+
+        const colorSchemes = {
+            blue: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe'],
+            rainbow: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'],
+            green: ['#22c55e', '#4ade80', '#86efac', '#bbf7d0', '#dcfce7'],
+            purple: ['#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'],
+            warm: ['#ef4444', '#f97316', '#eab308', '#fbbf24', '#fcd34d']
+        };
+
+        // Chart type buttons
+        document.querySelectorAll('.chart-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                chartType = btn.dataset.type;
+            });
+        });
+
+        // Color scheme buttons
+        document.querySelectorAll('.color-scheme').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-scheme').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                colorScheme = btn.dataset.scheme;
+            });
+        });
+
+        // Generate chart
+        document.getElementById('btn-generate').addEventListener('click', generateChart);
+
+        function generateChart() {
+            const title = document.getElementById('chart-title').value || 'Wykres';
+            const labelsStr = document.getElementById('chart-labels').value;
+            const dataStr = document.getElementById('chart-data').value;
+
+            if (!labelsStr || !dataStr) {
+                alert('Wprowadź etykiety i dane!');
+                return;
+            }
+
+            const labels = labelsStr.split(',').map(s => s.trim());
+            const data = dataStr.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+
+            if (labels.length === 0 || data.length === 0) {
+                alert('Nieprawidłowe dane!');
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            canvas.style.display = 'block';
+            chartActions.style.display = 'flex';
+
+            drawChart(title, labels, data);
+        }
+
+        function drawChart(title, labels, data) {
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#fff' : '#1a1a1a';
+            const bgColor = isDark ? '#2a2a2a' : '#ffffff';
+            const gridColor = isDark ? '#444' : '#e5e7eb';
+
+            canvas.width = 800;
+            canvas.height = 500;
+
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const colors = colorSchemes[colorScheme];
+            const padding = { top: 60, right: 40, bottom: 60, left: 60 };
+            const chartWidth = canvas.width - padding.left - padding.right;
+            const chartHeight = canvas.height - padding.top - padding.bottom;
+
+            // Title
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, canvas.width / 2, 35);
+
+            const maxVal = Math.max(...data);
+            const minVal = Math.min(0, ...data);
+            const range = maxVal - minVal;
+
+            if (chartType === 'bar' || chartType === 'line' || chartType === 'area') {
+                // Draw grid
+                ctx.strokeStyle = gridColor;
+                ctx.lineWidth = 1;
+                for (let i = 0; i <= 5; i++) {
+                    const y = padding.top + (i / 5) * chartHeight;
+                    ctx.beginPath();
+                    ctx.moveTo(padding.left, y);
+                    ctx.lineTo(padding.left + chartWidth, y);
+                    ctx.stroke();
+
+                    // Y-axis labels
+                    const val = maxVal - (i / 5) * range;
+                    ctx.fillStyle = textColor;
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(val.toFixed(0), padding.left - 10, y + 4);
+                }
+
+                // X-axis labels
+                const barWidth = chartWidth / labels.length;
+                labels.forEach((label, i) => {
+                    const x = padding.left + i * barWidth + barWidth / 2;
+                    ctx.fillStyle = textColor;
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(label, x, canvas.height - 20);
+                });
+
+                if (chartType === 'bar') {
+                    // Bar chart
+                    const barPadding = barWidth * 0.2;
+                    data.forEach((val, i) => {
+                        const x = padding.left + i * barWidth + barPadding;
+                        const h = ((val - minVal) / range) * chartHeight;
+                        const y = padding.top + chartHeight - h;
+                        const w = barWidth - barPadding * 2;
+
+                        ctx.fillStyle = colors[i % colors.length];
+                        ctx.fillRect(x, y, w, h);
+
+                        // Value label
+                        ctx.fillStyle = textColor;
+                        ctx.font = 'bold 12px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(val.toString(), x + w / 2, y - 5);
+                    });
+                } else if (chartType === 'line' || chartType === 'area') {
+                    // Line/Area chart
+                    ctx.beginPath();
+                    data.forEach((val, i) => {
+                        const x = padding.left + i * barWidth + barWidth / 2;
+                        const y = padding.top + chartHeight - ((val - minVal) / range) * chartHeight;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    });
+
+                    if (chartType === 'area') {
+                        ctx.lineTo(padding.left + (data.length - 1) * barWidth + barWidth / 2, padding.top + chartHeight);
+                        ctx.lineTo(padding.left + barWidth / 2, padding.top + chartHeight);
+                        ctx.closePath();
+                        ctx.fillStyle = colors[0] + '40';
+                        ctx.fill();
+                    }
+
+                    ctx.strokeStyle = colors[0];
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    // Points
+                    data.forEach((val, i) => {
+                        const x = padding.left + i * barWidth + barWidth / 2;
+                        const y = padding.top + chartHeight - ((val - minVal) / range) * chartHeight;
+                        ctx.beginPath();
+                        ctx.arc(x, y, 6, 0, Math.PI * 2);
+                        ctx.fillStyle = colors[0];
+                        ctx.fill();
+                        ctx.strokeStyle = bgColor;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    });
+                }
+            } else if (chartType === 'horizontal') {
+                // Horizontal bar chart
+                const barHeight = chartHeight / labels.length;
+                const barPadding = barHeight * 0.2;
+
+                data.forEach((val, i) => {
+                    const y = padding.top + i * barHeight + barPadding;
+                    const w = (val / maxVal) * chartWidth;
+                    const h = barHeight - barPadding * 2;
+
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.fillRect(padding.left, y, w, h);
+
+                    // Label
+                    ctx.fillStyle = textColor;
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(labels[i], padding.left - 10, y + h / 2);
+
+                    // Value
+                    ctx.textAlign = 'left';
+                    ctx.fillText(val.toString(), padding.left + w + 10, y + h / 2);
+                });
+            } else if (chartType === 'pie' || chartType === 'doughnut') {
+                // Pie/Doughnut chart
+                const total = data.reduce((a, b) => a + b, 0);
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2 + 20;
+                const radius = Math.min(chartWidth, chartHeight) / 2.5;
+                const innerRadius = chartType === 'doughnut' ? radius * 0.5 : 0;
+
+                let startAngle = -Math.PI / 2;
+
+                data.forEach((val, i) => {
+                    const sliceAngle = (val / total) * Math.PI * 2;
+                    const endAngle = startAngle + sliceAngle;
+
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.fill();
+
+                    // Label
+                    const midAngle = startAngle + sliceAngle / 2;
+                    const labelRadius = radius * 0.7;
+                    const lx = centerX + Math.cos(midAngle) * labelRadius;
+                    const ly = centerY + Math.sin(midAngle) * labelRadius;
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    const percent = ((val / total) * 100).toFixed(1) + '%';
+                    ctx.fillText(percent, lx, ly);
+
+                    startAngle = endAngle;
+                });
+
+                // Inner circle for doughnut
+                if (chartType === 'doughnut') {
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = bgColor;
+                    ctx.fill();
+                }
+
+                // Legend
+                const legendX = canvas.width - 150;
+                labels.forEach((label, i) => {
+                    const ly = padding.top + i * 25;
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.fillRect(legendX, ly, 15, 15);
+                    ctx.fillStyle = textColor;
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(label, legendX + 22, ly + 12);
+                });
+            }
+        }
+
+        // Download
+        document.getElementById('btn-download-png').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'wykres.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('btn-download-jpg').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'wykres.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            link.click();
+        });
+
+        // Default data
+        document.getElementById('chart-title').value = 'Sprzedaż 2024';
+        document.getElementById('chart-labels').value = 'Sty, Lut, Mar, Kwi, Maj, Cze';
+        document.getElementById('chart-data').value = '120, 150, 180, 140, 200, 220';
+    </script>
+</body>
+
+</html>

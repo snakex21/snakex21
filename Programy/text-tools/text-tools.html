@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Narzędzia Tekstowe - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #0ea5e9;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #38bdf8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-area-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text);
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: 2px solid var(--accent);
+            border-color: transparent;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .control-group h3 {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 0.8rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            padding: 0 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>📝 Narzędzia Tekstowe</h1>
+            <p>Konwertuj, czyść i formatuj tekst</p>
+        </div>
+
+        <div class="container">
+            <div class="text-area-container">
+                <textarea id="editor" placeholder="Wklej tutaj swój tekst..."></textarea>
+                <div class="stats">
+                    <span id="char-count">0 znaków</span>
+                    <span id="word-count">0 słów</span>
+                    <span id="line-count">0 linii</span>
+                </div>
+                <div class="btn-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <button class="btn" onclick="copyText()">📋 Kopiuj</button>
+                    <button class="btn" onclick="pasteText()">📥 Wklej</button>
+                    <button class="btn" onclick="clearText()">🗑️ Wyczyść</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <h3>Wielkość liter</h3>
+                    <div class="btn-grid">
+                        <button class="btn" onclick="transform('upper')">ABC</button>
+                        <button class="btn" onclick="transform('lower')">abc</button>
+                        <button class="btn" onclick="transform('title')">Abc Def</button>
+                        <button class="btn" onclick="transform('sentence')">Abc def.</button>
+                        <button class="btn" onclick="transform('alternating')">aBc DeF</button>
+                        <button class="btn" onclick="transform('inverse')">aBC dEF</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Programistyczne</h3>
+                    <div class="btn-grid">
+                        <button class="btn" onclick="transform('camel')">camelCase</button>
+                        <button class="btn" onclick="transform('snake')">snake_case</button>
+                        <button class="btn" onclick="transform('kebab')">kebab-case</button>
+                        <button class="btn" onclick="transform('pascal')">PascalCase</button>
+                        <button class="btn" onclick="transform('slug')">URL Slug</button>
+                        <button class="btn" onclick="transform('constant')">CONSTANT</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Czyszczenie</h3>
+                    <div class="btn-grid">
+                        <button class="btn" onclick="transform('trim')">Usuń spacje</button>
+                        <button class="btn" onclick="transform('lines')">Usuń puste linie</button>
+                        <button class="btn" onclick="transform('accents')">Usuń polskie</button>
+                        <button class="btn" onclick="transform('html')">Strip HTML</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Inne</h3>
+                    <div class="btn-grid">
+                        <button class="btn" onclick="transform('reverse')">Odwróć</button>
+                        <button class="btn" onclick="transform('base64enc')">Base64 Enc</button>
+                        <button class="btn" onclick="transform('base64dec')">Base64 Dec</button>
+                        <button class="btn" onclick="transform('morse')">Morse'a</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        const editor = document.getElementById('editor');
+
+        function updateStats() {
+            const text = editor.value;
+            document.getElementById('char-count').textContent = text.length + ' znaków';
+            document.getElementById('word-count').textContent = (text.trim() ? text.trim().split(/\s+/).length : 0) + ' słów';
+            document.getElementById('line-count').textContent = (text.length ? text.split(/\n/).length : 0) + ' linii';
+        }
+
+        editor.addEventListener('input', updateStats);
+
+        function copyText() {
+            editor.select();
+            document.execCommand('copy');
+        }
+
+        async function pasteText() {
+            const text = await navigator.clipboard.readText();
+            editor.value = text;
+            updateStats();
+        }
+
+        function clearText() {
+            editor.value = '';
+            updateStats();
+        }
+
+        function transform(type) {
+            let text = editor.value;
+
+            switch (type) {
+                case 'upper': text = text.toUpperCase(); break;
+                case 'lower': text = text.toLowerCase(); break;
+                case 'title':
+                    text = text.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    break;
+                case 'sentence':
+                    text = text.toLowerCase().replace(/(^\s*\w|[\.\!\?]\s*\w)/g, c => c.toUpperCase());
+                    break;
+                case 'alternating':
+                    text = text.split('').map((c, i) => i % 2 ? c.toUpperCase() : c.toLowerCase()).join('');
+                    break;
+                case 'inverse':
+                    text = text.split('').map(c => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join('');
+                    break;
+                case 'camel':
+                    text = text.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
+                    break;
+                case 'snake':
+                    text = text.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                        .map(x => x.toLowerCase()).join('_');
+                    break;
+                case 'kebab':
+                    text = text.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                        .map(x => x.toLowerCase()).join('-');
+                    break;
+                case 'pascal':
+                    text = text.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                        .map(x => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join('');
+                    break;
+                case 'slug':
+                    text = text.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+                    break;
+                case 'constant':
+                    text = text.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                        .map(x => x.toUpperCase()).join('_');
+                    break;
+                case 'trim':
+                    text = text.replace(/\s+/g, ' ').trim();
+                    break;
+                case 'lines':
+                    text = text.replace(/^\s*[\r\n]/gm, '');
+                    break;
+                case 'accents':
+                    text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, 'l').replace(/Ł/g, 'L');
+                    break;
+                case 'html':
+                    text = text.replace(/<[^>]*>?/gm, '');
+                    break;
+                case 'reverse':
+                    text = text.split('').reverse().join('');
+                    break;
+                case 'base64enc':
+                    try { text = btoa(text); } catch (e) { alert('Błąd kodowania'); }
+                    break;
+                case 'base64dec':
+                    try { text = atob(text); } catch (e) { alert('Błąd dekodowania'); }
+                    break;
+                case 'morse':
+                    const morseCode = {
+                        'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+                        'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+                        'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+                        'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+                        'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--',
+                        '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+                        '9': '----.', '0': '-----', ' ': '/'
+                    };
+                    text = text.toUpperCase().split('').map(c => morseCode[c] || c).join(' ');
+                    break;
+            }
+
+            editor.value = text;
+            updateStats();
+        }
+    </script>
+</body>
+
+</html>

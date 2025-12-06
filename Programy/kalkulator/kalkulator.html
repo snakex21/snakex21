@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kalkulator Uniwersalny - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #10b981;
+            /* Emerald */
+            --input-bg: #ffffff;
+            --key-bg: #ffffff;
+            --key-hover: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #34d399;
+            --input-bg: #222;
+            --key-bg: #333;
+            --key-hover: #444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+
+        .tab-btn:hover {
+            background: var(--card-hover);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Calculator UI */
+        .calc-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px var(--shadow);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .calc-display {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: right;
+            font-family: monospace;
+        }
+
+        #calc-history {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            min-height: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #calc-result {
+            font-size: 2.5rem;
+            font-weight: bold;
+            overflow-x: auto;
+        }
+
+        .calc-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.8rem;
+        }
+
+        .key {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--key-bg);
+            color: var(--text);
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .key:hover {
+            background: var(--key-hover);
+            transform: translateY(-2px);
+        }
+
+        .key:active {
+            transform: scale(0.95);
+        }
+
+        .key.operator {
+            color: var(--accent);
+        }
+
+        .key.equal {
+            background: var(--accent);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .key.clear {
+            color: #ef4444;
+        }
+
+        .key.sci {
+            font-size: 0.9rem;
+            background: var(--card-hover);
+        }
+
+        /* Geometry & Finance UI */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .btn-calc {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-calc:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .calc-keys {
+                gap: 0.5rem;
+            }
+
+            .key {
+                padding: 0.8rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🧮 Kalkulator Uniwersalny</h1>
+            <p>Naukowy, Geometria i Finanse</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('sci')">Naukowy</button>
+            <button class="tab-btn" onclick="switchTab('geo')">Geometria</button>
+            <button class="tab-btn" onclick="switchTab('fin')">Finanse</button>
+        </div>
+
+        <!-- SCIENTIFIC CALCULATOR -->
+        <div id="sci" class="tab-content active">
+            <div class="calc-container">
+                <div class="calc-display">
+                    <div id="calc-history"></div>
+                    <div id="calc-result">0</div>
+                </div>
+                <div class="calc-keys">
+                    <button class="key clear" onclick="calcClear()">C</button>
+                    <button class="key operator" onclick="calcOp('(')">(</button>
+                    <button class="key operator" onclick="calcOp(')')">)</button>
+                    <button class="key operator" onclick="calcOp('/')">÷</button>
+
+                    <button class="key sci" onclick="calcFunc('sin')">sin</button>
+                    <button class="key sci" onclick="calcFunc('cos')">cos</button>
+                    <button class="key sci" onclick="calcFunc('tan')">tan</button>
+                    <button class="key operator" onclick="calcOp('*')">×</button>
+
+                    <button class="key" onclick="calcNum(7)">7</button>
+                    <button class="key" onclick="calcNum(8)">8</button>
+                    <button class="key" onclick="calcNum(9)">9</button>
+                    <button class="key operator" onclick="calcOp('-')">-</button>
+
+                    <button class="key" onclick="calcNum(4)">4</button>
+                    <button class="key" onclick="calcNum(5)">5</button>
+                    <button class="key" onclick="calcNum(6)">6</button>
+                    <button class="key operator" onclick="calcOp('+')">+</button>
+
+                    <button class="key" onclick="calcNum(1)">1</button>
+                    <button class="key" onclick="calcNum(2)">2</button>
+                    <button class="key" onclick="calcNum(3)">3</button>
+                    <button class="key sci" onclick="calcFunc('sqrt')">√</button>
+
+                    <button class="key" onclick="calcNum(0)">0</button>
+                    <button class="key" onclick="calcNum('.')">.</button>
+                    <button class="key equal" onclick="calcEqual()">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GEOMETRY -->
+        <div id="geo" class="tab-content">
+            <div class="tool-grid">
+                <div class="tool-card">
+                    <h3>Figura</h3>
+                    <div class="form-group">
+                        <select id="geo-shape" onchange="updateGeoInputs()">
+                            <option value="square">Kwadrat</option>
+                            <option value="rect">Prostokąt</option>
+                            <option value="circle">Koło</option>
+                            <option value="triangle">Trójkąt</option>
+                        </select>
+                    </div>
+
+                    <div id="geo-inputs">
+                        <!-- Dynamic inputs -->
+                    </div>
+
+                    <button class="btn-calc" onclick="calcGeo()">Oblicz</button>
+
+                    <div class="result-box">
+                        <p>Pole: <span id="geo-area" class="result-value">-</span></p>
+                        <p>Obwód: <span id="geo-perim" class="result-value">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINANCE -->
+        <div id="fin" class="tab-content">
+            <div class="tool-grid">
+                <!-- VAT Calculator -->
+                <div class="tool-card">
+                    <h3>Kalkulator VAT</h3>
+                    <div class="form-group">
+                        <label>Kwota Netto</label>
+                        <input type="number" id="vat-netto" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Stawka VAT (%)</label>
+                        <input type="number" id="vat-rate" value="23">
+                    </div>
+                    <button class="btn-calc" onclick="calcVat()">Oblicz Brutto</button>
+                    <div class="result-box">
+                        <p>Brutto: <span id="vat-result" class="result-value">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Loan Calculator -->
+                <div class="tool-card">
+                    <h3>Rata Kredytu</h3>
+                    <div class="form-group">
+                        <label>Kwota Kredytu</label>
+                        <input type="number" id="loan-amount" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Oprocentowanie (%)</label>
+                        <input type="number" id="loan-rate" value="8.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Liczba miesięcy</label>
+                        <input type="number" id="loan-months" value="12">
+                    </div>
+                    <button class="btn-calc" onclick="calcLoan()">Oblicz Ratę</button>
+                    <div class="result-box">
+                        <p>Miesięczna rata: <span id="loan-result" class="result-value">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            const btns = document.querySelectorAll('.tab-btn');
+            if (tabId === 'sci') btns[0].classList.add('active');
+            if (tabId === 'geo') btns[1].classList.add('active');
+            if (tabId === 'fin') btns[2].classList.add('active');
+        }
+
+        // --- SCIENTIFIC CALCULATOR ---
+        let calcExpr = '';
+        const historyEl = document.getElementById('calc-history');
+        const resultEl = document.getElementById('calc-result');
+
+        function calcNum(num) {
+            calcExpr += num;
+            updateDisplay();
+        }
+
+        function calcOp(op) {
+            calcExpr += op;
+            updateDisplay();
+        }
+
+        function calcFunc(func) {
+            if (func === 'sqrt') calcExpr += 'Math.sqrt(';
+            else calcExpr += `Math.${func}(`;
+            updateDisplay();
+        }
+
+        function calcClear() {
+            calcExpr = '';
+            historyEl.textContent = '';
+            resultEl.textContent = '0';
+        }
+
+        function calcEqual() {
+            try {
+                historyEl.textContent = calcExpr + ' =';
+                // Security note: eval is dangerous in general but acceptable for a local static calculator tool
+                // We can use Function constructor as a slightly safer alternative or just eval
+                const res = eval(calcExpr);
+                resultEl.textContent = parseFloat(res.toFixed(8)); // Avoid precision errors
+                calcExpr = res.toString();
+            } catch (e) {
+                resultEl.textContent = 'Błąd';
+            }
+        }
+
+        function updateDisplay() {
+            // Replace Math. functions for display
+            let display = calcExpr
+                .replace(/Math.sqrt\(/g, '√(')
+                .replace(/Math.sin\(/g, 'sin(')
+                .replace(/Math.cos\(/g, 'cos(')
+                .replace(/Math.tan\(/g, 'tan(');
+            resultEl.textContent = display || '0';
+        }
+
+        // --- GEOMETRY ---
+        const geoInputs = document.getElementById('geo-inputs');
+
+        function updateGeoInputs() {
+            const shape = document.getElementById('geo-shape').value;
+            let html = '';
+
+            if (shape === 'square') {
+                html = '<div class="form-group"><label>Bok a</label><input type="number" id="g-a"></div>';
+            } else if (shape === 'rect') {
+                html = '<div class="form-group"><label>Bok a</label><input type="number" id="g-a"></div><div class="form-group"><label>Bok b</label><input type="number" id="g-b"></div>';
+            } else if (shape === 'circle') {
+                html = '<div class="form-group"><label>Promień r</label><input type="number" id="g-r"></div>';
+            } else if (shape === 'triangle') {
+                html = '<div class="form-group"><label>Podstawa a</label><input type="number" id="g-a"></div><div class="form-group"><label>Wysokość h</label><input type="number" id="g-h"></div><div class="form-group"><label>Bok b (do obwodu)</label><input type="number" id="g-b"></div><div class="form-group"><label>Bok c (do obwodu)</label><input type="number" id="g-c"></div>';
+            }
+            geoInputs.innerHTML = html;
+        }
+
+        function calcGeo() {
+            const shape = document.getElementById('geo-shape').value;
+            let area = 0, perim = 0;
+
+            if (shape === 'square') {
+                const a = parseFloat(document.getElementById('g-a').value) || 0;
+                area = a * a;
+                perim = 4 * a;
+            } else if (shape === 'rect') {
+                const a = parseFloat(document.getElementById('g-a').value) || 0;
+                const b = parseFloat(document.getElementById('g-b').value) || 0;
+                area = a * b;
+                perim = 2 * (a + b);
+            } else if (shape === 'circle') {
+                const r = parseFloat(document.getElementById('g-r').value) || 0;
+                area = Math.PI * r * r;
+                perim = 2 * Math.PI * r;
+            } else if (shape === 'triangle') {
+                const a = parseFloat(document.getElementById('g-a').value) || 0;
+                const h = parseFloat(document.getElementById('g-h').value) || 0;
+                const b = parseFloat(document.getElementById('g-b').value) || 0;
+                const c = parseFloat(document.getElementById('g-c').value) || 0;
+                area = 0.5 * a * h;
+                perim = a + b + c;
+            }
+
+            document.getElementById('geo-area').textContent = area.toFixed(2);
+            document.getElementById('geo-perim').textContent = perim.toFixed(2);
+        }
+
+        // --- FINANCE ---
+        function calcVat() {
+            const netto = parseFloat(document.getElementById('vat-netto').value) || 0;
+            const rate = parseFloat(document.getElementById('vat-rate').value) || 0;
+            const brutto = netto * (1 + rate / 100);
+            document.getElementById('vat-result').textContent = brutto.toFixed(2) + ' PLN';
+        }
+
+        function calcLoan() {
+            const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
+            const rate = parseFloat(document.getElementById('loan-rate').value) || 0;
+            const months = parseFloat(document.getElementById('loan-months').value) || 0;
+
+            if (amount > 0 && months > 0) {
+                const r = rate / 100 / 12;
+                const payment = (amount * r) / (1 - Math.pow(1 + r, -months));
+                document.getElementById('loan-result').textContent = payment.toFixed(2) + ' PLN';
+            }
+        }
+
+        // Init
+        updateGeoInputs();
+
+    </script>
+</body>
+
+</html>

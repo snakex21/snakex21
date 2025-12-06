@@ -4,34 +4,34 @@
 
   // Track library (first 30 tracks from player.js)
   const trackLibrary = [
-    {title: 'Bad Romance (AI Cover)', artist: 'Adolf Hitler (AI)', album: 'Memy i covery', file: '(RECREATION) Adolf Hitler -  Bad Romance (Ai Cover).mp3', accent: '#fb7185'},
-    {title: 'James Bond Theme', artist: 'Monty Norman', album: '007', file: '007  James Bond  Theme.mp3', accent: '#facc15'},
-    {title: 'Gimme! Gimme! Gimme! (A Man After Midnight)', artist: 'ABBA', album: 'Greatest Hits', file: 'ABBA - Gimme! Gimme! Gimme! (A Man After Midnight).mp3', accent: '#f97316'},
-    {title: 'The Liberation Of Gracemeria', artist: 'Ace Combat 6 OST', album: 'Ace Combat 6', file: 'Ace Combat 6 OST - The Liberation Of Gracemeria.mp3', accent: '#60a5fa'},
-    {title: 'All That She Wants', artist: 'Ace of Base', album: 'Happy Nation', file: 'Ace of Base - All That She Wants (Official Music Video).mp3', accent: '#f472b6'},
-    {title: 'Ghost Town', artist: 'Adam Lambert', album: 'The Original High', file: 'Adam Lambert - Ghost Town [Official Music Video].mp3', accent: '#a855f7'},
-    {title: 'Barbie Girl (AI Cover)', artist: 'Adolf Hitler (AI)', album: 'Memy i covery', file: 'Adolf Hitler - Barbie Girl [Ai Cover].mp3', accent: '#f97316'},
-    {title: 'All Falls Down', artist: 'Alan Walker feat. Noah Cyrus, Digital Farm Animals', album: 'Different World', file: 'Alan Walker - All Falls Down (feat. Noah Cyrus with Digital Farm Animals).mp3', accent: '#38bdf8'},
-    {title: 'Alone', artist: 'Alan Walker', album: 'Different World', file: 'Alan Walker - Alone.mp3', accent: '#4c1d95'},
-    {title: 'Faded', artist: 'Alan Walker', album: 'Different World', file: 'Alan Walker - Faded.mp3', accent: '#2563eb'},
-    {title: 'Sing Me To Sleep', artist: 'Alan Walker', album: 'Different World', file: 'Alan Walker - Sing Me To Sleep.mp3', accent: '#22d3ee'},
-    {title: 'Man On The Moon', artist: 'Alan Walker x Benjamin Ingrosso', album: 'World of Walker', file: 'Alan Walker x Benjamin Ingrosso - Man On The Moon (Official Music Video).mp3', accent: '#facc15'},
-    {title: 'Lady Gaga (Lyrics)', artist: 'Alejandro', album: 'Single', file: 'Alejandro - Lady Gaga (Lyrics) 🎵.mp3', accent: '#ef4444'},
-    {title: 'Mr. Saxobeat', artist: 'Alexandra Stan', album: 'Saxobeats', file: 'Alexandra Stan - Mr. Saxobeat (Official Video).mp3', accent: '#f97316'},
-    {title: 'All Star (AI Cover)', artist: 'Dr. Doofenshmirtz', album: 'Parodie', file: 'All Star Doofenshmirtz AI Cover.mp3', accent: '#34d399'},
-    {title: 'Please Tell Rosie', artist: 'Alle Farben', album: 'Music Is My Best Friend', file: 'Alle Farben Please Tell Rosie (Lyric Video).mp3', accent: '#14b8a6'},
-    {title: 'I Need A Dollar', artist: 'Aloe Blacc', album: 'Good Things', file: 'Aloe Blacc - I Need A Dollar.mp3', accent: '#ea580c'},
-    {title: 'El Mismo Sol', artist: 'Alvaro Soler', album: 'Eterno Agosto', file: 'Alvaro Soler - El Mismo Sol.mp3', accent: '#f59e0b'},
-    {title: 'La Cintura', artist: 'Alvaro Soler', album: 'Mar de Colores', file: 'Alvaro Soler - La Cintura - Lyrics  Letra.mp3', accent: '#f97316'},
-    {title: 'Sofia', artist: 'Alvaro Soler', album: 'Eterno Agosto', file: 'Alvaro Soler - Sofia.mp3', accent: '#fbbf24'},
-    {title: 'Best Day Of My Life', artist: 'American Authors', album: 'Oh, What a Life', file: 'American Authors - Best Day Of My Life.mp3', accent: '#22c55e'},
-    {title: 'Slow It Down', artist: 'Amy Macdonald', album: 'Life in a Beautiful Light', file: 'Amy Macdonald - Slow It Down (Official Video).mp3', accent: '#ec4899'},
-    {title: 'This Is The Life', artist: 'Amy Macdonald', album: 'This Is the Life', file: 'Amy Macdonald - This Is The Life.mp3', accent: '#fb7185'},
-    {title: 'Barbie Girl', artist: 'Aqua', album: 'Aquarium', file: 'Aqua - Barbie Girl (Official Music Video).mp3', accent: '#60a5fa'},
-    {title: 'The Ketchup Song (Lyrics)', artist: 'Las Ketchup', album: 'Hijas del Tomate', file: 'Aserejé (The Ketchup Song) - Las Ketchup ( letra  lyrics ) [ Spanish Version ].mp3', accent: '#f97316'},
-    {title: 'The Ketchup Song (Spanish Version)', artist: 'Las Ketchup', album: 'Hijas del Tomate', file: 'Aserejé (The Ketchup Song) [Spanish Version] - Las Ketchup.mp3', accent: '#fbbf24'},
-    {title: 'Take On Me', artist: 'a-ha', album: 'Hunting High and Low', file: 'a-ha - Take On Me (Official Video) [Remastered in 4K].mp3', accent: '#38bdf8'},
-    {title: 'Donald Trump Sings All Star', artist: 'Donald Trump AI', album: 'Memy i covery', file: '♪ Donald Trump Sings All Star by Smash Mouth.mp3', accent: '#f59e0b'},
+    { title: 'Bad Romance (AI Cover)', artist: 'Adolf Hitler (AI)', album: 'Memy i covery', file: '(RECREATION) Adolf Hitler -  Bad Romance (Ai Cover).mp3', accent: '#fb7185' },
+    { title: 'James Bond Theme', artist: 'Monty Norman', album: '007', file: '007  James Bond  Theme.mp3', accent: '#facc15' },
+    { title: 'Gimme! Gimme! Gimme! (A Man After Midnight)', artist: 'ABBA', album: 'Greatest Hits', file: 'ABBA - Gimme! Gimme! Gimme! (A Man After Midnight).mp3', accent: '#f97316' },
+    { title: 'The Liberation Of Gracemeria', artist: 'Ace Combat 6 OST', album: 'Ace Combat 6', file: 'Ace Combat 6 OST - The Liberation Of Gracemeria.mp3', accent: '#60a5fa' },
+    { title: 'All That She Wants', artist: 'Ace of Base', album: 'Happy Nation', file: 'Ace of Base - All That She Wants (Official Music Video).mp3', accent: '#f472b6' },
+    { title: 'Ghost Town', artist: 'Adam Lambert', album: 'The Original High', file: 'Adam Lambert - Ghost Town [Official Music Video].mp3', accent: '#a855f7' },
+    { title: 'Barbie Girl (AI Cover)', artist: 'Adolf Hitler (AI)', album: 'Memy i covery', file: 'Adolf Hitler - Barbie Girl [Ai Cover].mp3', accent: '#f97316' },
+    { title: 'All Falls Down', artist: 'Alan Walker feat. Noah Cyrus, Digital Farm Animals', album: 'Different World', file: 'Alan Walker - All Falls Down (feat. Noah Cyrus with Digital Farm Animals).mp3', accent: '#38bdf8' },
+    { title: 'Alone', artist: 'Alan Walker', album: 'Different World', file: 'Alan Walker - Alone.mp3', accent: '#4c1d95' },
+    { title: 'Faded', artist: 'Alan Walker', album: 'Different World', file: 'Alan Walker - Faded.mp3', accent: '#2563eb' },
+    { title: 'Sing Me To Sleep', artist: 'Alan Walker', album: 'Different World', file: 'Alan Walker - Sing Me To Sleep.mp3', accent: '#22d3ee' },
+    { title: 'Man On The Moon', artist: 'Alan Walker x Benjamin Ingrosso', album: 'World of Walker', file: 'Alan Walker x Benjamin Ingrosso - Man On The Moon (Official Music Video).mp3', accent: '#facc15' },
+    { title: 'Lady Gaga (Lyrics)', artist: 'Alejandro', album: 'Single', file: 'Alejandro - Lady Gaga (Lyrics) 🎵.mp3', accent: '#ef4444' },
+    { title: 'Mr. Saxobeat', artist: 'Alexandra Stan', album: 'Saxobeats', file: 'Alexandra Stan - Mr. Saxobeat (Official Video).mp3', accent: '#f97316' },
+    { title: 'All Star (AI Cover)', artist: 'Dr. Doofenshmirtz', album: 'Parodie', file: 'All Star Doofenshmirtz AI Cover.mp3', accent: '#34d399' },
+    { title: 'Please Tell Rosie', artist: 'Alle Farben', album: 'Music Is My Best Friend', file: 'Alle Farben Please Tell Rosie (Lyric Video).mp3', accent: '#14b8a6' },
+    { title: 'I Need A Dollar', artist: 'Aloe Blacc', album: 'Good Things', file: 'Aloe Blacc - I Need A Dollar.mp3', accent: '#ea580c' },
+    { title: 'El Mismo Sol', artist: 'Alvaro Soler', album: 'Eterno Agosto', file: 'Alvaro Soler - El Mismo Sol.mp3', accent: '#f59e0b' },
+    { title: 'La Cintura', artist: 'Alvaro Soler', album: 'Mar de Colores', file: 'Alvaro Soler - La Cintura - Lyrics  Letra.mp3', accent: '#f97316' },
+    { title: 'Sofia', artist: 'Alvaro Soler', album: 'Eterno Agosto', file: 'Alvaro Soler - Sofia.mp3', accent: '#fbbf24' },
+    { title: 'Best Day Of My Life', artist: 'American Authors', album: 'Oh, What a Life', file: 'American Authors - Best Day Of My Life.mp3', accent: '#22c55e' },
+    { title: 'Slow It Down', artist: 'Amy Macdonald', album: 'Life in a Beautiful Light', file: 'Amy Macdonald - Slow It Down (Official Video).mp3', accent: '#ec4899' },
+    { title: 'This Is The Life', artist: 'Amy Macdonald', album: 'This Is the Life', file: 'Amy Macdonald - This Is The Life.mp3', accent: '#fb7185' },
+    { title: 'Barbie Girl', artist: 'Aqua', album: 'Aquarium', file: 'Aqua - Barbie Girl (Official Music Video).mp3', accent: '#60a5fa' },
+    { title: 'The Ketchup Song (Lyrics)', artist: 'Las Ketchup', album: 'Hijas del Tomate', file: 'Aserejé (The Ketchup Song) - Las Ketchup ( letra  lyrics ) [ Spanish Version ].mp3', accent: '#f97316' },
+    { title: 'The Ketchup Song (Spanish Version)', artist: 'Las Ketchup', album: 'Hijas del Tomate', file: 'Aserejé (The Ketchup Song) [Spanish Version] - Las Ketchup.mp3', accent: '#fbbf24' },
+    { title: 'Take On Me', artist: 'a-ha', album: 'Hunting High and Low', file: 'a-ha - Take On Me (Official Video) [Remastered in 4K].mp3', accent: '#38bdf8' },
+    { title: 'Donald Trump Sings All Star', artist: 'Donald Trump AI', album: 'Memy i covery', file: '♪ Donald Trump Sings All Star by Smash Mouth.mp3', accent: '#f59e0b' }
   ];
 
   // State
@@ -84,7 +84,7 @@
     state.filteredTracks = trackLibrary.filter(track =>
       track.title.toLowerCase().includes(query) ||
       track.artist.toLowerCase().includes(query) ||
-      track.album.toLowerCase().includes(query)
+      (track.album || '').toLowerCase().includes(query)
     );
 
     elements.libraryList.innerHTML = state.filteredTracks.length === 0
@@ -120,7 +120,7 @@
       <div class="track-info">
         <h2 class="track-title">${track.title}</h2>
         <p class="track-artist">${track.artist}</p>
-        <p class="track-album">${track.album}</p>
+        <p class="track-album">${track.album || 'Nieznany album'}</p>
       </div>
       <div class="player-controls">
         <div class="control-buttons">

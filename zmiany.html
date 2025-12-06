@@ -1,96 +1,385 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dziennik zmian – Max Playground</title>
-    <meta name="description" content="Historia rozwoju Max Playground. Sprawdź, jakie nowości pojawiły się na stronie i jakie aktualizacje są planowane." />
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
-    <link rel="stylesheet" href="assets/css/site.css" />
-    <script defer src="assets/js/site.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dziennik Zmian - Hub</title>
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --accent: #2563eb; /* Przyjemny niebieski */
+            --accent-glow: rgba(37, 99, 235, 0.2);
+            --success: #10b981;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --accent: #60a5fa;
+            --accent-glow: rgba(96, 165, 250, 0.2);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* HEADER (Spójny z Index) */
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        /* MAIN CONTENT */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* TIMELINE STYLES */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        /* Linia pionowa */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 10px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .entry {
+            position: relative;
+            margin-bottom: 3.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Kropka na osi */
+        .entry::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 25px;
+            width: 16px;
+            height: 16px;
+            background: var(--bg);
+            border: 3px solid var(--accent);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .entry.latest::before {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .date-badge {
+            font-size: 0.85rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .version-badge {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .entry h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .entry-content ul {
+            list-style: none;
+        }
+
+        .entry-content li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .entry-content li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .highlight {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Sekcje zmian (Gry, Muzyka etc.) */
+        .changes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .change-card {
+            background: rgba(0,0,0,0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--border);
+        }
+
+        .change-card h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Responsywność */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .timeline { padding-left: 1.5rem; }
+            .entry::before { left: -28px; }
+            .timeline::before { left: 4px; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <header class="site-header">
-        <nav class="main-nav" aria-label="Główna nawigacja">
-            <a class="nav-brand" href="index.html"><span>MX</span>Max Playground</a>
-            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
-            <div class="nav-menu" data-nav-menu id="primary-navigation">
-                <a class="nav-link" href="index.html">Strona główna</a>
-                <div class="nav-item nav-item--dropdown">
-                    <button class="nav-dropdown-toggle" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
-                    <div class="nav-dropdown" id="nav-programy" role="menu">
-                        <a href="Programy/programy.html">Przegląd wszystkich programów</a>
-                        <a href="Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
-                        <a href="Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
-                        <a href="Programy/generator emoji/generator emoji.html">Generator emoji</a>
-                    </div>
-                </div>
-                <a class="nav-link" href="gry/gry.html">Gry</a>
-                <a class="nav-link" href="filmy/filmy glowna.html">Filmy</a>
-                <a class="nav-link" href="muzyka/muzyka.html">Muzyka</a>
-                <a class="nav-link is-active" href="zmiany.html" aria-current="page">Dziennik zmian</a>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="gry/gry.html">Gry</a>
+                <a href="muzyka/muzyka.html">Muzyka</a>
+                <a href="filmy/filmy glowna.html">Filmy</a>
+                <a href="Programy/programy.html">Narzędzia</a>
+                <a href="zmiany.html" style="color: var(--text); font-weight: bold;">Zmiany</a>
             </div>
-            <div class="nav-actions">
-                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
-                <div class="header-clock">
-                    <span class="clock-time" data-clock-time>--:--:--</span>
-                    <span class="clock-date" data-clock-date>Ładowanie…</span>
-                </div>
-            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
     </header>
 
     <main>
-        <section class="hero hero--subpage">
-            <div class="hero-content">
-                <span class="hero-eyebrow">Historia projektu</span>
-                <h1>Dziennik zmian Max Playground</h1>
-                <p class="hero-lead">Śledź, jak rozwija się centrum gier, filmów i muzyki Maxa. Dodaj własne pomysły, aby kolejne aktualizacje były jeszcze lepsze.</p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="filmy/filmy glowna.html">Zobacz nowe kolekcje filmowe</a>
-                    <a class="btn btn-secondary" href="muzyka/muzyka.html">Włącz odświeżony odtwarzacz</a>
-                </div>
-            </div>
-        </section>
+        <div class="hero">
+            <h1>Dziennik Zmian</h1>
+            <p>Historia rozwoju i aktualizacji Hubu</p>
+        </div>
 
-        <section class="section" id="timeline">
-            <div class="section-header">
-                <div>
-                    <span class="section-eyebrow">Ostatnie aktualizacje</span>
-                    <h2 class="section-title">Najważniejsze kamienie milowe</h2>
-                    <p class="section-description">Notujemy wszystkie większe zmiany interfejsu oraz treści, aby łatwo wrócić do poprzednich wersji.</p>
+        <div class="timeline">
+            
+            <!-- NAJNOWSZY WPIS -->
+            <article class="entry latest">
+                <div class="entry-header">
+                    <h2>Generalny Remont Systemu</h2>
+                    <div>
+                        <span class="date-badge">06.12.2025</span>
+                        <span class="version-badge">v2.0</span>
+                    </div>
                 </div>
-            </div>
-            <div class="changelog-timeline">
-                <article class="changelog-entry">
-                    <time datetime="2024-11-29">29 listopada 2024</time>
-                    <h3>Nowa odsłona działów Filmy, Muzyka i Dziennik</h3>
-                    <p>Wprowadzono spójny wygląd podstron, dodano wyszukiwarki, losowe propozycje oraz czytelne karty z opisami kolekcji.</p>
+                <div class="entry-content">
+                    <p style="margin-bottom: 1rem;">Kompletna przebudowa kluczowych sekcji Hubu. Strona zyskała spójny, nowoczesny wygląd, a poszczególne działy zostały napisane od nowa dla lepszej wydajności.</p>
+                    
+                    <div class="changes-grid">
+                        <div class="change-card" style="border-color: #1db954;">
+                            <h4>🎵 Muzyka</h4>
+                            <ul>
+                                <li>Nowy odtwarzacz "Spotify-style"</li>
+                                <li>Pełna lista 100+ utworów</li>
+                                <li>Wyszukiwarka i wizualizator</li>
+                            </ul>
+                        </div>
+                        <div class="change-card" style="border-color: #e11d48;">
+                            <h4>🎬 Filmy</h4>
+                            <ul>
+                                <li>Przebudowa interfejsu</li>
+                                <li>Lepsza nawigacja kafelkowa</li>
+                                <li>Optymalizacja ładowania</li>
+                            </ul>
+                        </div>
+                        <div class="change-card" style="border-color: #f59e0b;">
+                            <h4>🎮 Gry</h4>
+                            <ul>
+                                <li>Dodano nowe tytuły</li>
+                                <li>Nowy układ biblioteki</li>
+                                <li>Szybsze uruchamianie</li>
+                            </ul>
+                        </div>
+                        <div class="change-card" style="border-color: #3b82f6;">
+                            <h4>🛠️ Narzędzia</h4>
+                            <ul>
+                                <li>Dodano nowe programy</li>
+                                <li>Ujednolicenie wyglądu</li>
+                                <li>Naprawa błędów skryptów</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- STARSZY WPIS -->
+            <article class="entry">
+                <div class="entry-header">
+                    <h2>Strona Główna & Integracja</h2>
+                    <div>
+                        <span class="date-badge">29.11.2024</span>
+                        <span class="version-badge">v1.5</span>
+                    </div>
+                </div>
+                <div class="entry-content">
                     <ul>
-                        <li>Przebudowano stronę główną filmów oraz widok pojedynczych kolekcji.</li>
-                        <li>Dodano muzyczny panel z wyszukiwarką, licznikiem utworów i odświeżonym odtwarzaczem.</li>
-                        <li>Przygotowano nowy dziennik zmian z osią czasu.</li>
+                        <li><span class="highlight">Index:</span> Dodano zegar ze strefą czasową i powitanie.</li>
+                        <li><span class="highlight">Cytat dnia:</span> Integracja z API do losowania cytatów.</li>
+                        <li><span class="highlight">Tryb Ciemny:</span> Wdrożenie globalnego przełącznika motywów (Dark/Light Mode).</li>
+                        <li>Poprawki nawigacji mobilnej.</li>
                     </ul>
-                </article>
-                <article class="changelog-entry">
-                    <time datetime="2024-05-23">23 maja 2024</time>
-                    <h3>Przebudowa sekcji filmów i start strefy muzycznej</h3>
-                    <p>Dodano pierwsze kolekcje filmowe oraz podstawową wersję odtwarzacza audio z losowaniem utworów.</p>
-                </article>
-                <article class="changelog-entry">
-                    <time datetime="2024-04-04">4 kwietnia 2024</time>
-                    <h3>Start projektu</h3>
-                    <p>Udostępniono bazową wersję strony Maxa z katalogiem gier i narzędziami.</p>
-                </article>
-            </div>
-        </section>
+                </div>
+            </article>
+
+            <!-- STARSZY WPIS -->
+            <article class="entry">
+                <div class="entry-header">
+                    <h2>Start Projektu</h2>
+                    <div>
+                        <span class="date-badge">04.04.2024</span>
+                        <span class="version-badge">v1.0</span>
+                    </div>
+                </div>
+                <div class="entry-content">
+                    <p>Oficjalne uruchomienie Hubu. Stworzenie podstawowej struktury katalogów dla Gier, Filmów i Muzyki.</p>
+                </div>
+            </article>
+
+        </div>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-content">
-            <p>Masz pomysł na nową funkcję? Zapisz ją w dzienniku zmian lub wyślij wiadomość do Maxa.</p>
-            <a class="btn btn-ghost" href="mailto:max-playground@example.com">Napisz wiadomość</a>
-        </div>
-    </footer>
+    <script>
+        // Logika Trybu Ciemnego (Spójna z index.html)
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
 </body>
 </html>

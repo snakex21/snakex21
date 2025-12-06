@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tablica Wyników - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f0f4f8;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #f97316;
+            --team-a: #3b82f6;
+            --team-b: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --text: #ffffff;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --header-bg: #1e293b;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent: #fb923c;
+            --team-a: #60a5fa;
+            --team-b: #f87171;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Scoreboard */
+        .scoreboard {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px var(--shadow);
+        }
+
+        .scoreboard-header {
+            background: linear-gradient(135deg, var(--team-a), var(--team-b));
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+
+        .game-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .game-title input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.5);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            width: 200px;
+        }
+
+        .game-title input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .scores-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 3rem 2rem;
+        }
+
+        .team {
+            text-align: center;
+        }
+
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .team-name input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border);
+            color: var(--text);
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            width: 150px;
+        }
+
+        .team-a .team-name {
+            color: var(--team-a);
+        }
+
+        .team-b .team-name {
+            color: var(--team-b);
+        }
+
+        .score {
+            font-size: 6rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .team-a .score {
+            color: var(--team-a);
+        }
+
+        .team-b .score {
+            color: var(--team-b);
+        }
+
+        .score-controls {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .score-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .score-btn.plus {
+            background: var(--accent);
+            color: white;
+        }
+
+        .score-btn.minus {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .score-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .vs {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 0 2rem;
+        }
+
+        /* Timer */
+        .timer-section {
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 1rem;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn.start {
+            background: #22c55e;
+            color: white;
+        }
+
+        .timer-btn.pause {
+            background: #eab308;
+            color: white;
+        }
+
+        .timer-btn.reset {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        /* Actions */
+        .actions {
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* History */
+        .history {
+            margin-top: 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .history h3 {
+            margin-bottom: 1rem;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🏆 Tablica Wyników</h1>
+            <p>Śledź wyniki gier i meczów</p>
+        </div>
+
+        <div class="scoreboard">
+            <div class="scoreboard-header">
+                <div class="game-title">
+                    <input type="text" id="game-title" placeholder="Nazwa gry/meczu...">
+                </div>
+            </div>
+
+            <div class="scores-container">
+                <div class="team team-a">
+                    <div class="team-name">
+                        <input type="text" id="team-a-name" placeholder="Drużyna A">
+                    </div>
+                    <div class="score" id="score-a">0</div>
+                    <div class="score-controls">
+                        <button class="score-btn minus" data-team="a" data-action="minus">-</button>
+                        <button class="score-btn plus" data-team="a" data-action="plus">+</button>
+                    </div>
+                </div>
+
+                <div class="vs">VS</div>
+
+                <div class="team team-b">
+                    <div class="team-name">
+                        <input type="text" id="team-b-name" placeholder="Drużyna B">
+                    </div>
+                    <div class="score" id="score-b">0</div>
+                    <div class="score-controls">
+                        <button class="score-btn minus" data-team="b" data-action="minus">-</button>
+                        <button class="score-btn plus" data-team="b" data-action="plus">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timer-section">
+                <div class="timer-display" id="timer">00:00</div>
+                <div class="timer-controls">
+                    <button class="timer-btn start" id="btn-start">▶ Start</button>
+                    <button class="timer-btn pause" id="btn-pause" style="display: none;">⏸ Pauza</button>
+                    <button class="timer-btn reset" id="btn-timer-reset">↻ Reset</button>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn" id="btn-reset-scores">🔄 Resetuj wyniki</button>
+                <button class="action-btn" id="btn-swap">🔀 Zamień strony</button>
+                <button class="action-btn" id="btn-fullscreen">📺 Pełny ekran</button>
+            </div>
+        </div>
+
+        <div class="history">
+            <h3>📜 Historia</h3>
+            <div class="history-list" id="history-list">
+                <p style="color: var(--text-secondary);">Brak wydarzeń</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Scoreboard Logic
+        let scoreA = 0;
+        let scoreB = 0;
+        let history = [];
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let timerRunning = false;
+
+        const scoreAEl = document.getElementById('score-a');
+        const scoreBEl = document.getElementById('score-b');
+        const historyList = document.getElementById('history-list');
+        const timerEl = document.getElementById('timer');
+
+        // Score buttons
+        document.querySelectorAll('.score-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const team = btn.dataset.team;
+                const action = btn.dataset.action;
+
+                if (team === 'a') {
+                    scoreA = action === 'plus' ? scoreA + 1 : Math.max(0, scoreA - 1);
+                    scoreAEl.textContent = scoreA;
+                } else {
+                    scoreB = action === 'plus' ? scoreB + 1 : Math.max(0, scoreB - 1);
+                    scoreBEl.textContent = scoreB;
+                }
+
+                addToHistory(team, action);
+            });
+        });
+
+        function addToHistory(team, action) {
+            const teamName = team === 'a'
+                ? (document.getElementById('team-a-name').value || 'Drużyna A')
+                : (document.getElementById('team-b-name').value || 'Drużyna B');
+
+            const actionText = action === 'plus' ? '+1 punkt' : '-1 punkt';
+            const time = formatTime(timerSeconds);
+
+            history.unshift({
+                team: teamName,
+                action: actionText,
+                time: time,
+                scoreA: scoreA,
+                scoreB: scoreB
+            });
+
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: var(--text-secondary);">Brak wydarzeń</p>';
+                return;
+            }
+
+            historyList.innerHTML = history.slice(0, 20).map(h => `
+                <div class="history-item">
+                    <span><strong>${h.team}</strong> ${h.action} (${h.scoreA}:${h.scoreB})</span>
+                    <span class="history-time">${h.time}</span>
+                </div>
+            `).join('');
+        }
+
+        // Timer
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateTimer() {
+            timerEl.textContent = formatTime(timerSeconds);
+        }
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            if (!timerRunning) {
+                timerRunning = true;
+                document.getElementById('btn-start').style.display = 'none';
+                document.getElementById('btn-pause').style.display = 'inline-block';
+
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    updateTimer();
+                }, 1000);
+            }
+        });
+
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('btn-pause').style.display = 'none';
+            document.getElementById('btn-start').style.display = 'inline-block';
+        });
+
+        document.getElementById('btn-timer-reset').addEventListener('click', () => {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            timerSeconds = 0;
+            updateTimer();
+            document.getElementById('btn-pause').style.display = 'none';
+            document.getElementById('btn-start').style.display = 'inline-block';
+        });
+
+        // Reset scores
+        document.getElementById('btn-reset-scores').addEventListener('click', () => {
+            if (!confirm('Czy na pewno chcesz zresetować wyniki?')) return;
+            scoreA = 0;
+            scoreB = 0;
+            scoreAEl.textContent = '0';
+            scoreBEl.textContent = '0';
+            history = [];
+            renderHistory();
+        });
+
+        // Swap teams
+        document.getElementById('btn-swap').addEventListener('click', () => {
+            const tempScore = scoreA;
+            scoreA = scoreB;
+            scoreB = tempScore;
+            scoreAEl.textContent = scoreA;
+            scoreBEl.textContent = scoreB;
+
+            const nameA = document.getElementById('team-a-name');
+            const nameB = document.getElementById('team-b-name');
+            const tempName = nameA.value;
+            nameA.value = nameB.value;
+            nameB.value = tempName;
+        });
+
+        // Fullscreen
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            const elem = document.querySelector('.scoreboard');
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            }
+        });
+    </script>
+</body>
+
+</html>

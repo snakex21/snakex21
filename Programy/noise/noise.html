@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generator Szumu - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --accent: #8b5cf6;
+        }
+
+        [data-theme="light"] {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #7c3aed;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .noise-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 3rem;
+        }
+
+        .noise-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .noise-card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .noise-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .noise-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-play {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.1);
+        }
+
+        .volume-control {
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .noise-card.active .volume-control {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .visualizer {
+            width: 100%;
+            height: 100px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .master-controls {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .btn-stop-all {
+            padding: 0.8rem 2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-stop-all:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🔊 Generator Szumu</h1>
+            <p>Dźwięki tła do relaksu, snu i koncentracji</p>
+        </div>
+
+        <div class="visualizer">
+            <canvas id="visualizer"></canvas>
+        </div>
+        <br>
+
+        <div class="noise-controls">
+            <div class="noise-card" id="card-white">
+                <span class="icon">📺</span>
+                <div class="noise-title">Biały Szum</div>
+                <div class="noise-desc">Stały sygnał, maskuje inne dźwięki.</div>
+                <button class="btn-play" onclick="toggleNoise('white')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5"
+                        oninput="setVolume('white', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-pink">
+                <span class="icon">🌧️</span>
+                <div class="noise-title">Różowy Szum</div>
+                <div class="noise-desc">Głębszy, przypomina deszcz lub wiatr.</div>
+                <button class="btn-play" onclick="toggleNoise('pink')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('pink', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-brown">
+                <span class="icon">🌊</span>
+                <div class="noise-title">Brązowy Szum</div>
+                <div class="noise-desc">Niski, dudniący, jak wodospad.</div>
+                <button class="btn-play" onclick="toggleNoise('brown')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5"
+                        oninput="setVolume('brown', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="master-controls">
+            <button class="btn-stop-all" onclick="stopAll()">⏹ Zatrzymaj wszystko</button>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'dark'; // Default dark for noise gen
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Audio Context
+        let audioCtx;
+        const noises = {
+            white: { node: null, gain: null, playing: false },
+            pink: { node: null, gain: null, playing: false },
+            brown: { node: null, gain: null, playing: false }
+        };
+        let analyser;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.connect(audioCtx.destination);
+                drawVisualizer();
+            }
+        }
+
+        function createNoiseBuffer(type) {
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+
+                if (type === 'white') {
+                    output[i] = white;
+                } else if (type === 'pink') {
+                    // Pink noise approximation (Paul Kellett's method)
+                    let b0, b1, b2, b3, b4, b5, b6;
+                    b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+                    // Inside loop would need state, simplified here:
+                    // Actually, let's use a simpler approximation for buffer generation
+                    // Or just standard white noise filtered.
+                    // For simplicity in this single-file constraint, let's stick to white noise
+                    // and use BiquadFilterNodes to color it for Pink/Brown.
+                    output[i] = white;
+                } else {
+                    output[i] = white;
+                }
+            }
+            return buffer;
+        }
+
+        function toggleNoise(type) {
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const state = noises[type];
+            const card = document.getElementById('card-' + type);
+            const btn = card.querySelector('.btn-play');
+
+            if (state.playing) {
+                state.node.stop();
+                state.node.disconnect();
+                state.playing = false;
+                card.classList.remove('active');
+                btn.textContent = '▶';
+            } else {
+                // Create source
+                const bufferSize = 2 * audioCtx.sampleRate;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+
+                // Generate White Noise base
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+
+                const gainNode = audioCtx.createGain();
+                const volumeSlider = card.querySelector('input[type="range"]');
+                gainNode.gain.value = parseFloat(volumeSlider.value);
+
+                // Filter for colors
+                if (type === 'white') {
+                    source.connect(gainNode);
+                } else if (type === 'pink') {
+                    // Pink noise filter (-3dB/octave) - approximated with lowpass
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowshelf';
+                    filter.frequency.value = 1000;
+                    filter.gain.value = -10; // Simple approximation
+                    source.connect(filter);
+                    filter.connect(gainNode);
+                } else if (type === 'brown') {
+                    // Brown noise filter (-6dB/octave) - approximated with stronger lowpass
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 400;
+                    source.connect(filter);
+                    filter.connect(gainNode);
+                }
+
+                gainNode.connect(analyser);
+
+                source.start();
+                state.node = source;
+                state.gain = gainNode;
+                state.playing = true;
+
+                card.classList.add('active');
+                btn.textContent = '⏸';
+            }
+        }
+
+        function setVolume(type, val) {
+            if (noises[type].gain) {
+                noises[type].gain.gain.value = val;
+            }
+        }
+
+        function stopAll() {
+            ['white', 'pink', 'brown'].forEach(type => {
+                if (noises[type].playing) toggleNoise(type);
+            });
+        }
+
+        // Visualizer
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            analyser.getByteFrequencyData(dataArray);
+
+            canvasCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--card-bg');
+            canvasCtx.fillRect(0, 0, width, height);
+
+            const barWidth = (width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            const accent = getComputedStyle(document.body).getPropertyValue('--accent');
+            canvasCtx.fillStyle = accent;
+
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] / 2;
+                canvasCtx.fillRect(x, height - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
+
+        // Resize canvas
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+    </script>
+</body>
+
+</html>

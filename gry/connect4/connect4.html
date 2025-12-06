@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Czwórki - Hub</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --text: #fff;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f0f0;
+            --text: #333;
+            --header-bg: #fff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .turn-indicator {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+        }
+
+        .board {
+            background: #0055aa;
+            padding: 10px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .col:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .slot {
+            width: 50px;
+            height: 50px;
+            background: #121212;
+            border-radius: 50%;
+            border: 2px solid #004488;
+            transition: background 0.3s;
+        }
+
+        .red {
+            background: #ff4444 !important;
+        }
+
+        .yellow {
+            background: #ffbb00 !important;
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .reset-btn:hover {
+            background: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+
+    <div class="game-area">
+        <div class="status">Tura gracza: <span id="turn-color" class="turn-indicator red"></span></div>
+        <div class="board" id="board"></div>
+        <button class="reset-btn" onclick="resetGame()">Restart</button>
+    </div>
+
+    <script>
+        const rows = 6;
+        const cols = 7;
+        let board = [];
+        let currentPlayer = 1;
+        let gameOver = false;
+
+        function init() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            board = Array(cols).fill().map(() => Array(rows).fill(0));
+
+            for (let c = 0; c < cols; c++) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col';
+                colDiv.onclick = () => dropToken(c);
+
+                for (let r = 0; r < rows; r++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'slot';
+                    slot.id = `slot-${c}-${rows - 1 - r}`;
+                    colDiv.appendChild(slot);
+                }
+                boardEl.appendChild(colDiv);
+            }
+            gameOver = false;
+            currentPlayer = 1;
+            updateStatus();
+        }
+
+        function dropToken(col) {
+            if (gameOver) return;
+            const row = board[col].indexOf(0);
+            if (row === -1) return;
+
+            board[col][row] = currentPlayer;
+            const slotReal = document.getElementById(`slot-${col}-${row}`);
+            slotReal.classList.add(currentPlayer === 1 ? 'red' : 'yellow');
+
+            if (checkWin(col, row)) {
+                document.querySelector('.status').innerText = (currentPlayer === 1 ? "Czerwony" : "Żółty") + " Wygrywa!";
+                gameOver = true;
+            } else {
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                updateStatus();
+            }
+        }
+
+        function checkWin(c, r) {
+            const player = board[c][r];
+            return checkDir(c, r, 1, 0, player) ||
+                checkDir(c, r, 0, 1, player) ||
+                checkDir(c, r, 1, 1, player) ||
+                checkDir(c, r, 1, -1, player);
+        }
+
+        function checkDir(c, r, dx, dy, p) {
+            let count = 0;
+            for (let i = -3; i <= 3; i++) {
+                const nc = c + i * dx;
+                const nr = r + i * dy;
+                if (nc >= 0 && nc < cols && nr >= 0 && nr < rows && board[nc][nr] === p) {
+                    count++;
+                    if (count === 4) return true;
+                } else {
+                    count = 0;
+                }
+            }
+            return false;
+        }
+
+        function updateStatus() {
+            const ind = document.getElementById('turn-color');
+            ind.className = 'turn-indicator ' + (currentPlayer === 1 ? 'red' : 'yellow');
+        }
+
+        function resetGame() {
+            document.querySelector('.status').innerHTML = 'Tura gracza: <span id="turn-color" class="turn-indicator red"></span>';
+            init();
+        }
+
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

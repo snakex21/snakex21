@@ -136,11 +136,50 @@
             font-weight: 500;
         }
 
+        .quote-card {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .quote-card:hover {
+            box-shadow: 0 4px 12px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .quote-card blockquote {
+            font-size: 1.1rem;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .quote-author {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: right;
+            font-weight: 600;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
             margin-top: 3rem;
+        }
+
+        /* Wyśrodkowanie ostatniego nieparzystego elementu na komputerach */
+        @media (min-width: 769px) {
+            .grid .card:last-child:nth-child(odd) {
+                grid-column: span 2;
+                justify-self: center;
+                width: calc(50% - 0.75rem); /* Szerokość jednego kafelka uwzględniając gap */
+            }
         }
 
         .card {
@@ -204,6 +243,7 @@
                 <a href="muzyka/muzyka.html">Muzyka</a>
                 <a href="filmy/filmy glowna.html">Filmy</a>
                 <a href="Programy/programy.html">Narzędzia</a>
+                <a href="zmiany.html">Zmiany</a>
             </div>
             <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
         </nav>
@@ -217,6 +257,12 @@
             <div class="time" id="time">--:--:--</div>
             <div class="date" id="date">Ładowanie...</div>
             <div class="timezone" id="timezone">--</div>
+        </div>
+
+        <!-- Sekcja Cytatu -->
+        <div class="quote-card" title="Kliknij, aby wylosować nowy cytat" onclick="fetchQuote()">
+            <blockquote id="quote-text">Szukanie inspiracji...</blockquote>
+            <div class="quote-author" id="quote-author"></div>
         </div>
 
         <div class="grid">
@@ -235,6 +281,10 @@
             <a href="Programy/programy.html" class="card">
                 <div class="icon">🛠️</div>
                 <div class="label">Narzędzia</div>
+            </a>
+            <a href="zmiany.html" class="card">
+                <div class="icon">📜</div>
+                <div class="label">Dziennik Zmian</div>
             </a>
         </div>
     </main>
@@ -305,6 +355,38 @@
             localStorage.setItem('theme', newTheme);
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
         });
+
+        // Pobieranie cytatu z API
+        async function fetchQuote() {
+            const textElem = document.getElementById('quote-text');
+            const authorElem = document.getElementById('quote-author');
+            
+            // Efekt ładowania (tylko przy kliknięciu, nie przy starcie)
+            if(textElem.textContent !== 'Szukanie inspiracji...') {
+                textElem.style.opacity = '0.5';
+            }
+
+            try {
+                // Używamy darmowego API (dummyjson)
+                const response = await fetch('https://dummyjson.com/quotes/random');
+                if (!response.ok) throw new Error('Błąd API');
+                
+                const data = await response.json();
+                
+                textElem.style.opacity = '1';
+                textElem.textContent = `„${data.quote}”`;
+                authorElem.textContent = `— ${data.author}`;
+            } catch (error) {
+                console.error('Nie udało się pobrać cytatu:', error);
+                textElem.style.opacity = '1';
+                // Fallback w razie błędu
+                textElem.textContent = '„Jedynym sposobem na robienie wielkich rzeczy jest robienie tego, co się kocha.”';
+                authorElem.textContent = '— Steve Jobs';
+            }
+        }
+
+        // Pobierz cytat przy starcie strony
+        fetchQuote();
     </script>
 </body>
 </html>

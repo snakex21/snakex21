@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino Run - Hub</title>
+    <style>
+        :root {
+            --bg: #f7f7f7;
+            --text: #535353;
+            --header-bg: #fff;
+            --nav-text: #666;
+            --nav-hover: #333;
+            --border: #ddd;
+        }
+
+        [data-theme="dark"] {
+            --bg: #202124;
+            --text: #fff;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+        }
+
+        [data-theme="dark"] .game-container {
+            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .score {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 10px 30px;
+            border-radius: 10px;
+        }
+
+        .game-wrapper {
+            position: relative;
+        }
+
+        canvas {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .msg {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .highscore {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+    <div class="game-container">
+        <div class="score">🦖 <span id="score">00000</span></div>
+        <div class="game-wrapper">
+            <div class="highscore">HI: <span id="highscore">00000</span></div>
+            <canvas id="game" width="800" height="250"></canvas>
+        </div>
+        <div class="msg" id="msg">Spacja lub kliknij aby skoczyć</div>
+    </div>
+    <script>
+        const cvs = document.getElementById('game');
+        const ctx = cvs.getContext('2d');
+
+        let dino = { x: 60, y: 180, w: 44, h: 47, dy: 0, jumpPower: -14, grounded: true, frame: 0 };
+        let obstacles = [], clouds = [], frame = 0, score = 0, speed = 7, running = false, gravity = 0.7;
+        let highScore = parseInt(localStorage.getItem('dinoHighScore') || '0');
+        document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0');
+
+        // Dino sprite drawing
+        function drawDino(x, y, frame) {
+            ctx.fillStyle = '#535353';
+            // Body
+            ctx.fillRect(x + 15, y + 5, 25, 30);
+            // Head
+            ctx.fillRect(x + 25, y, 19, 20);
+            // Eye
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x + 36, y + 5, 4, 4);
+            ctx.fillStyle = '#535353';
+            // Tail
+            ctx.fillRect(x, y + 10, 18, 12);
+            ctx.fillRect(x - 5, y + 15, 8, 7);
+            // Mouth
+            ctx.fillRect(x + 35, y + 12, 9, 3);
+            // Arms
+            ctx.fillRect(x + 28, y + 25, 6, 10);
+            // Legs animation
+            if (dino.grounded && running) {
+                if (Math.floor(frame / 5) % 2 === 0) {
+                    ctx.fillRect(x + 18, y + 35, 6, 12);
+                    ctx.fillRect(x + 30, y + 35, 6, 10);
+                } else {
+                    ctx.fillRect(x + 18, y + 35, 6, 10);
+                    ctx.fillRect(x + 30, y + 35, 6, 12);
+                }
+            } else {
+                ctx.fillRect(x + 18, y + 35, 6, 12);
+                ctx.fillRect(x + 30, y + 35, 6, 12);
+            }
+        }
+
+        // Cactus drawing
+        function drawCactus(x, h) {
+            ctx.fillStyle = '#2d5a27';
+            const baseW = 18;
+            ctx.fillRect(x, 227 - h, baseW, h);
+            // Arms
+            if (h > 35) {
+                ctx.fillRect(x - 10, 227 - h + 15, 12, 8);
+                ctx.fillRect(x - 10, 227 - h + 8, 5, 15);
+                ctx.fillRect(x + baseW - 2, 227 - h + 20, 12, 8);
+                ctx.fillRect(x + baseW + 5, 227 - h + 13, 5, 15);
+            }
+            // Spikes
+            ctx.fillStyle = '#1a3d17';
+            for (let i = 0; i < h; i += 8) {
+                ctx.fillRect(x - 2, 227 - h + i, 2, 3);
+                ctx.fillRect(x + baseW, 227 - h + i, 2, 3);
+            }
+        }
+
+        // Cloud drawing
+        function drawCloud(x, y, size) {
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.arc(x + size, y - size * 0.3, size * 0.8, 0, Math.PI * 2);
+            ctx.arc(x + size * 1.8, y, size * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function start() {
+            if (running) return;
+            running = true;
+            document.getElementById('msg').innerText = '';
+            dino.y = 180; dino.grounded = true; dino.dy = 0;
+            obstacles = []; clouds = []; score = 0; speed = 5; frame = 0;
+            // Initial clouds
+            for (let i = 0; i < 3; i++) clouds.push({ x: 200 + i * 300, y: 30 + Math.random() * 40, size: 15 + Math.random() * 10 });
+            loop();
+        }
+
+        function loop() {
+            if (!running) return;
+            requestAnimationFrame(loop);
+            frame++;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, 800, 250);
+
+            // Draw clouds
+            clouds.forEach(c => { drawCloud(c.x, c.y, c.size); c.x -= speed * 0.3; });
+            clouds = clouds.filter(c => c.x > -50);
+            if (frame % 150 === 0) clouds.push({ x: 820, y: 30 + Math.random() * 40, size: 15 + Math.random() * 10 });
+
+            // Ground
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(0, 227, 800, 2);
+            // Ground texture
+            for (let i = 0; i < 800; i += 20) {
+                if ((i + frame * speed) % 40 < 20) {
+                    ctx.fillRect(i - (frame * speed) % 800, 232, 8, 2);
+                }
+            }
+
+            // Dino Physics
+            if (!dino.grounded) {
+                dino.dy += gravity;
+                dino.y += dino.dy;
+                if (dino.y >= 180) { dino.y = 180; dino.dy = 0; dino.grounded = true; }
+            }
+            drawDino(dino.x, dino.y, frame);
+
+            // Spawn obstacles
+            if (frame % Math.floor(100 / (speed / 5)) === 0 && Math.random() > 0.4) {
+                obstacles.push({ x: 820, h: 35 + Math.random() * 25 });
+            }
+
+            // Move and draw obstacles
+            obstacles.forEach((obs) => {
+                obs.x -= speed;
+                drawCactus(obs.x, obs.h);
+                // Collision (with smaller hitbox)
+                if (dino.x + 20 < obs.x + 14 && dino.x + 40 > obs.x + 4 && dino.y + 47 > 227 - obs.h) {
+                    running = false;
+                    if (score > highScore) { highScore = score; localStorage.setItem('dinoHighScore', highScore); document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0'); }
+                    document.getElementById('msg').innerText = "Game Over! Spacja by zagrać";
+                }
+            });
+            obstacles = obstacles.filter(o => o.x > -30);
+
+            // Score
+            if (frame % 5 === 0) score++;
+            if (score % 100 === 0 && score > 0) speed += 0.15;
+            document.getElementById('score').innerText = score.toString().padStart(5, '0');
+        }
+
+        const html = document.documentElement, themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
+
+        function jump() {
+            if (!running) start();
+            else if (dino.grounded) { dino.dy = dino.jumpPower; dino.grounded = false; }
+        }
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); jump(); } });
+        cvs.addEventListener('click', jump);
+        document.querySelector('.game-container').addEventListener('click', (e) => { if (e.target === document.querySelector('.game-container')) jump(); });
+    </script>
+</body>
+
+</html>

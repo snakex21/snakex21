@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Tycoon - Hub</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text-main: #006400; /* Dark Green on White */
+            --header-bg: #f0f0f0;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #ccc;
+            --terminal-bg: #f8f8f8;
+            --terminal-border: #006400;
+            --btn-bg: #fff;
+            --btn-border: #006400;
+            --btn-text: #006400;
+            --btn-hover-shadow: #006400;
+        }
+
+        [data-theme="dark"] {
+            --bg: #000000;
+            --text-main: #0f0; /* Bright Green on Black */
+            --header-bg: #050505;
+            --nav-text: #0a0;
+            --nav-hover: #0f0;
+            --border: #0f0;
+            --terminal-bg: rgba(0, 20, 0, 0.9);
+            --terminal-border: #0f0;
+            --btn-bg: #000;
+            --btn-border: #0f0;
+            --btn-text: #0f0;
+            --btn-hover-shadow: #0f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text-main); font-family: 'Courier New', Courier, monospace; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s; }
+
+        /* HEADER - HACKER STYLE */
+        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; transition: background 0.3s; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--text-main); text-decoration: none; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 2rem; flex: 1; }
+        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; font-weight: bold; }
+        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); text-shadow: 0 0 5px var(--text-main); }
+        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+
+        .container { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .terminal { border: 1px solid var(--terminal-border); padding: 1rem; border-radius: 4px; background: var(--terminal-bg); height: 100%; display: flex; flex-direction: column; }
+        .terminal-header { border-bottom: 1px solid var(--terminal-border); padding-bottom: 0.5rem; margin-bottom: 1rem; font-weight: bold; }
+        
+        .stats { font-size: 2rem; margin-bottom: 2rem; text-align: center; text-shadow: 0 0 10px var(--text-main); }
+        .per-sec { font-size: 1rem; color: var(--text-main); opacity: 0.8; text-align: center; margin-bottom: 2rem; }
+
+        .hack-btn { background: var(--btn-bg); border: 2px solid var(--btn-border); color: var(--btn-text); padding: 2rem; font-size: 1.5rem; font-family: inherit; cursor: pointer; width: 100%; transition: 0.1s; text-transform: uppercase; font-weight: bold; }
+        .hack-btn:active { background: var(--btn-border); color: var(--bg); }
+        .hack-btn:hover { box-shadow: 0 0 15px var(--btn-hover-shadow); }
+
+        .upgrade-list { overflow-y: auto; flex: 1; }
+        .upgrade-item { border: 1px solid var(--terminal-border); padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .upgrade-item:hover { background: rgba(0, 100, 0, 0.1); border-color: var(--terminal-border); }
+        .upgrade-item.disabled { opacity: 0.5; cursor: not-allowed; border-color: #555; color: #555; }
+        .upgrade-info h4 { margin-bottom: 5px; }
+        .upgrade-info p { font-size: 0.8rem; opacity: 0.8; }
+        .upgrade-cost { font-weight: bold; }
+
+        .log-area { font-size: 0.8rem; opacity: 0.8; margin-top: auto; height: 150px; overflow: hidden; display: flex; flex-direction: column-reverse; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub_System</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">/games</a>
+                <a href="../../muzyka/muzyka.html">/music</a>
+                <a href="../../filmy/filmy glowna.html">/movies</a>
+                <a href="../../Programy/programy.html">/tools</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="terminal">
+            <div class="terminal-header">/// MAIN_PROCESS</div>
+            <div class="stats">
+                <span id="bits">0</span> BITS
+            </div>
+            <div class="per-sec">
+                GPS (Generate Per Sec): <span id="gps">0</span>
+            </div>
+            <button class="hack-btn" id="hackBtn">HACK SYSTEM</button>
+            <div class="log-area" id="log"></div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">/// UPGRADES_MODULE</div>
+            <div class="upgrade-list" id="upgradeList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Game Logic
+        const state = {
+            bits: 0, gps: 0, clickValue: 1,
+            upgrades: [
+                { id: 'script', name: 'Simple Script', cost: 15, gps: 0.5, count: 0 },
+                { id: 'bot', name: 'IRC Bot', cost: 100, gps: 3, count: 0 },
+                { id: 'gpu', name: 'GPU Mining', cost: 500, gps: 10, count: 0 },
+                { id: 'server', name: 'Dedicated Server', cost: 2000, gps: 50, count: 0 },
+                { id: 'ai', name: 'AI Assistant', cost: 10000, gps: 250, count: 0 },
+                { id: 'quantum', name: 'Quantum Core', cost: 50000, gps: 1000, count: 0 }
+            ]
+        };
+        const els = { bits: document.getElementById('bits'), gps: document.getElementById('gps'), hackBtn: document.getElementById('hackBtn'), list: document.getElementById('upgradeList'), log: document.getElementById('log') };
+
+        function log(msg) { const div = document.createElement('div'); div.textContent = `> ${msg}`; els.log.prepend(div); if(els.log.children.length > 10) els.log.lastChild.remove(); }
+        function updateUI() { els.bits.textContent = Math.floor(state.bits); els.gps.textContent = state.gps.toFixed(1); renderUpgrades(); }
+        function renderUpgrades() {
+            els.list.innerHTML = state.upgrades.map((u, i) => `
+                <div class="upgrade-item ${state.bits >= u.cost ? '' : 'disabled'}" onclick="buy(${i})">
+                    <div class="upgrade-info"><h4>${u.name} [x${u.count}]</h4><p>+${u.gps} GPS</p></div>
+                    <div class="upgrade-cost">${Math.floor(u.cost)} BITS</div>
+                </div>
+            `).join('');
+        }
+        function buy(index) {
+            const u = state.upgrades[index];
+            if(state.bits >= u.cost) {
+                state.bits -= u.cost; state.gps += u.gps; u.count++; u.cost *= 1.15;
+                log(`Installed ${u.name}`); updateUI();
+            } else { log(`Error: Insufficient resources for ${u.name}`); }
+        }
+        els.hackBtn.addEventListener('click', () => { state.bits += state.clickValue; updateUI(); });
+        setInterval(() => { if(state.gps > 0) { state.bits += state.gps / 10; updateUI(); } }, 100);
+        if(localStorage.getItem('hacker_save')) {
+            try { const saved = JSON.parse(localStorage.getItem('hacker_save')); state.bits = saved.bits; state.gps = saved.gps; state.upgrades = saved.upgrades; log('System Restored...'); } catch(e) {}
+        }
+        setInterval(() => { localStorage.setItem('hacker_save', JSON.stringify(state)); }, 5000);
+        updateUI(); log('System Initialized.');
+    </script>
+</body>
+</html>

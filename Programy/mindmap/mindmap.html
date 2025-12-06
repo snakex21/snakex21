@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mapa Myśli - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f0f4f8;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #06b6d4;
+            --canvas-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --text: #ffffff;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --header-bg: #1e293b;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent: #22d3ee;
+            --canvas-bg: #1e293b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 100%;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .toolbar-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            background: var(--canvas-bg);
+            background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        #mindmap-canvas {
+            position: absolute;
+            cursor: grab;
+        }
+
+        #mindmap-canvas.grabbing {
+            cursor: grabbing;
+        }
+
+        /* Node Styles */
+        .node {
+            position: absolute;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 12px 20px;
+            min-width: 120px;
+            max-width: 250px;
+            text-align: center;
+            cursor: move;
+            box-shadow: 0 4px 12px var(--shadow);
+            user-select: none;
+            transition: box-shadow 0.2s, transform 0.1s;
+        }
+
+        .node:hover {
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .node.selected {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+        }
+
+        .node.root {
+            background: linear-gradient(135deg, var(--accent), #0891b2);
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 150px;
+        }
+
+        .node-text {
+            outline: none;
+            min-height: 1.2em;
+        }
+
+        .node-text:focus {
+            cursor: text;
+        }
+
+        .node-delete {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .node:hover .node-delete {
+            display: flex;
+        }
+
+        .node.root .node-delete {
+            display: none !important;
+        }
+
+        /* Connection Lines (SVG) */
+        #connections-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .connection-line {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2;
+        }
+
+        /* Color Picker */
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        .color-option.selected {
+            border-color: var(--text);
+        }
+
+        /* Instructions */
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            font-size: 0.85rem;
+            max-width: 280px;
+            border: 1px solid var(--border);
+        }
+
+        .instructions h4 {
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .instructions ul {
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 0.3rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .instructions kbd {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .toolbar {
+                gap: 0.3rem;
+            }
+
+            .toolbar-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .instructions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <div class="toolbar">
+                <button class="toolbar-btn" id="btn-add">➕ Dodaj</button>
+                <button class="toolbar-btn" id="btn-connect">🔗 Połącz</button>
+                <div class="color-picker">
+                    <span style="font-size: 0.85rem;">Kolor:</span>
+                    <div class="color-option selected" style="background: #06b6d4;" data-color="#06b6d4"></div>
+                    <div class="color-option" style="background: #8b5cf6;" data-color="#8b5cf6"></div>
+                    <div class="color-option" style="background: #f97316;" data-color="#f97316"></div>
+                    <div class="color-option" style="background: #10b981;" data-color="#10b981"></div>
+                    <div class="color-option" style="background: #ec4899;" data-color="#ec4899"></div>
+                </div>
+                <button class="toolbar-btn" id="btn-clear">🗑️ Wyczyść</button>
+                <button class="toolbar-btn" id="btn-save">💾 Zapisz</button>
+                <button class="toolbar-btn" id="btn-load">📂 Wczytaj</button>
+                <button class="toolbar-btn" id="btn-export">📥 Eksport PNG</button>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <div class="canvas-container" id="canvas-container">
+        <svg id="connections-svg"></svg>
+        <div id="mindmap-canvas"></div>
+    </div>
+
+    <div class="instructions">
+        <h4>💡 Instrukcja</h4>
+        <ul>
+            <li><kbd>Klik</kbd> na węzeł – zaznacz</li>
+            <li><kbd>Podwójny klik</kbd> – edytuj tekst</li>
+            <li><kbd>Przeciągnij</kbd> – przesuń węzeł</li>
+            <li><kbd>🔗 Połącz</kbd> – kliknij 2 węzły aby połączyć</li>
+            <li><kbd>Delete</kbd> – usuń zaznaczony węzeł</li>
+        </ul>
+    </div>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Mind Map Logic
+        const canvas = document.getElementById('mindmap-canvas');
+        const svg = document.getElementById('connections-svg');
+        const container = document.getElementById('canvas-container');
+
+        let nodes = [];
+        let connections = [];
+        let selectedNode = null;
+        let connectMode = false;
+        let connectStart = null;
+        let currentColor = '#06b6d4';
+        let nodeIdCounter = 1;
+
+        // Initialize with root node
+        function init() {
+            const saved = localStorage.getItem('mindmap-data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                nodes = data.nodes || [];
+                connections = data.connections || [];
+                nodeIdCounter = data.nodeIdCounter || 1;
+                renderAll();
+            } else {
+                createNode(container.offsetWidth / 2 - 75, 150, 'Główny temat', true);
+            }
+        }
+
+        function createNode(x, y, text = 'Nowy węzeł', isRoot = false) {
+            const id = 'node-' + nodeIdCounter++;
+            const node = { id, x, y, text, color: currentColor, isRoot };
+            nodes.push(node);
+            renderNode(node);
+            return node;
+        }
+
+        function renderNode(node) {
+            const div = document.createElement('div');
+            div.className = 'node' + (node.isRoot ? ' root' : '');
+            div.id = node.id;
+            div.style.left = node.x + 'px';
+            div.style.top = node.y + 'px';
+            if (!node.isRoot) {
+                div.style.borderColor = node.color;
+            }
+
+            div.innerHTML = `
+                <div class="node-text" contenteditable="true">${node.text}</div>
+                <button class="node-delete">×</button>
+            `;
+
+            // Events
+            div.addEventListener('mousedown', (e) => onNodeMouseDown(e, node));
+            div.addEventListener('click', (e) => onNodeClick(e, node));
+            div.querySelector('.node-text').addEventListener('blur', (e) => {
+                node.text = e.target.textContent;
+            });
+            div.querySelector('.node-delete').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteNode(node.id);
+            });
+
+            canvas.appendChild(div);
+        }
+
+        function onNodeClick(e, node) {
+            e.stopPropagation();
+
+            if (connectMode) {
+                if (!connectStart) {
+                    connectStart = node;
+                    document.getElementById(node.id).classList.add('selected');
+                } else if (connectStart.id !== node.id) {
+                    // Create connection
+                    if (!connections.find(c =>
+                        (c.from === connectStart.id && c.to === node.id) ||
+                        (c.from === node.id && c.to === connectStart.id)
+                    )) {
+                        connections.push({ from: connectStart.id, to: node.id });
+                        renderConnections();
+                    }
+                    document.getElementById(connectStart.id).classList.remove('selected');
+                    connectStart = null;
+                }
+                return;
+            }
+
+            // Select node
+            if (selectedNode) {
+                const prev = document.getElementById(selectedNode.id);
+                if (prev) prev.classList.remove('selected');
+            }
+            selectedNode = node;
+            document.getElementById(node.id).classList.add('selected');
+        }
+
+        let dragging = null;
+        let dragOffset = { x: 0, y: 0 };
+
+        function onNodeMouseDown(e, node) {
+            if (e.target.classList.contains('node-delete')) return;
+            if (e.target.classList.contains('node-text') && document.activeElement === e.target) return;
+
+            dragging = node;
+            const rect = document.getElementById(node.id).getBoundingClientRect();
+            dragOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            e.preventDefault();
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const x = e.clientX - containerRect.left - dragOffset.x;
+            const y = e.clientY - containerRect.top - dragOffset.y;
+
+            dragging.x = Math.max(0, x);
+            dragging.y = Math.max(0, y);
+
+            const div = document.getElementById(dragging.id);
+            div.style.left = dragging.x + 'px';
+            div.style.top = dragging.y + 'px';
+
+            renderConnections();
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragging = null;
+        });
+
+        function deleteNode(id) {
+            const node = nodes.find(n => n.id === id);
+            if (node && node.isRoot) return; // Can't delete root
+
+            nodes = nodes.filter(n => n.id !== id);
+            connections = connections.filter(c => c.from !== id && c.to !== id);
+
+            const div = document.getElementById(id);
+            if (div) div.remove();
+
+            if (selectedNode && selectedNode.id === id) {
+                selectedNode = null;
+            }
+
+            renderConnections();
+        }
+
+        function renderConnections() {
+            svg.innerHTML = '';
+            svg.setAttribute('width', container.offsetWidth);
+            svg.setAttribute('height', container.offsetHeight);
+
+            connections.forEach(conn => {
+                const fromEl = document.getElementById(conn.from);
+                const toEl = document.getElementById(conn.to);
+                if (!fromEl || !toEl) return;
+
+                const fromRect = fromEl.getBoundingClientRect();
+                const toRect = toEl.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
+                const y1 = fromRect.top + fromRect.height / 2 - containerRect.top;
+                const x2 = toRect.left + toRect.width / 2 - containerRect.left;
+                const y2 = toRect.top + toRect.height / 2 - containerRect.top;
+
+                // Bezier curve
+                const midX = (x1 + x2) / 2;
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${x1} ${y1} Q ${midX} ${y1} ${midX} ${(y1 + y2) / 2} Q ${midX} ${y2} ${x2} ${y2}`);
+                path.classList.add('connection-line');
+
+                // Get color from source node
+                const fromNode = nodes.find(n => n.id === conn.from);
+                if (fromNode && !fromNode.isRoot) {
+                    path.style.stroke = fromNode.color;
+                }
+
+                svg.appendChild(path);
+            });
+        }
+
+        function renderAll() {
+            canvas.innerHTML = '';
+            nodes.forEach(node => renderNode(node));
+            renderConnections();
+        }
+
+        // Toolbar actions
+        document.getElementById('btn-add').addEventListener('click', () => {
+            const x = container.offsetWidth / 2 - 60 + (Math.random() - 0.5) * 200;
+            const y = container.offsetHeight / 2 + (Math.random() - 0.5) * 200;
+            createNode(x, y);
+            renderConnections();
+        });
+
+        document.getElementById('btn-connect').addEventListener('click', () => {
+            connectMode = !connectMode;
+            document.getElementById('btn-connect').classList.toggle('active', connectMode);
+            if (!connectMode && connectStart) {
+                document.getElementById(connectStart.id).classList.remove('selected');
+                connectStart = null;
+            }
+        });
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            if (!confirm('Czy na pewno chcesz usunąć całą mapę?')) return;
+            nodes = [];
+            connections = [];
+            canvas.innerHTML = '';
+            svg.innerHTML = '';
+            createNode(container.offsetWidth / 2 - 75, 150, 'Główny temat', true);
+        });
+
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const data = { nodes, connections, nodeIdCounter };
+            localStorage.setItem('mindmap-data', JSON.stringify(data));
+            alert('Mapa zapisana!');
+        });
+
+        document.getElementById('btn-load').addEventListener('click', () => {
+            const saved = localStorage.getItem('mindmap-data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                nodes = data.nodes || [];
+                connections = data.connections || [];
+                nodeIdCounter = data.nodeIdCounter || 1;
+                renderAll();
+                alert('Mapa wczytana!');
+            } else {
+                alert('Brak zapisanej mapy.');
+            }
+        });
+
+        document.getElementById('btn-export').addEventListener('click', () => {
+            // Use html2canvas approach - simple screenshot
+            const exportCanvas = document.createElement('canvas');
+            const ctx = exportCanvas.getContext('2d');
+
+            // Find bounds
+            let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+            nodes.forEach(n => {
+                const el = document.getElementById(n.id);
+                if (el) {
+                    minX = Math.min(minX, n.x);
+                    minY = Math.min(minY, n.y);
+                    maxX = Math.max(maxX, n.x + el.offsetWidth);
+                    maxY = Math.max(maxY, n.y + el.offsetHeight);
+                }
+            });
+
+            const padding = 50;
+            const width = maxX - minX + padding * 2;
+            const height = maxY - minY + padding * 2;
+
+            exportCanvas.width = width;
+            exportCanvas.height = height;
+
+            // Background
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#fff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw connections
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = 2;
+            connections.forEach(conn => {
+                const fromNode = nodes.find(n => n.id === conn.from);
+                const toNode = nodes.find(n => n.id === conn.to);
+                if (!fromNode || !toNode) return;
+
+                const fromEl = document.getElementById(fromNode.id);
+                const toEl = document.getElementById(toNode.id);
+
+                const x1 = fromNode.x - minX + padding + fromEl.offsetWidth / 2;
+                const y1 = fromNode.y - minY + padding + fromEl.offsetHeight / 2;
+                const x2 = toNode.x - minX + padding + toEl.offsetWidth / 2;
+                const y2 = toNode.y - minY + padding + toEl.offsetHeight / 2;
+
+                ctx.strokeStyle = fromNode.color || currentColor;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                const midX = (x1 + x2) / 2;
+                ctx.quadraticCurveTo(midX, y1, midX, (y1 + y2) / 2);
+                ctx.quadraticCurveTo(midX, y2, x2, y2);
+                ctx.stroke();
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                const el = document.getElementById(node.id);
+                const x = node.x - minX + padding;
+                const y = node.y - minY + padding;
+                const w = el.offsetWidth;
+                const h = el.offsetHeight;
+
+                // Node background
+                ctx.fillStyle = node.isRoot ? node.color || '#06b6d4' : '#fff';
+                ctx.strokeStyle = node.color || '#06b6d4';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, 12);
+                ctx.fill();
+                ctx.stroke();
+
+                // Text
+                ctx.fillStyle = node.isRoot ? '#fff' : '#1a1a1a';
+                ctx.font = node.isRoot ? 'bold 16px Arial' : '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.text, x + w / 2, y + h / 2);
+            });
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'mapa-mysli.png';
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // Color picker
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                currentColor = opt.dataset.color;
+
+                // Update selected node color
+                if (selectedNode && !selectedNode.isRoot) {
+                    selectedNode.color = currentColor;
+                    const el = document.getElementById(selectedNode.id);
+                    el.style.borderColor = currentColor;
+                    renderConnections();
+                }
+            });
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' && selectedNode && !selectedNode.isRoot) {
+                deleteNode(selectedNode.id);
+            }
+        });
+
+        // Click on empty space to deselect
+        container.addEventListener('click', (e) => {
+            if (e.target === container || e.target === canvas) {
+                if (selectedNode) {
+                    const el = document.getElementById(selectedNode.id);
+                    if (el) el.classList.remove('selected');
+                    selectedNode = null;
+                }
+                if (connectStart) {
+                    const el = document.getElementById(connectStart.id);
+                    if (el) el.classList.remove('selected');
+                    connectStart = null;
+                }
+            }
+        });
+
+        // Initialize
+        init();
+        window.addEventListener('resize', renderConnections);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Stack - Hub</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --text: #fff;
+            --header-bg: #16213e;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #0f3460;
+        }
+
+        [data-theme="light"] {
+            --bg: #e8f4f8;
+            --text: #1a1a2e;
+            --header-bg: #fff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #feda75 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .score-display {
+            position: absolute;
+            top: 15%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .score {
+            font-size: 6rem;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .highscore {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .msg {
+            position: absolute;
+            bottom: 12%;
+            color: white;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 30px;
+        }
+
+        .game-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .perfect {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .perfect.show {
+            animation: perfectPop 0.6s ease-out forwards;
+        }
+
+        @keyframes perfectPop {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -70%) scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+    <div class="game-container">
+        <div class="highscore">🏆 HI: <span id="highscore">0</span></div>
+        <div class="score-display">
+            <div class="score" id="score">0</div>
+            <div class="score-label">Piętro</div>
+        </div>
+        <div class="game-wrapper">
+            <canvas id="game" width="400" height="500"></canvas>
+            <div class="perfect" id="perfect">PERFECT! ⭐</div>
+        </div>
+        <div class="msg" id="msg">Kliknij lub Spacja aby zacząć</div>
+    </div>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const msgEl = document.getElementById('msg');
+        const perfectEl = document.getElementById('perfect');
+        const highscoreEl = document.getElementById('highscore');
+
+        let blocks = [], currentBlock = null, speed = 2, direction = 1, score = 0, gameOver = true, width = 140;
+        let particles = [], perfectStreak = 0;
+        let highScore = parseInt(localStorage.getItem('towerHighScore') || '0');
+        highscoreEl.innerText = highScore;
+
+        const colors = [
+            ['#ff6b6b', '#ee5a5a'], ['#feca57', '#f7b928'], ['#48dbfb', '#0abde3'],
+            ['#ff9ff3', '#f368e0'], ['#54a0ff', '#2e86de'], ['#5f27cd', '#341f97'],
+            ['#00d2d3', '#01a3a4'], ['#ff6b81', '#ff4757'], ['#7bed9f', '#2ed573']
+        ];
+
+        function getColor(index) { return colors[index % colors.length]; }
+
+        function init() {
+            blocks = [];
+            particles = [];
+            score = 0;
+            width = 140;
+            perfectStreak = 0;
+            speed = 2;
+            direction = 1;
+            gameOver = false;
+
+            const c = getColor(0);
+            blocks.push({ x: 130, y: 450, w: 140, h: 30, color: c[0], shadow: c[1] });
+            spawnNext();
+
+            scoreEl.innerText = 0;
+            msgEl.style.display = 'block';
+            msgEl.innerText = 'Kliknij lub Spacja aby postawić blok';
+            loop();
+        }
+
+        function spawnNext() {
+            const prev = blocks[blocks.length - 1];
+            const c = getColor(blocks.length);
+            currentBlock = { x: 0, y: prev.y - 30, w: width, h: 30, color: c[0], shadow: c[1] };
+            if (currentBlock.y < 150) {
+                blocks.forEach(b => b.y += 30);
+                currentBlock.y += 30;
+            }
+        }
+
+        function createParticles(x, y, w, color) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({ x: x + Math.random() * w, y: y, vx: (Math.random() - 0.5) * 8, vy: -Math.random() * 5 - 2, size: 4 + Math.random() * 4, color: color, life: 1 });
+            }
+        }
+
+        function showPerfect() {
+            perfectEl.classList.remove('show');
+            void perfectEl.offsetWidth;
+            perfectEl.classList.add('show');
+        }
+
+        function place() {
+            if (gameOver) { init(); return; }
+            msgEl.style.display = 'none';
+
+            const prev = blocks[blocks.length - 1];
+            const curr = currentBlock;
+            const diff = curr.x - prev.x;
+
+            if (Math.abs(diff) >= curr.w) {
+                gameOver = true;
+                if (score > highScore) { highScore = score; localStorage.setItem('towerHighScore', highScore); highscoreEl.innerText = highScore; }
+                msgEl.innerText = "Game Over! Kliknij by zagrać";
+                msgEl.style.display = 'block';
+                return;
+            }
+
+            if (Math.abs(diff) < 5) {
+                curr.x = prev.x;
+                curr.w = prev.w;
+                width = prev.w;
+                perfectStreak++;
+                if (perfectStreak >= 2) { showPerfect(); width = Math.min(width + 5, 140); curr.w = width; }
+            } else {
+                perfectStreak = 0;
+                createParticles(diff > 0 ? prev.x + prev.w : curr.x, curr.y, Math.abs(diff), curr.shadow);
+                if (diff > 0) { curr.w -= diff; } else { curr.w += diff; curr.x = prev.x; }
+                width = curr.w;
+            }
+
+            blocks.push(curr);
+            score++;
+            scoreEl.innerText = score;
+            speed = Math.min(speed + 0.06, 5);
+            spawnNext();
+        }
+
+        function loop() {
+            if (gameOver && blocks.length > 1) return;
+            requestAnimationFrame(loop);
+
+            const grad = ctx.createLinearGradient(0, 0, 0, 500);
+            grad.addColorStop(0, '#1a1a2e');
+            grad.addColorStop(1, '#16213e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 400, 500);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            for (let i = 0; i < 30; i++) { ctx.fillRect((i * 47) % 400, (i * 31) % 300, 2, 2); }
+
+            if (currentBlock && !gameOver) {
+                currentBlock.x += speed * direction;
+                if (currentBlock.x + currentBlock.w > 400 || currentBlock.x < 0) direction *= -1;
+            }
+
+            [...blocks, currentBlock].filter(Boolean).forEach(b => {
+                ctx.fillStyle = b.shadow;
+                ctx.fillRect(b.x + 3, b.y + 3, b.w, b.h);
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillRect(b.x, b.y, b.w, 5);
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+            });
+
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= 0.02;
+                if (p.life > 0) { ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); ctx.globalAlpha = 1; }
+            });
+            particles = particles.filter(p => p.life > 0);
+        }
+
+        document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); place(); } });
+        document.addEventListener('click', e => { if (!e.target.closest('header')) place(); });
+
+        const html = document.documentElement, themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
+
+        init();
+        gameOver = true;
+    </script>
+</body>
+
+</html>
