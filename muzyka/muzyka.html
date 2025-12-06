@@ -455,9 +455,11 @@
             /* Trik do kolorowania Emoji na zielono */
             color: transparent !important;
             text-shadow: 0 0 0 var(--spotify-green);
-            
-            /* Dodatkowy blask */
-            filter: drop-shadow(0 0 4px rgba(29, 185, 84, 0.6));
+
+            /* Wyraźne zielone tło i blask */
+            background: rgba(29, 185, 84, 0.15);
+            border-radius: 8px;
+            filter: drop-shadow(0 0 6px rgba(29, 185, 84, 0.8));
             transform: scale(1.1);
         }
 
@@ -1741,12 +1743,12 @@
             }
 
             function toggleRepeat() {
-                const modes = ['off', 'all', 'one'];
+                const modes = ['off', 'one', 'all'];
                 state.repeat = modes[(modes.indexOf(state.repeat) + 1) % modes.length];
                 updateRepeatButton();
-                
-                const msg = state.repeat === 'one' ? 'Powtarzaj ten utwór' : 
-                           state.repeat === 'all' ? 'Powtarzaj wszystko' : 'Powtarzanie wyłączone';
+
+                const msg = state.repeat === 'one' ? 'Powtarzaj ten utwór (x1)' :
+                           state.repeat === 'all' ? 'Powtarzaj wszystko (nieskończony)' : 'Powtarzanie wyłączone';
                 showToast(msg);
             }
 
@@ -1928,6 +1930,10 @@
                 renderFavorites();
                 renderHistory();
                 initVisualizerBars();
+
+                // Inicjalizacja wizualnego stanu przycisków shuffle i repeat
+                updateShuffleButton();
+                updateRepeatButton();
 
                 // New Controls
                 elements.barSpeedSelect.addEventListener('change', (e) => {
