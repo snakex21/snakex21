@@ -452,7 +452,13 @@
         }
 
         .control-btn.active {
-            color: var(--spotify-green);
+            /* Trik do kolorowania Emoji na zielono */
+            color: transparent !important;
+            text-shadow: 0 0 0 var(--spotify-green);
+            
+            /* Dodatkowy blask */
+            filter: drop-shadow(0 0 4px rgba(29, 185, 84, 0.6));
+            transform: scale(1.1);
         }
 
         .play-btn {
@@ -1620,6 +1626,7 @@
           </div>
           <div class="player-controls">
             <div class="control-buttons">
+              <!-- Dodano warunkowe klasy 'active' -->
               <button class="control-btn ${state.shuffle ? 'active' : ''}" id="main-shuffle" title="Losuj">🔀</button>
               <button class="control-btn" id="main-prev" title="Poprzedni">⏮️</button>
               <button class="control-btn play-btn" id="main-play" title="Odtwórz">▶️</button>
@@ -1662,6 +1669,10 @@
 
                 attachMainControls();
                 updateLibraryHighlight();
+                
+                // Synchronizacja paska dolnego
+                updateShuffleButton();
+                updateRepeatButton();
             }
 
             function togglePlay() {
@@ -1687,7 +1698,15 @@
                     return;
                 }
 
-                let next = state.shuffle ? Math.floor(Math.random() * trackLibrary.length) : (state.currentIndex + 1) % trackLibrary.length;
+                let next;
+                if (state.shuffle) {
+                    // Smart Shuffle: Avoid playing the same song immediately unless it's the only one
+                    do {
+                        next = Math.floor(Math.random() * trackLibrary.length);
+                    } while (next === state.currentIndex && trackLibrary.length > 1);
+                } else {
+                    next = (state.currentIndex + 1) % trackLibrary.length;
+                }
                 loadTrack(next, true);
             }
 
@@ -1697,34 +1716,64 @@
                     elements.audio.currentTime = 0;
                     return;
                 }
-                let prev = state.shuffle ? Math.floor(Math.random() * trackLibrary.length) : state.currentIndex - 1;
-                if (prev < 0) prev = trackLibrary.length - 1;
+                let prev;
+                if (state.shuffle) {
+                    // W shuffle poprzedni też losuje (lub można użyć historii)
+                    if (state.history.length > 1) {
+                         // Cofnij do przedostatniego w historii
+                         state.history.pop(); // usuń obecny
+                         const last = state.history.pop(); // weź poprzedni
+                         prev = last ? last.index : Math.floor(Math.random() * trackLibrary.length);
+                    } else {
+                        prev = Math.floor(Math.random() * trackLibrary.length);
+                    }
+                } else {
+                    prev = state.currentIndex - 1;
+                    if (prev < 0) prev = trackLibrary.length - 1;
+                }
                 loadTrack(prev, true);
             }
 
             function toggleShuffle() {
                 state.shuffle = !state.shuffle;
                 updateShuffleButton();
+                showToast(state.shuffle ? 'Losowanie włączone' : 'Losowanie wyłączone');
             }
 
             function toggleRepeat() {
                 const modes = ['off', 'all', 'one'];
                 state.repeat = modes[(modes.indexOf(state.repeat) + 1) % modes.length];
                 updateRepeatButton();
+                
+                const msg = state.repeat === 'one' ? 'Powtarzaj ten utwór' : 
+                           state.repeat === 'all' ? 'Powtarzaj wszystko' : 'Powtarzanie wyłączone';
+                showToast(msg);
             }
 
             function updateShuffleButton() {
-                [document.getElementById('main-shuffle'), elements.barShuffle].forEach(btn => {
-                    if (btn) btn.classList.toggle('active', state.shuffle);
-                });
+                // Pobieramy świeże referencje, bo loadTrack podmienia te elementy
+                const mainBtn = document.getElementById('main-shuffle');
+                const barBtn = document.getElementById('bar-shuffle');
+                
+                if (mainBtn) mainBtn.classList.toggle('active', state.shuffle);
+                if (barBtn) barBtn.classList.toggle('active', state.shuffle);
             }
 
             function updateRepeatButton() {
+                const mainBtn = document.getElementById('main-repeat');
+                const barBtn = document.getElementById('bar-repeat');
+                
                 const icon = state.repeat === 'one' ? '🔂' : '🔁';
-                const active = state.repeat !== 'off';
-                [document.getElementById('main-repeat'), elements.barRepeat].forEach(btn => {
-                    if (btn) { btn.textContent = icon; btn.classList.toggle('active', active); }
-                });
+                const isActive = state.repeat !== 'off';
+                
+                if (mainBtn) {
+                    mainBtn.textContent = icon;
+                    mainBtn.classList.toggle('active', isActive);
+                }
+                if (barBtn) {
+                    barBtn.textContent = icon;
+                    barBtn.classList.toggle('active', isActive);
+                }
             }
 
             function updateLibraryHighlight() {
