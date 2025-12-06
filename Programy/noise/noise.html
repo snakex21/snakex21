@@ -250,23 +250,23 @@
         <br>
 
         <div class="noise-controls">
+            <!-- Basic Colors -->
             <div class="noise-card" id="card-white">
                 <span class="icon">📺</span>
                 <div class="noise-title">Biały Szum</div>
-                <div class="noise-desc">Stały sygnał, maskuje inne dźwięki.</div>
+                <div class="noise-desc">Płaski sygnał, idealny do maskowania tła.</div>
                 <button class="btn-play" onclick="toggleNoise('white')">▶</button>
                 <div class="volume-control">
                     <span>🔈</span>
-                    <input type="range" min="0" max="1" step="0.01" value="0.5"
-                        oninput="setVolume('white', this.value)">
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('white', this.value)">
                     <span>🔊</span>
                 </div>
             </div>
 
             <div class="noise-card" id="card-pink">
-                <span class="icon">🌧️</span>
+                <span class="icon">🌫️</span>
                 <div class="noise-title">Różowy Szum</div>
-                <div class="noise-desc">Głębszy, przypomina deszcz lub wiatr.</div>
+                <div class="noise-desc">Zbalansowany, naturalny, jak wiatr.</div>
                 <button class="btn-play" onclick="toggleNoise('pink')">▶</button>
                 <div class="volume-control">
                     <span>🔈</span>
@@ -278,12 +278,109 @@
             <div class="noise-card" id="card-brown">
                 <span class="icon">🌊</span>
                 <div class="noise-title">Brązowy Szum</div>
-                <div class="noise-desc">Niski, dudniący, jak wodospad.</div>
+                <div class="noise-desc">Głęboki bas, jak wodospad lub huk morza.</div>
                 <button class="btn-play" onclick="toggleNoise('brown')">▶</button>
                 <div class="volume-control">
                     <span>🔈</span>
-                    <input type="range" min="0" max="1" step="0.01" value="0.5"
-                        oninput="setVolume('brown', this.value)">
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('brown', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <!-- New Effects -->
+            <div class="noise-card" id="card-blue">
+                <span class="icon">🚿</span>
+                <div class="noise-title">Niebieski Szum</div>
+                <div class="noise-desc">Wysokie tony, jak sycząca woda pod ciśnieniem.</div>
+                <button class="btn-play" onclick="toggleNoise('blue')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('blue', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-violet">
+                <span class="icon">⚡</span>
+                <div class="noise-title">Fioletowy Szum</div>
+                <div class="noise-desc">Bardzo ostry, stymulujący wysokie częstotliwości.</div>
+                <button class="btn-play" onclick="toggleNoise('violet')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('violet', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-rain">
+                <span class="icon">🌧️</span>
+                <div class="noise-title">Deszcz</div>
+                <div class="noise-desc">Symulacja ciężkiego deszczu za oknem.</div>
+                <button class="btn-play" onclick="toggleNoise('rain')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('rain', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-binaural">
+                <span class="icon">🧠</span>
+                <div class="noise-title">Focus (40Hz)</div>
+                <div class="noise-desc">Binauralne dudnienia Gamma. Wymaga słuchawek.</div>
+                <button class="btn-play" onclick="toggleNoise('binaural')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('binaural', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <!-- More Effects -->
+            <div class="noise-card" id="card-green">
+                <span class="icon">🌲</span>
+                <div class="noise-title">Zielony Szum</div>
+                <div class="noise-desc">Szum natury, średnie tony. Jak las w oddali.</div>
+                <button class="btn-play" onclick="toggleNoise('green')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('green', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-grey">
+                <span class="icon">⚖️</span>
+                <div class="noise-title">Szary Szum</div>
+                <div class="noise-desc">Skalibrowany, by brzmieć jednakowo głośno dla ucha.</div>
+                <button class="btn-play" onclick="toggleNoise('grey')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('grey', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-wind">
+                <span class="icon">🍃</span>
+                <div class="noise-title">Wiatr</div>
+                <div class="noise-desc">Dynamiczny szum zmieniający się w czasie.</div>
+                <button class="btn-play" onclick="toggleNoise('wind')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('wind', this.value)">
+                    <span>🔊</span>
+                </div>
+            </div>
+
+            <div class="noise-card" id="card-drone">
+                <span class="icon">🚀</span>
+                <div class="noise-title">Kosmos</div>
+                <div class="noise-desc">Głęboki, basowy drone (ambient).</div>
+                <button class="btn-play" onclick="toggleNoise('drone')">▶</button>
+                <div class="volume-control">
+                    <span>🔈</span>
+                    <input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('drone', this.value)">
                     <span>🔊</span>
                 </div>
             </div>
@@ -314,7 +411,15 @@
         const noises = {
             white: { node: null, gain: null, playing: false },
             pink: { node: null, gain: null, playing: false },
-            brown: { node: null, gain: null, playing: false }
+            brown: { node: null, gain: null, playing: false },
+            blue: { node: null, gain: null, playing: false },
+            violet: { node: null, gain: null, playing: false },
+            rain: { node: null, gain: null, playing: false },
+            binaural: { node: null, gain: null, playing: false },
+            green: { node: null, gain: null, playing: false },
+            grey: { node: null, gain: null, playing: false },
+            wind: { node: null, gain: null, playing: false },
+            drone: { node: null, gain: null, playing: false }
         };
         let analyser;
 
@@ -328,29 +433,13 @@
             }
         }
 
-        function createNoiseBuffer(type) {
+        // Helper: Generuje bufor białego szumu (baza dla innych)
+        function createWhiteNoiseBuffer() {
             const bufferSize = 2 * audioCtx.sampleRate;
             const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const output = buffer.getChannelData(0);
-
+            const data = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
-                let white = Math.random() * 2 - 1;
-
-                if (type === 'white') {
-                    output[i] = white;
-                } else if (type === 'pink') {
-                    // Pink noise approximation (Paul Kellett's method)
-                    let b0, b1, b2, b3, b4, b5, b6;
-                    b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
-                    // Inside loop would need state, simplified here:
-                    // Actually, let's use a simpler approximation for buffer generation
-                    // Or just standard white noise filtered.
-                    // For simplicity in this single-file constraint, let's stick to white noise
-                    // and use BiquadFilterNodes to color it for Pink/Brown.
-                    output[i] = white;
-                } else {
-                    output[i] = white;
-                }
+                data[i] = Math.random() * 2 - 1;
             }
             return buffer;
         }
@@ -363,61 +452,156 @@
             const card = document.getElementById('card-' + type);
             const btn = card.querySelector('.btn-play');
 
+            // Zatrzymaj, jeśli gra
             if (state.playing) {
-                state.node.stop();
-                state.node.disconnect();
+                if(state.nodes) {
+                    // Dla złożonych dźwięków (binaural)
+                    state.nodes.forEach(n => { try{n.stop()}catch(e){} try{n.disconnect()}catch(e){} });
+                } else if (state.node) {
+                    // Dla prostych szumów
+                    try{state.node.stop()}catch(e){}
+                    try{state.node.disconnect()}catch(e){}
+                }
+                
+                if(state.gain) state.gain.disconnect();
+                
                 state.playing = false;
                 card.classList.remove('active');
                 btn.textContent = '▶';
-            } else {
-                // Create source
-                const bufferSize = 2 * audioCtx.sampleRate;
-                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-
-                // Generate White Noise base
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = Math.random() * 2 - 1;
-                }
-
-                const source = audioCtx.createBufferSource();
-                source.buffer = buffer;
-                source.loop = true;
-
-                const gainNode = audioCtx.createGain();
-                const volumeSlider = card.querySelector('input[type="range"]');
-                gainNode.gain.value = parseFloat(volumeSlider.value);
-
-                // Filter for colors
-                if (type === 'white') {
-                    source.connect(gainNode);
-                } else if (type === 'pink') {
-                    // Pink noise filter (-3dB/octave) - approximated with lowpass
-                    const filter = audioCtx.createBiquadFilter();
-                    filter.type = 'lowshelf';
-                    filter.frequency.value = 1000;
-                    filter.gain.value = -10; // Simple approximation
-                    source.connect(filter);
-                    filter.connect(gainNode);
-                } else if (type === 'brown') {
-                    // Brown noise filter (-6dB/octave) - approximated with stronger lowpass
-                    const filter = audioCtx.createBiquadFilter();
-                    filter.type = 'lowpass';
-                    filter.frequency.value = 400;
-                    source.connect(filter);
-                    filter.connect(gainNode);
-                }
-
-                gainNode.connect(analyser);
-
-                source.start();
-                state.node = source;
-                state.gain = gainNode;
-                state.playing = true;
-
-                card.classList.add('active');
-                btn.textContent = '⏸';
+                return;
             }
+
+            // Start odtwarzania
+            const gainNode = audioCtx.createGain();
+            const volumeSlider = card.querySelector('input[type="range"]');
+            gainNode.gain.value = parseFloat(volumeSlider.value);
+            
+            // Podłącz do analizatora i wyjścia
+            gainNode.connect(analyser);
+            
+            state.gain = gainNode;
+            state.playing = true;
+            card.classList.add('active');
+            btn.textContent = '⏸';
+
+            // Logika dla poszczególnych typów
+            if (type === 'binaural') {
+                // Binaural: 2 oscylatory (Lewy: 200Hz, Prawy: 240Hz = 40Hz beat)
+                const oscL = audioCtx.createOscillator();
+                const oscR = audioCtx.createOscillator();
+                const panL = audioCtx.createStereoPanner();
+                const panR = audioCtx.createStereoPanner();
+
+                oscL.frequency.value = 200;
+                oscR.frequency.value = 240; // Różnica 40Hz (Gamma)
+
+                panL.pan.value = -1; // Lewo
+                panR.pan.value = 1;  // Prawo
+
+                oscL.connect(panL).connect(gainNode);
+                oscR.connect(panR).connect(gainNode);
+
+                oscL.start();
+                oscR.start();
+                
+                state.nodes = [oscL, oscR, panL, panR]; // Przechowaj do zatrzymania
+                return;
+            }
+
+            // Dla reszty szumów bazą jest biały szum
+            const source = audioCtx.createBufferSource();
+            source.buffer = createWhiteNoiseBuffer();
+            source.loop = true;
+            state.node = source;
+
+            if (type === 'white') {
+                source.connect(gainNode);
+            } 
+            else if (type === 'pink') {
+                // Pink: Lowshelf cut
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowshelf';
+                filter.frequency.value = 1000;
+                filter.gain.value = -12;
+                source.connect(filter).connect(gainNode);
+            } 
+            else if (type === 'brown') {
+                // Brown: Strong Lowpass
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 400;
+                source.connect(filter).connect(gainNode);
+            }
+            else if (type === 'blue') {
+                // Blue: Highpass (wzmocnienie wysokich)
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 2000;
+                source.connect(filter).connect(gainNode);
+            }
+            else if (type === 'violet') {
+                // Violet: Highshelf boost
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'highshelf';
+                filter.frequency.value = 4000;
+                filter.gain.value = 10;
+                source.connect(filter).connect(gainNode);
+            }
+            else if (type === 'rain') {
+                // Rain: Pink base + Bandpass random variation simulation
+                const filter1 = audioCtx.createBiquadFilter();
+                filter1.type = 'lowshelf';
+                filter1.frequency.value = 800;
+                filter1.gain.value = -10;
+
+                const filter2 = audioCtx.createBiquadFilter();
+                filter2.type = 'peaking';
+                filter2.frequency.value = 3000;
+                filter2.Q.value = 0.5;
+                filter2.gain.value = -5;
+
+                source.connect(filter1).connect(filter2).connect(gainNode);
+            }
+            else if (type === 'green') {
+                // Zielony: Pasmowo-przepustowy (środek pasma, natura)
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 500;
+                filter.Q.value = 0.6;
+                source.connect(filter).connect(gainNode);
+            }
+            else if (type === 'grey') {
+                // Szary: Krzywa psychoakustyczna (podbite doły i góry, wycięty środek)
+                const low = audioCtx.createBiquadFilter();
+                low.type = 'lowshelf';
+                low.frequency.value = 150;
+                low.gain.value = 5;
+
+                const high = audioCtx.createBiquadFilter();
+                high.type = 'highshelf';
+                high.frequency.value = 5000;
+                high.gain.value = 5;
+
+                source.connect(low).connect(high).connect(gainNode);
+            }
+            else if (type === 'wind') {
+                // Wiatr: Lowpass (szum wiatru)
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 400;
+                filter.Q.value = 0.5;
+                source.connect(filter).connect(gainNode);
+            }
+            else if (type === 'drone') {
+                // Kosmos: Głęboki bas (Lowpass < 100Hz)
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 90;
+                filter.Q.value = 2; // Lekki rezonans
+                source.connect(filter).connect(gainNode);
+            }
+
+            source.start();
         }
 
         function setVolume(type, val) {
@@ -427,7 +611,7 @@
         }
 
         function stopAll() {
-            ['white', 'pink', 'brown'].forEach(type => {
+            Object.keys(noises).forEach(type => {
                 if (noises[type].playing) toggleNoise(type);
             });
         }
