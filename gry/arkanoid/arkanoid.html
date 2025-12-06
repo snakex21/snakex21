@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arkanoid - Hub</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --header-bg: #ffffff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #e0e0e0;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --text: #ffffff;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s; }
+        
+        /* HEADER */
+        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; transition: background 0.3s; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; flex: 1; }
+        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; }
+        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); }
+        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+
+        /* GAME */
+        .game-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        canvas { background: #000; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,255,255,0.1); display: block; }
+        .info { margin-bottom: 10px; font-size: 1.2rem; color: #aaa; display: flex; gap: 20px; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 10; flex-direction: column; color: #fff; }
+        .btn { background: #00bcd4; border: none; padding: 10px 20px; font-size: 1.2rem; color: #000; cursor: pointer; border-radius: 4px; margin-top: 10px; font-weight: bold; }
+        .btn:hover { background: #00acc1; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <div class="game-container">
+        <div class="info">
+            <span>Wynik: <span id="score">0</span></span>
+            <span>Życia: <span id="lives">3</span></span>
+        </div>
+        <div style="position: relative;">
+            <canvas id="gameCanvas" width="600" height="400"></canvas>
+            <div id="start-screen" class="overlay">
+                <h1>Arkanoid</h1>
+                <p>Sterowanie: Strzałki lub Myszka</p>
+                <button class="btn" onclick="startGame()">START</button>
+            </div>
+            <div id="game-over-screen" class="overlay hidden">
+                <h1 id="end-msg">Koniec Gry</h1>
+                <p>Wynik: <span id="final-score">0</span></p>
+                <button class="btn" onclick="resetGame()">Zagraj ponownie</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Game Logic
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let score = 0, lives = 3, isRunning = false, animationId;
+        const paddle = { x: canvas.width / 2 - 50, y: canvas.height - 20, w: 100, h: 10, speed: 8, dx: 0 };
+        const ball = { x: canvas.width / 2, y: canvas.height - 30, r: 6, dx: 4, dy: -4, speed: 5 };
+        const brickInfo = { r: 5, c: 8, w: 60, h: 20, padding: 10, offsetTop: 30, offsetLeft: 25 };
+        let bricks = [];
+
+        function initBricks() {
+            bricks = [];
+            for(let c=0; c<brickInfo.c; c++) {
+                bricks[c] = [];
+                for(let r=0; r<brickInfo.r; r++) bricks[c][r] = { x: 0, y: 0, status: 1 };
+            }
+        }
+
+        document.addEventListener('keydown', (e) => { if(e.key === 'ArrowRight') paddle.dx = paddle.speed; else if(e.key === 'ArrowLeft') paddle.dx = -paddle.speed; });
+        document.addEventListener('keyup', (e) => { if(e.key === 'ArrowRight' || e.key === 'ArrowLeft') paddle.dx = 0; });
+        document.addEventListener('mousemove', (e) => {
+            const relativeX = e.clientX - canvas.getBoundingClientRect().left;
+            if(relativeX > 0 && relativeX < canvas.width) paddle.x = relativeX - paddle.w / 2;
+        });
+
+        function drawBall() { ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fillStyle = '#00bcd4'; ctx.fill(); ctx.closePath(); }
+        function drawPaddle() { ctx.beginPath(); ctx.rect(paddle.x, paddle.y, paddle.w, paddle.h); ctx.fillStyle = '#fff'; ctx.fill(); ctx.closePath(); }
+        function drawBricks() {
+            for(let c=0; c<brickInfo.c; c++) {
+                for(let r=0; r<brickInfo.r; r++) {
+                    if(bricks[c][r].status === 1) {
+                        const brickX = (c * (brickInfo.w + brickInfo.padding)) + brickInfo.offsetLeft;
+                        const brickY = (r * (brickInfo.h + brickInfo.padding)) + brickInfo.offsetTop;
+                        bricks[c][r].x = brickX; bricks[c][r].y = brickY;
+                        ctx.beginPath(); ctx.rect(brickX, brickY, brickInfo.w, brickInfo.h);
+                        ctx.fillStyle = `hsl(${r * 40}, 70%, 50%)`; ctx.fill(); ctx.closePath();
+                    }
+                }
+            }
+        }
+        function collisionDetection() {
+            for(let c=0; c<brickInfo.c; c++) {
+                for(let r=0; r<brickInfo.r; r++) {
+                    const b = bricks[c][r];
+                    if(b.status === 1) {
+                        if(ball.x > b.x && ball.x < b.x + brickInfo.w && ball.y > b.y && ball.y < b.y + brickInfo.h) {
+                            ball.dy = -ball.dy; b.status = 0; score += 10; document.getElementById('score').innerText = score;
+                            if(score === brickInfo.r * brickInfo.c * 10) gameOver(true);
+                        }
+                    }
+                }
+            }
+        }
+        function update() {
+            if(!isRunning) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBricks(); drawBall(); drawPaddle(); collisionDetection();
+            if(ball.x + ball.dx > canvas.width - ball.r || ball.x + ball.dx < ball.r) ball.dx = -ball.dx;
+            if(ball.y + ball.dy < ball.r) ball.dy = -ball.dy;
+            else if(ball.y + ball.dy > canvas.height - ball.r) {
+                if(ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
+                    ball.dy = -ball.dy; ball.dx = (ball.x - (paddle.x + paddle.w/2)) * 0.15;
+                } else {
+                    lives--; document.getElementById('lives').innerText = lives;
+                    if(!lives) gameOver(false); else { ball.x = canvas.width/2; ball.y = canvas.height-30; ball.dx = 4; ball.dy = -4; paddle.x = (canvas.width-paddle.w)/2; }
+                }
+            }
+            ball.x += ball.dx; ball.y += ball.dy;
+            paddle.x += paddle.dx; if(paddle.x < 0) paddle.x = 0; if(paddle.x + paddle.w > canvas.width) paddle.x = canvas.width - paddle.w;
+            animationId = requestAnimationFrame(update);
+        }
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden'); initBricks();
+            lives = 3; score = 0; document.getElementById('score').innerText = score; document.getElementById('lives').innerText = lives;
+            ball.x = canvas.width/2; ball.y = canvas.height-30; isRunning = true; update();
+        }
+        function gameOver(win) {
+            isRunning = false; cancelAnimationFrame(animationId);
+            document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('end-msg').innerText = win ? "Wygrałeś!" : "Game Over";
+            document.getElementById('final-score').innerText = score;
+        }
+        function resetGame() { document.getElementById('game-over-screen').classList.add('hidden'); startGame(); }
+        initBricks(); drawBricks(); drawPaddle();
+    </script>
+</body>
+</html>

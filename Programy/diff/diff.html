@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Porównywarka Tekstu - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #8b5cf6;
+            --added: #dcfce7;
+            --removed: #fee2e2;
+            --added-text: #166534;
+            --removed-text: #991b1b;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #a78bfa;
+            --added: #14532d;
+            --removed: #7f1d1d;
+            --added-text: #86efac;
+            --removed-text: #fca5a5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .compare-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .compare-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .text-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1rem;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .text-panel textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .text-panel textarea:focus {
+            outline: none;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Results */
+        .results {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .results-header {
+            padding: 1rem;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .stat.added .stat-value {
+            color: var(--added-text);
+        }
+
+        .stat.removed .stat-value {
+            color: var(--removed-text);
+        }
+
+        .diff-output {
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .diff-line {
+            padding: 0.2rem 0.5rem;
+            margin: 0.1rem 0;
+            border-radius: 4px;
+        }
+
+        .diff-added {
+            background: var(--added);
+            color: var(--added-text);
+        }
+
+        .diff-removed {
+            background: var(--removed);
+            color: var(--removed-text);
+        }
+
+        .diff-same {
+            color: var(--text-secondary);
+        }
+
+        .legend {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.added {
+            background: var(--added);
+        }
+
+        .legend-color.removed {
+            background: var(--removed);
+        }
+
+        .word-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🔍 Porównywarka Tekstu</h1>
+            <p>Znajdź różnice między dwoma tekstami</p>
+        </div>
+
+        <div class="compare-container">
+            <div class="text-panel">
+                <div class="panel-header">
+                    <span>📄 Tekst oryginalny</span>
+                    <span class="word-count" id="count-1">0 słów</span>
+                </div>
+                <textarea id="text-1" placeholder="Wklej lub wpisz pierwszy tekst..."></textarea>
+            </div>
+            <div class="text-panel">
+                <div class="panel-header">
+                    <span>📝 Tekst zmodyfikowany</span>
+                    <span class="word-count" id="count-2">0 słów</span>
+                </div>
+                <textarea id="text-2" placeholder="Wklej lub wpisz drugi tekst..."></textarea>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="btn-compare">🔍 Porównaj teksty</button>
+            <button class="btn btn-secondary" id="btn-clear">🗑️ Wyczyść</button>
+            <button class="btn btn-secondary" id="btn-swap">🔄 Zamień miejscami</button>
+        </div>
+
+        <div class="results" id="results">
+            <div class="results-header">
+                <div class="stats">
+                    <div class="stat added">
+                        <div class="stat-value" id="stat-added">0</div>
+                        <div class="stat-label">Dodane</div>
+                    </div>
+                    <div class="stat removed">
+                        <div class="stat-value" id="stat-removed">0</div>
+                        <div class="stat-label">Usunięte</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-same">0</div>
+                        <div class="stat-label">Bez zmian</div>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color added"></div>
+                        <span>Dodane</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color removed"></div>
+                        <span>Usunięte</span>
+                    </div>
+                </div>
+            </div>
+            <div class="diff-output" id="diff-output"></div>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Text Comparison Logic
+        const text1 = document.getElementById('text-1');
+        const text2 = document.getElementById('text-2');
+        const results = document.getElementById('results');
+        const diffOutput = document.getElementById('diff-output');
+
+        // Word counts
+        function updateCounts() {
+            const count1 = text1.value.trim() ? text1.value.trim().split(/\s+/).length : 0;
+            const count2 = text2.value.trim() ? text2.value.trim().split(/\s+/).length : 0;
+            document.getElementById('count-1').textContent = count1 + ' słów';
+            document.getElementById('count-2').textContent = count2 + ' słów';
+        }
+
+        text1.addEventListener('input', updateCounts);
+        text2.addEventListener('input', updateCounts);
+
+        // Clear
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            text1.value = '';
+            text2.value = '';
+            results.classList.remove('active');
+            updateCounts();
+        });
+
+        // Swap
+        document.getElementById('btn-swap').addEventListener('click', () => {
+            const temp = text1.value;
+            text1.value = text2.value;
+            text2.value = temp;
+            updateCounts();
+        });
+
+        // Compare using LCS-based diff
+        document.getElementById('btn-compare').addEventListener('click', () => {
+            const lines1 = text1.value.split('\n');
+            const lines2 = text2.value.split('\n');
+
+            const diff = computeDiff(lines1, lines2);
+
+            let added = 0, removed = 0, same = 0;
+            let html = '';
+
+            diff.forEach(item => {
+                const escapedLine = escapeHtml(item.line);
+                if (item.type === 'added') {
+                    html += `<div class="diff-line diff-added">+ ${escapedLine}</div>`;
+                    added++;
+                } else if (item.type === 'removed') {
+                    html += `<div class="diff-line diff-removed">- ${escapedLine}</div>`;
+                    removed++;
+                } else {
+                    html += `<div class="diff-line diff-same">  ${escapedLine}</div>`;
+                    same++;
+                }
+            });
+
+            document.getElementById('stat-added').textContent = added;
+            document.getElementById('stat-removed').textContent = removed;
+            document.getElementById('stat-same').textContent = same;
+            diffOutput.innerHTML = html;
+            results.classList.add('active');
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function computeDiff(oldLines, newLines) {
+            // Simple line-by-line diff using LCS
+            const result = [];
+            const lcs = longestCommonSubsequence(oldLines, newLines);
+
+            let oldIndex = 0;
+            let newIndex = 0;
+            let lcsIndex = 0;
+
+            while (oldIndex < oldLines.length || newIndex < newLines.length) {
+                if (lcsIndex < lcs.length && oldIndex < oldLines.length && oldLines[oldIndex] === lcs[lcsIndex]) {
+                    if (newIndex < newLines.length && newLines[newIndex] === lcs[lcsIndex]) {
+                        result.push({ type: 'same', line: oldLines[oldIndex] });
+                        oldIndex++;
+                        newIndex++;
+                        lcsIndex++;
+                    } else {
+                        result.push({ type: 'added', line: newLines[newIndex] });
+                        newIndex++;
+                    }
+                } else if (oldIndex < oldLines.length && (lcsIndex >= lcs.length || oldLines[oldIndex] !== lcs[lcsIndex])) {
+                    result.push({ type: 'removed', line: oldLines[oldIndex] });
+                    oldIndex++;
+                } else if (newIndex < newLines.length) {
+                    result.push({ type: 'added', line: newLines[newIndex] });
+                    newIndex++;
+                }
+            }
+
+            return result;
+        }
+
+        function longestCommonSubsequence(arr1, arr2) {
+            const m = arr1.length;
+            const n = arr2.length;
+            const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (arr1[i - 1] === arr2[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+
+            // Backtrack to find LCS
+            const lcs = [];
+            let i = m, j = n;
+            while (i > 0 && j > 0) {
+                if (arr1[i - 1] === arr2[j - 1]) {
+                    lcs.unshift(arr1[i - 1]);
+                    i--;
+                    j--;
+                } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                    i--;
+                } else {
+                    j--;
+                }
+            }
+
+            return lcs;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Symulator Rzutów - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e293b;
+            --text: #ffffff;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --card-bg: #0f172a;
+            --header-bg: #0f172a;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --accent: #ef4444;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #dc2626;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .page-header {
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Dice Display */
+        .dice-stage {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3rem;
+            perspective: 1000px;
+        }
+
+        .dice-result {
+            font-size: 8rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-shadow: 0 4px 20px var(--shadow);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .coin-result {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #eab308;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #713f12;
+            border: 8px solid #ca8a04;
+            box-shadow: 0 4px 20px rgba(234, 179, 8, 0.4);
+            animation: flip 0.6s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes flip {
+            0% {
+                transform: rotateY(0);
+            }
+
+            50% {
+                transform: rotateY(900deg) scale(1.5);
+            }
+
+            100% {
+                transform: rotateY(1080deg) scale(1);
+            }
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+        .shaking {
+            animation: shake 0.5s;
+        }
+
+        /* Controls */
+        .dice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .dice-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                line-height: 1.6;
+                min-height: 100vh;
+            }
+
+            header {
+                background: var(--header-bg);
+                border-bottom: 1px solid var(--border);
+            }
+
+            nav {
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 1rem 2rem;
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--text);
+                text-decoration: none;
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 2rem;
+                flex: 1;
+            }
+
+            .nav-links a {
+                color: var(--text-secondary);
+                text-decoration: none;
+            }
+
+            .nav-links a:hover,
+            .nav-links a.active {
+                color: var(--text);
+            }
+
+            #theme-toggle {
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+
+            main {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .page-header {
+                margin-bottom: 3rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            /* Dice Display */
+            .dice-stage {
+                height: 250px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 3rem;
+                perspective: 1000px;
+            }
+
+            .dice-result {
+                font-size: 8rem;
+                font-weight: 800;
+                color: var(--accent);
+                text-shadow: 0 4px 20px var(--shadow);
+                animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .coin-result {
+                width: 150px;
+                height: 150px;
+                border-radius: 50%;
+                background: #eab308;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                font-weight: 700;
+                color: #713f12;
+                border: 8px solid #ca8a04;
+                box-shadow: 0 4px 20px rgba(234, 179, 8, 0.4);
+                animation: flip 0.6s ease-out;
+            }
+
+            @keyframes popIn {
+                from {
+                    transform: scale(0);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes flip {
+                0% {
+                    transform: rotateY(0);
+                }
+
+                50% {
+                    transform: rotateY(900deg) scale(1.5);
+                }
+
+                100% {
+                    transform: rotateY(1080deg) scale(1);
+                }
+            }
+
+            @keyframes shake {
+                0% {
+                    transform: translate(1px, 1px) rotate(0deg);
+                }
+
+                10% {
+                    transform: translate(-1px, -2px) rotate(-1deg);
+                }
+
+                20% {
+                    transform: translate(-3px, 0px) rotate(1deg);
+                }
+
+                30% {
+                    transform: translate(3px, 2px) rotate(0deg);
+                }
+
+                40% {
+                    transform: translate(1px, -1px) rotate(1deg);
+                }
+
+                50% {
+                    transform: translate(-1px, 2px) rotate(-1deg);
+                }
+
+                60% {
+                    transform: translate(-3px, 1px) rotate(0deg);
+                }
+
+                70% {
+                    transform: translate(3px, 1px) rotate(-1deg);
+                }
+
+                80% {
+                    transform: translate(-1px, -1px) rotate(1deg);
+                }
+
+                90% {
+                    transform: translate(1px, 2px) rotate(0deg);
+                }
+
+                100% {
+                    transform: translate(1px, -2px) rotate(-1deg);
+                }
+            }
+
+            .shaking {
+                animation: shake 0.5s;
+            }
+
+            /* Controls */
+            .dice-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 1rem;
+                margin-bottom: 3rem;
+            }
+
+            .dice-btn {
+                background: var(--card-bg);
+                border: 2px solid var(--border);
+                border-radius: 12px;
+                padding: 1.5rem 1rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .dice-btn:hover {
+                border-color: #eab308;
+                transform: translateY(-5px);
+                box-shadow: 0 4px 12px var(--shadow);
+            }
+
+            .dice-btn:active {
+                transform: translateY(-2px);
+            }
+
+            .dice-icon {
+                font-size: 2rem;
+            }
+
+            .dice-name {
+                font-weight: 700;
+                color: var(--text-secondary);
+            }
+
+            /* History */
+            .history {
+                background: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 1.5rem;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .history h3 {
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+                color: var(--text-secondary);
+            }
+
+            .history-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .history-item {
+                background: var(--bg);
+                padding: 0.4rem 0.8rem;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                border: 1px solid var(--border);
+            }
+
+            .history-item.recent {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            .coin-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🎲 Symulator Rzutów</h1>
+            <p>Rzucaj kośćmi i monetami</p>
+        </div>
+
+        <div class="dice-stage" id="stage">
+            <div class="dice-result" id="result">?</div>
+        </div>
+
+        <div class="dice-grid">
+            <button class="dice-btn" onclick="roll(4)">
+                <span class="dice-icon">🔺</span>
+                <span class="dice-name">D4</span>
+            </button>
+            <button class="dice-btn" onclick="roll(6)">
+                <span class="dice-icon">🎲</span>
+                <span class="dice-name">D6</span>
+            </button>
+            <button class="dice-btn" onclick="roll(8)">
+                <span class="dice-icon">💎</span>
+                <span class="dice-name">D8</span>
+            </button>
+            <button class="dice-btn" onclick="roll(10)">
+                <span class="dice-icon">🔟</span>
+                <span class="dice-name">D10</span>
+            </button>
+            <button class="dice-btn" onclick="roll(12)">
+                <span class="dice-icon">⬡</span>
+                <span class="dice-name">D12</span>
+            </button>
+            <button class="dice-btn" onclick="roll(20)">
+                <span class="dice-icon">⚔️</span>
+                <span class="dice-name">D20</span>
+            </button>
+            <button class="dice-btn" onclick="flipCoin()">
+                <span class="dice-icon">🪙</span>
+                <span class="dice-name">Moneta</span>
+            </button>
+        </div>
+
+        <div class="history">
+            <h3>Ostatnie rzuty</h3>
+            <div class="history-list" id="history"></div>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        const stage = document.getElementById('stage');
+        const historyList = document.getElementById('history');
+        let history = [];
+
+        function addToHistory(val, type) {
+            history.unshift({ val, type });
+            if (history.length > 10) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyList.innerHTML = history.map((h, i) => `
+                <div class="history-item ${i === 0 ? 'recent' : ''}">
+                    ${h.type}: ${h.val}
+                </div>
+            `).join('');
+        }
+
+        function roll(sides) {
+            stage.innerHTML = '<div class="dice-result shaking">...</div>';
+
+            setTimeout(() => {
+                const result = Math.floor(Math.random() * sides) + 1;
+                stage.innerHTML = `<div class="dice-result">${result}</div>`;
+                addToHistory(result, 'D' + sides);
+            }, 500);
+        }
+
+        function flipCoin() {
+            stage.innerHTML = '';
+            const container = document.createElement('div');
+            container.className = 'coin-container';
+
+            const coin = document.createElement('div');
+            coin.className = 'coin-result';
+            coin.style.animation = 'flip 0.6s ease-out infinite';
+
+            container.appendChild(coin);
+            stage.appendChild(container);
+
+            setTimeout(() => {
+                const isHeads = Math.random() > 0.5;
+                const result = isHeads ? 'Orzeł' : 'Reszka';
+
+                container.innerHTML = `
+                    <div class="coin-result" style="animation: none;">
+                        ${isHeads ? '🦅' : '1️⃣'}
+                    </div>
+                    <div style="margin-top: 1rem; font-weight: 700; font-size: 1.5rem;">${result}</div>
+                `;
+
+                addToHistory(result, 'Moneta');
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Narzędzia - Hub</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
             margin: 0;
@@ -21,6 +23,7 @@
             --card-hover: #e9ecef;
             --header-bg: #ffffff;
             --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #6366f1;
         }
 
         [data-theme="dark"] {
@@ -32,6 +35,7 @@
             --card-hover: #3a3a3a;
             --header-bg: #1a1a1a;
             --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #818cf8;
         }
 
         body {
@@ -100,7 +104,7 @@
 
         .page-header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
 
         h1 {
@@ -113,23 +117,99 @@
             font-size: 1.1rem;
         }
 
+        /* Search Box - Premium Style */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3.5rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 50px;
+            background: var(--card-bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--border);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .search-clear:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .search-clear.visible {
+            display: flex;
+        }
+
+        /* Results Counter */
+        .results-counter {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Tools List */
         .tools-list {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .tool-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-decoration: none;
             color: var(--text);
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .tool-card:hover {
@@ -139,7 +219,7 @@
         }
 
         .tool-icon {
-            font-size: 3rem;
+            font-size: 2.5rem;
             flex-shrink: 0;
         }
 
@@ -148,20 +228,46 @@
         }
 
         .tool-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .tool-description {
             color: var(--text-secondary);
-            line-height: 1.6;
+            font-size: 0.9rem;
         }
 
         .tool-arrow {
             font-size: 1.5rem;
             color: var(--text-secondary);
             flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .tool-card:hover .tool-arrow {
+            transform: translateX(4px);
+            color: var(--accent);
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 3rem 2rem;
+            display: none;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-results h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
         }
 
         @media (max-width: 768px) {
@@ -188,6 +294,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <nav>
@@ -205,10 +312,25 @@
     <main>
         <div class="page-header">
             <h1>🛠️ Narzędzia</h1>
-            <p>Przydatne generatory i narzędzia</p>
+            <p>36 przydatnych generatorów i narzędzi</p>
         </div>
 
-        <div class="tools-list">
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Szukaj narzędzia..."
+                autocomplete="off">
+            <button class="search-clear" id="search-clear">✕</button>
+        </div>
+
+        <div class="results-counter" id="results-counter"></div>
+
+        <div class="no-results" id="no-results">
+            <div class="no-results-icon">🔎</div>
+            <h3>Brak wyników</h3>
+            <p>Nie znaleziono narzędzi pasujących do wyszukiwania.</p>
+        </div>
+
+        <div class="tools-list" id="tools-list">
             <a href="generator kolorow/generator kolorow.html" class="tool-card">
                 <div class="tool-icon">🎨</div>
                 <div class="tool-info">
@@ -246,7 +368,7 @@
             </a>
 
             <a href="lista zadan/lista zadan.html" class="tool-card">
-                <div class="tool-icon">📝</div>
+                <div class="tool-icon">✅</div>
                 <div class="tool-info">
                     <div class="tool-title">Lista Zadań</div>
                     <div class="tool-description">Szybki notatnik z zapisem</div>
@@ -267,7 +389,7 @@
                 <div class="tool-icon">📏</div>
                 <div class="tool-info">
                     <div class="tool-title">Konwerter Jednostek</div>
-                    <div class="tool-description">Długość, waga, dane, temperatura</div>
+                    <div class="tool-description">Długość, waga, dane, temperatura i waluty</div>
                 </div>
                 <div class="tool-arrow">→</div>
             </a>
@@ -291,7 +413,7 @@
             </a>
 
             <a href="kompresor/kompresor.html" class="tool-card">
-                <div class="tool-icon">🖼️</div>
+                <div class="tool-icon">🗜️</div>
                 <div class="tool-info">
                     <div class="tool-title">Kompresor Obrazów</div>
                     <div class="tool-description">Zmniejszaj wagę zdjęć i zmieniaj format</div>
@@ -334,11 +456,201 @@
                 </div>
                 <div class="tool-arrow">→</div>
             </a>
+
+            <a href="czas/czas.html" class="tool-card">
+                <div class="tool-icon">⏱️</div>
+                <div class="tool-info">
+                    <div class="tool-title">Centrum Czasu</div>
+                    <div class="tool-description">Stoper, Minutnik, Pomodoro i 60+ stref czasowych</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="szyfrator/szyfrator.html" class="tool-card">
+                <div class="tool-icon">🛡️</div>
+                <div class="tool-info">
+                    <div class="tool-title">Szyfrator Plików</div>
+                    <div class="tool-description">Zabezpiecz pliki hasłem (AES-256)</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="tester/tester.html" class="tool-card">
+                <div class="tool-icon">⌨️</div>
+                <div class="tool-info">
+                    <div class="tool-title">Tester Klawiatury</div>
+                    <div class="tool-description">Test klawiszy, myszki i ghostingu</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="fiszki/fiszki.html" class="tool-card">
+                <div class="tool-icon">🗂️</div>
+                <div class="tool-info">
+                    <div class="tool-title">Fiszki</div>
+                    <div class="tool-description">Twórz i przeglądaj zestawy do nauki</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="tester ekranu/tester ekranu.html" class="tool-card">
+                <div class="tool-icon">📺</div>
+                <div class="tool-info">
+                    <div class="tool-title">Tester Ekranu</div>
+                    <div class="tool-description">Sprawdź martwe piksele i kolory</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="kalkulator/kalkulator.html" class="tool-card">
+                <div class="tool-icon">🧮</div>
+                <div class="tool-info">
+                    <div class="tool-title">Kalkulator Uniwersalny</div>
+                    <div class="tool-description">Naukowy, Geometria i Finanse</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="cornell/cornell.html" class="tool-card">
+                <div class="tool-icon">📓</div>
+                <div class="tool-info">
+                    <div class="tool-title">Notatnik Cornell</div>
+                    <div class="tool-description">System notowania z podziałem na notatki, wskazówki i podsumowanie
+                    </div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="mindmap/mindmap.html" class="tool-card">
+                <div class="tool-icon">🧠</div>
+                <div class="tool-info">
+                    <div class="tool-title">Mapa Myśli</div>
+                    <div class="tool-description">Twórz mind maps z eksportem do obrazu</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="wykresy/wykresy.html" class="tool-card">
+                <div class="tool-icon">📈</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator Wykresów</div>
+                    <div class="tool-description">Słupkowe, liniowe, kołowe i więcej</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="edytor/edytor.html" class="tool-card">
+                <div class="tool-icon">🖼️</div>
+                <div class="tool-info">
+                    <div class="tool-title">Edytor Zdjęć</div>
+                    <div class="tool-description">Filtry, kadrowanie, jasność, kontrast</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="gif/gif.html" class="tool-card">
+                <div class="tool-icon">🎬</div>
+                <div class="tool-info">
+                    <div class="tool-title">Edytor GIF</div>
+                    <div class="tool-description">Twórz animacje z obrazów lub wideo</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="kanban/kanban.html" class="tool-card">
+                <div class="tool-icon">📋</div>
+                <div class="tool-info">
+                    <div class="tool-title">Tablica Kanban</div>
+                    <div class="tool-description">Zarządzaj zadaniami z przeciągnij i upuść</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="diff/diff.html" class="tool-card">
+                <div class="tool-icon">🔍</div>
+                <div class="tool-info">
+                    <div class="tool-title">Porównywarka Tekstu</div>
+                    <div class="tool-description">Znajdź różnice między dwoma tekstami</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="gradient/gradient.html" class="tool-card">
+                <div class="tool-icon">🌈</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator Gradientów CSS</div>
+                    <div class="tool-description">Twórz piękne gradienty i kopiuj kod CSS</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="scoreboard/scoreboard.html" class="tool-card">
+                <div class="tool-icon">🏆</div>
+                <div class="tool-info">
+                    <div class="tool-title">Tablica Wyników</div>
+                    <div class="tool-description">Śledź wyniki gier i meczów z timerem</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="lorem/lorem.html" class="tool-card">
+                <div class="tool-icon">📜</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator Lorem Ipsum</div>
+                    <div class="tool-description">Generuj tekst zastępczy do projektów</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="markdown/markdown.html" class="tool-card">
+                <div class="tool-icon">📝</div>
+                <div class="tool-info">
+                    <div class="tool-title">Edytor Markdown</div>
+                    <div class="tool-description">Pisz i podglądaj Markdown na żywo</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="health/health.html" class="tool-card">
+                <div class="tool-icon">💪</div>
+                <div class="tool-info">
+                    <div class="tool-title">Kalkulator Zdrowia</div>
+                    <div class="tool-description">BMI, BMR i kalkulator nawodnienia</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="noise/noise.html" class="tool-card">
+                <div class="tool-icon">🔊</div>
+                <div class="tool-info">
+                    <div class="tool-title">Generator Szumu</div>
+                    <div class="tool-description">Biały, różowy i brązowy szum do relaksu</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="text-tools/text-tools.html" class="tool-card">
+                <div class="tool-icon">🔤</div>
+                <div class="tool-info">
+                    <div class="tool-title">Narzędzia Tekstowe</div>
+                    <div class="tool-description">Konwersja wielkości liter, czyszczenie i więcej</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
+
+            <a href="dice/dice.html" class="tool-card">
+                <div class="tool-icon">🎲</div>
+                <div class="tool-info">
+                    <div class="tool-title">Symulator Rzutów</div>
+                    <div class="tool-description">Rzucaj kośćmi D4-D20 i monetą</div>
+                </div>
+                <div class="tool-arrow">→</div>
+            </a>
         </div>
     </main>
 
     <script>
-        // Tryb ciemny
+        // Theme Toggle
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -352,6 +664,71 @@
             localStorage.setItem('theme', newTheme);
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
         });
+
+        // Search Functionality
+        const searchInput = document.getElementById('search-input');
+        const searchClear = document.getElementById('search-clear');
+        const toolsList = document.getElementById('tools-list');
+        const toolCards = document.querySelectorAll('.tool-card');
+        const noResults = document.getElementById('no-results');
+        const resultsCounter = document.getElementById('results-counter');
+        const totalTools = toolCards.length;
+
+        function performSearch(query) {
+            query = query.toLowerCase().trim();
+            let visibleCount = 0;
+
+            toolCards.forEach(card => {
+                const title = card.querySelector('.tool-title').textContent.toLowerCase();
+                const description = card.querySelector('.tool-description').textContent.toLowerCase();
+
+                if (title.includes(query) || description.includes(query)) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update UI
+            if (visibleCount > 0) {
+                noResults.style.display = 'none';
+                toolsList.style.display = 'flex';
+                if (query) {
+                    resultsCounter.textContent = `Znaleziono ${visibleCount} z ${totalTools} narzędzi`;
+                } else {
+                    resultsCounter.textContent = '';
+                }
+            } else {
+                noResults.style.display = 'block';
+                toolsList.style.display = 'none';
+                resultsCounter.textContent = '';
+            }
+
+            // Show/hide clear button
+            searchClear.classList.toggle('visible', query.length > 0);
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            performSearch('');
+            searchInput.focus();
+        });
+
+        // Allow Enter to focus first result
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const firstVisible = document.querySelector('.tool-card[style="display: flex;"], .tool-card:not([style])');
+                if (firstVisible && firstVisible.style.display !== 'none') {
+                    firstVisible.click();
+                }
+            }
+        });
     </script>
 </body>
+
 </html>

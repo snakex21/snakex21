@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku - Hub</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --text: #333;
+            --header-bg: #ffffff;
+            --nav-text: #666;
+            --nav-hover: #1a1a1a;
+            --border: #e0e0e0;
+            --board-border: #333;
+            --cell-bg: #fff;
+            --cell-fixed: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --text: #ffffff;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+            --board-border: #888;
+            --cell-bg: #2a2a2a;
+            --cell-fixed: #444;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+        
+        /* HEADER */
+        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background 0.3s; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; flex: 1; }
+        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; }
+        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); font-weight: 500; }
+        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+
+        .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        
+        .sudoku-board { display: grid; grid-template-columns: repeat(9, 40px); grid-template-rows: repeat(9, 40px); gap: 1px; background: var(--board-border); border: 2px solid var(--board-border); margin-bottom: 20px; }
+        .cell { width: 40px; height: 40px; background: var(--cell-bg); border: none; text-align: center; font-size: 1.2rem; color: var(--text); }
+        .cell:focus { background: #e8f0fe; outline: none; }
+        .cell.fixed { background: var(--cell-fixed); font-weight: bold; cursor: default; }
+        .cell.error { color: red; background: #ffe6e6; }
+        .cell:nth-child(3n) { border-right: 2px solid var(--board-border); }
+        .cell:nth-child(9n) { border-right: none; }
+        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--board-border); }
+        .controls { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; background: #1db954; color: white; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        .btn:hover { background: #1ed760; } .btn.secondary { background: #666; }
+        @media (max-width: 500px) { .sudoku-board { grid-template-columns: repeat(9, 32px); grid-template-rows: repeat(9, 32px); } .cell { width: 32px; height: 32px; font-size: 1rem; } }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-bottom: 20px;">Sudoku</h1>
+        <div class="sudoku-board" id="board"></div>
+        <div class="controls">
+            <button class="btn" onclick="newGame()">Nowa Gra</button>
+            <button class="btn secondary" onclick="check()">Sprawdź</button>
+        </div>
+    </div>
+
+    <script>
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Game Logic
+        const boardEl = document.getElementById('board');
+        let solution = [];
+
+        function generateSudoku() {
+            let board = Array(81).fill(0);
+            for(let i=0; i<9; i+=3) fillBox(board, i, i);
+            solve(board); solution = [...board];
+            let attempts = 40; while(attempts > 0) { let idx = Math.floor(Math.random() * 81); if(board[idx] !== 0) { board[idx] = 0; attempts--; } }
+            return board;
+        }
+        function fillBox(board, row, col) {
+            let num; for(let i=0; i<3; i++) for(let j=0; j<3; j++) { do { num = Math.floor(Math.random() * 9) + 1; } while(!isSafeBox(board, row, col, num)); board[(row+i)*9 + (col+j)] = num; }
+        }
+        function isSafeBox(board, rowStart, colStart, num) { for(let i=0; i<3; i++) for(let j=0; j<3; j++) if(board[(rowStart+i)*9 + (colStart+j)] === num) return false; return true; }
+        function solve(board) {
+            for(let i=0; i<81; i++) if(board[i] === 0) {
+                for(let num=1; num<=9; num++) if(isValid(board, i, num)) { board[i] = num; if(solve(board)) return true; board[i] = 0; }
+                return false;
+            } return true;
+        }
+        function isValid(board, idx, num) {
+            const row = Math.floor(idx / 9), col = idx % 9, startRow = row - row % 3, startCol = col - col % 3;
+            for(let i=0; i<9; i++) if(board[row*9 + i] === num) return false;
+            for(let i=0; i<9; i++) if(board[i*9 + col] === num) return false;
+            for(let i=0; i<3; i++) for(let j=0; j<3; j++) if(board[(startRow+i)*9 + (startCol+j)] === num) return false;
+            return true;
+        }
+        function renderBoard(board) {
+            boardEl.innerHTML = '';
+            board.forEach((val, idx) => {
+                const input = document.createElement('input'); input.className = 'cell'; input.type = 'number'; input.min = 1; input.max = 9; input.dataset.idx = idx;
+                if(val !== 0) { input.value = val; input.readOnly = true; input.classList.add('fixed'); }
+                else { input.addEventListener('input', (e) => { if(e.target.value.length > 1) e.target.value = e.target.value.slice(0,1); e.target.classList.remove('error'); }); }
+                boardEl.appendChild(input);
+            });
+        }
+        function newGame() { const board = generateSudoku(); renderBoard(board); }
+        function check() {
+            const inputs = document.querySelectorAll('.cell'); let errors = 0, empty = 0;
+            inputs.forEach(input => {
+                const val = parseInt(input.value) || 0, idx = parseInt(input.dataset.idx); input.classList.remove('error');
+                if(val === 0) empty++; else if(val !== solution[idx]) { input.classList.add('error'); errors++; }
+            });
+            if(errors === 0 && empty === 0) alert('Gratulacje! Rozwiązałeś Sudoku!'); else if(errors === 0) alert('Na razie bez błędów, ale plansza niepełna.'); else alert(`Znaleziono ${errors} błędów.`);
+        }
+        newGame();
+    </script>
+</body>
+</html>

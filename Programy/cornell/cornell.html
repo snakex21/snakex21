@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notatnik Cornell - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --cues-bg: #fef3c7;
+            --notes-bg: #ffffff;
+            --summary-bg: #dbeafe;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #a78bfa;
+            --accent-light: #c4b5fd;
+            --cues-bg: #44403c;
+            --notes-bg: #2a2a2a;
+            --summary-bg: #1e3a5f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .toolbar-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Cornell Layout */
+        .cornell-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: 1fr auto;
+            gap: 0;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            min-height: 70vh;
+            box-shadow: 0 8px 32px var(--shadow);
+        }
+
+        .cornell-section {
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .section-label {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        /* Cues Section */
+        .cues-section {
+            background: var(--cues-bg);
+            border-right: 2px solid var(--border);
+            grid-row: 1;
+        }
+
+        .cues-section textarea {
+            width: 100%;
+            height: calc(100% - 30px);
+            margin-top: 25px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            resize: none;
+            line-height: 1.8;
+        }
+
+        /* Notes Section */
+        .notes-section {
+            background: var(--notes-bg);
+            grid-row: 1;
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            height: calc(100% - 30px);
+            margin-top: 25px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            resize: none;
+            line-height: 1.8;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            background: var(--summary-bg);
+            grid-column: 1 / -1;
+            border-top: 2px solid var(--border);
+            min-height: 150px;
+        }
+
+        .summary-section textarea {
+            width: 100%;
+            height: calc(100% - 30px);
+            margin-top: 25px;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            resize: none;
+            line-height: 1.8;
+        }
+
+        textarea:focus {
+            outline: none;
+        }
+
+        textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* Saved Notes List */
+        .saved-notes {
+            margin-top: 2rem;
+        }
+
+        .saved-notes h2 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        .note-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-card .date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .note-card .preview {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+
+        .note-actions button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        /* Tips */
+        .cornell-tips {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .cornell-tips h3 {
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .cornell-tips ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .cornell-tips li {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .cornell-tips .emoji {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .cornell-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+
+            .cues-section {
+                border-right: none;
+                border-bottom: 2px solid var(--border);
+                min-height: 150px;
+            }
+
+            .notes-section {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>📓 Notatnik Cornell</h1>
+            <p>System notowania oparty na metodzie Cornell</p>
+        </div>
+
+        <div class="toolbar">
+            <input type="text" id="note-title" placeholder="Tytuł notatki...">
+            <button class="toolbar-btn btn-primary" id="btn-save">💾 Zapisz</button>
+            <button class="toolbar-btn btn-secondary" id="btn-new">📄 Nowa</button>
+            <button class="toolbar-btn btn-secondary" id="btn-export">📥 Eksportuj PDF</button>
+        </div>
+
+        <div class="cornell-container">
+            <div class="cornell-section cues-section">
+                <span class="section-label">💡 Wskazówki / Pytania</span>
+                <textarea id="cues"
+                    placeholder="Zapisuj tutaj kluczowe słowa, pytania i wskazówki, które pomogą Ci powtórzyć materiał..."></textarea>
+            </div>
+
+            <div class="cornell-section notes-section">
+                <span class="section-label">📝 Notatki</span>
+                <textarea id="notes"
+                    placeholder="Zapisuj tutaj główne notatki z lekcji lub wykładu. Używaj skrótów, symboli i diagramów..."></textarea>
+            </div>
+
+            <div class="cornell-section summary-section">
+                <span class="section-label">📌 Podsumowanie</span>
+                <textarea id="summary"
+                    placeholder="Po zakończeniu notatek napisz krótkie podsumowanie najważniejszych punktów własnymi słowami..."></textarea>
+            </div>
+        </div>
+
+        <div class="saved-notes" id="saved-notes">
+            <h2>📚 Zapisane notatki</h2>
+            <div class="notes-grid" id="notes-grid"></div>
+        </div>
+
+        <div class="cornell-tips">
+            <h3>💡 Jak korzystać z metody Cornell?</h3>
+            <ul>
+                <li><span class="emoji">1️⃣</span> <strong>Notatki:</strong> Podczas lekcji zapisuj główne informacje w
+                    prawej kolumnie</li>
+                <li><span class="emoji">2️⃣</span> <strong>Wskazówki:</strong> Po lekcji dodaj pytania i słowa kluczowe
+                    w lewej kolumnie</li>
+                <li><span class="emoji">3️⃣</span> <strong>Podsumowanie:</strong> Na końcu napisz podsumowanie własnymi
+                    słowami</li>
+                <li><span class="emoji">4️⃣</span> <strong>Powtórka:</strong> Zasłoń notatki i odpowiadaj na pytania ze
+                    wskazówek</li>
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Cornell Notes Logic
+        const titleInput = document.getElementById('note-title');
+        const cuesArea = document.getElementById('cues');
+        const notesArea = document.getElementById('notes');
+        const summaryArea = document.getElementById('summary');
+        const notesGrid = document.getElementById('notes-grid');
+
+        let currentNoteId = null;
+
+        function getSavedNotes() {
+            return JSON.parse(localStorage.getItem('cornell-notes')) || [];
+        }
+
+        function saveNotes(notes) {
+            localStorage.setItem('cornell-notes', JSON.stringify(notes));
+        }
+
+        function renderNotes() {
+            const notes = getSavedNotes();
+
+            if (notes.length === 0) {
+                notesGrid.innerHTML = '<p style="color: var(--text-secondary);">Brak zapisanych notatek. Zacznij pisać!</p>';
+                return;
+            }
+
+            notesGrid.innerHTML = notes.map(note => `
+                <div class="note-card" data-id="${note.id}">
+                    <h3>
+                        ${note.title || 'Bez tytułu'}
+                        <span class="date">${new Date(note.date).toLocaleDateString('pl-PL')}</span>
+                    </h3>
+                    <p class="preview">${note.notes.substring(0, 100)}${note.notes.length > 100 ? '...' : ''}</p>
+                    <div class="note-actions">
+                        <button class="toolbar-btn btn-secondary btn-load" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" data-id="${note.id}">📂 Otwórz</button>
+                        <button class="btn-delete" data-id="${note.id}">🗑️ Usuń</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add event listeners
+            document.querySelectorAll('.btn-load').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    loadNote(btn.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteNote(btn.dataset.id);
+                });
+            });
+        }
+
+        function loadNote(id) {
+            const notes = getSavedNotes();
+            const note = notes.find(n => n.id === id);
+            if (note) {
+                currentNoteId = id;
+                titleInput.value = note.title;
+                cuesArea.value = note.cues;
+                notesArea.value = note.notes;
+                summaryArea.value = note.summary;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function deleteNote(id) {
+            if (!confirm('Czy na pewno chcesz usunąć tę notatkę?')) return;
+
+            let notes = getSavedNotes();
+            notes = notes.filter(n => n.id !== id);
+            saveNotes(notes);
+
+            if (currentNoteId === id) {
+                clearForm();
+            }
+
+            renderNotes();
+        }
+
+        function clearForm() {
+            currentNoteId = null;
+            titleInput.value = '';
+            cuesArea.value = '';
+            notesArea.value = '';
+            summaryArea.value = '';
+        }
+
+        // Save button
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const title = titleInput.value.trim();
+            const cues = cuesArea.value.trim();
+            const notes = notesArea.value.trim();
+            const summary = summaryArea.value.trim();
+
+            if (!notes && !cues && !summary) {
+                alert('Napisz coś zanim zapiszesz!');
+                return;
+            }
+
+            let allNotes = getSavedNotes();
+
+            if (currentNoteId) {
+                // Update existing
+                const idx = allNotes.findIndex(n => n.id === currentNoteId);
+                if (idx !== -1) {
+                    allNotes[idx] = { ...allNotes[idx], title, cues, notes, summary, date: Date.now() };
+                }
+            } else {
+                // Create new
+                const newNote = {
+                    id: Date.now().toString(),
+                    title,
+                    cues,
+                    notes,
+                    summary,
+                    date: Date.now()
+                };
+                allNotes.unshift(newNote);
+                currentNoteId = newNote.id;
+            }
+
+            saveNotes(allNotes);
+            renderNotes();
+            alert('Notatka zapisana!');
+        });
+
+        // New button
+        document.getElementById('btn-new').addEventListener('click', () => {
+            if ((cuesArea.value || notesArea.value || summaryArea.value) &&
+                !confirm('Masz niezapisane zmiany. Kontynuować?')) {
+                return;
+            }
+            clearForm();
+        });
+
+        // Export PDF (simple print)
+        document.getElementById('btn-export').addEventListener('click', () => {
+            const printContent = `
+                <html>
+                <head>
+                    <title>${titleInput.value || 'Notatka Cornell'}</title>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+                        body { padding: 20px; }
+                        h1 { text-align: center; margin-bottom: 20px; }
+                        .container { border: 2px solid #333; display: grid; grid-template-columns: 200px 1fr; }
+                        .section { padding: 15px; border: 1px solid #333; min-height: 300px; }
+                        .cues { background: #fffbeb; }
+                        .notes { background: #fff; }
+                        .summary { grid-column: 1 / -1; background: #eff6ff; min-height: 100px; }
+                        .label { font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; color: #666; }
+                        .content { white-space: pre-wrap; line-height: 1.6; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${titleInput.value || 'Notatka Cornell'}</h1>
+                    <div class="container">
+                        <div class="section cues">
+                            <div class="label">💡 Wskazówki / Pytania</div>
+                            <div class="content">${cuesArea.value}</div>
+                        </div>
+                        <div class="section notes">
+                            <div class="label">📝 Notatki</div>
+                            <div class="content">${notesArea.value}</div>
+                        </div>
+                        <div class="section summary">
+                            <div class="label">📌 Podsumowanie</div>
+                            <div class="content">${summaryArea.value}</div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.print();
+        });
+
+        // Auto-save to localStorage
+        function autoSave() {
+            localStorage.setItem('cornell-draft', JSON.stringify({
+                title: titleInput.value,
+                cues: cuesArea.value,
+                notes: notesArea.value,
+                summary: summaryArea.value
+            }));
+        }
+
+        [titleInput, cuesArea, notesArea, summaryArea].forEach(el => {
+            el.addEventListener('input', autoSave);
+        });
+
+        // Load draft on startup
+        const draft = JSON.parse(localStorage.getItem('cornell-draft'));
+        if (draft && (draft.cues || draft.notes || draft.summary)) {
+            titleInput.value = draft.title || '';
+            cuesArea.value = draft.cues || '';
+            notesArea.value = draft.notes || '';
+            summaryArea.value = draft.summary || '';
+        }
+
+        // Initial render
+        renderNotes();
+    </script>
+</body>
+
+</html>

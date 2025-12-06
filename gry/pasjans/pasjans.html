@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasjans - Hub</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card-bg: #fff;
+            --text: #fff;
+            --green: #2a5a3b;
+            --header-bg: #1a1a1a;
+            --border: #333;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f0f0;
+            --text: #333;
+            --green: #3a7a4b;
+            --header-bg: #fff;
+            --border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-area {
+            flex: 1;
+            background: var(--green);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            height: 140px;
+        }
+
+        .deck-area,
+        .foundations {
+            display: flex;
+            gap: 20px;
+        }
+
+        .tableau {
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+        }
+
+        .card-placeholder {
+            width: 80px;
+            height: 120px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+        }
+
+        .card {
+            width: 80px;
+            height: 120px;
+            background: var(--card-bg);
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            z-index: 100 !important;
+        }
+
+        .card.red {
+            color: #d00;
+        }
+
+        .card.black {
+            color: #000;
+        }
+
+        .card.back {
+            background: repeating-linear-gradient(45deg, #1d4e89, #1d4e89 10px, #fff 10px, #fff 11px);
+            color: transparent;
+        }
+
+        .pile {
+            position: relative;
+            width: 80px;
+        }
+
+        .selected {
+            box-shadow: 0 0 10px 3px yellow;
+        }
+
+        .controls {
+            margin-top: 10px;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            background: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+    <div class="game-area">
+        <div class="top-row">
+            <div class="deck-area">
+                <div class="card-placeholder" id="stock" onclick="drawCard()"></div>
+                <div class="card-placeholder" id="waste"></div>
+            </div>
+            <div class="foundations">
+                <div class="card-placeholder" id="f0" onclick="clickFoundation(0)"></div>
+                <div class="card-placeholder" id="f1" onclick="clickFoundation(1)"></div>
+                <div class="card-placeholder" id="f2" onclick="clickFoundation(2)"></div>
+                <div class="card-placeholder" id="f3" onclick="clickFoundation(3)"></div>
+            </div>
+        </div>
+        <div class="tableau" id="tableau"></div>
+        <div class="controls"><button onclick="initGame()">Nowa Gra</button></div>
+    </div>
+    <script>
+        const suits = ['♠', '♥', '♣', '♦'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        let deck = [], piles = [], waste = [], stock = [], foundations = [[], [], [], []];
+        let selected = null;
+
+        function createCard(suit, value) {
+            return { suit, value, color: (suit === '♥' || suit === '♦') ? 'red' : 'black', faceUp: false, id: Math.random() };
+        }
+
+        function initGame() {
+            deck = [];
+            suits.forEach(s => values.forEach(v => deck.push(createCard(s, v))));
+            deck.sort(() => Math.random() - 0.5);
+            piles = Array(7).fill().map(() => []);
+            foundations = [[], [], [], []];
+            waste = []; stock = [];
+            for (let i = 0; i < 7; i++) {
+                for (let j = 0; j <= i; j++) {
+                    let card = deck.pop();
+                    if (j === i) card.faceUp = true;
+                    piles[i].push(card);
+                }
+            }
+            stock = deck;
+            render();
+        }
+
+        function getVal(v) { return values.indexOf(v) + 1; }
+
+        function render() {
+            const stockEl = document.getElementById('stock');
+            stockEl.innerHTML = stock.length > 0 ? '<div class="card back"></div>' : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;">↻</div>';
+            const wasteEl = document.getElementById('waste');
+            wasteEl.innerHTML = '';
+            if (waste.length > 0) {
+                const c = waste[waste.length - 1];
+                const div = renderCardDiv(c);
+                div.onclick = (e) => selectCard(e, 'waste', 0, waste.length - 1);
+                if (selected && selected.type === 'waste') div.classList.add('selected');
+                wasteEl.appendChild(div);
+            }
+            foundations.forEach((f, i) => {
+                const el = document.getElementById('f' + i);
+                el.innerHTML = '';
+                if (f.length > 0) { el.appendChild(renderCardDiv(f[f.length - 1])); }
+            });
+            const tabEl = document.getElementById('tableau');
+            tabEl.innerHTML = '';
+            piles.forEach((pile, i) => {
+                const pileDiv = document.createElement('div');
+                pileDiv.className = 'pile';
+                pileDiv.onclick = (e) => clickPile(i);
+                pile.forEach((c, idx) => {
+                    const div = renderCardDiv(c);
+                    div.style.top = (idx * 25) + 'px';
+                    if (c.faceUp) {
+                        div.onclick = (e) => { e.stopPropagation(); selectCard(e, 'pile', i, idx); };
+                        if (selected && selected.type === 'pile' && selected.index === i && selected.cardIndex === idx) div.classList.add('selected');
+                    }
+                    pileDiv.appendChild(div);
+                });
+                tabEl.appendChild(pileDiv);
+            });
+        }
+
+        function renderCardDiv(c) {
+            const div = document.createElement('div');
+            div.className = 'card ' + (c.faceUp ? c.color : 'back');
+            if (c.faceUp) div.innerHTML = '<div>' + c.value + '</div><div style="font-size:1.5rem">' + c.suit + '</div>';
+            return div;
+        }
+
+        function drawCard() {
+            if (stock.length === 0) { stock = waste.reverse(); waste = []; }
+            else { let c = stock.pop(); c.faceUp = true; waste.push(c); }
+            selected = null; render();
+        }
+
+        function selectCard(e, type, index, cIdx) {
+            e.stopPropagation();
+            if (selected && selected.type === type && selected.index === index && selected.cardIndex === cIdx) { selected = null; render(); return; }
+            if (selected) { if (type === 'pile') attemptMoveToPile(index); }
+            else { selected = { type, index, cardIndex: cIdx }; render(); }
+        }
+
+        function clickPile(index) { if (selected) attemptMoveToPile(index); }
+        function clickFoundation(index) { if (selected) attemptMoveToFoundation(index); }
+
+        function attemptMoveToPile(toIndex) {
+            if (!selected) return;
+            let sourceCards = [];
+            if (selected.type === 'waste') sourceCards = [waste[waste.length - 1]];
+            else if (selected.type === 'pile') sourceCards = piles[selected.index].slice(selected.cardIndex);
+            const targetPile = piles[toIndex];
+            const bottomCard = sourceCards[0];
+            let valid = false;
+            if (targetPile.length === 0) { if (bottomCard.value === 'K') valid = true; }
+            else {
+                const topTarget = targetPile[targetPile.length - 1];
+                if (topTarget.color !== bottomCard.color && getVal(topTarget.value) === getVal(bottomCard.value) + 1) valid = true;
+            }
+            if (valid) {
+                if (selected.type === 'waste') waste.pop();
+                else piles[selected.index].splice(selected.cardIndex);
+                if (selected.type === 'pile' && piles[selected.index].length > 0) piles[selected.index][piles[selected.index].length - 1].faceUp = true;
+                piles[toIndex].push(...sourceCards);
+                selected = null; render();
+            }
+        }
+
+        function attemptMoveToFoundation(fIndex) {
+            if (!selected) return;
+            let card;
+            if (selected.type === 'waste') card = waste[waste.length - 1];
+            else if (selected.type === 'pile') {
+                if (selected.cardIndex !== piles[selected.index].length - 1) return;
+                card = piles[selected.index][selected.cardIndex];
+            }
+            const targetF = foundations[fIndex];
+            let valid = false;
+            if (targetF.length === 0) { if (card.value === 'A') valid = true; }
+            else {
+                const topF = targetF[targetF.length - 1];
+                if (topF.suit === card.suit && getVal(card.value) === getVal(topF.value) + 1) valid = true;
+            }
+            if (valid) {
+                if (selected.type === 'waste') waste.pop();
+                else { piles[selected.index].pop(); if (piles[selected.index].length > 0) piles[selected.index][piles[selected.index].length - 1].faceUp = true; }
+                foundations[fIndex].push(card);
+                selected = null; render();
+            }
+        }
+
+        const html = document.documentElement, themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
+        initGame();
+    </script>
+</body>
+
+</html>

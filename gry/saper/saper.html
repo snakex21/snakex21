@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saper - Hub</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --header-bg: #ffffff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #e0e0e0;
+            --game-bg: #f0f0f0;
+            --cell-bg: #e0e0e0;
+            --cell-border-light: #fff;
+            --cell-border-dark: #aaa;
+            --cell-revealed: #d0d0d0;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+            --game-bg: #2a2a2a;
+            --cell-bg: #c0c0c0;
+            --cell-border-light: #ffffff;
+            --cell-border-dark: #888;
+            --cell-revealed: #b0b0b0;
+        }
+
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; min-height: 100vh; margin: 0; transition: background 0.3s; }
+        
+        /* HEADER */
+        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; transition: background 0.3s; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; flex: 1; }
+        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; }
+        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); }
+        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .header { display: flex; justify-content: space-between; width: 300px; margin-bottom: 10px; background: var(--game-bg); padding: 10px; border-radius: 5px; border: 1px solid var(--border); }
+        .stat { font-size: 1.5rem; font-family: monospace; color: #ff5555; }
+        .reset-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
+        .grid { display: grid; grid-template-columns: repeat(10, 30px); grid-template-rows: repeat(10, 30px); gap: 2px; background: #444; padding: 5px; border-radius: 5px; }
+        .cell { 
+            width: 30px; height: 30px; 
+            background: var(--cell-bg); 
+            border-top: 2px solid var(--cell-border-light); border-left: 2px solid var(--cell-border-light);
+            border-bottom: 2px solid var(--cell-border-dark); border-right: 2px solid var(--cell-border-dark);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; user-select: none; font-family: sans-serif; font-size: 18px; color: #000; 
+        }
+        .cell:active { border: 2px inset var(--cell-border-dark); }
+        .cell.revealed { background: var(--cell-revealed); border: 1px solid #999; }
+        .cell.bomb { background: #ff5555; }
+        .cell[data-num="1"] { color: blue; } .cell[data-num="2"] { color: green; } .cell[data-num="3"] { color: red; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <div class="game-wrapper">
+        <h1>Saper</h1>
+        <div class="header">
+            <select class="difficulty-select" id="difficulty-select">
+                <option value="easy">Łatwy (10x10)</option>
+                <option value="medium">Średni (16x16)</option>
+                <option value="hard">Trudny (30x16)</option>
+            </select>
+            <div class="stat" id="bomb-count">010</div>
+            <button class="reset-btn" id="reset-btn">🙂</button>
+            <div class="stat" id="timer">000</div>
+        </div>
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <script>
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Game Logic
+        const grid = document.getElementById('grid');
+        const bombCountEl = document.getElementById('bomb-count');
+        const timerEl = document.getElementById('timer');
+        const resetBtn = document.getElementById('reset-btn');
+        const diffSelect = document.getElementById('difficulty-select');
+        
+        let width = 10;
+        let height = 10;
+        let bombAmount = 10;
+        let flags = 0;
+        let squares = [];
+        let isGameOver = false;
+        let timer = 0;
+        let timerId;
+
+        function setDifficulty() {
+            const val = diffSelect.value;
+            if (val === 'easy') { width = 10; height = 10; bombAmount = 10; }
+            else if (val === 'medium') { width = 16; height = 16; bombAmount = 40; }
+            else if (val === 'hard') { width = 30; height = 16; bombAmount = 99; }
+            createBoard();
+        }
+
+        diffSelect.addEventListener('change', setDifficulty);
+
+        function createBoard() {
+            grid.innerHTML = ''; squares = []; isGameOver = false; flags = 0; timer = 0;
+            
+            // Set grid styles
+            grid.style.gridTemplateColumns = `repeat(${width}, 30px)`;
+            grid.style.gridTemplateRows = `repeat(${height}, 30px)`;
+            
+            clearInterval(timerId);
+            timerId = setInterval(() => { timer++; timerEl.innerText = timer.toString().padStart(3, '0'); }, 1000);
+            bombCountEl.innerText = (bombAmount - flags).toString().padStart(3, '0');
+            resetBtn.innerText = '🙂';
+
+            const bombsArray = Array(bombAmount).fill('bomb');
+            const emptyArray = Array(width * height - bombAmount).fill('valid');
+            const gameArray = emptyArray.concat(bombsArray).sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < width * height; i++) {
+                const square = document.createElement('div');
+                square.setAttribute('id', i); square.classList.add('cell'); square.dataset.type = gameArray[i];
+                grid.appendChild(square); squares.push(square);
+                square.addEventListener('click', () => click(square));
+                square.oncontextmenu = (e) => { e.preventDefault(); addFlag(square); }
+            }
+            
+            // Calculate Numbers
+            for (let i = 0; i < squares.length; i++) {
+                let total = 0;
+                const isLeftEdge = (i % width === 0);
+                const isRightEdge = (i % width === width - 1);
+
+                if (squares[i].dataset.type === 'valid') {
+                    if (i > 0 && !isLeftEdge && squares[i - 1].dataset.type === 'bomb') total++; // West
+                    if (i > width - 1 && !isRightEdge && squares[i + 1 - width].dataset.type === 'bomb') total++; // North-East
+                    if (i > width && squares[i - width].dataset.type === 'bomb') total++; // North
+                    if (i > width + 1 && !isLeftEdge && squares[i - 1 - width].dataset.type === 'bomb') total++; // North-West
+                    if (i < width * height - 2 && !isRightEdge && squares[i + 1].dataset.type === 'bomb') total++; // East
+                    if (i < width * (height - 1) && !isLeftEdge && squares[i - 1 + width].dataset.type === 'bomb') total++; // South-West
+                    if (i < width * (height - 1) - 2 && !isRightEdge && squares[i + 1 + width].dataset.type === 'bomb') total++; // South-East
+                    if (i < width * (height - 1) - 1 && squares[i + width].dataset.type === 'bomb') total++; // South
+                    squares[i].setAttribute('data', total);
+                }
+            }
+        }
+
+        function addFlag(square) {
+            if (isGameOver) return;
+            if (!square.classList.contains('revealed') && (flags < bombAmount)) {
+                if (!square.classList.contains('flag')) {
+                    square.classList.add('flag'); square.innerHTML = '🚩'; flags++;
+                    bombCountEl.innerText = (bombAmount - flags).toString().padStart(3, '0'); checkForWin();
+                } else {
+                    square.classList.remove('flag'); square.innerHTML = ''; flags--;
+                    bombCountEl.innerText = (bombAmount - flags).toString().padStart(3, '0');
+                }
+            }
+        }
+
+        function click(square) {
+            if (isGameOver || square.classList.contains('revealed') || square.classList.contains('flag')) return;
+            if (square.dataset.type === 'bomb') { gameOver(square); } else {
+                let total = square.getAttribute('data');
+                if (total != 0) {
+                    square.classList.add('revealed'); square.innerHTML = total; square.dataset.num = total; checkForWin(); return;
+                }
+                checkSquare(square, parseInt(square.id));
+            }
+            square.classList.add('revealed'); checkForWin();
+        }
+
+        function checkSquare(square, currentId) {
+            const isLeftEdge = (currentId % width === 0);
+            const isRightEdge = (currentId % width === width - 1);
+
+            setTimeout(() => {
+                if (currentId > 0 && !isLeftEdge) clickSquareById(currentId - 1);
+                if (currentId > width - 1 && !isRightEdge) clickSquareById(currentId + 1 - width);
+                if (currentId >= width) clickSquareById(currentId - width);
+                if (currentId > width && !isLeftEdge) clickSquareById(currentId - 1 - width);
+                if (currentId < width * height - 1 && !isRightEdge) clickSquareById(currentId + 1);
+                if (currentId < width * (height - 1) && !isLeftEdge) clickSquareById(currentId - 1 + width);
+                if (currentId < width * (height - 1) - 2 && !isRightEdge) clickSquareById(currentId + 1 + width);
+                if (currentId < width * (height - 1)) clickSquareById(currentId + width);
+            }, 10);
+        }
+
+        function clickSquareById(id) {
+            if (id >= 0 && id < width * height) {
+                const newSquare = document.getElementById(id);
+                if(newSquare) click(newSquare);
+            }
+        }
+
+        function gameOver(square) {
+            isGameOver = true; resetBtn.innerText = '😵'; clearInterval(timerId);
+            squares.forEach(sq => { if (sq.dataset.type === 'bomb') { sq.innerHTML = '💣'; sq.classList.remove('flag'); sq.classList.add('revealed', 'bomb'); } });
+        }
+
+        function checkForWin() {
+            let matches = 0;
+            for (let i = 0; i < squares.length; i++) {
+                if (squares[i].classList.contains('flag') && squares[i].dataset.type === 'bomb') matches++;
+                if (matches === bombAmount) { isGameOver = true; resetBtn.innerText = '😎'; clearInterval(timerId); }
+            }
+        }
+
+        resetBtn.addEventListener('click', createBoard); 
+        createBoard();
+    </script>
+</body>
+</html>

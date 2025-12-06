@@ -182,6 +182,216 @@ const gamesCatalog = [
     duration: "medium",
     spotlight:
       "Dobry sposób na szybkie sprawdzenie wiedzy – idealny przed kolejnym zakupem lub testem z hardware'u."
+  },
+  {
+    slug: "typing-test",
+    title: "Tester Szybkości Pisania",
+    description:
+      "Sprawdź jak szybko piszesz na klawiaturze. 60-sekundowy test na czas z polskimi słowami. Trenuj celność i prędkość (WPM).",
+    cover: "https://images.unsplash.com/photo-1587829741301-dc798b91add1?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Klawiatura mechaniczna z podświetleniem RGB",
+    url: "typing/typing.html",
+    genres: ["Edukacyjne", "Zręcznościowe"],
+    modes: ["Solo"],
+    tags: ["WPM", "Pisanie", "Trening"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight:
+      "Zmierz się z czasem i popraw swoje umiejętności pisania. Czy uda Ci się pobić swój rekord WPM?"
+  },
+  {
+    slug: "minesweeper",
+    title: "Saper",
+    description:
+      "Absolutny klasyk biurowy w nowoczesnym, neonowym wydaniu. Odkrywaj pola, oznaczaj miny flagami i nie daj się wysadzić.",
+    cover: "https://images.unsplash.com/photo-1580234567406-03c233856108?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Siatka pól w grze Saper",
+    url: "saper/saper.html",
+    genres: ["Logiczna", "Klasyk"],
+    modes: ["Solo"],
+    tags: ["Myślenie", "Relaks", "Retro"],
+    difficulty: "classic",
+    duration: "medium",
+    spotlight:
+      "Wymaga myślenia, ale dziwnie relaksuje. Idealny sposób na 'produktywną' przerwę."
+  },
+  {
+    slug: "arkanoid",
+    title: "Arkanoid",
+    description:
+      "Dynamiczna gra zręcznościowa. Odbijaj piłeczkę, niszcz kolorowe cegły i łap wypadające bonusy.",
+    cover: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Neonowe elementy gry zręcznościowej",
+    url: "arkanoid/arkanoid.html",
+    genres: ["Arcade", "Retro"],
+    modes: ["Solo"],
+    tags: ["Refleks", "Bonusy", "Cegiełki"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight:
+      "Powrót do lat 80. Z każdym poziomem tempo rośnie, a bonusy (laser, powiększenie) zmieniają zasady gry."
+  },
+  {
+    slug: "flappy-bird",
+    title: "Flappy Bird (Klon)",
+    description:
+      "Proste zasady, nieskończona irytacja. Klikaj, aby utrzymać ptaka w powietrzu i omijać przeszkody.",
+    cover: "https://images.unsplash.com/photo-1454789476662-bdd71606334f?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Ptak lecący przez niebo",
+    url: "flappy/flappy.html",
+    genres: ["Zręcznościowa", "Indie"],
+    modes: ["Solo"],
+    tags: ["Refleks", "High Score", "Wyzwanie"],
+    difficulty: "intense",
+    duration: "quick",
+    spotlight:
+      "Tylko 'jeszcze jedna próba'. Sprawdź swój refleks i cierpliwość w tej kultowej zręcznościówce."
+  },
+  {
+    slug: "snake",
+    title: "Snake",
+    description:
+      "Nieśmiertelny Wąż powraca. Zbieraj punkty, rośnij w siłę i unikaj zderzenia z własnym ogonem lub ścianą.",
+    cover: "https://images.unsplash.com/photo-1533422902779-aff35862e462?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Zielony wąż w stylu retro",
+    url: "snakex21/snake.html",
+    genres: ["Retro", "Zręcznościowa"],
+    modes: ["Solo"],
+    tags: ["Nokia 3310", "Klasyk", "Refleks"],
+    difficulty: "casual",
+    duration: "quick",
+    spotlight:
+      "Gra, którą zna każdy. Prosta, wciągająca i idealna, by zabić kilka minut czasu."
+  },
+  {
+    slug: "hacker-tycoon",
+    title: "Hacker Tycoon",
+    description:
+      "Zostań hakerem w tej grze typu Idle Clicker. Klikaj, aby zarabiać bity, kupuj serwery i automatyzuj swój dochód.",
+    cover: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Kod binarny na ekranie monitora - klimat hakerski",
+    url: "clicker/clicker.html",
+    genres: ["Symulacja", "Idle"],
+    modes: ["Solo"],
+    tags: ["Klikacz", "Ulepszenia", "Tycoon"],
+    difficulty: "casual",
+    duration: "long",
+    spotlight:
+      "Zatrudniaj boty i rozbudowuj serwerownię. Gra gra się sama, nawet gdy na nią nie patrzysz!"
+  },
+  {
+    slug: "sudoku",
+    title: "Sudoku",
+    description:
+      "Japońska łamigłówka liczbowa. Wypełnij planszę 9x9 tak, aby cyfry nie powtarzały się w wierszach, kolumnach i kwadratach.",
+    cover: "https://images.unsplash.com/photo-1629814249159-e48020163346?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Wypełniona plansza Sudoku na papierze",
+    url: "sudoku/sudoku.html",
+    genres: ["Logiczna", "Puzzle"],
+    modes: ["Solo"],
+    tags: ["Liczenie", "Mózg", "Spokój"],
+    difficulty: "classic",
+    duration: "medium",
+    spotlight:
+      "Trening dla szarych komórek. Idealne wyciszenie przy logicznym wyzwaniu."
+  },
+  {
+    slug: "solitaire",
+    title: "Pasjans (Solitaire)",
+    description: "Absolutny klasyk. Układaj karty w odpowiedniej kolejności i kolorach. Idealny czasoumilacz w nowoczesnym wydaniu.",
+    cover: "https://images.unsplash.com/photo-1593085512500-bfd179324512?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Karty do gry na ciemnym stole",
+    url: "pasjans/pasjans.html",
+    genres: ["Karciana", "Logiczna"],
+    modes: ["Solo"],
+    tags: ["Klasyk", "Cierpliwość", "Karty"],
+    difficulty: "classic",
+    duration: "medium",
+    spotlight: "Wersja Klondike, którą wszyscy znają. Czy uda Ci się ułożyć pasjansa?"
+  },
+  {
+    slug: "wordle",
+    title: "Wordle (Słowotok)",
+    description: "Masz 6 prób, aby zgadnąć 5-literowe słowo. Zielony kolor oznacza trafienie, żółty - złą pozycję.",
+    cover: "https://images.unsplash.com/photo-1632213702844-1e0615781374?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Kafelki z literami w grze słownej",
+    url: "wordle/wordle.html",
+    genres: ["Słowna", "Logiczna"],
+    modes: ["Solo"],
+    tags: ["Słownik", "Myślenie", "Hit"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight: "Codzienne wyzwanie dla Twojego słownictwa. Wciąga jak bagno!"
+  },
+  {
+    slug: "connect4",
+    title: "Czwórki (Connect 4)",
+    description: "Strategiczna gra dla dwóch osób (lub przeciwko AI). Wrzuć żeton i ułóż 4 w jednej linii, zanim zrobi to przeciwnik.",
+    cover: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Plansza do gry w czwórki",
+    url: "connect4/connect4.html",
+    genres: ["Strategia", "Logiczna"],
+    modes: ["Solo", "Dwóch graczy"],
+    tags: ["Rywalizacja", "Myślenie"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight: "Bardziej zaawansowane 'Kółko i Krzyżyk'. Grawitacja zmienia wszystko."
+  },
+  {
+    slug: "dino-run",
+    title: "Dino Run",
+    description: "Klon słynnej gry z brakiem internetu. Skacz T-Rexem nad kaktusami i biegnij w nieskończoność.",
+    cover: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Pikselowy dinozaur",
+    url: "dino/dino.html",
+    genres: ["Arcade", "Runner"],
+    modes: ["Solo"],
+    tags: ["Refleks", "Endless", "Chrome"],
+    difficulty: "intense",
+    duration: "quick",
+    spotlight: "Proste sterowanie, rosnące tempo. Jak daleko dobiegniesz?"
+  },
+  {
+    slug: "tower-stack",
+    title: "Tower Stack",
+    description: "Buduj najwyższą wieżę z klocków. Klikaj precyzyjnie, bo każdy błąd zmniejsza podstawę wieży.",
+    cover: "https://images.unsplash.com/photo-1476082549609-dd234850755a?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Wysoka wieża w chmurach",
+    url: "tower/tower.html",
+    genres: ["Arcade", "Zręcznościowa"],
+    modes: ["Solo"],
+    tags: ["Precyzja", "Timing", "Rekord"],
+    difficulty: "classic",
+    duration: "quick",
+    spotlight: "Niesamowicie satysfakcjonująca, gdy wpadniesz w rytm."
+  },
+  {
+    slug: "simon-says",
+    title: "Simon Says",
+    description: "Trenuj pamięć. Powtarzaj coraz dłuższe sekwencje kolorów i dźwięków, które dyktuje komputer.",
+    cover: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Kolorowe przyciski",
+    url: "simon/simon.html",
+    genres: ["Pamięć", "Muzyczna"],
+    modes: ["Solo"],
+    tags: ["Mózg", "Kolory", "Audio"],
+    difficulty: "classic",
+    duration: "medium",
+    spotlight: "Zaczyna się niewinnie, kończy na panicznym zapamiętywaniu 15 ruchów."
+  },
+  {
+    slug: "z-type",
+    title: "Z-Type (Spadające Słowa)",
+    description: "Kosmiczna strzelanka sterowana klawiaturą. Wpisuj spadające słowa, aby je zniszczyć, zanim dotrą do Ciebie.",
+    cover: "https://images.unsplash.com/photo-1587829741301-dc798b91add1?auto=format&fit=crop&w=800&q=80",
+    coverAlt: "Klawiatura w akcji",
+    url: "ztype/ztype.html",
+    genres: ["Pisanie", "Arcade"],
+    modes: ["Solo"],
+    tags: ["Szybkie pisanie", "WPM", "Akcja"],
+    difficulty: "intense",
+    duration: "medium",
+    spotlight: "Najlepszy sposób na naukę szybkiego pisania poprzez eksterminację kosmitów."
   }
 ];
 

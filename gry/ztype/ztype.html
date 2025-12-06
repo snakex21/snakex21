@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Type - Hub</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --text: #0f0;
+            --header-bg: #111;
+            --nav-text: #0a0;
+            --nav-hover: #0f0;
+            --border: #0a0;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f0f0;
+            --text: #333;
+            --header-bg: #fff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        #game-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enemy {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .enemy span {
+            transition: color 0.1s;
+        }
+
+        .enemy .matched {
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .ship {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid #0f0;
+        }
+
+        .laser {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: #0f0;
+        }
+
+        .score-box {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 2rem;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+
+    <div id="game-area">
+        <div class="ship" id="ship"></div>
+        <div class="game-over" id="go">GAME OVER<br><small style="font-size:1rem">Odśwież aby zagrać</small></div>
+    </div>
+    <div class="score-box" id="score">0</div>
+
+    <script>
+        const words = ["KOD", "JAVA", "HTML", "CSS", "NODE", "REACT", "DATA", "BIT", "BYTE", "PIXEL", "LINUX", "SERVER", "CLOUD", "WIFI", "MOUSE", "SCREEN", "LOGIC", "ARRAY", "LOOP", "INPUT", "OUTPUT", "FILE", "DISK", "ERROR", "DEBUG"];
+
+        const area = document.getElementById('game-area');
+        const scoreEl = document.getElementById('score');
+        const ship = document.getElementById('ship');
+
+        let enemies = [];
+        let score = 0;
+        let activeTarget = null;
+        let spawnRate = 2000;
+        let gameOver = false;
+
+        function spawn() {
+            if (gameOver) return;
+            const word = words[Math.floor(Math.random() * words.length)];
+            const div = document.createElement('div');
+            div.className = 'enemy';
+            div.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+            div.style.top = '-30px';
+            div.innerHTML = word.split('').map(l => `<span>${l}</span>`).join('');
+            area.appendChild(div);
+            enemies.push({ el: div, word: word, progress: 0, x: parseFloat(div.style.left), y: -30 });
+
+            if (spawnRate > 500) spawnRate -= 50;
+            setTimeout(spawn, spawnRate);
+        }
+
+        function update() {
+            if (gameOver) return;
+            enemies.forEach(e => {
+                e.y += 0.5;
+                e.el.style.top = e.y + 'px';
+                if (e.y > window.innerHeight - 50) {
+                    gameOver = true;
+                    document.getElementById('go').style.display = 'block';
+                }
+            });
+            requestAnimationFrame(update);
+        }
+
+        function shoot(targetX, targetY) {
+            const l = document.createElement('div');
+            l.className = 'laser';
+            l.style.left = '50%';
+            l.style.bottom = '60px';
+            area.appendChild(l);
+            const endX = targetX + 20;
+            l.animate([
+                { left: '50%', bottom: '60px', opacity: 1 },
+                { left: endX + 'px', top: targetY + 'px', opacity: 0 }
+            ], { duration: 200, fill: 'forwards' }).onfinish = () => l.remove();
+        }
+
+        document.addEventListener('keydown', e => {
+            if (gameOver) return;
+            const char = e.key.toUpperCase();
+            if (activeTarget) {
+                const letter = activeTarget.word[activeTarget.progress];
+                if (char === letter) {
+                    activeTarget.el.children[activeTarget.progress].className = 'matched';
+                    activeTarget.progress++;
+                    shoot(activeTarget.x, activeTarget.y);
+                    if (activeTarget.progress === activeTarget.word.length) {
+                        activeTarget.el.remove();
+                        enemies = enemies.filter(en => en !== activeTarget);
+                        activeTarget = null;
+                        score += 10;
+                        scoreEl.innerText = score;
+                    }
+                }
+            } else {
+                const potential = enemies.filter(en => en.word.startsWith(char));
+                potential.sort((a, b) => b.y - a.y);
+                if (potential.length > 0) {
+                    activeTarget = potential[0];
+                    activeTarget.el.children[0].className = 'matched';
+                    activeTarget.progress = 1;
+                    shoot(activeTarget.x, activeTarget.y);
+                    Array.from(activeTarget.el.children).forEach(s => s.classList.add('target'));
+                }
+            }
+        });
+
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+
+        setTimeout(spawn, 1000);
+        update();
+    </script>
+</body>
+
+</html>

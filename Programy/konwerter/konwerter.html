@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Konwerter Jednostek - Hub</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
             margin: 0;
@@ -21,8 +23,9 @@
             --card-hover: #e9ecef;
             --header-bg: #ffffff;
             --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #0ea5e9; /* Sky Blue */
+            --accent: #0ea5e9;
             --input-bg: #ffffff;
+            --select-bg: #ffffff;
         }
 
         [data-theme="dark"] {
@@ -36,6 +39,7 @@
             --shadow: rgba(0, 0, 0, 0.3);
             --accent: #38bdf8;
             --input-bg: #222;
+            --select-bg: #2a2a2a;
         }
 
         body {
@@ -97,7 +101,7 @@
         }
 
         main {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 3rem 2rem;
         }
@@ -117,7 +121,6 @@
             font-size: 1.1rem;
         }
 
-        /* Converter Styles */
         .converter-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -191,14 +194,53 @@
             border-color: var(--accent);
         }
 
+        /* Custom styled select */
         select {
-            padding: 0.8rem;
+            padding: 0.8rem 1rem;
             border: 1px solid var(--border);
             border-radius: 8px;
-            background: var(--bg);
+            background: var(--select-bg);
             color: var(--text);
             font-size: 1rem;
             cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 2.5rem;
+            width: 100%;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Style scrollbar for dark mode */
+        select::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        select::-webkit-scrollbar-track {
+            background: var(--card-bg);
+            border-radius: 4px;
+        }
+
+        select::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        select::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        select option {
+            background: var(--select-bg);
+            color: var(--text);
+            padding: 0.5rem;
         }
 
         .equals {
@@ -207,15 +249,96 @@
             text-align: center;
         }
 
+        /* Currency Info */
+        .currency-info {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .rate-display {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .rate-display .rate-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .rate-display .rate-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .rate-update {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Chart */
+        .chart-container {
+            margin-top: 1.5rem;
+            height: 200px;
+            position: relative;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
         @media (max-width: 768px) {
-            nav { padding: 1rem; }
-            .nav-links { display: none; }
-            h1 { font-size: 2rem; }
-            .converter-grid { grid-template-columns: 1fr; gap: 2rem; }
-            .equals { transform: rotate(90deg); }
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .converter-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .equals {
+                transform: rotate(90deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <header>
         <nav>
@@ -233,7 +356,7 @@
     <main>
         <div class="page-header">
             <h1>📏 Konwerter Jednostek</h1>
-            <p>Szybkie przeliczanie miar, wag i danych</p>
+            <p>Szybkie przeliczanie miar, wag, danych i walut</p>
         </div>
 
         <div class="converter-card">
@@ -243,6 +366,7 @@
                 <button class="tab-btn" data-type="data">Dane (GB/MB)</button>
                 <button class="tab-btn" data-type="temp">Temperatura</button>
                 <button class="tab-btn" data-type="speed">Prędkość</button>
+                <button class="tab-btn" data-type="currency">💰 Waluty</button>
             </div>
 
             <div class="converter-grid">
@@ -256,6 +380,23 @@
                 <div class="input-group">
                     <input type="number" id="output-val" readonly placeholder="0">
                     <select id="select-to"></select>
+                </div>
+            </div>
+
+            <!-- Currency Info (only visible for currency tab) -->
+            <div class="currency-info" id="currency-info" style="display: none;">
+                <div class="rate-display">
+                    <div class="rate-value" id="rate-value">1 PLN = 0.25 USD</div>
+                    <div class="rate-label">Aktualny kurs wymiany</div>
+                </div>
+                <div class="rate-update" id="rate-update">Dane z: --</div>
+
+                <div class="chart-container">
+                    <canvas id="chart-canvas" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background: #0ea5e9;"></span> Kurs w
+                        ostatnich 7 dniach (symulacja)</div>
                 </div>
             </div>
         </div>
@@ -278,7 +419,7 @@
         });
 
         // --- CONVERTER LOGIC ---
-        
+
         const units = {
             length: {
                 m: { name: 'Metry (m)', rate: 1 },
@@ -287,7 +428,9 @@
                 mm: { name: 'Milimetry (mm)', rate: 0.001 },
                 in: { name: 'Cale (in)', rate: 0.0254 },
                 ft: { name: 'Stopy (ft)', rate: 0.3048 },
-                mi: { name: 'Mile (mi)', rate: 1609.34 }
+                yd: { name: 'Jardy (yd)', rate: 0.9144 },
+                mi: { name: 'Mile (mi)', rate: 1609.34 },
+                nm: { name: 'Mile morskie (nm)', rate: 1852 }
             },
             weight: {
                 kg: { name: 'Kilogramy (kg)', rate: 1 },
@@ -295,27 +438,97 @@
                 mg: { name: 'Miligramy (mg)', rate: 0.000001 },
                 lb: { name: 'Funty (lb)', rate: 0.453592 },
                 oz: { name: 'Uncje (oz)', rate: 0.0283495 },
-                t: { name: 'Tony (t)', rate: 1000 }
+                t: { name: 'Tony (t)', rate: 1000 },
+                st: { name: 'Stone (st)', rate: 6.35029 }
             },
             data: {
                 b: { name: 'Bajty (B)', rate: 1 },
                 kb: { name: 'Kilobajty (KB)', rate: 1024 },
                 mb: { name: 'Megabajty (MB)', rate: 1048576 },
                 gb: { name: 'Gigabajty (GB)', rate: 1073741824 },
-                tb: { name: 'Terabajty (TB)', rate: 1099511627776 }
+                tb: { name: 'Terabajty (TB)', rate: 1099511627776 },
+                pb: { name: 'Petabajty (PB)', rate: 1125899906842624 }
             },
             speed: {
                 mps: { name: 'Metry/sek (m/s)', rate: 1 },
                 kph: { name: 'Km/godz (km/h)', rate: 0.277778 },
                 mph: { name: 'Mile/godz (mph)', rate: 0.44704 },
-                kn: { name: 'Węzły (kn)', rate: 0.514444 }
+                kn: { name: 'Węzły (kn)', rate: 0.514444 },
+                fps: { name: 'Stopy/sek (ft/s)', rate: 0.3048 }
             },
-            // Temp is handled separately due to formula differences
+            currency: {
+                // Europa
+                pln: { name: '🇵🇱 Polski Złoty (PLN)', rate: 1 },
+                eur: { name: '🇪🇺 Euro (EUR)', rate: 0.23 },
+                gbp: { name: '🇬🇧 Funt Brytyjski (GBP)', rate: 0.19 },
+                chf: { name: '🇨🇭 Frank Szwajcarski (CHF)', rate: 0.22 },
+                czk: { name: '🇨🇿 Korona Czeska (CZK)', rate: 5.88 },
+                sek: { name: '🇸🇪 Korona Szwedzka (SEK)', rate: 2.65 },
+                nok: { name: '🇳🇴 Korona Norweska (NOK)', rate: 2.72 },
+                dkk: { name: '🇩🇰 Korona Duńska (DKK)', rate: 1.72 },
+                hrk: { name: '🇭🇷 Kuna Chorwacka (HRK)', rate: 1.74 },
+                huf: { name: '🇭🇺 Forint Węgierski (HUF)', rate: 94.5 },
+                ron: { name: '🇷🇴 Lej Rumuński (RON)', rate: 1.15 },
+                bgn: { name: '🇧🇬 Lew Bułgarski (BGN)', rate: 0.45 },
+                rub: { name: '🇷🇺 Rubel Rosyjski (RUB)', rate: 24.5 },
+                uah: { name: '🇺🇦 Hrywna Ukraińska (UAH)', rate: 10.25 },
+                try: { name: '🇹🇷 Lira Turecka (TRY)', rate: 8.5 },
+
+                // Ameryki
+                usd: { name: '🇺🇸 Dolar USA (USD)', rate: 0.25 },
+                cad: { name: '🇨🇦 Dolar Kanadyjski (CAD)', rate: 0.34 },
+                mxn: { name: '🇲🇽 Peso Meksykańskie (MXN)', rate: 4.35 },
+                brl: { name: '🇧🇷 Real Brazylijski (BRL)', rate: 1.24 },
+                ars: { name: '🇦🇷 Peso Argentyńskie (ARS)', rate: 215 },
+                clp: { name: '🇨🇱 Peso Chilijskie (CLP)', rate: 225 },
+                cop: { name: '🇨🇴 Peso Kolumbijskie (COP)', rate: 1025 },
+
+                // Azja
+                jpy: { name: '🇯🇵 Jen Japoński (JPY)', rate: 37.5 },
+                cny: { name: '🇨🇳 Juan Chiński (CNY)', rate: 1.8 },
+                krw: { name: '🇰🇷 Won Południowokoreański (KRW)', rate: 335 },
+                inr: { name: '🇮🇳 Rupia Indyjska (INR)', rate: 20.9 },
+                idr: { name: '🇮🇩 Rupia Indonezyjska (IDR)', rate: 3925 },
+                thb: { name: '🇹🇭 Bat Tajlandzki (THB)', rate: 8.9 },
+                vnd: { name: '🇻🇳 Dong Wietnamski (VND)', rate: 6150 },
+                php: { name: '🇵🇭 Peso Filipińskie (PHP)', rate: 14.1 },
+                myr: { name: '🇲🇾 Ringgit Malezyjski (MYR)', rate: 1.17 },
+                sgd: { name: '🇸🇬 Dolar Singapurski (SGD)', rate: 0.34 },
+                hkd: { name: '🇭🇰 Dolar Hongkoński (HKD)', rate: 1.96 },
+                twd: { name: '🇹🇼 Dolar Tajwański (TWD)', rate: 7.95 },
+
+                // Bliski Wschód
+                aed: { name: '🇦🇪 Dirham UAE (AED)', rate: 0.92 },
+                sar: { name: '🇸🇦 Rial Saudyjski (SAR)', rate: 0.94 },
+                ils: { name: '🇮🇱 Nowy Szekel (ILS)', rate: 0.91 },
+                qar: { name: '🇶🇦 Rial Katarski (QAR)', rate: 0.91 },
+
+                // Oceania
+                aud: { name: '🇦🇺 Dolar Australijski (AUD)', rate: 0.39 },
+                nzd: { name: '🇳🇿 Dolar Nowozelandzki (NZD)', rate: 0.42 },
+
+                // Afryka
+                zar: { name: '🇿🇦 Rand Południowoafrykański (ZAR)', rate: 4.7 },
+                egp: { name: '🇪🇬 Funt Egipski (EGP)', rate: 7.75 },
+                ngn: { name: '🇳🇬 Naira Nigeryjska (NGN)', rate: 195 },
+
+                // Krypto
+                btc: { name: '₿ Bitcoin (BTC)', rate: 0.0000063 },
+                eth: { name: 'Ξ Ethereum (ETH)', rate: 0.000079 }
+            },
             temp: {
                 c: { name: 'Celsjusz (°C)' },
                 f: { name: 'Fahrenheit (°F)' },
                 k: { name: 'Kelvin (K)' }
             }
+        };
+
+        // Historical data simulation for chart
+        const historicalRates = {
+            usd: [0.248, 0.250, 0.249, 0.252, 0.251, 0.250, 0.250],
+            eur: [0.228, 0.230, 0.229, 0.231, 0.230, 0.229, 0.230],
+            gbp: [0.188, 0.190, 0.189, 0.191, 0.190, 0.189, 0.190],
+            chf: [0.218, 0.220, 0.219, 0.221, 0.220, 0.219, 0.220]
         };
 
         let currentType = 'length';
@@ -324,14 +537,16 @@
         const selectFrom = document.getElementById('select-from');
         const selectTo = document.getElementById('select-to');
         const tabs = document.querySelectorAll('.tab-btn');
+        const currencyInfo = document.getElementById('currency-info');
+        const rateValueEl = document.getElementById('rate-value');
+        const rateUpdateEl = document.getElementById('rate-update');
 
-        // Populate selects
         function populateSelects(type) {
             selectFrom.innerHTML = '';
             selectTo.innerHTML = '';
-            
+
             const keys = Object.keys(units[type]);
-            
+
             keys.forEach(key => {
                 const option1 = new Option(units[type][key].name, key);
                 const option2 = new Option(units[type][key].name, key);
@@ -339,7 +554,6 @@
                 selectTo.add(option2);
             });
 
-            // Set defaults (e.g., m to km)
             selectTo.selectedIndex = 1 < keys.length ? 1 : 0;
             convert();
         }
@@ -358,35 +572,50 @@
 
             if (currentType === 'temp') {
                 result = convertTemp(val, from, to);
+            } else if (currentType === 'currency') {
+                const fromRate = units.currency[from].rate;
+                const toRate = units.currency[to].rate;
+                result = val * (toRate / fromRate);
+                updateCurrencyInfo(from, to);
             } else {
                 const fromRate = units[currentType][from].rate;
                 const toRate = units[currentType][to].rate;
-                // Convert to base unit then to target unit
                 const base = val * fromRate;
                 result = base / toRate;
             }
 
-            // Formatting
             if (Math.abs(result) < 0.000001 || Math.abs(result) > 1000000) {
                 outputVal.value = result.toExponential(4);
             } else {
-                // Remove trailing zeros
                 outputVal.value = parseFloat(result.toFixed(6));
             }
         }
 
+        function updateCurrencyInfo(from, to) {
+            const fromRate = units.currency[from].rate;
+            const toRate = units.currency[to].rate;
+            const rate = (toRate / fromRate).toFixed(4);
+
+            const fromName = from.toUpperCase();
+            const toName = to.toUpperCase();
+
+            rateValueEl.textContent = `1 ${fromName} = ${rate} ${toName}`;
+            rateUpdateEl.textContent = `Dane z: ${new Date().toLocaleString('pl-PL')}`;
+
+            const targetCurrency = to === 'pln' ? from : to;
+            drawChart(targetCurrency);
+        }
+
         function convertTemp(val, from, to) {
             if (from === to) return val;
-            
+
             let celsius;
-            // To Celsius
             if (from === 'c') celsius = val;
-            else if (from === 'f') celsius = (val - 32) * (5/9);
+            else if (from === 'f') celsius = (val - 32) * (5 / 9);
             else if (from === 'k') celsius = val - 273.15;
 
-            // From Celsius
             if (to === 'c') return celsius;
-            else if (to === 'f') return (celsius * 9/5) + 32;
+            else if (to === 'f') return (celsius * 9 / 5) + 32;
             else if (to === 'k') return celsius + 273.15;
         }
 
@@ -397,6 +626,12 @@
                 btn.classList.add('active');
                 currentType = btn.dataset.type;
                 populateSelects(currentType);
+
+                if (currentType === 'currency') {
+                    currencyInfo.style.display = 'block';
+                } else {
+                    currencyInfo.style.display = 'none';
+                }
             });
         });
 
@@ -407,6 +642,113 @@
         // Init
         populateSelects('length');
 
+        // Fetch Live Currencies
+        async function fetchCurrencies() {
+            try {
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/PLN');
+                const data = await response.json();
+
+                if (data && data.rates) {
+                    Object.keys(units.currency).forEach(code => {
+                        const apiCode = code.toUpperCase();
+                        if (data.rates[apiCode]) {
+                            units.currency[code].rate = data.rates[apiCode];
+                        }
+                    });
+                    units.currency.pln.rate = 1;
+
+                    if (currentType === 'currency') {
+                        convert();
+                    }
+                }
+            } catch (e) {
+                console.log('Using offline rates');
+            }
+        }
+
+        fetchCurrencies();
+
+        // --- SIMPLE CHART ---
+        function drawChart(currency) {
+            const canvas = document.getElementById('chart-canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = canvas.offsetWidth * 2;
+            canvas.height = canvas.offsetHeight * 2;
+            ctx.scale(2, 2);
+
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+
+            let data = historicalRates[currency];
+            if (!data) {
+                const baseRate = units.currency[currency] ? units.currency[currency].rate : 1;
+                data = [];
+                for (let i = 0; i < 7; i++) {
+                    data.push(baseRate * (0.98 + Math.random() * 0.04));
+                }
+            }
+
+            const days = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Ndz'];
+
+            const min = Math.min(...data) * 0.99;
+            const max = Math.max(...data) * 1.01;
+            const range = max - min;
+
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.strokeStyle = html.getAttribute('data-theme') === 'dark' ? '#444' : '#e0e0e0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 4; i++) {
+                const y = 20 + (i / 4) * (height - 40);
+                ctx.beginPath();
+                ctx.moveTo(40, y);
+                ctx.lineTo(width - 20, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#0ea5e9';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            const stepX = (width - 60) / (data.length - 1);
+
+            data.forEach((val, i) => {
+                const x = 40 + i * stepX;
+                const y = 20 + ((max - val) / range) * (height - 40);
+
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            ctx.fillStyle = '#0ea5e9';
+            data.forEach((val, i) => {
+                const x = 40 + i * stepX;
+                const y = 20 + ((max - val) / range) * (height - 40);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = html.getAttribute('data-theme') === 'dark' ? '#aaa' : '#666';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            data.forEach((_, i) => {
+                const x = 40 + i * stepX;
+                ctx.fillText(days[i], x, height - 5);
+            });
+
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const val = max - (i / 4) * range;
+                const y = 20 + (i / 4) * (height - 40);
+                ctx.fillText(val.toFixed(3), 35, y + 3);
+            }
+        }
+
     </script>
 </body>
+
 </html>

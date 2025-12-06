@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,7 +26,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Spotify Circular', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--spotify-black);
             color: var(--text-primary);
             line-height: 1.6;
@@ -38,7 +39,6 @@
             height: 100vh;
         }
 
-        /* Header */
         header {
             background: var(--spotify-dark);
             padding: 0.75rem 1.5rem;
@@ -86,14 +86,12 @@
             color: var(--text-primary);
         }
 
-        /* Main Content */
         .main-content {
             display: grid;
             grid-template-columns: 300px 1fr;
             overflow: hidden;
         }
 
-        /* Sidebar - Library */
         .sidebar {
             background: var(--spotify-dark);
             border-right: 1px solid var(--border);
@@ -103,17 +101,35 @@
         }
 
         .sidebar-header {
-            padding: 1.5rem 1.5rem 1rem;
+            padding: 1rem 1rem 0.75rem;
             border-bottom: 1px solid var(--border);
         }
 
-        .sidebar-header h2 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
+        .sidebar-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
-        .search-box {
-            position: relative;
+        .sidebar-tab {
+            flex: 1;
+            padding: 0.5rem;
+            background: var(--spotify-light-gray);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .sidebar-tab.active {
+            background: var(--spotify-green);
+            color: var(--spotify-black);
         }
 
         .search-input {
@@ -141,7 +157,7 @@
         }
 
         .library-item {
-            padding: 0.5rem 1.5rem;
+            padding: 0.5rem 1rem;
             cursor: pointer;
             transition: background 0.2s;
             display: flex;
@@ -191,7 +207,127 @@
             text-overflow: ellipsis;
         }
 
-        /* Main Player Area */
+        .library-item-actions {
+            display: flex;
+            gap: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .library-item:hover .library-item-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--spotify-green);
+            transform: scale(1.2);
+        }
+
+        .playlist-section {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .playlist-section.active {
+            display: flex;
+        }
+
+        .playlist-header {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .playlist-header h3 {
+            font-size: 0.9rem;
+        }
+
+        .create-playlist-btn {
+            background: var(--spotify-green);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            color: var(--spotify-black);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .create-playlist-btn:hover {
+            background: var(--spotify-green-hover);
+            transform: scale(1.1);
+        }
+
+        .playlist-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .playlist-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .playlist-item:hover {
+            background: var(--spotify-light-gray);
+        }
+
+        .playlist-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #450af5, #c4efd9);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .playlist-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .playlist-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .playlist-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .playlist-delete {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .playlist-item:hover .playlist-delete {
+            opacity: 1;
+        }
+
         .player-area {
             background: linear-gradient(to bottom, var(--spotify-gray) 0%, var(--spotify-black) 100%);
             overflow-y: auto;
@@ -204,17 +340,67 @@
             text-align: center;
         }
 
-        .album-art {
+        .album-art-container {
             width: 300px;
             height: 300px;
             margin: 0 auto 2rem;
-            background: var(--spotify-light-gray);
+            position: relative;
             border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .album-art {
+            width: 100%;
+            height: 100%;
+            background: var(--spotify-light-gray);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 6rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s;
+        }
+
+        .album-art.hidden {
+            opacity: 0.3;
+        }
+
+        .visualizer-canvas {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .visualizer-canvas.active {
+            display: block;
+        }
+
+        .visualizer-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .visualizer-toggle:hover {
+            background: var(--spotify-green);
+            transform: scale(1.1);
+        }
+
+        .visualizer-toggle.active {
+            background: var(--spotify-green);
         }
 
         .track-info {
@@ -238,7 +424,6 @@
             color: var(--text-secondary);
         }
 
-        /* Player Controls */
         .player-controls {
             margin-top: 2rem;
         }
@@ -271,8 +456,8 @@
         }
 
         .play-btn {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             background: var(--spotify-green);
             border-radius: 50%;
             display: flex;
@@ -287,7 +472,6 @@
             transform: scale(1.05);
         }
 
-        /* Progress Bar */
         .progress-container {
             margin-bottom: 1rem;
         }
@@ -301,30 +485,12 @@
             cursor: pointer;
         }
 
-        .progress-bar:hover .progress-fill::after {
-            opacity: 1;
-        }
-
         .progress-fill {
             height: 100%;
             background: var(--spotify-green);
             border-radius: 3px;
             position: relative;
             transition: width 0.1s;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.2s;
         }
 
         .progress-time {
@@ -335,7 +501,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Volume Control */
         .volume-control {
             display: flex;
             align-items: center;
@@ -354,7 +519,6 @@
             height: 4px;
             background: var(--spotify-light-gray);
             border-radius: 2px;
-            position: relative;
             cursor: pointer;
         }
 
@@ -369,7 +533,6 @@
             background: var(--spotify-green);
         }
 
-        /* Bottom Player Bar */
         .player-bar {
             background: var(--spotify-gray);
             border-top: 1px solid var(--border);
@@ -442,7 +605,6 @@
             height: 4px;
             background: var(--spotify-light-gray);
             border-radius: 2px;
-            position: relative;
             cursor: pointer;
         }
 
@@ -463,6 +625,245 @@
             align-items: center;
             justify-content: flex-end;
             gap: 1rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--spotify-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal h3 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--spotify-light-gray);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-input:focus {
+            outline: 2px solid var(--spotify-green);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: var(--spotify-green);
+            color: var(--spotify-black);
+        }
+
+        .modal-btn.primary:hover {
+            background: var(--spotify-green-hover);
+        }
+
+        .modal-btn.secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        .favorite-btn {
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .favorite-btn.active {
+            color: #ef4444;
+        }
+
+        .speed-select {
+            background: var(--spotify-light-gray);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--spotify-light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--spotify-green);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .shortcuts-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .kbd {
+            background: var(--spotify-light-gray);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .playlist-select-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .playlist-select-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .playlist-select-item:hover {
+            background: var(--spotify-light-gray);
+        }
+
+        .playlist-select-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #450af5, #c4efd9);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+        }
+
+        .toast {
+            background: var(--spotify-green);
+            color: var(--spotify-black);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            animation: toastIn 0.3s ease-out, toastOut 0.3s ease-out 2.7s forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
         }
 
         @media (max-width: 768px) {
@@ -488,7 +889,6 @@
             }
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 12px;
         }
@@ -505,20 +905,9 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #404040;
         }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <header>
@@ -534,20 +923,30 @@
         </header>
 
         <div class="main-content">
-            <!-- Sidebar Library -->
             <aside class="sidebar">
                 <div class="sidebar-header">
-                    <h2>📚 Twoja biblioteka</h2>
-                    <div class="search-box">
-                        <input type="search" class="search-input" id="library-search" placeholder="Szukaj utworów...">
+                    <div class="sidebar-tabs">
+                        <button class="sidebar-tab active" data-tab="library" title="Biblioteka">📚</button>
+                        <button class="sidebar-tab" data-tab="favorites" title="Ulubione">❤️</button>
+                        <button class="sidebar-tab" data-tab="playlists" title="Playlisty">🎵</button>
+                        <button class="sidebar-tab" data-tab="history" title="Historia">📜</button>
                     </div>
+                    <input type="search" class="search-input" id="library-search" placeholder="Szukaj utworów...">
                 </div>
-                <div class="library-list" id="library-list">
-                    <!-- Populated by JS -->
+
+                <div class="library-list" id="library-list"></div>
+                <div class="library-list" id="favorites-list" style="display: none;"></div>
+                <div class="library-list" id="history-list" style="display: none;"></div>
+
+                <div class="playlist-section" id="playlist-section">
+                    <div class="playlist-header">
+                        <h3>Twoje playlisty</h3>
+                        <button class="create-playlist-btn" id="create-playlist-btn" title="Utwórz playlistę">+</button>
+                    </div>
+                    <div class="playlist-list" id="playlist-list"></div>
                 </div>
             </aside>
 
-            <!-- Main Player -->
             <main class="player-area">
                 <div class="now-playing" id="now-playing">
                     <div class="empty-state">
@@ -558,7 +957,6 @@
             </main>
         </div>
 
-        <!-- Bottom Player Bar -->
         <div class="player-bar" id="player-bar" style="display: none;">
             <div class="bar-track-info">
                 <div class="bar-album-art" id="bar-album-art">🎵</div>
@@ -586,6 +984,18 @@
             </div>
 
             <div class="bar-right">
+                <button class="control-btn" id="bar-stats-btn" title="Statystyki">📈</button>
+                <button class="control-btn" id="bar-timer-btn" title="Sleep Timer">💤</button>
+                <button class="control-btn" id="bar-shortcuts-btn" title="Skróty klawiszowe">⌨️</button>
+                <select id="bar-speed-select" class="speed-select" title="Prędkość">
+                    <option value="0.5">0.5x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="1" selected>1.0x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2.0x</option>
+                </select>
+                <button class="control-btn" id="bar-visualizer-toggle" title="Wizualizator">📊</button>
                 <button class="control-btn" id="bar-volume-icon" title="Głośność">🔊</button>
                 <div class="volume-slider" id="bar-volume-slider">
                     <div class="volume-fill" id="bar-volume-fill"></div>
@@ -594,8 +1004,1208 @@
         </div>
     </div>
 
+    <!-- Modals -->
+    <div class="modal-overlay" id="create-playlist-modal">
+        <div class="modal">
+            <h3>Utwórz nową playlistę</h3>
+            <input type="text" class="modal-input" id="playlist-name-input" placeholder="Nazwa playlisty...">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="cancel-create-playlist">Anuluj</button>
+                <button class="modal-btn primary" id="confirm-create-playlist">Utwórz</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add-to-playlist-modal">
+        <div class="modal">
+            <h3>Dodaj do playlisty</h3>
+            <div class="playlist-select-list" id="playlist-select-list"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" id="cancel-add-to-playlist">Anuluj</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortcuts Modal -->
+    <div class="modal-overlay" id="shortcuts-modal">
+        <div class="modal">
+            <h3>Skróty klawiszowe</h3>
+            <div class="shortcuts-list">
+                <div class="shortcut-row"><span>Play / Pause</span><span class="kbd">Spacja</span></div>
+                <div class="shortcut-row"><span>Następny</span><span class="kbd">→</span></div>
+                <div class="shortcut-row"><span>Poprzedni</span><span class="kbd">←</span></div>
+                <div class="shortcut-row"><span>Głośniej / Ciszej</span><span class="kbd">↑ / ↓</span></div>
+                <div class="shortcut-row"><span>Mute</span><span class="kbd">M</span></div>
+                <div class="shortcut-row"><span>Shuffle</span><span class="kbd">S</span></div>
+                <div class="shortcut-row"><span>Repeat</span><span class="kbd">R</span></div>
+                <div class="shortcut-row"><span>Ulubione</span><span class="kbd">L</span></div>
+            </div>
+            <div class="modal-buttons" style="margin-top: 1rem;">
+                <button class="modal-btn primary" onclick="document.getElementById('shortcuts-modal').classList.remove('active')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div class="modal-overlay" id="stats-modal">
+        <div class="modal">
+            <h3>Statystyki słuchania</h3>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total-plays">0</div>
+                    <div class="stat-label">Odtworzeń</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total-time">0h</div>
+                    <div class="stat-label">Czas słuchania</div>
+                </div>
+            </div>
+            <h4>Najczęściej słuchane:</h4>
+            <div class="playlist-select-list" id="top-tracks-list" style="height: 150px;"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="document.getElementById('stats-modal').classList.remove('active')">Zamknij</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sleep Timer Modal -->
+    <div class="modal-overlay" id="timer-modal">
+        <div class="modal">
+            <h3>Ustaw Timer uśpienia</h3>
+            <div class="modal-buttons" style="justify-content: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                <button class="modal-btn secondary timer-set-btn" data-time="15">15 min</button>
+                <button class="modal-btn secondary timer-set-btn" data-time="30">30 min</button>
+                <button class="modal-btn secondary timer-set-btn" data-time="45">45 min</button>
+                <button class="modal-btn secondary timer-set-btn" data-time="60">60 min</button>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="document.getElementById('timer-modal').classList.remove('active')">Anuluj</button>
+                <button class="modal-btn primary" id="timer-off-btn">Wyłącz Timer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
     <audio id="audio-player"></audio>
 
-    <script src="spotify-player.js"></script>
+    <script>
+        // ==================== MAIN PLAYER ====================
+        (() => {
+            const basePath = 'utwory/muzyka/';
+
+            const trackLibrary = [
+    { title: 'Bad Romance', artist: 'Adolf Hitler (AI Cover)', album: 'Mix', file: '(RECREATION) Adolf Hitler -  Bad Romance (Ai Cover).mp3', accent: '#fb7185' },
+    { title: 'James Bond Theme', artist: '007', album: 'Mix', file: '007  James Bond  Theme.mp3', accent: '#facc15' },
+    { title: 'ŚCIERNISKO', artist: 'BRACIA PIERDOLEC (Fredie Mercury)', album: 'Mix', file: '1_BRACIA PIERDOLEC - ŚCIERNISKO Fredie Mercury.mp3', accent: '#22d3ee' },
+    { title: 'Heaven Is a Place on Earth', artist: 'Fredie Mercury', album: 'Mix', file: '1_Belinda Carlisle Fredie Mercury.mp3', accent: '#f97316' },
+    { title: 'This Is What You Came For', artist: 'Fredie Mercury', album: 'Mix', file: '1_Calvin Harris, Rihanna - This Is What You Came For Fredie Mercury.mp3', accent: '#60a5fa' },
+    { title: 'Danza Kuduro', artist: 'Fredie Mercury', album: 'Mix', file: '1_Danza Kuduro-Fredie Mercury.mp3', accent: '#f472b6' },
+    { title: 'A Little Party Never Killed Nobody', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury - A Little Party Never Killed Nobody (All We Got) ft. Q-Tip, GoonRock_(Instrumental).mp3', accent: '#a855f7' },
+    { title: 'ITALODISCO', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury - ITALODISCO (TestoLyrics)_(Vocals)_RVC_1.mp3', accent: '#38bdf8' },
+    { title: 'The Road To Mandalay', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury - The Road To Mandalay_(Instrumental).mp3', accent: '#4c1d95' },
+    { title: 'Venus', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury - Venus (Lyrics)_(Instrumental).mp3', accent: '#2563eb' },
+    { title: 'When We Stand Together', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury - When We Stand Together_(Instrumental).mp3', accent: '#ef4444' },
+    { title: 'Boulevard of Broken Dreams', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury -Boulevard of Broken Dreams lyrics_(Instrumental).mp3', accent: '#34d399' },
+    { title: 'Whistle', artist: 'Fredie Mercury', album: 'Mix', file: '1_Fredie Mercury- Whistle [Official Video]_(Instrumental).mp3', accent: '#14b8a6' },
+    { title: 'Heaven Is a Place on Earth', artist: 'Fredie Mercury', album: 'Mix', file: '1_Heaven Is a Place on Earth_-Fredie Mercury.mp3', accent: '#ea580c' },
+    { title: 'Hotel Room Service', artist: 'Weird Al (Pitbull cover)', album: 'Mix', file: '1_Pitbull - Hotel Room Service Weird Al.mp3', accent: '#f59e0b' },
+    { title: 'The Best', artist: 'Fredie Mercury (Tina Turner)', album: 'Mix', file: '1_Tina Turner - The Best Fredie Mercury.mp3', accent: '#22c55e' },
+    { title: 'Get Ready For This', artist: '2 UNLIMITED', album: 'Mix', file: '2 UNLIMITED - Get Ready For This (Official Music Video).webm', accent: '#ec4899' },
+    { title: 'Gimme! Gimme! Gimme!', artist: 'ABBA', album: 'Mix', file: 'ABBA - Gimme! Gimme! Gimme! (A Man After Midnight).mp3', accent: '#fbbf24' },
+    { title: 'The Liberation Of Gracemeria', artist: 'Ace Combat 6 OST', album: 'Mix', file: 'Ace Combat 6 OST - The Liberation Of Gracemeria.mp3', accent: '#3b82f6' },
+    { title: 'All That She Wants', artist: 'Ace of Base', album: 'Mix', file: 'Ace of Base - All That She Wants (Official Music Video).mp3', accent: '#84cc16' },
+    { title: 'Ghost Town', artist: 'Adam Lambert', album: 'Mix', file: 'Adam Lambert - Ghost Town [Official Music Video].mp3', accent: '#6366f1' },
+    { title: 'Barbie Girl', artist: 'Adolf Hitler (AI Cover)', album: 'Mix', file: 'Adolf Hitler - Barbie Girl [Ai Cover].mp3', accent: '#dc2626' },
+    { title: 'All Falls Down', artist: 'Alan Walker feat. Noah Cyrus', album: 'Mix', file: 'Alan Walker - All Falls Down (feat. Noah Cyrus with Digital Farm Animals).mp3', accent: '#1f2937' },
+    { title: 'Alone', artist: 'Alan Walker', album: 'Mix', file: 'Alan Walker - Alone.mp3', accent: '#0ea5e9' },
+    { title: 'Faded', artist: 'Alan Walker', album: 'Mix', file: 'Alan Walker - Faded.mp3', accent: '#7c3aed' },
+    { title: 'Sing Me To Sleep', artist: 'Alan Walker', album: 'Mix', file: 'Alan Walker - Sing Me To Sleep.mp3', accent: '#fb7185' },
+    { title: 'Man On The Moon', artist: 'Alan Walker x Benjamin Ingrosso', album: 'Mix', file: 'Alan Walker x Benjamin Ingrosso - Man On The Moon (Official Music Video).mp3', accent: '#facc15' },
+    { title: 'Alejandro', artist: 'Lady Gaga', album: 'Mix', file: 'Alejandro - Lady Gaga (Lyrics) 🎵.mp3', accent: '#22d3ee' },
+    { title: 'Mr. Saxobeat', artist: 'Alexandra Stan', album: 'Mix', file: 'Alexandra Stan - Mr. Saxobeat (Official Video).mp3', accent: '#f97316' },
+    { title: 'All Star', artist: 'Doofenshmirtz AI Cover', album: 'Mix', file: 'All Star Doofenshmirtz AI Cover.mp3', accent: '#60a5fa' },
+    { title: 'Please Tell Rosie', artist: 'Alle Farben', album: 'Mix', file: 'Alle Farben Please Tell Rosie (Lyric Video).mp3', accent: '#f472b6' },
+    { title: 'I Need A Dollar', artist: 'Aloe Blacc', album: 'Mix', file: 'Aloe Blacc - I Need A Dollar.mp3', accent: '#a855f7' },
+    { title: 'El Mismo Sol', artist: 'Alvaro Soler', album: 'Mix', file: 'Alvaro Soler - El Mismo Sol (Official Music Video).mp3', accent: '#38bdf8' },
+    { title: 'El Mismo Sol', artist: 'Alvaro Soler', album: 'Mix', file: 'Alvaro Soler - El Mismo Sol.mp3', accent: '#4c1d95' },
+    { title: 'La Cintura', artist: 'Alvaro Soler', album: 'Mix', file: 'Alvaro Soler - La Cintura - Lyrics  Letra.mp3', accent: '#2563eb' },
+    { title: 'Sofia', artist: 'Alvaro Soler', album: 'Mix', file: 'Alvaro Soler - Sofia (Official Music Video).mp3', accent: '#ef4444' },
+    { title: 'Sofia', artist: 'Alvaro Soler', album: 'Mix', file: 'Alvaro Soler - Sofia.mp3', accent: '#34d399' },
+    { title: 'Best Day Of My Life', artist: 'American Authors', album: 'Mix', file: 'American Authors - Best Day Of My Life.mp3', accent: '#14b8a6' },
+    { title: 'Slow It Down', artist: 'Amy Macdonald', album: 'Mix', file: 'Amy Macdonald - Slow It Down (Official Video).mp3', accent: '#ea580c' },
+    { title: 'This Is The Life', artist: 'Amy Macdonald', album: 'Mix', file: 'Amy Macdonald - This Is The Life.mp3', accent: '#f59e0b' },
+    { title: 'Barbie Girl', artist: 'Aqua', album: 'Mix', file: 'Aqua - Barbie Girl (Official Music Video).mp3', accent: '#22c55e' },
+    { title: 'Aserejé (The Ketchup Song)', artist: 'Las Ketchup', album: 'Mix', file: 'Aserejé (The Ketchup Song) - Las Ketchup ( letra  lyrics ) [ Spanish Version ].mp3', accent: '#ec4899' },
+    { title: 'Aserejé (The Ketchup Song)', artist: 'Las Ketchup', album: 'Mix', file: 'Aserejé (The Ketchup Song) [Spanish Version] - Las Ketchup.mp3', accent: '#fbbf24' },
+    { title: 'Narkotik Kal', artist: 'Hard Bass School', album: 'Mix', file: 'BASS BOOSTED  Hard Bass School - Narkotik Kal.mp3', accent: '#3b82f6' },
+    { title: 'ŚCIERNISKO', artist: 'BRACIA PIERDOLEC', album: 'Mix', file: 'BRACIA PIERDOLEC - ŚCIERNISKO (cover) (reupload).mp3', accent: '#84cc16' },
+    { title: 'Bad Boys', artist: 'Theme from COPS', album: 'Mix', file: 'Bad Boys (Theme from COPS).mp3', accent: '#6366f1' },
+    { title: 'Venus', artist: 'Bananarama', album: 'Mix', file: 'Bananarama - Venus (Lyrics).mp3', accent: '#dc2626' },
+    { title: 'Bandoleros', artist: 'Don Omar', album: 'Mix', file: 'Bandoleros.mp3', accent: '#1f2937' },
+    { title: 'DotA', artist: 'Basshunter', album: 'Mix', file: 'Basshunter - Vi sitter i ventrilo och spelar DotA.mp3', accent: '#0ea5e9' },
+    { title: 'Battlefield 4 Main Theme', artist: 'Battlefield 4 OST', album: 'Mix', file: 'Battlefield 4 - OFFICIAL MAIN THEME (Extended).mp3', accent: '#7c3aed' },
+    { title: 'Tu Condamnes', artist: 'Bertysolo', album: 'Mix', file: 'Bertysolo - Tu Condamnes (Instrumental).mp3', accent: '#fb7185' },
+    { title: 'Axel F', artist: 'Beverly Hills Cop', album: 'Mix', file: 'Beverly Hills Cop Main Theme.mp3', accent: '#facc15' },
+    { title: 'Paranoid', artist: 'Black Sabbath', album: 'Mix', file: 'Black Sabbath - Paranoid (HQ).mp3', accent: '#22d3ee' },
+    { title: 'A Lalala Long', artist: 'Bob Marley', album: 'Mix', file: 'Bob Marley - A lalala long.mp3', accent: '#f97316' },
+    { title: "Don't Worry Be Happy", artist: 'Bobby McFerrin', album: 'Mix', file: "Bobby McFerrin - Don't Worry Be Happy (Official Music Video).mp3", accent: '#60a5fa' },
+    { title: "It's My Life", artist: 'Bon Jovi', album: 'Mix', file: "Bon Jovi - It's My Life (Official Music Video).mp3", accent: '#f472b6' },
+    { title: "Livin' On A Prayer", artist: 'Bon Jovi', album: 'Mix', file: "Bon Jovi - Livin' On A Prayer.mp3", accent: '#a855f7' },
+    { title: 'Daddy Cool', artist: 'Boney M', album: 'Mix', file: 'Boney M - Daddy Cool (Lyrics Video).mp3', accent: '#38bdf8' },
+    { title: 'I Need a Hero', artist: 'Bonnie Tyler', album: 'Mix', file: 'Bonnie Tyler - I Need a Hero (Lyrics).mp3', accent: '#4c1d95' },
+    { title: "Baby I'm Yours", artist: 'Breakbot', album: 'Mix', file: "Breakbot - Baby I'm Yours (feat. Irfane) [Official Audio].mp3", accent: '#2563eb' },
+    { title: 'Bring Down', artist: 'Unknown', album: 'Mix', file: 'Bring Down.mp3', accent: '#ef4444' },
+    { title: 'Hungry Heart', artist: 'Bruce Springsteen', album: 'Mix', file: 'Bruce Springsteen - Hungry Heart (Official Audio).mp3', accent: '#34d399' },
+    { title: 'Locked Out Of Heaven', artist: 'Bruno Mars', album: 'Mix', file: 'Bruno Mars - Locked Out Of Heaven (Official Music Video).mp3', accent: '#14b8a6' },
+    { title: 'Treasure', artist: 'Bruno Mars', album: 'Mix', file: 'Bruno Mars - Treasure (Official Music Video).mp3', accent: '#ea580c' },
+    { title: "Busy Earnin'", artist: 'Jungle', album: 'Mix', file: "Busy Earnin'.mp3", accent: '#f59e0b' },
+    { title: 'Safe And Sound', artist: 'Capital Cities', album: 'Mix', file: 'Capital Cities - Safe And Sound (Official Music Video).mp3', accent: '#22c55e' },
+    { title: 'Kung Fu Fighting', artist: 'Carl Douglas', album: 'Mix', file: 'Carl Douglas  Kung Fu Fighting  (Original Music Video).mp3', accent: '#ec4899' },
+    { title: 'Call Me Maybe', artist: 'Carly Rae Jepsen', album: 'Mix', file: 'Carly Rae Jepsen - Call Me Maybe.mp3', accent: '#fbbf24' },
+    { title: 'Run Through The Jungle', artist: 'CCR', album: 'Mix', file: 'CCR - Run Through The Jungle (Vietnam footage).mp3', accent: '#3b82f6' },
+    { title: 'Cheeki Breeki Hardbass Anthem', artist: 'Hard Bass', album: 'Mix', file: 'Cheeki Breeki Hardbass Anthem.mp3', accent: '#84cc16' },
+    { title: 'The Shoop Shoop Song', artist: 'Cher', album: 'Mix', file: "Cher - The Shoop Shoop Song (It's In His Kiss) [Official Music Video].mp3", accent: '#6366f1' },
+    { title: 'Lost Weekend', artist: 'Qemists (DiRT 2)', album: 'Mix', file: 'Colin McRae DiRT 2 - Soundtrack - Qemists - Lost Weekend.mp3', accent: '#dc2626' },
+    { title: 'Little Sister', artist: 'Queens Of The Stone Age', album: 'Mix', file: 'Colin McRae DiRT 2 - Soundtrack - Queens Of The Stone Age - Little Sister.mp3', accent: '#1f2937' },
+    { title: "I'm A Rope", artist: 'Tommy Sparks (DiRT 2)', album: 'Mix', file: "Colin McRae DiRT 2 - Soundtrack - Tommy Sparks - I'm A Rope.mp3", accent: '#0ea5e9' },
+    { title: "Gangsta's Paradise", artist: 'Coolio feat. L.V.', album: 'Mix', file: "Coolio - Gangsta's Paradise (feat. L.V.) [Official Music Video].mp3", accent: '#7c3aed' },
+    { title: 'Axel F', artist: 'Crazy Frog', album: 'Mix', file: 'Crazy Frog - Axel F (Official Video).mp3', accent: '#fb7185' },
+    { title: 'White Room', artist: 'Cream', album: 'Mix', file: 'Cream - White Room - Lyrics.mp3', accent: '#facc15' },
+    { title: 'Fortunate Son', artist: 'Creedence Clearwater Revival', album: 'Mix', file: 'Creedence Clearwater Revival Fortunate Son.mp3', accent: '#22d3ee' },
+    { title: 'Karma Chameleon', artist: 'Culture Club', album: 'Mix', file: 'Culture Club - Karma Chameleon (Official Music Video).mp3', accent: '#f97316' },
+    { title: 'Dorris Day', artist: 'DJ Williams', album: 'Mix', file: 'DJ Williams  Dorris Day.mp3', accent: '#60a5fa' },
+    { title: "X Gon' Give It To Ya", artist: 'DMX', album: 'Mix', file: "DMX - X Gon' Give It To Ya.mp3", accent: '#f472b6' },
+    { title: 'Danza Kuduro', artist: 'Don Omar', album: 'Mix', file: 'Danza Kuduro.mp3', accent: '#a855f7' },
+    { title: 'Sandstorm', artist: 'Darude', album: 'Mix', file: 'Darude - Sandstorm.mp3', accent: '#38bdf8' },
+    { title: 'Misirlou', artist: 'Dick Dale (Pulp Fiction)', album: 'Mix', file: 'Dick Dale - Misirlou (Pulp Fiction) Extended Version.mp3', accent: '#4c1d95' },
+    { title: 'Walk Of Life', artist: 'Dire Straits', album: 'Mix', file: 'Dire Straits - Walk Of Life.mp3', accent: '#2563eb' },
+    { title: 'Still D.R.E.', artist: 'Dr. Dre feat. Snoop Dogg', album: 'Mix', file: 'Dr. Dre - Still D.R.E. (Official Music Video) ft. Snoop Dogg.mp3', accent: '#ef4444' },
+    { title: 'The Next Episode', artist: 'Dr. Dre feat. Snoop Dogg', album: 'Mix', file: 'Dr. Dre - The Next Episode (Official Music Video) ft. Snoop Dogg, Kurupt, Nate Dogg.mp3', accent: '#34d399' },
+    { title: 'Dragostea Din Tei (Eurobeat)', artist: 'O-Zone Remix', album: 'Mix', file: 'Dragostea Din Tei  Eurobeat Remix.mp3', accent: '#14b8a6' },
+    { title: 'Drip of The Japanese Emperor', artist: 'Hirohito Drip', album: 'Mix', file: 'Drip of The Japanese Emperor (Hirohito Drip).mp3', accent: '#ea580c' },
+    { title: 'Shape of You', artist: 'Ed Sheeran', album: 'Mix', file: 'Ed Sheeran - Shape of You (Lyrics).mp3', accent: '#f59e0b' },
+    { title: 'Blue (Da Ba Dee)', artist: 'Eiffel 65', album: 'Mix', file: 'Eiffel 65 - Blue (Da Ba Dee).mp3', accent: '#22c55e' },
+    { title: 'Burn', artist: 'Ellie Goulding', album: 'Mix', file: 'Ellie Goulding - Burn (Official Video).mp3', accent: '#ec4899' },
+    { title: "I'm Still Standing", artist: 'Elton John', album: 'Mix', file: "Elton John - I'm Still Standing.mp3", accent: '#fbbf24' },
+    { title: 'Hungry Eyes', artist: 'Eric Carmen', album: 'Mix', file: 'Eric Carmen - Hungry Eyes (Video).mp3', accent: '#3b82f6' },
+    { title: 'Call on Me', artist: 'Eric Prydz', album: 'Mix', file: 'Eric Prydz - Call on me (Lyrics).mp3', accent: '#84cc16' },
+    { title: 'Eurobeat Intensifies', artist: 'Initial D', album: 'Mix', file: 'Eurobeat Intensifies 2 (Initial D).mp3', accent: '#6366f1' },
+    { title: 'Eye of the Tiger', artist: 'Survivor', album: 'Mix', file: 'Eye of the Tiger.mp3', accent: '#dc2626' },
+    { title: 'Mam wyjebane', artist: 'FIRMA', album: 'Mix', file: 'FIRMA - Mam wyjebane (official video).mp3', accent: '#1f2937' },
+    { title: 'Firework (Duet)', artist: 'Katy Perry ft. Jontron', album: 'Mix', file: 'Firework Katy Perry ft. Jontron Duet [V-o2m3TCkoo].mp3', accent: '#0ea5e9' },
+    { title: 'Good Feeling', artist: 'Flo Rida', album: 'Mix', file: 'Flo Rida - Good Feeling [Official Video].mp3', accent: '#7c3aed' },
+    { title: 'Whistle', artist: 'Flo Rida', album: 'Mix', file: 'Flo Rida - Whistle [Official Video].mp3', accent: '#fb7185' },
+    { title: "I Don't Like It, I Love It", artist: 'Flo Rida ft. Robin Thicke', album: 'Mix', file: "Flo Rida ft. Robin Thicke & Verdine White - I Don't Like It, I Love It [Official Video].mp3", accent: '#facc15' },
+    { title: 'Pumped Up Kicks', artist: 'Foster The People', album: 'Mix', file: 'Foster The People - Pumped Up Kicks (Official Video).mp3', accent: '#22d3ee' },
+    { title: 'Dangerous', artist: 'Fredie Mercury', album: 'Mix', file: 'Fredie Mercury - Dangerous.mp3', accent: '#f97316' },
+    { title: 'Lovers On The Sun', artist: 'Fredie Mercury', album: 'Mix', file: 'Fredie Mercury - Lovers On The Sun.mp3', accent: '#60a5fa' },
+    { title: 'You Give Love A Bad Name', artist: 'Fredie Mercury', album: 'Mix', file: 'Fredie Mercury - You Give Love A Bad Name.mp3', accent: '#f472b6' },
+    { title: "Gangsta's Paradise", artist: 'Fredie Mercury', album: 'Mix', file: "Fredie Mercury Gangsta's Paradise.mp3", accent: '#a855f7' },
+    { title: "It's Raining Men", artist: 'Fredie Mercury', album: 'Mix', file: 'Fredie Mercury Its Raining Men .mp3', accent: '#38bdf8' },
+    { title: 'DotA', artist: 'Fredue Nercury', album: 'Mix', file: 'Fredue Nercury - Vi sitter i ventrilo och spelar DotA.mp3', accent: '#4c1d95' },
+    { title: 'Gangnam Style - Call Me Maybe', artist: 'Mashup', album: 'Mix', file: 'Gangnam Style - Call Me Maybe.mp3', accent: '#2563eb' },
+    { title: "Gangsta's Paradise", artist: 'Coolio', album: 'Mix', file: "Gangsta's Paradise.mp3", accent: '#ef4444' },
+    { title: 'GENTLEMAN', artist: 'Hitler (PSY Parody)', album: 'Mix', file: 'GENTLEMAN (PSY) from Hitler!.mp3', accent: '#34d399' },
+    { title: 'Got My Mind Set On You', artist: 'George Harrison', album: 'Mix', file: 'George Harrison - Got My Mind Set On You (Version II).mp3', accent: '#14b8a6' },
+    { title: 'Careless Whisper', artist: 'George Michael', album: 'Mix', file: 'George Michael - Careless Whisper (Official Video).mp3', accent: '#ea580c' },
+    { title: 'Get Down To It', artist: 'Unknown', album: 'Mix', file: 'Get Down To It.mp3', accent: '#f59e0b' },
+    { title: "L'Amour Toujours", artist: "Gigi D'Agostino", album: 'Mix', file: "Gigi D'Agostino - L'Amour Toujours (original version).mp3", accent: '#22c55e' },
+    { title: 'Volare', artist: 'Gipsy Kings', album: 'Mix', file: 'Gipsy Kings - Volare (Nel blu dipinto di blu).mp3', accent: '#ec4899' },
+    { title: 'Go Go Power Rangers', artist: 'Power Rangers (Redux)', album: 'Mix', file: 'Go Go Power Rangers (Redux).mp3', accent: '#fbbf24' },
+    { title: 'Somebody That I Used To Know', artist: 'Gotye (Trap Remix)', album: 'Mix', file: 'Gotye - Somebody That I Used To Know - Trap by VelvetCasca (Extended Version).mp3', accent: '#3b82f6' },
+    { title: 'GTA 4 Theme', artist: 'Grand Theft Auto', album: 'Mix', file: 'Grand Theft Auto 4 Theme Song.mp3', accent: '#84cc16' },
+    { title: 'Green Grass & High Tides', artist: 'The Outlaws', album: 'Mix', file: 'Green Grass & High Tides.mp3', accent: '#6366f1' },
+    { title: 'GTA III Theme', artist: 'Grand Theft Auto', album: 'Mix', file: 'GTA III FULL Theme HQ.mp3', accent: '#dc2626' },
+    { title: 'GTA San Andreas Theme', artist: 'Grand Theft Auto', album: 'Mix', file: 'GTA San Andreas Theme Song Full ! !.mp3', accent: '#1f2937' },
+    { title: 'Nash Gimn (Our Anthem)', artist: 'Hard Bass School', album: 'Mix', file: 'Hard Bass School - Nash Gimn (OUR ANTHEM, Hard Bass Adidas, РАЗ РАЗ РАЗ ЭТО ХАРДБАС).mp3', accent: '#0ea5e9' },
+    { title: 'Gangnam Style PARODY', artist: 'Hitler', album: 'Mix', file: 'Hitler - Gangnam Style PARODY - Extended Full-Version ( 4 Minutes ).mp3', accent: '#7c3aed' },
+    { title: 'Call me Maybe', artist: 'Hitler sings', album: 'Mix', file: 'Hitler sings Call me Maybe (Full version).mp3', accent: '#fb7185' },
+    { title: 'Despacito (Fegel-Cito)', artist: 'Hitler sings', album: 'Mix', file: 'Hitler sings Despacito (a.k.a Fegel-Cito).mp3', accent: '#facc15' },
+    { title: 'Moskau', artist: 'Hitler sings Dschinghis Khan', album: 'Mix', file: 'Hitler sings Dschinghis Khan - Moskau.mp3', accent: '#22d3ee' },
+    { title: 'I Will Survive', artist: 'Gloria Gaynor', album: 'Mix', file: 'I Will Survive.mp3', accent: '#f97316' },
+    { title: 'Everybody Wants To Go To Heaven', artist: 'Ice Cube feat DJ Shadow', album: 'Mix', file: "Ice Cube (feat DJ Shadow) 'Everybody Wants To Go To Heaven' (MAFIADE ENDING Credit Song.).mp3", accent: '#60a5fa' },
+    { title: 'Deja Vu', artist: 'Initial D', album: 'Mix', file: 'Initial D - Deja Vu.mp3', accent: '#f472b6' },
+    { title: "Don't Stop The Music", artist: 'Initial D', album: 'Mix', file: "Initial D - Don't Stop The Music.mp3", accent: '#a855f7' },
+    { title: 'Night Of Fire', artist: 'Initial D', album: 'Mix', file: 'Initial D - Night Of Fire.mp3', accent: '#38bdf8' },
+    { title: "Running In The 90's", artist: 'Initial D', album: 'Mix', file: "Initial D - Running In The 90's (Bass Boosted).mp3", accent: '#4c1d95' },
+    { title: 'Bad Boys', artist: 'Inner Circle', album: 'Mix', file: 'Inner Circle- Bad Boys.mp3', accent: '#2563eb' },
+    { title: "It's my life (Russian)", artist: 'Russian Version', album: 'Mix', file: "It's my life (Russian version).mp3", accent: '#ef4444' },
+    { title: 'Empire State of Mind', artist: 'Jay-Z feat. Alicia Keys', album: 'Mix', file: 'Jay-Z feat. Alicia Keys - Empire State of Mind (Official Music Video).mp3', accent: '#34d399' },
+    { title: 'Oneself', artist: 'Jincheng Zhang', album: 'Mix', file: 'Jincheng Zhang - Oneself (Instrumental Version) (Official Audio).mp3', accent: '#14b8a6' },
+    { title: 'Our First Time Story', artist: 'Jincheng Zhang', album: 'Mix', file: 'Jincheng Zhang - Our First Time Story (Official Audio).mp3', accent: '#ea580c' },
+    { title: 'Love Me Again', artist: 'John Newman', album: 'Mix', file: 'John Newman - Love Me Again.mp3', accent: '#f59e0b' },
+    { title: 'Walking On Sunshine', artist: 'Katrina & The Waves', album: 'Mix', file: 'Katrina & The Waves - Walking On Sunshine (Official Music Video).mp3', accent: '#22c55e' },
+    { title: 'Hot N Cold', artist: 'Katy Perry', album: 'Mix', file: 'Katy Perry - Hot N Cold (Lyrics).mp3', accent: '#ec4899' },
+    { title: 'Katyusha Rock Cover', artist: 'Katyusha', album: 'Mix', file: 'Katyusha Rock Cover.mp3', accent: '#fbbf24' },
+    { title: 'Party Rock Anthem', artist: 'LMFAO', album: 'Mix', file: 'LMFAO ft. Lauren Bennett, GoonRock - Party Rock Anthem (Official Audio).mp3', accent: '#3b82f6' },
+    { title: 'Lemon Tree', artist: "Fool's Garden", album: 'Mix', file: 'Lemon Tree.mp3', accent: '#84cc16' },
+    { title: 'Manager', artist: 'Leningrad (Ленинград)', album: 'Mix', file: 'Leningrad — Manager  Ленинград — Менеджер.mp3', accent: '#6366f1' },
+    { title: "Let's Dance", artist: 'David Bowie', album: 'Mix', file: "Let's Dance with lyrics.mp3", accent: '#dc2626' },
+    { title: 'Libre', artist: 'Nino Bravo', album: 'Mix', file: 'Libre.mp3', accent: '#1f2937' },
+    { title: 'Tico Tico', artist: 'Lou Bega', album: 'Mix', file: 'Lou Bega Can - I Tico Tico you.mp3', accent: '#0ea5e9' },
+    { title: 'Low Rider', artist: 'War', album: 'Mix', file: 'Low Rider.mp3', accent: '#7c3aed' },
+    { title: 'Let It Snow', artist: 'Dean Martin (Mafia II)', album: 'Mix', file: 'MAFIA II™ - CHRISTMAS TIME  (Dean Martin - Let It Snow).mp3', accent: '#fb7185' },
+    { title: 'Magic In The Air', artist: 'MAGIC SYSTEM feat. Chawki', album: 'Mix', file: 'MAGIC SYSTEM - Magic In The Air Feat. Chawki [Clip Officiel].mp3', accent: '#facc15' },
+    { title: 'Our House', artist: 'Madness', album: 'Mix', file: 'Madness - Our House (Official 4K Video).mp3', accent: '#22d3ee' },
+    { title: 'Welcome To The Club', artist: 'Manian', album: 'Mix', file: 'Manian - Welcome To The Club (Official Video).mp3', accent: '#f97316' },
+    { title: 'Gas Gas Gas', artist: 'Manuel', album: 'Mix', file: 'Manuel - Gas Gas Gas.mp3', accent: '#60a5fa' },
+    { title: 'Uptown Funk', artist: 'Mark Ronson feat. Bruno Mars', album: 'Mix', file: 'Mark Ronson - Uptown Funk (Official Video) ft. Bruno Mars.mp3', accent: '#f472b6' },
+    { title: 'Moves Like Jagger', artist: 'Maroon 5 feat. Christina Aguilera', album: 'Mix', file: 'Maroon 5 - Moves Like Jagger (Lyrics) ft. Christina Aguilera.mp3', accent: '#a855f7' },
+    { title: 'Heroes', artist: 'Måns Zelmerlöw', album: 'Mix', file: 'Måns Zelmerlöw - Heroes (Official Video).mp3', accent: '#38bdf8' },
+    { title: 'Down Under', artist: 'Men At Work', album: 'Mix', file: 'Men At Work - Down Under (Official HD Video).mp3', accent: '#4c1d95' },
+    { title: 'Come Closer', artist: 'Miles Kane', album: 'Mix', file: 'Miles Kane - Come Closer.mp3', accent: '#2563eb' },
+    { title: 'Cheri Cheri Lady', artist: 'Modern Talking', album: 'Mix', file: 'Modern Talking - Cheri Cheri Lady (Official Music Video).mp3', accent: '#ef4444' },
+    { title: 'Mortal Kombat Theme', artist: 'The Immortals', album: 'Mix', file: 'Mortal Kombat Theme Song Original.mp3', accent: '#34d399' },
+    { title: 'Moves Like Jagger', artist: 'Maroon 5', album: 'Mix', file: 'Moves Like Jagger - Maroon 5 featuring Christina Aguilera.mp3', accent: '#14b8a6' },
+    { title: 'Dragostea din tei', artist: 'O-Zone', album: 'Mix', file: 'O-Zone - Dragostea din tei (Bass Boosted).mp3', accent: '#ea580c' },
+    { title: 'Battlefield 1 Theme', artist: 'Battlefield OST', album: 'Mix', file: 'OST Battlefield 1 - Main Theme (Classic Theme).mp3', accent: '#f59e0b' },
+    { title: 'Can Can Music', artist: 'Offenbach', album: 'Mix', file: 'Offenbach - Can Can Music.mp3', accent: '#22c55e' },
+    { title: 'Counting Stars', artist: 'OneRepublic', album: 'Mix', file: 'OneRepublic - Counting Stars (Official Music Video).mp3', accent: '#ec4899' },
+    { title: 'Over My Shoulder', artist: 'Mike + The Mechanics', album: 'Mix', file: 'Over My Shoulder.mp3', accent: '#fbbf24' },
+    { title: 'Overclocking E5200', artist: 'PC Music', album: 'Mix', file: 'Overclocking E5200 to 3Ghz.mp3', accent: '#3b82f6' },
+    { title: 'PC Gaming in 2022', artist: 'Meme', album: 'Mix', file: 'PC Gaming in 2022 Meme.mp3', accent: '#84cc16' },
+    { title: 'My mind', artist: 'Peyruis ft. Sandrah', album: 'Mix', file: 'Peyruis - My mind (ft. Sandrah).mp3', accent: '#6366f1' },
+    { title: 'Happy', artist: 'Pharrell Williams', album: 'Mix', file: 'Pharrell Williams - Happy (from Despicable Me 2) [Ballroom Version].mp3', accent: '#dc2626' },
+    { title: "He's a Pirate", artist: 'Pirates of the Caribbean', album: 'Mix', file: "Pirates of the Caribbean - He's a Pirate (Extended).mp3", accent: '#1f2937' },
+    { title: 'Pizza Time', artist: 'Spider-Man', album: 'Mix', file: 'pizza time.mp3', accent: '#3b82f6' },
+    { title: 'Push It To The Limit', artist: 'Scarface OST', album: 'Mix', file: 'Push It To The Limit (scarface).mp3', accent: '#0ea5e9' },
+    { title: "Don't Stop Me Now", artist: 'Queen', album: 'Mix', file: "Queen - Don't Stop Me Now (Official Video).mp3", accent: '#7c3aed' },
+    { title: 'Human', artist: "Rag'n'Bone Man", album: 'Mix', file: "Rag'n'Bone Man - Human (Official Video).mp3", accent: '#fb7185' },
+    { title: 'Ghostbusters', artist: 'Ray Parker Jr.', album: 'Mix', file: 'Ray Parker Jr. - Ghostbusters.mp3', accent: '#facc15' },
+    { title: 'Hell March 2', artist: 'Red Alert 2 OST', album: 'Mix', file: 'Red Alert 2 - Hell March 2.mp3', accent: '#22d3ee' },
+    { title: 'Soviet March', artist: 'Red Alert 3 OST', album: 'Mix', file: 'Red Alert 3 Theme - Soviet March.mp3', accent: '#f97316' },
+    { title: 'Never Gonna Give You Up', artist: 'Rick Astley', album: 'Mix', file: 'Rick Astley - Never Gonna Give You Up (Official Music Video).mp3', accent: '#60a5fa' },
+    { title: "Livin' La Vida Loca", artist: 'Ricky Martin', album: 'Mix', file: "Ricky Martin - Livin' La Vida Loca.mp3", accent: '#f472b6' },
+    { title: 'Love My Life', artist: 'Robbie Williams', album: 'Mix', file: 'Robbie Williams  Love My Life (Official Video).mp3', accent: '#a855f7' },
+    { title: 'Rocky Theme', artist: 'Rocky OST', album: 'Mix', file: 'Rocky theme song.mp3', accent: '#38bdf8' },
+    { title: "Running in the 90's", artist: 'Max Coveri', album: 'Mix', file: "Running in the 90's.mp3", accent: '#4c1d95' },
+    { title: 'Russian Airborne Troops (VDV)', artist: 'Russian Military', album: 'Mix', file: 'Russian Airborne Troops (VDV)  Music Video.mp3', accent: '#2563eb' },
+    { title: 'Kalinka', artist: 'Russian Folk Music', album: 'Mix', file: 'Russian Folk Music-Kalinka (balalaika).mp3', accent: '#ef4444' },
+    { title: "Rorke's Drift", artist: 'Sabaton', album: 'Mix', file: "Sabaton - Rorke's Drift (Music Video).mp3", accent: '#34d399' },
+    { title: 'Let The Good Times Roll', artist: 'Sam Butera (Mafia II)', album: 'Mix', file: 'Sam Butera & The Witnesses - Let The Good Times Roll (Mafia II soundtrack).mp3', accent: '#14b8a6' },
+    { title: 'San Francisco', artist: 'Scott McKenzie', album: 'Mix', file: 'San Francisco - Scott McKenzie.mp3', accent: '#ea580c' },
+    { title: 'All Star', artist: 'Smash Mouth', album: 'Mix', file: 'Smash Mouth - All Star [Bass Boosted].mp3', accent: '#f59e0b' },
+    { title: "I'm A Believer", artist: 'Smash Mouth', album: 'Mix', file: "Smash Mouth - I'm A Believer.mp3", accent: '#22c55e' },
+    { title: 'Smooth Criminal', artist: 'Michael Jackson', album: 'Mix', file: 'Smooth Criminal (Radio Edit).mp3', accent: '#ec4899' },
+    { title: 'Sneakman', artist: 'Jet Set Radio', album: 'Mix', file: 'Sneakman.mp3', accent: '#fbbf24' },
+    { title: 'Song for Denise', artist: 'Piano Fantasia', album: 'Mix', file: 'Song for Denise (Maxi Version).mp3', accent: '#3b82f6' },
+    { title: "Theresa May's Chronic Brexit", artist: 'Still M.A.Y.', album: 'Mix', file: "Still M.A.Y. (featuring Snoop Mogg) - Theresa May's Chronic Brexit.mp3", accent: '#84cc16' },
+    { title: "Ken's Theme", artist: 'Street Fighter 5', album: 'Mix', file: "Street Fighter 5 Ken's Theme.mp3", accent: '#6366f1' },
+    { title: 'Sung Kang', artist: 'Fast & Furious', album: 'Mix', file: 'Sung Kang.mp4.mp3', accent: '#dc2626' },
+    { title: 'Eye Of The Tiger', artist: 'Survivor', album: 'Mix', file: 'Survivor - Eye Of The Tiger (Official HD Video).mp3', accent: '#1f2937' },
+    { title: 'Shake It Off (Piotr Żyła Remix)', artist: 'Taylor Swift', album: 'Mix', file: 'Taylor Swift - Shake It Off Piotr Żyła Remix.mp3', accent: '#0ea5e9' },
+    { title: 'Shake It Off', artist: 'Taylor Swift', album: 'Mix', file: 'Taylor Swift - Shake It Off.mp3', accent: '#7c3aed' },
+    { title: 'The Final Countdown', artist: 'Europe', album: 'Mix', file: 'The Final Countdown.mp3', accent: '#fb7185' },
+    { title: 'Tarantella Napoletana', artist: 'The Godfather (Trap remix)', album: 'Mix', file: 'The godfather -Tarantella Napoletana (Trap remix).mp3', accent: '#60a5fa' },
+    { title: 'The Missile Knows Where It Is', artist: 'Meme Remix', album: 'Mix', file: 'The Missile Knows Where It Is (Remix) - OFFICIAL MUSIC VIDEO.mp3', accent: '#facc15' },
+    { title: 'Panic Restaurant', artist: 'The Munchables OST', album: 'Mix', file: 'The Munchables OST – 18 – Panic Restaurant.mp3', accent: '#22d3ee' },
+    { title: "I'm so excited", artist: 'The Pointer Sisters', album: 'Mix', file: "The pointer sisters - I'm so excited.mp3", accent: '#f472b6' },
+    { title: 'Paint It Black', artist: 'The Rolling Stones', album: 'Mix', file: 'The Rolling Stones - Paint It, Black (Official Lyric Video).mp3', accent: '#f97316' },
+    { title: "Can't Hold Us", artist: 'Macklemore & Ryan Lewis', album: 'Mix', file: "This is the moment tonight is the night-(Macklemore & Ryan Lewis - Can't Hold Us).mp3", accent: '#a855f7' },
+    { title: 'The Best', artist: 'Tina Turner', album: 'Mix', file: 'Tina Turner - The Best (Official Music Video).mp3', accent: '#38bdf8' },
+    { title: 'Tokyo Drift', artist: 'Teriyaki Boyz', album: 'Mix', file: 'Tokyo Drift (Fast & Furious).mp3', accent: '#4c1d95' },
+    { title: 'Sexbomb', artist: 'Tom Jones', album: 'Mix', file: 'Tom Jones - Sexbomb (Lyrics).mp3', accent: '#2563eb' },
+    { title: 'Sexbomb', artist: 'Tom Jones, Mousse T.', album: 'Mix', file: 'Tom Jones, Mousse T. - Sexbomb (Official Video).mp3', accent: '#ef4444' },
+    { title: 'Hold The Line', artist: 'Toto', album: 'Mix', file: 'Toto - Hold The Line (Official Video).mp3', accent: '#34d399' },
+    { title: 'Lasciatemi Cantare', artist: 'Toto Cutugno', album: 'Mix', file: 'Toto Cutugno - Lasciatemi Cantare (1983).mp3', accent: '#14b8a6' },
+    { title: 'Trainwreck Of Electro Swing', artist: 'A Hat In Time Remix', album: 'Mix', file: 'Trainwreck Of Electro Swing - A Hat In Time Remix.mp3', accent: '#ea580c' },
+    { title: 'Trance Music for Racing Game', artist: 'Racing Music', album: 'Mix', file: 'Trance Music for Racing Game.mp3', accent: '#f59e0b' },
+    { title: 'Tunak Tunak Tun', artist: 'Daler Mehndi', album: 'Mix', file: 'Tunak Tunak Tun  Daler Mehndi  Full Video  Superhit Punjabi Song.mp3', accent: '#22c55e' },
+    { title: 'Stressed Out', artist: 'Twenty One Pilots', album: 'Mix', file: 'twenty one pilots Stressed Out [OFFICIAL VIDEO].mp3', accent: '#ec4899' },
+    { title: 'U got that (WWII Edition)', artist: 'Meme', album: 'Mix', file: 'U got that (WWII Edition).mp3', accent: '#fbbf24' },
+    { title: 'USSR National Anthem', artist: 'Soviet Anthem', album: 'Mix', file: 'USSR National Anthem Be glorious, our free Swampland!.mp3', accent: '#3b82f6' },
+    { title: 'Riptide', artist: 'Vance Joy', album: 'Mix', file: 'Vance Joy - Riptide (Lyrics).mp3', accent: '#84cc16' },
+    { title: 'Walter, Strażnik Skoków', artist: 'Polish Meme', album: 'Mix', file: 'Walter, Strażnik Skoków Narciarskich.mp3', accent: '#6366f1' },
+    { title: "We Are Number One (L'Amour Toujours)", artist: 'Remix', album: 'Mix', file: "We Are Number One but it's a L'Amour Toujours remix.mp3", accent: '#dc2626' },
+    { title: 'We Are Number One (NUMA NUMA)', artist: 'Remix', album: 'Mix', file: 'We Are Number One but NUMA NUMA YAY.mp3', accent: '#1f2937' },
+    { title: 'We Are Number One (Call Me Maybe)', artist: 'Remix', album: 'Mix', file: 'We Are Number One so call me maybe.mp3', accent: '#0ea5e9' },
+    { title: 'Last Christmas', artist: 'Wham!', album: 'Mix', file: 'Wham! - Last Christmas (Official Video).mp3', accent: '#7c3aed' },
+    { title: 'When the DOOM music kicks in', artist: 'DOOM', album: 'Mix', file: 'When the DOOM music kicks in.mp3', accent: '#fb7185' },
+    { title: 'I Wanna Dance With Somebody', artist: 'Whitney Houston', album: 'Mix', file: 'Whitney Houston - I Wanna Dance With Somebody (Official Video).mp3', accent: '#facc15' },
+    { title: 'Winnie The Pooh dancing to Pitbull', artist: 'Meme', album: 'Mix', file: 'Winnie The Pooh dancing to Pitbull (full song).mp3', accent: '#22d3ee' },
+    { title: 'See You Again', artist: 'Wiz Khalifa feat. Charlie Puth', album: 'Mix', file: 'Wiz Khalifa - See You Again ft. Charlie Puth [Official Video] Furious 7 Soundtrack.mp3', accent: '#f97316' },
+    { title: 'Wonder Boy', artist: 'Tenacious D', album: 'Mix', file: 'Wonder Boy.mp3', accent: '#60a5fa' },
+    { title: 'Lincoln', artist: 'XS Project', album: 'Mix', file: 'XS Project - Lincoln.mp3', accent: '#f472b6' },
+    { title: 'We No Speak Americano', artist: 'Yolanda Be Cool & DCUP', album: 'Mix', file: 'Yolanda Be Cool & DCUP - We No Speak Americano (Official Video).mp3', accent: '#38bdf8' },
+    { title: 'Uptown Rosen', artist: 'YTPMV', album: 'Mix', file: 'YTPMV Uptown Rosen.mp3', accent: '#a855f7' },
+    { title: 'DADDY (Parody)', artist: 'Adolf Hitler (DPMV)', album: 'Mix', file: "[DPMV] Adolf Hitler - DADDY (Parody of PSY's DADDY).mp3", accent: '#4c1d95' },
+    { title: 'Eye of the Fegel', artist: 'Adolf Hitler (DPMV)', album: 'Mix', file: '[DPMV] Adolf Hitler - Eye of the Fegel (Eye of the Tiger Parody).mp3', accent: '#2563eb' },
+    { title: 'Fegel Off', artist: 'Adolf Hitler (DPMV)', album: 'Mix', file: '[DPMV] Adolf Hitler - Fegel Off.mp3', accent: '#ef4444' },
+    { title: "MEIN'S NOT HOT", artist: 'BIG SHITLER', album: 'Mix', file: "[DPMV] BIG SHITLER - MEIN'S NOT HOT.mp3", accent: '#34d399' },
+    { title: 'Deutschland Funk', artist: 'DPMV', album: 'Mix', file: '[DPMV] Deutschland Funk.mp3', accent: '#14b8a6' },
+    { title: 'OPPA GODDAMN STYLE', artist: 'PSYTP', album: 'Mix', file: '[PSYTP] OPPA GODDAMN STYLE.mp3', accent: '#ea580c' },
+    { title: 'House In The Middle Of A Street', artist: 'Michael Rosen (YTPMV)', album: 'Mix', file: '[YTPMV] - Michael Rosen Has A House In The Middle Of A Street (Our House - Madness).mp3', accent: '#f59e0b' },
+    { title: 'Uptown Rectal Cleansing PSA', artist: 'Bruno (YTP)', album: 'Mix', file: "[YTP] Bruno's Uptown Rectal Cleansing Sing-along PSA.mp3", accent: '#22c55e' },
+    { title: 'El Mismo Sol (Parodia)', artist: 'Andrzej Duda & Kaczyński', album: 'Mix', file: '♪ Andrzej Duda & Jarosław Kaczyński & Aniela Bogusz - El Mismo Sol (Alvaro Solder Parodia).mp3', accent: '#84cc16' },
+    { title: 'SKIBIDI (Parodia)', artist: 'Andrzej Duda', album: 'Mix', file: '♪ Andrzej Duda - SKIBIDI (Little Big Parodia) #skibidichallenge.mp3', accent: '#6366f1' },
+    { title: 'All Star', artist: 'Donald Trump Sings', album: 'Mix', file: '♪ Donald Trump Sings All Star by Smash Mouth.mp3', accent: '#dc2626' },
+    { title: 'Shape of You (Parodia)', artist: 'Janusz Korwin-Mikke', album: 'Mix', file: '♪ Janusz Korwin-Mikke - Shape of You (Ed Sheeran Parodia).mp3', accent: '#1f2937' },
+    { title: 'Miętowa herbata', artist: 'Robert Makłowicz', album: 'Mix', file: '♪ Robert Makłowicz - Miętowa herbata (Alvaro Soler ft. M. Lewczuk Parodia).mp3', accent: '#0ea5e9' },
+    { title: 'Hound Dog', artist: 'Elvis Presley', album: 'Mix', file: 'elvis presley-hound dog.mp3', accent: '#fbbf24' },
+    { title: 'Pizza Time', artist: 'Spider-Man', album: 'Mix', file: 'pizza time.mp3', accent: '#3b82f6' }
+];
+
+            const state = {
+                currentIndex: -1,
+                isPlaying: false,
+                shuffle: false,
+                repeat: 'off',
+                volume: 0.7,
+                visualizerActive: false,
+                queue: [], // Array of indices
+                favorites: JSON.parse(localStorage.getItem('hub_favorites') || '[]'),
+                history: JSON.parse(localStorage.getItem('hub_history') || '[]'), // Array of {index, timestamp}
+                stats: JSON.parse(localStorage.getItem('hub_stats') || '{"plays":{},"totalTime":0}'),
+                sleepTimer: null
+            };
+
+            const elements = {
+                audio: document.getElementById('audio-player'),
+                libraryList: document.getElementById('library-list'),
+                favoritesList: document.getElementById('favorites-list'),
+                historyList: document.getElementById('history-list'),
+                librarySearch: document.getElementById('library-search'),
+                nowPlaying: document.getElementById('now-playing'),
+                playerBar: document.getElementById('player-bar'),
+                barAlbumArt: document.getElementById('bar-album-art'),
+                barTrackTitle: document.getElementById('bar-track-title'),
+                barTrackArtist: document.getElementById('bar-track-artist'),
+                barPlay: document.getElementById('bar-play'),
+                barPrev: document.getElementById('bar-prev'),
+                barNext: document.getElementById('bar-next'),
+                barShuffle: document.getElementById('bar-shuffle'),
+                barRepeat: document.getElementById('bar-repeat'),
+                barProgressBar: document.getElementById('bar-progress-bar'),
+                barProgressFill: document.getElementById('bar-progress-fill'),
+                barCurrentTime: document.getElementById('bar-current-time'),
+                barDuration: document.getElementById('bar-duration'),
+                barVolumeIcon: document.getElementById('bar-volume-icon'),
+                barVolumeSlider: document.getElementById('bar-volume-slider'),
+                barVolumeFill: document.getElementById('bar-volume-fill'),
+                barVisualizerToggle: document.getElementById('bar-visualizer-toggle'),
+                barSpeedSelect: document.getElementById('bar-speed-select'),
+                barStatsBtn: document.getElementById('bar-stats-btn'),
+                barTimerBtn: document.getElementById('bar-timer-btn'),
+                barShortcutsBtn: document.getElementById('bar-shortcuts-btn'),
+                toastContainer: document.getElementById('toast-container')
+            };
+
+            // Simulated visualizer data
+            let visualizerBars = [];
+            let visualizerAnimId = null;
+            let visualizerCanvas = null;
+            let visualizerCtx = null;
+            let statsInterval = null;
+
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                elements.toastContainer.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function formatTime(seconds) {
+                if (!isFinite(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            function saveState() {
+                localStorage.setItem('hub_favorites', JSON.stringify(state.favorites));
+                localStorage.setItem('hub_history', JSON.stringify(state.history));
+                localStorage.setItem('hub_stats', JSON.stringify(state.stats));
+            }
+
+            function toggleFavorite(e, index) {
+                e.stopPropagation();
+                const i = state.favorites.indexOf(index);
+                const isAdding = i === -1;
+                
+                if (isAdding) {
+                    state.favorites.push(index);
+                    showToast('Dodano do ulubionych');
+                } else {
+                    state.favorites.splice(i, 1);
+                    showToast('Usunięto z ulubionych');
+                }
+                
+                saveState();
+                renderLibrary(elements.librarySearch.value);
+                renderFavorites();
+                
+                // Update Main Player Button immediately if it matches current track
+                if (index === state.currentIndex) {
+                    const mainBtn = document.getElementById('main-fav-btn');
+                    if (mainBtn) {
+                        mainBtn.innerHTML = isAdding ? '❤️' : '♡';
+                        mainBtn.classList.toggle('active', isAdding);
+                    }
+                }
+            }
+
+            function addToQueue(e, index) {
+                e.stopPropagation();
+                state.queue.push(index);
+                showToast('Dodano do kolejki');
+            }
+
+            function renderTrackItem(track, realIndex, isHistory = false) {
+                const isFav = state.favorites.includes(realIndex);
+                return `
+                <div class="library-item ${!isHistory && state.currentIndex === realIndex ? 'active' : ''}" data-index="${realIndex}">
+                  <div class="library-item-icon" style="background: ${track.accent}">🎵</div>
+                  <div class="library-item-info">
+                    <div class="library-item-title">${track.title}</div>
+                    <div class="library-item-artist">${track.artist}</div>
+                  </div>
+                  <div class="library-item-actions">
+                    <button class="favorite-btn ${isFav ? 'active' : ''}" onclick="window.triggerFavorite(event, ${realIndex})" title="Ulubione">${isFav ? '❤️' : '♡'}</button>
+                    <button class="action-btn" onclick="window.triggerQueue(event, ${realIndex})" title="Dodaj do kolejki">🎯</button>
+                    <button class="action-btn add-to-playlist-btn" data-index="${realIndex}" title="Dodaj do playlisty">➕</button>
+                  </div>
+                </div>
+              `;
+            }
+
+            function renderLibrary(searchQuery = '') {
+                const query = searchQuery.toLowerCase();
+                const filtered = trackLibrary.filter(track =>
+                    track.title.toLowerCase().includes(query) ||
+                    track.artist.toLowerCase().includes(query)
+                );
+
+                elements.libraryList.innerHTML = filtered.length === 0
+                    ? '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">Nie znaleziono</div>'
+                    : filtered.map(track => renderTrackItem(track, trackLibrary.indexOf(track))).join('');
+            }
+
+            function renderFavorites() {
+                if (!elements.favoritesList) return;
+                // Filter out invalid indices
+                const favs = state.favorites
+                    .map(idx => ({ track: trackLibrary[idx], idx }))
+                    .filter(item => item.track); 
+                
+                elements.favoritesList.innerHTML = favs.length === 0
+                    ? '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">Brak ulubionych<br><small>Kliknij ❤️ przy utworze</small></div>'
+                    : favs.map(item => renderTrackItem(item.track, item.idx)).join('');
+            }
+
+            function renderHistory() {
+                if (!elements.historyList) return;
+                // Filter out invalid indices and reverse safely
+                const historyItems = state.history
+                    .slice()
+                    .reverse()
+                    .map(h => ({ track: trackLibrary[h.index], idx: h.index }))
+                    .filter(item => item.track);
+
+                elements.historyList.innerHTML = historyItems.length === 0
+                    ? '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">Historia jest pusta</div>'
+                    : historyItems.map(item => renderTrackItem(item.track, item.idx, true)).join('');
+            }
+
+            // Expose helpers for HTML onclick
+            window.triggerFavorite = toggleFavorite;
+            window.triggerQueue = addToQueue;
+
+            // Simulated visualizer - no CORS needed!
+            function initVisualizerBars() {
+                visualizerBars = [];
+                for (let i = 0; i < 64; i++) {
+                    visualizerBars.push({ value: 0, target: 0 });
+                }
+            }
+
+            function drawSimulatedVisualizer() {
+                if (!state.visualizerActive || !visualizerCanvas || !state.isPlaying) {
+                    if (visualizerAnimId) {
+                        cancelAnimationFrame(visualizerAnimId);
+                        visualizerAnimId = null;
+                    }
+                    return;
+                }
+
+                visualizerAnimId = requestAnimationFrame(drawSimulatedVisualizer);
+
+                const width = visualizerCanvas.width;
+                const height = visualizerCanvas.height;
+                const barWidth = width / visualizerBars.length;
+                const track = trackLibrary[state.currentIndex];
+                const color = track?.accent || '#1db954';
+
+                // Update bars with smooth animation
+                for (let i = 0; i < visualizerBars.length; i++) {
+                    // Random target based on "music" (simulated)
+                    if (Math.random() > 0.7) {
+                        visualizerBars[i].target = Math.random() * height * 0.8;
+                    }
+                    // Smooth interpolation
+                    visualizerBars[i].value += (visualizerBars[i].target - visualizerBars[i].value) * 0.15;
+                    // Decay
+                    visualizerBars[i].target *= 0.95;
+                }
+
+                visualizerCtx.fillStyle = '#181818';
+                visualizerCtx.fillRect(0, 0, width, height);
+
+                for (let i = 0; i < visualizerBars.length; i++) {
+                    const barHeight = visualizerBars[i].value;
+                    const gradient = visualizerCtx.createLinearGradient(0, height - barHeight, 0, height);
+                    gradient.addColorStop(0, color);
+                    gradient.addColorStop(1, color + '33');
+                    visualizerCtx.fillStyle = gradient;
+                    visualizerCtx.fillRect(i * barWidth, height - barHeight, barWidth - 1, barHeight);
+                }
+            }
+
+            function toggleVisualizer() {
+                state.visualizerActive = !state.visualizerActive;
+
+                const canvas = document.getElementById('visualizer-canvas');
+                const albumArt = document.querySelector('.album-art');
+                const toggleBtn = document.getElementById('visualizer-toggle-main');
+
+                if (state.visualizerActive) {
+                    if (canvas) canvas.classList.add('active');
+                    if (albumArt) albumArt.classList.add('hidden');
+                    if (toggleBtn) toggleBtn.classList.add('active');
+                    elements.barVisualizerToggle?.classList.add('active');
+                    if (state.isPlaying) drawSimulatedVisualizer();
+                } else {
+                    if (canvas) canvas.classList.remove('active');
+                    if (albumArt) albumArt.classList.remove('hidden');
+                    if (toggleBtn) toggleBtn.classList.remove('active');
+                    elements.barVisualizerToggle?.classList.remove('active');
+                }
+            }
+
+            function loadTrack(index, autoplay = false) {
+                if (index < 0 || index >= trackLibrary.length) return;
+
+                const track = trackLibrary[index];
+                state.currentIndex = index;
+
+                // Stats & History
+                state.history.push({ index, timestamp: Date.now() });
+                if (state.history.length > 50) state.history.shift();
+                
+                state.stats.plays[index] = (state.stats.plays[index] || 0) + 1;
+                saveState();
+                renderHistory();
+
+                elements.audio.src = basePath + track.file;
+                elements.audio.playbackRate = parseFloat(elements.barSpeedSelect.value);
+
+                if (autoplay) {
+                    elements.audio.play().catch(err => console.log('Playback prevented:', err));
+                }
+
+                const isFav = state.favorites.includes(index);
+
+                elements.nowPlaying.innerHTML = `
+          <div class="album-art-container">
+            <div class="album-art ${state.visualizerActive ? 'hidden' : ''}" style="background: ${track.accent}">🎵</div>
+            <canvas id="visualizer-canvas" class="visualizer-canvas ${state.visualizerActive ? 'active' : ''}"></canvas>
+            <button class="visualizer-toggle ${state.visualizerActive ? 'active' : ''}" id="visualizer-toggle-main" title="Wizualizator">📊</button>
+          </div>
+          <div class="track-info">
+            <h2 class="track-title">${track.title} 
+                <button class="favorite-btn ${isFav ? 'active' : ''}" id="main-fav-btn" onclick="window.triggerFavorite(event, ${index})" style="font-size: 1.5rem; margin-left: 1rem;">${isFav ? '❤️' : '♡'}</button>
+            </h2>
+            <p class="track-artist">${track.artist}</p>
+            <p class="track-album">${track.album}</p>
+          </div>
+          <div class="player-controls">
+            <div class="control-buttons">
+              <button class="control-btn ${state.shuffle ? 'active' : ''}" id="main-shuffle" title="Losuj">🔀</button>
+              <button class="control-btn" id="main-prev" title="Poprzedni">⏮️</button>
+              <button class="control-btn play-btn" id="main-play" title="Odtwórz">▶️</button>
+              <button class="control-btn" id="main-next" title="Następny">⏭️</button>
+              <button class="control-btn ${state.repeat !== 'off' ? 'active' : ''}" id="main-repeat" title="Powtarzaj">${state.repeat === 'one' ? '🔂' : '🔁'}</button>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar" id="main-progress-bar">
+                <div class="progress-fill" id="main-progress-fill"></div>
+              </div>
+              <div class="progress-time">
+                <span id="main-current-time">0:00</span>
+                <span id="main-duration">0:00</span>
+              </div>
+            </div>
+            <div class="volume-control">
+              <span class="volume-icon" id="main-volume-icon">🔊</span>
+              <div class="volume-slider" id="main-volume-slider">
+                <div class="volume-fill" id="main-volume-fill"></div>
+              </div>
+            </div>
+          </div>
+        `;
+
+                // Setup visualizer canvas
+                visualizerCanvas = document.getElementById('visualizer-canvas');
+                if (visualizerCanvas) {
+                    visualizerCanvas.width = 300;
+                    visualizerCanvas.height = 300;
+                    visualizerCtx = visualizerCanvas.getContext('2d');
+                    initVisualizerBars();
+                }
+
+                // Update bar
+                elements.barAlbumArt.textContent = '🎵';
+                elements.barAlbumArt.style.background = track.accent;
+                elements.barTrackTitle.textContent = track.title;
+                elements.barTrackArtist.textContent = track.artist;
+                elements.playerBar.style.display = 'grid';
+
+                attachMainControls();
+                updateLibraryHighlight();
+            }
+
+            function togglePlay() {
+                if (state.currentIndex === -1 && trackLibrary.length > 0) {
+                    loadTrack(0, true);
+                    return;
+                }
+                if (elements.audio.paused) {
+                    elements.audio.play().catch(err => console.log('Playback prevented:', err));
+                } else {
+                    elements.audio.pause();
+                }
+            }
+
+            function nextTrack() {
+                if (trackLibrary.length === 0) return;
+                
+                // Check Queue first
+                if (state.queue.length > 0) {
+                    const next = state.queue.shift();
+                    showToast('Odtwarzanie z kolejki');
+                    loadTrack(next, true);
+                    return;
+                }
+
+                let next = state.shuffle ? Math.floor(Math.random() * trackLibrary.length) : (state.currentIndex + 1) % trackLibrary.length;
+                loadTrack(next, true);
+            }
+
+            function prevTrack() {
+                if (trackLibrary.length === 0) return;
+                if (elements.audio.currentTime > 3) {
+                    elements.audio.currentTime = 0;
+                    return;
+                }
+                let prev = state.shuffle ? Math.floor(Math.random() * trackLibrary.length) : state.currentIndex - 1;
+                if (prev < 0) prev = trackLibrary.length - 1;
+                loadTrack(prev, true);
+            }
+
+            function toggleShuffle() {
+                state.shuffle = !state.shuffle;
+                updateShuffleButton();
+            }
+
+            function toggleRepeat() {
+                const modes = ['off', 'all', 'one'];
+                state.repeat = modes[(modes.indexOf(state.repeat) + 1) % modes.length];
+                updateRepeatButton();
+            }
+
+            function updateShuffleButton() {
+                [document.getElementById('main-shuffle'), elements.barShuffle].forEach(btn => {
+                    if (btn) btn.classList.toggle('active', state.shuffle);
+                });
+            }
+
+            function updateRepeatButton() {
+                const icon = state.repeat === 'one' ? '🔂' : '🔁';
+                const active = state.repeat !== 'off';
+                [document.getElementById('main-repeat'), elements.barRepeat].forEach(btn => {
+                    if (btn) { btn.textContent = icon; btn.classList.toggle('active', active); }
+                });
+            }
+
+            function updateLibraryHighlight() {
+                document.querySelectorAll('.library-item').forEach(item => {
+                    item.classList.toggle('active', parseInt(item.dataset.index) === state.currentIndex);
+                });
+            }
+
+            function updateProgress() {
+                const progress = (elements.audio.currentTime / elements.audio.duration) * 100 || 0;
+                [document.getElementById('main-progress-fill'), elements.barProgressFill].forEach(el => {
+                    if (el) el.style.width = `${progress}%`;
+                });
+                const current = formatTime(elements.audio.currentTime);
+                const duration = formatTime(elements.audio.duration);
+                [document.getElementById('main-current-time'), elements.barCurrentTime].forEach(el => { if (el) el.textContent = current; });
+                [document.getElementById('main-duration'), elements.barDuration].forEach(el => { if (el) el.textContent = duration; });
+            }
+
+            // --- Draggable Logic ---
+            let isDraggingProgress = false;
+            let isDraggingVolume = false;
+
+            function setupDraggable(clickArea, fillElement, onDrag, onRelease) {
+                if (!clickArea) return;
+
+                const update = (clientX) => {
+                    const rect = clickArea.getBoundingClientRect();
+                    let percent = (clientX - rect.left) / rect.width;
+                    percent = Math.max(0, Math.min(1, percent));
+                    if (fillElement) fillElement.style.width = `${percent * 100}%`;
+                    if (onDrag) onDrag(percent);
+                    return percent;
+                };
+
+                const startDrag = (e) => {
+                    e.preventDefault(); 
+                    update(e.clientX);
+                    
+                    const moveHandler = (ev) => update(ev.clientX);
+                    const upHandler = (ev) => {
+                        document.removeEventListener('mousemove', moveHandler);
+                        document.removeEventListener('mouseup', upHandler);
+                        const finalPercent = update(ev.clientX);
+                        if (onRelease) onRelease(finalPercent);
+                    };
+
+                    document.addEventListener('mousemove', moveHandler);
+                    document.addEventListener('mouseup', upHandler);
+                };
+
+                clickArea.addEventListener('mousedown', startDrag);
+            }
+
+            function seek(percent) {
+                if (isFinite(elements.audio.duration)) {
+                    elements.audio.currentTime = percent * elements.audio.duration;
+                }
+                isDraggingProgress = false;
+            }
+
+            function setVolume(percentVal) {
+                // percentVal can be 0-1 (from drag) or 0-100 (from key/init)
+                let vol = percentVal > 1 ? percentVal / 100 : percentVal;
+                state.volume = Math.max(0, Math.min(1, vol));
+                elements.audio.volume = state.volume;
+                
+                [document.getElementById('main-volume-fill'), elements.barVolumeFill].forEach(el => {
+                    if (el) el.style.width = `${state.volume * 100}%`;
+                });
+                
+                const icon = state.volume === 0 ? '🔇' : state.volume < 0.5 ? '🔉' : '🔊';
+                [document.getElementById('main-volume-icon'), elements.barVolumeIcon].forEach(el => { if (el) el.textContent = icon; });
+            }
+
+            function updateStatsModal() {
+                const totalSecs = Math.floor(state.stats.totalTime || 0);
+                const hrs = Math.floor(totalSecs / 3600);
+                const mins = Math.floor((totalSecs % 3600) / 60);
+                document.getElementById('stat-total-time').textContent = `${hrs}h ${mins}m`;
+                
+                const totalPlays = Object.values(state.stats.plays).reduce((a, b) => a + b, 0);
+                document.getElementById('stat-total-plays').textContent = totalPlays;
+
+                const sorted = Object.entries(state.stats.plays)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10)
+                    .map(([idx, count]) => {
+                        const t = trackLibrary[idx];
+                        return `<div class="playlist-select-item">
+                            <div class="playlist-select-icon" style="background:${t.accent}">🎵</div>
+                            <div class="playlist-info">
+                                <div class="playlist-name">${t.title}</div>
+                                <div class="playlist-count">${count} odtworzeń</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                document.getElementById('top-tracks-list').innerHTML = sorted;
+            }
+
+            function attachMainControls() {
+                const mainPlay = document.getElementById('main-play');
+                const mainPrev = document.getElementById('main-prev');
+                const mainNext = document.getElementById('main-next');
+                const mainShuffle = document.getElementById('main-shuffle');
+                const mainRepeat = document.getElementById('main-repeat');
+                
+                // Elementy suwaków
+                const mainProgressBar = document.getElementById('main-progress-bar');
+                const mainProgressFill = document.getElementById('main-progress-fill');
+                
+                const mainVolumeIcon = document.getElementById('main-volume-icon');
+                const mainVolumeSlider = document.getElementById('main-volume-slider');
+                const mainVolumeFill = document.getElementById('main-volume-fill');
+                
+                const visualizerToggleMain = document.getElementById('visualizer-toggle-main');
+
+                // Podstawowe przyciski
+                if (mainPlay) mainPlay.addEventListener('click', togglePlay);
+                if (mainPrev) mainPrev.addEventListener('click', prevTrack);
+                if (mainNext) mainNext.addEventListener('click', nextTrack);
+                if (mainShuffle) mainShuffle.addEventListener('click', toggleShuffle);
+                if (mainRepeat) mainRepeat.addEventListener('click', toggleRepeat);
+                
+                // LOGIKA PRZECIĄGANIA - GÓRNY PASEK POSTĘPU
+                if (mainProgressBar && mainProgressFill) {
+                    setupDraggable(
+                        mainProgressBar,
+                        mainProgressFill,
+                        () => { isDraggingProgress = true; },
+                        (pct) => seek(pct)
+                    );
+                }
+
+                if (mainVolumeIcon) mainVolumeIcon.addEventListener('click', () => setVolume(state.volume === 0 ? 70 : 0));
+                
+                // LOGIKA PRZECIĄGANIA - GÓRNA GŁOŚNOŚĆ
+                if (mainVolumeSlider && mainVolumeFill) {
+                    setupDraggable(
+                        mainVolumeSlider,
+                        mainVolumeFill,
+                        (pct) => setVolume(pct),
+                        (pct) => setVolume(pct)
+                    );
+                }
+                
+                if (visualizerToggleMain) visualizerToggleMain.addEventListener('click', toggleVisualizer);
+            }
+
+            function init() {
+                renderLibrary();
+                renderFavorites();
+                renderHistory();
+                initVisualizerBars();
+
+                // New Controls
+                elements.barSpeedSelect.addEventListener('change', (e) => {
+                    elements.audio.playbackRate = parseFloat(e.target.value);
+                });
+
+                elements.barShortcutsBtn.addEventListener('click', () => document.getElementById('shortcuts-modal').classList.add('active'));
+                elements.barStatsBtn.addEventListener('click', () => {
+                    updateStatsModal();
+                    document.getElementById('stats-modal').classList.add('active');
+                });
+                elements.barTimerBtn.addEventListener('click', () => document.getElementById('timer-modal').classList.add('active'));
+
+                // Timer Logic
+                document.querySelectorAll('.timer-set-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const min = parseInt(btn.dataset.time);
+                        clearTimeout(state.sleepTimer);
+                        state.sleepTimer = setTimeout(() => {
+                            elements.audio.pause();
+                            showToast('Timer zatrzymał odtwarzanie');
+                        }, min * 60 * 1000);
+                        document.getElementById('timer-modal').classList.remove('active');
+                        showToast(`Timer ustawiony na ${min} min`);
+                        elements.barTimerBtn.style.color = 'var(--spotify-green)';
+                    });
+                });
+
+                document.getElementById('timer-off-btn').addEventListener('click', () => {
+                    clearTimeout(state.sleepTimer);
+                    document.getElementById('timer-modal').classList.remove('active');
+                    showToast('Timer wyłączony');
+                    elements.barTimerBtn.style.color = '';
+                });
+
+                // Tabs Logic - FIXED VISIBILITY
+                document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const type = tab.dataset.tab;
+                        const playlistSection = document.getElementById('playlist-section');
+                        
+                        document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        
+                        // Hide everything first
+                        elements.libraryList.style.display = 'none';
+                        elements.favoritesList.style.display = 'none';
+                        elements.historyList.style.display = 'none';
+                        playlistSection.style.display = 'none'; // Force hide playlist section by default
+                        playlistSection.classList.remove('active');
+                        
+                        // Show specific
+                        if (type === 'library') {
+                            elements.libraryList.style.display = 'block';
+                            renderLibrary(elements.librarySearch.value);
+                        }
+                        else if (type === 'favorites') {
+                            elements.favoritesList.style.display = 'block';
+                            renderFavorites();
+                        }
+                        else if (type === 'history') {
+                            elements.historyList.style.display = 'block';
+                            renderHistory();
+                        }
+                        else if (type === 'playlists') {
+                            playlistSection.style.display = 'flex'; // Restore flex display
+                            playlistSection.classList.add('active');
+                        }
+                    });
+                });
+
+                elements.librarySearch?.addEventListener('input', (e) => renderLibrary(e.target.value));
+
+                const handleTrackClick = (e) => {
+                    const item = e.target.closest('.library-item');
+                    if (item && !e.target.closest('button')) {
+                        loadTrack(parseInt(item.dataset.index), true);
+                    }
+                };
+                
+                elements.libraryList?.addEventListener('click', handleTrackClick);
+                elements.favoritesList?.addEventListener('click', handleTrackClick);
+                elements.historyList?.addEventListener('click', handleTrackClick);
+
+                elements.barPlay?.addEventListener('click', togglePlay);
+                elements.barPrev?.addEventListener('click', prevTrack);
+                elements.barNext?.addEventListener('click', nextTrack);
+                elements.barShuffle?.addEventListener('click', toggleShuffle);
+                elements.barRepeat?.addEventListener('click', toggleRepeat);
+                elements.barVolumeIcon?.addEventListener('click', () => setVolume(state.volume === 0 ? 70 : 0));
+                elements.barVisualizerToggle?.addEventListener('click', toggleVisualizer);
+
+                // Initialize Draggable Sliders
+                setupDraggable(
+                    elements.barProgressBar, 
+                    elements.barProgressFill, 
+                    () => { isDraggingProgress = true; }, 
+                    (pct) => seek(pct)
+                );
+                
+                setupDraggable(
+                    document.getElementById('main-progress-bar'), 
+                    document.getElementById('main-progress-fill'), 
+                    () => { isDraggingProgress = true; }, 
+                    (pct) => seek(pct)
+                );
+
+                setupDraggable(
+                    elements.barVolumeSlider,
+                    elements.barVolumeFill,
+                    (pct) => setVolume(pct), // Update while dragging
+                    (pct) => setVolume(pct)  // Final update
+                );
+
+                setupDraggable(
+                    document.getElementById('main-volume-slider'),
+                    document.getElementById('main-volume-fill'),
+                    (pct) => setVolume(pct),
+                    (pct) => setVolume(pct)
+                );
+
+                // Stats Counter & Progress Update
+                elements.audio.addEventListener('timeupdate', () => {
+                    if (!isDraggingProgress) updateProgress();
+                    if (state.isPlaying) {
+                        state.stats.totalTime = (state.stats.totalTime || 0) + (elements.audio.playbackRate * 0.25); // Approximate
+                    }
+                });
+
+                // Save stats periodically
+                setInterval(saveState, 30000);
+
+                elements.audio.addEventListener('loadedmetadata', updateProgress);
+                elements.audio.addEventListener('play', () => {
+                    state.isPlaying = true;
+                    [document.getElementById('main-play'), elements.barPlay].forEach(el => { if (el) el.textContent = '⏸️'; });
+                    if (state.visualizerActive) drawSimulatedVisualizer();
+                });
+                elements.audio.addEventListener('pause', () => {
+                    state.isPlaying = false;
+                    [document.getElementById('main-play'), elements.barPlay].forEach(el => { if (el) el.textContent = '▶️'; });
+                });
+                elements.audio.addEventListener('ended', () => {
+                    if (state.repeat === 'one') { elements.audio.currentTime = 0; elements.audio.play(); }
+                    else if (state.repeat === 'all' || state.currentIndex < trackLibrary.length - 1) { nextTrack(); }
+                });
+
+                setVolume(state.volume * 100);
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.tagName === 'INPUT') return;
+                    switch(e.code) {
+                        case 'Space': e.preventDefault(); togglePlay(); break;
+                        case 'ArrowRight': e.preventDefault(); nextTrack(); break;
+                        case 'ArrowLeft': e.preventDefault(); prevTrack(); break;
+                        case 'ArrowUp': e.preventDefault(); setVolume(Math.min(100, state.volume * 100 + 10)); break;
+                        case 'ArrowDown': e.preventDefault(); setVolume(Math.max(0, state.volume * 100 - 10)); break;
+                        case 'KeyM': setVolume(state.volume === 0 ? 70 : 0); break;
+                        case 'KeyS': toggleShuffle(); break;
+                        case 'KeyR': toggleRepeat(); break;
+                        case 'KeyL': if(state.currentIndex !== -1) toggleFavorite(e, state.currentIndex); break;
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+
+        // ==================== PLAYLIST SYSTEM ====================
+        (() => {
+            const state = { playlists: [], trackToAdd: null };
+
+            const elements = {
+                libraryList: document.getElementById('library-list'),
+                playlistSection: document.getElementById('playlist-section'),
+                playlistList: document.getElementById('playlist-list'),
+                createPlaylistBtn: document.getElementById('create-playlist-btn'),
+                createPlaylistModal: document.getElementById('create-playlist-modal'),
+                playlistNameInput: document.getElementById('playlist-name-input'),
+                cancelCreatePlaylist: document.getElementById('cancel-create-playlist'),
+                confirmCreatePlaylist: document.getElementById('confirm-create-playlist'),
+                addToPlaylistModal: document.getElementById('add-to-playlist-modal'),
+                playlistSelectList: document.getElementById('playlist-select-list'),
+                cancelAddToPlaylist: document.getElementById('cancel-add-to-playlist'),
+                toastContainer: document.getElementById('toast-container'),
+            };
+
+            function loadPlaylists() {
+                try { state.playlists = JSON.parse(localStorage.getItem('hub_playlists') || '[]'); } catch (e) { }
+            }
+
+            function savePlaylists() {
+                try { localStorage.setItem('hub_playlists', JSON.stringify(state.playlists)); } catch (e) { }
+            }
+
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                elements.toastContainer.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function renderPlaylists() {
+                if (state.playlists.length === 0) {
+                    elements.playlistList.innerHTML = '<div class="empty-state" style="padding: 2rem 1rem;"><p>Brak playlist.</p></div>';
+                    return;
+                }
+                elements.playlistList.innerHTML = state.playlists.map((p, i) => `
+          <div class="playlist-item" data-index="${i}">
+            <div class="playlist-icon">🎶</div>
+            <div class="playlist-info">
+              <div class="playlist-name">${p.name}</div>
+              <div class="playlist-count">${p.tracks.length} utworów</div>
+            </div>
+            <button class="action-btn playlist-delete" data-index="${i}" title="Usuń">🗑️</button>
+          </div>
+        `).join('');
+            }
+
+            function switchTab(tab) {
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+                if (tab === 'library') {
+                    elements.libraryList.style.display = 'block';
+                    elements.playlistSection.classList.remove('active');
+                } else {
+                    elements.libraryList.style.display = 'none';
+                    elements.playlistSection.classList.add('active');
+                    renderPlaylists();
+                }
+            }
+
+            function openAddToPlaylistModal(trackIndex) {
+                state.trackToAdd = trackIndex;
+                if (state.playlists.length === 0) { showToast('Najpierw utwórz playlistę!'); return; }
+                elements.playlistSelectList.innerHTML = state.playlists.map((p, i) => `
+          <div class="playlist-select-item" data-index="${i}">
+            <div class="playlist-select-icon">🎶</div>
+            <div class="playlist-info">
+              <div class="playlist-name">${p.name}</div>
+              <div class="playlist-count">${p.tracks.length} utworów</div>
+            </div>
+          </div>
+        `).join('');
+                elements.addToPlaylistModal.classList.add('active');
+            }
+
+            function init() {
+                loadPlaylists();
+                renderPlaylists();
+
+                document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+                });
+
+                elements.libraryList.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.add-to-playlist-btn');
+                    if (btn) { e.stopPropagation(); openAddToPlaylistModal(parseInt(btn.dataset.index)); }
+                });
+
+                elements.playlistList.addEventListener('click', (e) => {
+                    const delBtn = e.target.closest('.playlist-delete');
+                    if (delBtn) {
+                        const i = parseInt(delBtn.dataset.index);
+                        if (confirm(`Usunąć playlistę "${state.playlists[i].name}"?`)) {
+                            state.playlists.splice(i, 1);
+                            savePlaylists();
+                            renderPlaylists();
+                            showToast('Playlista usunięta');
+                        }
+                    }
+                });
+
+                elements.createPlaylistBtn.addEventListener('click', () => {
+                    elements.playlistNameInput.value = '';
+                    elements.createPlaylistModal.classList.add('active');
+                    elements.playlistNameInput.focus();
+                });
+
+                elements.cancelCreatePlaylist.addEventListener('click', () => elements.createPlaylistModal.classList.remove('active'));
+
+                elements.confirmCreatePlaylist.addEventListener('click', () => {
+                    const name = elements.playlistNameInput.value.trim();
+                    if (name) {
+                        state.playlists.push({ name, tracks: [] });
+                        savePlaylists();
+                        renderPlaylists();
+                        elements.createPlaylistModal.classList.remove('active');
+                        showToast(`Utworzono playlistę "${name}"`);
+                    }
+                });
+
+                elements.playlistNameInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') elements.confirmCreatePlaylist.click();
+                    if (e.key === 'Escape') elements.cancelCreatePlaylist.click();
+                });
+
+                elements.playlistSelectList.addEventListener('click', (e) => {
+                    const item = e.target.closest('.playlist-select-item');
+                    if (item) {
+                        const i = parseInt(item.dataset.index);
+                        const p = state.playlists[i];
+                        if (p.tracks.includes(state.trackToAdd)) { showToast('Utwór już jest na tej playliście'); }
+                        else { p.tracks.push(state.trackToAdd); savePlaylists(); showToast(`Dodano do "${p.name}"`); }
+                        elements.addToPlaylistModal.classList.remove('active');
+                    }
+                });
+
+                elements.cancelAddToPlaylist.addEventListener('click', () => elements.addToPlaylistModal.classList.remove('active'));
+
+                [elements.createPlaylistModal, elements.addToPlaylistModal].forEach(modal => {
+                    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
 </body>
+
 </html>

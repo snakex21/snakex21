@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Centrum Czasu - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #f97316;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --accent: #fb923c;
+            --input-bg: #222;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 3rem;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .display {
+            font-size: 6rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 2rem;
+            color: var(--text);
+            text-shadow: 0 4px 10px var(--shadow);
+            line-height: 1;
+        }
+
+        .display-small {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: transparent;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .ring-bg {
+            stroke: var(--border);
+        }
+
+        .ring-progress {
+            stroke: var(--accent);
+            stroke-dasharray: 880;
+            stroke-dashoffset: 880;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .ring-text {
+            position: absolute;
+            font-size: 3.5rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn-start {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-reset {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-reset:hover {
+            background: var(--card-hover);
+        }
+
+        .btn-lap {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-lap:hover {
+            background: var(--card-hover);
+        }
+
+        .laps-container {
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 400px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border);
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .lap-item:nth-child(1) {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .timer-inputs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .timer-input {
+            width: 80px;
+            padding: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        .timer-sep {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* World Clock */
+        .world-clock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .clock-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .clock-card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .clock-card .wc-time {
+            font-size: 2rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-card .wc-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .clock-card .btn-remove {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .clock-card .btn-remove:hover {
+            color: #ef4444;
+        }
+
+        .add-clock-container {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .wc-select {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .display {
+                font-size: 4rem;
+            }
+
+            .tabs {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>⏱️ Centrum Czasu</h1>
+            <p>Stoper, Minutnik, Pomodoro i Strefy Czasowe</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-stopwatch">Stoper</button>
+            <button class="tab-btn" id="tab-timer">Minutnik</button>
+            <button class="tab-btn" id="tab-pomodoro">Pomodoro</button>
+            <button class="tab-btn" id="tab-worldclock">Strefy</button>
+        </div>
+
+        <!-- STOPER -->
+        <div id="stopwatch" class="tab-content active">
+            <div class="display" id="sw-display">00:00.00</div>
+            <div class="controls">
+                <button class="btn-circle btn-reset" id="sw-reset">↻</button>
+                <button class="btn-circle btn-start" id="sw-btn">▶</button>
+                <button class="btn-circle btn-lap" id="sw-lap">⚑</button>
+            </div>
+            <div class="laps-container" id="sw-laps"></div>
+        </div>
+
+        <!-- MINUTNIK -->
+        <div id="timer" class="tab-content">
+            <div class="progress-ring" id="tm-ring" style="display:none;">
+                <svg>
+                    <circle class="ring-bg" cx="150" cy="150" r="140"></circle>
+                    <circle class="ring-progress" id="tm-progress" cx="150" cy="150" r="140"></circle>
+                </svg>
+                <div class="ring-text" id="tm-display-ring">00:00</div>
+            </div>
+
+            <div class="timer-inputs" id="tm-inputs">
+                <input type="number" class="timer-input" id="tm-min" placeholder="00" min="0" max="99" value="05">
+                <span class="timer-sep">:</span>
+                <input type="number" class="timer-input" id="tm-sec" placeholder="00" min="0" max="59" value="00">
+            </div>
+
+            <div class="controls">
+                <button class="btn-circle btn-reset" id="tm-reset">↻</button>
+                <button class="btn-circle btn-start" id="tm-btn">▶</button>
+            </div>
+        </div>
+
+        <!-- POMODORO -->
+        <div id="pomodoro" class="tab-content">
+            <div class="display" id="pm-display">25:00</div>
+            <div class="display-small" id="pm-status">Czas na pracę! 👨‍💻</div>
+
+            <div class="controls">
+                <button class="btn-circle btn-reset" id="pm-reset">↻</button>
+                <button class="btn-circle btn-start" id="pm-btn">▶</button>
+            </div>
+        </div>
+
+        <!-- STREFY CZASOWE -->
+        <div id="worldclock" class="tab-content">
+            <div class="world-clock-grid" id="wc-grid"></div>
+
+            <div class="add-clock-container">
+                <select id="wc-select" class="wc-select">
+                    <optgroup label="🇪🇺 Europa">
+                        <option value="Europe/Warsaw">Warszawa 🇵🇱</option>
+                        <option value="Europe/London">Londyn 🇬🇧</option>
+                        <option value="Europe/Paris">Paryż 🇫🇷</option>
+                        <option value="Europe/Berlin">Berlin 🇩🇪</option>
+                        <option value="Europe/Rome">Rzym 🇮🇹</option>
+                        <option value="Europe/Madrid">Madryt 🇪🇸</option>
+                        <option value="Europe/Amsterdam">Amsterdam 🇳🇱</option>
+                        <option value="Europe/Brussels">Bruksela 🇧🇪</option>
+                        <option value="Europe/Vienna">Wiedeń 🇦🇹</option>
+                        <option value="Europe/Zurich">Zurych 🇨🇭</option>
+                        <option value="Europe/Stockholm">Sztokholm 🇸🇪</option>
+                        <option value="Europe/Oslo">Oslo 🇳🇴</option>
+                        <option value="Europe/Copenhagen">Kopenhaga 🇩🇰</option>
+                        <option value="Europe/Helsinki">Helsinki 🇫🇮</option>
+                        <option value="Europe/Prague">Praga 🇨🇿</option>
+                        <option value="Europe/Budapest">Budapeszt 🇭🇺</option>
+                        <option value="Europe/Athens">Ateny 🇬🇷</option>
+                        <option value="Europe/Lisbon">Lizbona 🇵🇹</option>
+                        <option value="Europe/Dublin">Dublin 🇮🇪</option>
+                        <option value="Europe/Moscow">Moskwa 🇷🇺</option>
+                        <option value="Europe/Kiev">Kijów 🇺🇦</option>
+                        <option value="Europe/Bucharest">Bukareszt 🇷🇴</option>
+                        <option value="Europe/Istanbul">Stambuł 🇹🇷</option>
+                    </optgroup>
+                    <optgroup label="🌎 Ameryka Północna">
+                        <option value="America/New_York">Nowy Jork 🇺🇸</option>
+                        <option value="America/Los_Angeles">Los Angeles 🇺🇸</option>
+                        <option value="America/Chicago">Chicago 🇺🇸</option>
+                        <option value="America/Denver">Denver 🇺🇸</option>
+                        <option value="America/Phoenix">Phoenix 🇺🇸</option>
+                        <option value="America/Toronto">Toronto 🇨🇦</option>
+                        <option value="America/Vancouver">Vancouver 🇨🇦</option>
+                        <option value="America/Montreal">Montreal 🇨🇦</option>
+                        <option value="America/Mexico_City">Meksyk 🇲🇽</option>
+                        <option value="America/Anchorage">Anchorage 🇺🇸</option>
+                        <option value="Pacific/Honolulu">Honolulu 🇺🇸</option>
+                    </optgroup>
+                    <optgroup label="🌎 Ameryka Południowa">
+                        <option value="America/Sao_Paulo">São Paulo 🇧🇷</option>
+                        <option value="America/Buenos_Aires">Buenos Aires 🇦🇷</option>
+                        <option value="America/Lima">Lima 🇵🇪</option>
+                        <option value="America/Bogota">Bogota 🇨🇴</option>
+                        <option value="America/Santiago">Santiago 🇨🇱</option>
+                        <option value="America/Caracas">Caracas 🇻🇪</option>
+                    </optgroup>
+                    <optgroup label="🌏 Azja">
+                        <option value="Asia/Tokyo">Tokio 🇯🇵</option>
+                        <option value="Asia/Shanghai">Szanghaj 🇨🇳</option>
+                        <option value="Asia/Hong_Kong">Hongkong 🇭🇰</option>
+                        <option value="Asia/Singapore">Singapur 🇸🇬</option>
+                        <option value="Asia/Seoul">Seul 🇰🇷</option>
+                        <option value="Asia/Taipei">Tajpej 🇹🇼</option>
+                        <option value="Asia/Bangkok">Bangkok 🇹🇭</option>
+                        <option value="Asia/Jakarta">Dżakarta 🇮🇩</option>
+                        <option value="Asia/Manila">Manila 🇵🇭</option>
+                        <option value="Asia/Ho_Chi_Minh">Ho Chi Minh 🇻🇳</option>
+                        <option value="Asia/Kuala_Lumpur">Kuala Lumpur 🇲🇾</option>
+                        <option value="Asia/Dubai">Dubaj 🇦🇪</option>
+                        <option value="Asia/Riyadh">Rijad 🇸🇦</option>
+                        <option value="Asia/Tel_Aviv">Tel Awiw 🇮🇱</option>
+                        <option value="Asia/Kolkata">Mumbaj 🇮🇳</option>
+                        <option value="Asia/Karachi">Karaczi 🇵🇰</option>
+                        <option value="Asia/Dhaka">Dhaka 🇧🇩</option>
+                        <option value="Asia/Almaty">Ałmaty 🇰🇿</option>
+                    </optgroup>
+                    <optgroup label="🌏 Australia i Oceania">
+                        <option value="Australia/Sydney">Sydney 🇦🇺</option>
+                        <option value="Australia/Melbourne">Melbourne 🇦🇺</option>
+                        <option value="Australia/Brisbane">Brisbane 🇦🇺</option>
+                        <option value="Australia/Perth">Perth 🇦🇺</option>
+                        <option value="Pacific/Auckland">Auckland 🇳🇿</option>
+                        <option value="Pacific/Fiji">Fidżi 🇫🇯</option>
+                    </optgroup>
+                    <optgroup label="🌍 Afryka">
+                        <option value="Africa/Cairo">Kair 🇪🇬</option>
+                        <option value="Africa/Johannesburg">Johannesburg 🇿🇦</option>
+                        <option value="Africa/Lagos">Lagos 🇳🇬</option>
+                        <option value="Africa/Nairobi">Nairobi 🇰🇪</option>
+                        <option value="Africa/Casablanca">Casablanca 🇲🇦</option>
+                        <option value="Africa/Tunis">Tunis 🇹🇳</option>
+                    </optgroup>
+                </select>
+                <button class="btn-circle btn-start" id="wc-add"
+                    style="width: 50px; height: 50px; font-size: 1.2rem;">+</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- THEME ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- TABS LOGIC ---
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabIds = ['stopwatch', 'timer', 'pomodoro', 'worldclock'];
+
+        tabBtns.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tabIds[index]).classList.add('active');
+            });
+        });
+
+        // --- AUDIO BEEP ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playBeep() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 880;
+            gain.gain.value = 0.1;
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+
+            setTimeout(() => {
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.frequency.value = 880;
+                gain2.gain.value = 0.1;
+                osc2.start();
+                osc2.stop(audioCtx.currentTime + 0.4);
+            }, 300);
+        }
+
+        // --- STOPWATCH ---
+        let swInterval;
+        let swTime = 0;
+        let swRunning = false;
+        const swDisplay = document.getElementById('sw-display');
+        const swBtn = document.getElementById('sw-btn');
+        const swLaps = document.getElementById('sw-laps');
+
+        function formatTime(ms) {
+            const m = Math.floor(ms / 60000).toString().padStart(2, '0');
+            const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+            const cs = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
+            return `${m}:${s}.${cs}`;
+        }
+
+        swBtn.addEventListener('click', () => {
+            if (swRunning) {
+                clearInterval(swInterval);
+                swBtn.innerHTML = "▶";
+            } else {
+                const startTime = Date.now() - swTime;
+                swInterval = setInterval(() => {
+                    swTime = Date.now() - startTime;
+                    swDisplay.textContent = formatTime(swTime);
+                }, 10);
+                swBtn.innerHTML = "⏸";
+            }
+            swRunning = !swRunning;
+        });
+
+        document.getElementById('sw-reset').addEventListener('click', () => {
+            clearInterval(swInterval);
+            swRunning = false;
+            swTime = 0;
+            swDisplay.textContent = "00:00.00";
+            swBtn.innerHTML = "▶";
+            swLaps.innerHTML = "";
+        });
+
+        document.getElementById('sw-lap').addEventListener('click', () => {
+            if (!swRunning) return;
+            const lap = document.createElement('div');
+            lap.className = 'lap-item';
+            const count = swLaps.children.length + 1;
+            lap.innerHTML = `<span>#${count}</span> <span>${formatTime(swTime)}</span>`;
+            swLaps.prepend(lap);
+        });
+
+        // --- TIMER ---
+        let tmInterval;
+        let tmTotal = 0;
+        let tmRemaining = 0;
+        let tmRunning = false;
+
+        const tmRing = document.getElementById('tm-ring');
+        const tmInputs = document.getElementById('tm-inputs');
+        const tmDisplayRing = document.getElementById('tm-display-ring');
+        const tmProgress = document.getElementById('tm-progress');
+        const tmBtn = document.getElementById('tm-btn');
+        const tmMin = document.getElementById('tm-min');
+        const tmSec = document.getElementById('tm-sec');
+        const CIRCUMFERENCE = 880;
+
+        tmBtn.addEventListener('click', () => {
+            if (tmRunning) {
+                clearInterval(tmInterval);
+                tmBtn.innerHTML = "▶";
+                tmRunning = false;
+            } else {
+                if (tmRemaining === 0) {
+                    const m = parseInt(tmMin.value) || 0;
+                    const s = parseInt(tmSec.value) || 0;
+                    if (m === 0 && s === 0) return;
+
+                    tmTotal = (m * 60) + s;
+                    tmRemaining = tmTotal;
+
+                    tmInputs.style.display = 'none';
+                    tmRing.style.display = 'flex';
+                }
+
+                tmBtn.innerHTML = "⏸";
+                tmRunning = true;
+
+                tmInterval = setInterval(() => {
+                    tmRemaining--;
+
+                    const m = Math.floor(tmRemaining / 60).toString().padStart(2, '0');
+                    const s = (tmRemaining % 60).toString().padStart(2, '0');
+                    tmDisplayRing.textContent = `${m}:${s}`;
+
+                    const offset = CIRCUMFERENCE - (tmRemaining / tmTotal) * CIRCUMFERENCE;
+                    tmProgress.style.strokeDashoffset = offset;
+
+                    if (tmRemaining <= 0) {
+                        clearInterval(tmInterval);
+                        tmRunning = false;
+                        tmBtn.innerHTML = "▶";
+                        playBeep();
+                        alert("Czas minął!");
+                        tmReset();
+                    }
+                }, 1000);
+            }
+        });
+
+        function tmReset() {
+            clearInterval(tmInterval);
+            tmRunning = false;
+            tmRemaining = 0;
+            tmBtn.innerHTML = "▶";
+            tmInputs.style.display = 'flex';
+            tmRing.style.display = 'none';
+            tmProgress.style.strokeDashoffset = 0;
+        }
+
+        document.getElementById('tm-reset').addEventListener('click', tmReset);
+
+        // --- POMODORO ---
+        let pmInterval;
+        let pmTime = 25 * 60;
+        let pmRunning = false;
+        let pmMode = 'work';
+
+        const pmDisplay = document.getElementById('pm-display');
+        const pmStatus = document.getElementById('pm-status');
+        const pmBtn = document.getElementById('pm-btn');
+
+        function updatePmDisplay() {
+            const m = Math.floor(pmTime / 60).toString().padStart(2, '0');
+            const s = (pmTime % 60).toString().padStart(2, '0');
+            pmDisplay.textContent = `${m}:${s}`;
+        }
+
+        pmBtn.addEventListener('click', () => {
+            if (pmRunning) {
+                clearInterval(pmInterval);
+                pmBtn.innerHTML = "▶";
+            } else {
+                pmInterval = setInterval(() => {
+                    pmTime--;
+                    updatePmDisplay();
+
+                    if (pmTime <= 0) {
+                        clearInterval(pmInterval);
+                        pmRunning = false;
+                        pmBtn.innerHTML = "▶";
+                        playBeep();
+
+                        if (pmMode === 'work') {
+                            pmMode = 'break';
+                            pmTime = 5 * 60;
+                            pmStatus.textContent = "Czas na przerwę! ☕";
+                            document.documentElement.style.setProperty('--accent', '#10b981');
+                        } else {
+                            pmMode = 'work';
+                            pmTime = 25 * 60;
+                            pmStatus.textContent = "Czas na pracę! 👨‍💻";
+                            document.documentElement.style.setProperty('--accent', '#f97316');
+                        }
+                        updatePmDisplay();
+                    }
+                }, 1000);
+                pmBtn.innerHTML = "⏸";
+            }
+            pmRunning = !pmRunning;
+        });
+
+        document.getElementById('pm-reset').addEventListener('click', () => {
+            clearInterval(pmInterval);
+            pmRunning = false;
+            pmMode = 'work';
+            pmTime = 25 * 60;
+            pmStatus.textContent = "Czas na pracę! 👨‍💻";
+            document.documentElement.style.setProperty('--accent', '#f97316');
+            pmBtn.innerHTML = "▶";
+            updatePmDisplay();
+        });
+
+        // --- WORLD CLOCK ---
+        let wcInterval;
+        let savedClocks = JSON.parse(localStorage.getItem('wc-clocks')) || ['Europe/Warsaw', 'America/New_York', 'Asia/Tokyo'];
+        const wcGrid = document.getElementById('wc-grid');
+        const wcSelect = document.getElementById('wc-select');
+
+        function wcInit() {
+            renderClocks();
+            wcInterval = setInterval(updateClocks, 1000);
+        }
+
+        function renderClocks() {
+            wcGrid.innerHTML = '';
+            savedClocks.forEach((zone, index) => {
+                const parts = zone.split('/');
+                const city = parts[parts.length - 1].replace(/_/g, ' ');
+                const card = document.createElement('div');
+                card.className = 'clock-card';
+                card.innerHTML = `
+                    <button class="btn-remove" data-index="${index}">×</button>
+                    <h3>${city}</h3>
+                    <div class="wc-time" id="wc-time-${index}">--:--</div>
+                    <div class="wc-date" id="wc-date-${index}">--</div>
+                `;
+                wcGrid.appendChild(card);
+            });
+
+            document.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(e.target.dataset.index);
+                    savedClocks.splice(idx, 1);
+                    localStorage.setItem('wc-clocks', JSON.stringify(savedClocks));
+                    renderClocks();
+                });
+            });
+
+            updateClocks();
+        }
+
+        function updateClocks() {
+            const now = new Date();
+            savedClocks.forEach((zone, index) => {
+                try {
+                    const timeStr = now.toLocaleTimeString('pl-PL', { timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    const dateStr = now.toLocaleDateString('pl-PL', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' });
+
+                    const timeEl = document.getElementById(`wc-time-${index}`);
+                    const dateEl = document.getElementById(`wc-date-${index}`);
+
+                    if (timeEl) timeEl.textContent = timeStr;
+                    if (dateEl) dateEl.textContent = dateStr;
+                } catch (e) { console.error(e); }
+            });
+        }
+
+        document.getElementById('wc-add').addEventListener('click', () => {
+            const zone = wcSelect.value;
+            if (!savedClocks.includes(zone)) {
+                savedClocks.push(zone);
+                localStorage.setItem('wc-clocks', JSON.stringify(savedClocks));
+                renderClocks();
+            }
+        });
+
+        wcInit();
+
+    </script>
+</body>
+
+</html>

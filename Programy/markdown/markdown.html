@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edytor Markdown - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #3b82f6;
+            --code-bg: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --header-bg: #1e293b;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent: #60a5fa;
+            --code-bg: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        nav {
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.3rem;
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        /* Editor Container */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 100vh;
+            padding-top: 55px;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .panel:last-child {
+            border-right: none;
+        }
+
+        .panel-header {
+            padding: 0.8rem 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header .info {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        /* Editor */
+        #editor {
+            flex: 1;
+            width: 100%;
+            padding: 1.5rem;
+            border: none;
+            background: var(--card-bg);
+            color: var(--text);
+            font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            resize: none;
+        }
+
+        #editor:focus {
+            outline: none;
+        }
+
+        /* Preview */
+        #preview {
+            flex: 1;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            overflow-y: auto;
+            font-size: 1rem;
+        }
+
+        /* Markdown Styles */
+        #preview h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        #preview h2 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        #preview h3 {
+            font-size: 1.25rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.6rem;
+        }
+
+        #preview h4 {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #preview p {
+            margin-bottom: 1rem;
+        }
+
+        #preview strong {
+            font-weight: 700;
+        }
+
+        #preview em {
+            font-style: italic;
+        }
+
+        #preview code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+
+        #preview pre {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        #preview pre code {
+            background: none;
+            padding: 0;
+        }
+
+        #preview blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        #preview ul,
+        #preview ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #preview li {
+            margin-bottom: 0.3rem;
+        }
+
+        #preview a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        #preview a:hover {
+            text-decoration: underline;
+        }
+
+        #preview hr {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        #preview img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        #preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        #preview th,
+        #preview td {
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        #preview th {
+            background: var(--code-bg);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .toolbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <div class="toolbar">
+                <button class="toolbar-btn" data-action="h1" title="Nagłówek 1">H1</button>
+                <button class="toolbar-btn" data-action="h2" title="Nagłówek 2">H2</button>
+                <button class="toolbar-btn" data-action="h3" title="Nagłówek 3">H3</button>
+                <button class="toolbar-btn" data-action="bold" title="Pogrubienie"><strong>B</strong></button>
+                <button class="toolbar-btn" data-action="italic" title="Kursywa"><em>I</em></button>
+                <button class="toolbar-btn" data-action="code" title="Kod">&lt;/&gt;</button>
+                <button class="toolbar-btn" data-action="link" title="Link">🔗</button>
+                <button class="toolbar-btn" data-action="image" title="Obrazek">🖼️</button>
+                <button class="toolbar-btn" data-action="quote" title="Cytat">❝</button>
+                <button class="toolbar-btn" data-action="ul" title="Lista">• —</button>
+                <button class="toolbar-btn" data-action="ol" title="Lista numerowana">1.</button>
+                <button class="toolbar-btn" data-action="hr" title="Linia">—</button>
+                <button class="toolbar-btn" data-action="table" title="Tabela">⊞</button>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <div class="editor-container">
+        <div class="panel">
+            <div class="panel-header">
+                <span>📝 Edytor Markdown</span>
+                <span class="info" id="word-count">0 słów</span>
+            </div>
+            <textarea id="editor" placeholder="Pisz tutaj w Markdown...
+
+# Nagłówek 1
+## Nagłówek 2
+
+**pogrubienie** i *kursywa*
+
+- element listy
+- kolejny element
+
+[link](https://example.com)
+
+`kod inline`
+
+```
+blok kodu
+```
+
+> cytat"></textarea>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <span>👁️ Podgląd</span>
+                <button class="toolbar-btn" id="btn-copy-html">📋 Kopiuj HTML</button>
+            </div>
+            <div id="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Markdown Editor
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
+        const wordCount = document.getElementById('word-count');
+
+        function updatePreview() {
+            const markdown = editor.value;
+            preview.innerHTML = parseMarkdown(markdown);
+
+            // Word count
+            const words = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
+            wordCount.textContent = words + ' słów';
+
+            // Save to localStorage
+            localStorage.setItem('markdown-content', markdown);
+        }
+
+        function parseMarkdown(text) {
+            let html = text;
+
+            // Escape HTML first
+            html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            // Code blocks (must be before other parsing)
+            html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // Headers
+            html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+            // Bold and italic
+            html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/___(.+?)___/g, '<strong><em>$1</em></strong>');
+            html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+            html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+
+            // Strikethrough
+            html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
+            // Links
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+            // Images
+            html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+
+            // Blockquotes
+            html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+            // Horizontal rule
+            html = html.replace(/^---$/gm, '<hr>');
+            html = html.replace(/^\*\*\*$/gm, '<hr>');
+
+            // Unordered lists
+            html = html.replace(/^[\*\-] (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+            // Ordered lists
+            html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+
+            // Tables (simple)
+            html = html.replace(/^\|(.+)\|$/gm, function (match, content) {
+                const cells = content.split('|').map(c => c.trim());
+                if (content.includes('---')) {
+                    return '';
+                }
+                const isHeader = content.includes('**');
+                const tag = isHeader ? 'th' : 'td';
+                return '<tr>' + cells.map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>';
+            });
+            html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table>$&</table>');
+
+            // Paragraphs
+            html = html.split('\n\n').map(para => {
+                para = para.trim();
+                if (!para) return '';
+                if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<ol') ||
+                    para.startsWith('<blockquote') || para.startsWith('<pre') || para.startsWith('<hr') ||
+                    para.startsWith('<table')) {
+                    return para;
+                }
+                return '<p>' + para.replace(/\n/g, '<br>') + '</p>';
+            }).join('\n');
+
+            return html;
+        }
+
+        // Toolbar actions
+        document.querySelectorAll('.toolbar-btn[data-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                const selected = editor.value.substring(start, end);
+                let replacement = '';
+
+                switch (action) {
+                    case 'h1': replacement = `# ${selected || 'Nagłówek 1'}`; break;
+                    case 'h2': replacement = `## ${selected || 'Nagłówek 2'}`; break;
+                    case 'h3': replacement = `### ${selected || 'Nagłówek 3'}`; break;
+                    case 'bold': replacement = `**${selected || 'pogrubiony tekst'}**`; break;
+                    case 'italic': replacement = `*${selected || 'tekst kursywą'}*`; break;
+                    case 'code': replacement = selected.includes('\n') ? `\`\`\`\n${selected || 'kod'}\n\`\`\`` : `\`${selected || 'kod'}\``; break;
+                    case 'link': replacement = `[${selected || 'tekst linku'}](url)`; break;
+                    case 'image': replacement = `![${selected || 'alt tekst'}](url-obrazka)`; break;
+                    case 'quote': replacement = `> ${selected || 'cytat'}`; break;
+                    case 'ul': replacement = `- ${selected || 'element listy'}`; break;
+                    case 'ol': replacement = `1. ${selected || 'element listy'}`; break;
+                    case 'hr': replacement = '\n---\n'; break;
+                    case 'table': replacement = '| Kolumna 1 | Kolumna 2 |\n|---|---|\n| Dane | Dane |'; break;
+                }
+
+                editor.value = editor.value.substring(0, start) + replacement + editor.value.substring(end);
+                editor.focus();
+                editor.selectionStart = editor.selectionEnd = start + replacement.length;
+                updatePreview();
+            });
+        });
+
+        // Copy HTML
+        document.getElementById('btn-copy-html').addEventListener('click', () => {
+            navigator.clipboard.writeText(preview.innerHTML);
+            document.getElementById('btn-copy-html').textContent = '✅ Skopiowano!';
+            setTimeout(() => {
+                document.getElementById('btn-copy-html').textContent = '📋 Kopiuj HTML';
+            }, 2000);
+        });
+
+        // Live preview
+        editor.addEventListener('input', updatePreview);
+
+        // Load saved content
+        const savedContent = localStorage.getItem('markdown-content');
+        if (savedContent) {
+            editor.value = savedContent;
+        } else {
+            editor.value = `# Witaj w Edytorze Markdown! 👋
+
+To jest **prosty edytor** z podglądem na żywo.
+
+## Funkcje
+
+- Podgląd w czasie rzeczywistym
+- Pasek narzędzi do wstawiania elementów
+- Automatyczny zapis w przeglądarce
+
+### Przykład kodu
+
+\`\`\`javascript
+function hello() {
+    console.log("Cześć!");
+}
+\`\`\`
+
+> To jest cytat
+
+---
+
+Miłego pisania! 🎉`;
+        }
+        updatePreview();
+    </script>
+</body>
+
+</html>

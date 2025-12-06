@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Says - Hub</title>
+    <style>
+        :root {
+            --bg: #222;
+            --text: #fff;
+            --header-bg: #1a1a1a;
+            --nav-text: #aaa;
+            --nav-hover: #fff;
+            --border: #333;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f0f0;
+            --text: #333;
+            --header-bg: #fff;
+            --nav-text: #666;
+            --nav-hover: #000;
+            --border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .simon {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 10px solid #333;
+            position: relative;
+        }
+
+        .pad {
+            opacity: 0.6;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .pad:active,
+        .pad.lit {
+            opacity: 1;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .green {
+            background: #00ff00;
+            border-top-left-radius: 150px;
+        }
+
+        .red {
+            background: #ff0000;
+            border-top-right-radius: 150px;
+        }
+
+        .yellow {
+            background: #ffff00;
+            border-bottom-left-radius: 150px;
+        }
+
+        .blue {
+            background: #0000ff;
+            border-bottom-right-radius: 150px;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: #222;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 10px solid #333;
+            z-index: 10;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .msg {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            height: 30px;
+        }
+
+        .start-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .start-btn:hover {
+            background: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry.html" class="active">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../../Programy/programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">☀️</button>
+        </nav>
+    </header>
+
+    <div class="game-container">
+        <div class="simon">
+            <div class="pad green" id="0" onclick="userClick(0)"></div>
+            <div class="pad red" id="1" onclick="userClick(1)"></div>
+            <div class="pad yellow" id="2" onclick="userClick(2)"></div>
+            <div class="pad blue" id="3" onclick="userClick(3)"></div>
+            <div class="center">
+                <div class="score" id="score">0</div>
+            </div>
+        </div>
+        <div class="msg" id="msg">Wciśnij Start</div>
+        <button class="start-btn" onclick="startGame()">Start</button>
+    </div>
+
+    <script>
+        let sequence = [];
+        let userStep = 0;
+        let turn = 'comp';
+
+        const pads = [
+            document.getElementById('0'),
+            document.getElementById('1'),
+            document.getElementById('2'),
+            document.getElementById('3')
+        ];
+        const msg = document.getElementById('msg');
+        const scoreEl = document.getElementById('score');
+
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const freqs = [329.63, 261.63, 220.00, 164.81];
+
+        function beep(i) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.value = freqs[i];
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+            osc.stop(ctx.currentTime + 0.5);
+        }
+
+        function lightUp(i) {
+            pads[i].classList.add('lit');
+            beep(i);
+            setTimeout(() => pads[i].classList.remove('lit'), 300);
+        }
+
+        function startGame() {
+            sequence = [];
+            scoreEl.innerText = 0;
+            nextRound();
+        }
+
+        function nextRound() {
+            userStep = 0;
+            turn = 'comp';
+            msg.innerText = "Słuchaj...";
+            sequence.push(Math.floor(Math.random() * 4));
+            scoreEl.innerText = sequence.length;
+
+            let i = 0;
+            const interval = setInterval(() => {
+                lightUp(sequence[i]);
+                i++;
+                if (i >= sequence.length) {
+                    clearInterval(interval);
+                    turn = 'user';
+                    msg.innerText = "Twoja kolej";
+                }
+            }, 800);
+        }
+
+        function userClick(i) {
+            if (turn !== 'user') return;
+            lightUp(i);
+
+            if (i === sequence[userStep]) {
+                userStep++;
+                if (userStep === sequence.length) {
+                    turn = 'comp';
+                    msg.innerText = "Dobrze!";
+                    setTimeout(nextRound, 1000);
+                }
+            } else {
+                msg.innerText = "Błąd! Koniec gry.";
+                turn = 'over';
+                const osc = ctx.createOscillator();
+                osc.frequency.value = 100;
+                osc.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            }
+        }
+
+        // Theme Logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeBtn.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
+</body>
+
+</html>

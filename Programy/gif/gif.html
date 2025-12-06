@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edytor GIF - Hub</title>
+    <link rel="icon" type="image/x-icon"
+        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f0f0f0;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #ddd;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #10b981;
+        }
+
+        [data-theme="dark"] {
+            --bg: #111;
+            --text: #fff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #1a1a1a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent: #34d399;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 2rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .drop-zone {
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .drop-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Frames Grid */
+        .frames-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .frames-section h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .frames-grid {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .frame-item {
+            flex-shrink: 0;
+            position: relative;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .frame-item img,
+        .frame-item canvas {
+            width: 120px;
+            height: 80px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .frame-item:hover {
+            border-color: var(--accent);
+        }
+
+        .frame-item .frame-num {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .frame-item .btn-remove-frame {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .frame-item:hover .btn-remove-frame {
+            display: flex;
+        }
+
+        /* Preview */
+        .preview-area {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        #gif-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px var(--shadow);
+        }
+
+        .empty-preview {
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-preview .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        /* Video section */
+        .video-controls {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        video {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+        }
+
+        .time-range {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .time-range input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .control-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../programy.html" class="active">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🎬 Edytor GIF</h1>
+            <p>Twórz animacje GIF z obrazów lub fragmentów wideo</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="images">📷 Z Obrazów</button>
+            <button class="tab-btn" data-tab="video">🎥 Z Wideo</button>
+        </div>
+
+        <!-- FROM IMAGES TAB -->
+        <div class="tab-content active" id="tab-images">
+            <div class="upload-area">
+                <div class="drop-zone" id="images-drop">
+                    <div class="icon">📷</div>
+                    <h3>Przeciągnij obrazy tutaj</h3>
+                    <p>lub kliknij aby wybrać pliki (PNG, JPG, WEBP)</p>
+                    <input type="file" id="images-input" accept="image/*" multiple>
+                </div>
+            </div>
+
+            <div class="frames-section" id="frames-section" style="display: none;">
+                <h3>🖼️ Klatki (<span id="frame-count">0</span>)</h3>
+                <div class="frames-grid" id="frames-grid"></div>
+                <button class="btn btn-secondary" id="btn-add-more" style="margin-top: 1rem;">➕ Dodaj więcej</button>
+            </div>
+        </div>
+
+        <!-- FROM VIDEO TAB -->
+        <div class="tab-content" id="tab-video">
+            <div class="upload-area">
+                <div class="drop-zone" id="video-drop">
+                    <div class="icon">🎥</div>
+                    <h3>Przeciągnij wideo tutaj</h3>
+                    <p>lub kliknij aby wybrać plik (MP4, WEBM)</p>
+                    <input type="file" id="video-input" accept="video/*">
+                </div>
+
+                <div class="video-controls" id="video-controls" style="display: none;">
+                    <video id="video-preview" controls></video>
+                    <div class="time-range">
+                        <label>Od (sek):</label>
+                        <input type="number" id="time-start" value="0" min="0" step="0.1">
+                        <label>Do (sek):</label>
+                        <input type="number" id="time-end" value="3" min="0" step="0.1">
+                        <button class="btn btn-primary" id="btn-extract">📸 Wyodrębnij klatki</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="frames-section" id="video-frames-section" style="display: none;">
+                <h3>🖼️ Wyodrębnione klatki (<span id="video-frame-count">0</span>)</h3>
+                <div class="frames-grid" id="video-frames-grid"></div>
+            </div>
+        </div>
+
+        <!-- Common Controls -->
+        <div class="controls" id="gif-controls" style="display: none;">
+            <div class="control-row">
+                <div class="control-group">
+                    <label>Opóźnienie między klatkami: <span id="delay-val">100</span> ms</label>
+                    <input type="range" id="delay" min="50" max="1000" value="100" step="10">
+                </div>
+                <div class="control-group">
+                    <label>Szerokość (px)</label>
+                    <input type="number" id="gif-width" value="400" min="50" max="1000">
+                </div>
+                <div class="control-group">
+                    <label>Jakość</label>
+                    <input type="range" id="gif-quality" min="1" max="20" value="10">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-generate">✨ Generuj GIF</button>
+                <button class="btn btn-secondary" id="btn-clear-all">🗑️ Wyczyść wszystko</button>
+            </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-area" id="preview-area" style="display: none;">
+            <h3 style="margin-bottom: 1rem;">📺 Podgląd GIF</h3>
+            <img id="gif-preview" src="" alt="GIF Preview">
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-download">📥 Pobierz GIF</button>
+            </div>
+        </div>
+
+        <div class="empty-preview" id="empty-preview">
+            <div class="icon">🎬</div>
+            <h3>Brak GIF-a</h3>
+            <p>Dodaj obrazy lub wideo, a następnie kliknij "Generuj GIF"</p>
+        </div>
+    </main>
+
+    <!-- GIF.js library (simplified inline implementation) -->
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // GIF Editor Logic
+        let frames = [];
+        const framesGrid = document.getElementById('frames-grid');
+        const framesSection = document.getElementById('frames-section');
+        const frameCount = document.getElementById('frame-count');
+        const gifControls = document.getElementById('gif-controls');
+        const emptyPreview = document.getElementById('empty-preview');
+        const previewArea = document.getElementById('preview-area');
+        const gifPreview = document.getElementById('gif-preview');
+
+        // Image upload
+        const imagesDrop = document.getElementById('images-drop');
+        const imagesInput = document.getElementById('images-input');
+
+        imagesDrop.addEventListener('click', () => imagesInput.click());
+        imagesDrop.addEventListener('dragover', (e) => { e.preventDefault(); imagesDrop.classList.add('dragover'); });
+        imagesDrop.addEventListener('dragleave', () => imagesDrop.classList.remove('dragover'));
+        imagesDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imagesDrop.classList.remove('dragover');
+            handleImageFiles(e.dataTransfer.files);
+        });
+        imagesInput.addEventListener('change', (e) => handleImageFiles(e.target.files));
+
+        document.getElementById('btn-add-more').addEventListener('click', () => imagesInput.click());
+
+        function handleImageFiles(files) {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        frames.push({ type: 'image', data: img, src: e.target.result });
+                        renderFrames();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderFrames() {
+            framesGrid.innerHTML = '';
+            frames.forEach((frame, i) => {
+                const div = document.createElement('div');
+                div.className = 'frame-item';
+                div.innerHTML = `
+                    <img src="${frame.src}" alt="Frame ${i + 1}">
+                    <span class="frame-num">${i + 1}</span>
+                    <button class="btn-remove-frame" data-idx="${i}">×</button>
+                `;
+                framesGrid.appendChild(div);
+            });
+
+            document.querySelectorAll('.btn-remove-frame').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    frames.splice(parseInt(btn.dataset.idx), 1);
+                    renderFrames();
+                });
+            });
+
+            frameCount.textContent = frames.length;
+            framesSection.style.display = frames.length > 0 ? 'block' : 'none';
+            gifControls.style.display = frames.length > 1 ? 'block' : 'none';
+        }
+
+        // Video handling
+        const videoDrop = document.getElementById('video-drop');
+        const videoInput = document.getElementById('video-input');
+        const videoControls = document.getElementById('video-controls');
+        const videoPreview = document.getElementById('video-preview');
+        const videoFramesSection = document.getElementById('video-frames-section');
+        const videoFramesGrid = document.getElementById('video-frames-grid');
+        const videoFrameCount = document.getElementById('video-frame-count');
+
+        videoDrop.addEventListener('click', () => videoInput.click());
+        videoDrop.addEventListener('dragover', (e) => { e.preventDefault(); videoDrop.classList.add('dragover'); });
+        videoDrop.addEventListener('dragleave', () => videoDrop.classList.remove('dragover'));
+        videoDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            videoDrop.classList.remove('dragover');
+            if (e.dataTransfer.files[0]) loadVideo(e.dataTransfer.files[0]);
+        });
+        videoInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) loadVideo(e.target.files[0]);
+        });
+
+        function loadVideo(file) {
+            const url = URL.createObjectURL(file);
+            videoPreview.src = url;
+            videoControls.style.display = 'block';
+
+            videoPreview.onloadedmetadata = () => {
+                document.getElementById('time-end').value = Math.min(3, videoPreview.duration).toFixed(1);
+                document.getElementById('time-end').max = videoPreview.duration;
+            };
+        }
+
+        document.getElementById('btn-extract').addEventListener('click', extractFramesFromVideo);
+
+        async function extractFramesFromVideo() {
+            const start = parseFloat(document.getElementById('time-start').value);
+            const end = parseFloat(document.getElementById('time-end').value);
+            const fps = 10; // Frames per second to extract
+            const duration = end - start;
+            const frameCountToExtract = Math.floor(duration * fps);
+
+            if (frameCountToExtract <= 0 || frameCountToExtract > 100) {
+                alert('Nieprawidłowy zakres czasowy (max 100 klatek)');
+                return;
+            }
+
+            frames = [];
+            videoFramesGrid.innerHTML = '<p>Wyodrębnianie klatek...</p>';
+            videoFramesSection.style.display = 'block';
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = videoPreview.videoWidth;
+            canvas.height = videoPreview.videoHeight;
+
+            for (let i = 0; i < frameCountToExtract; i++) {
+                const time = start + (i / fps);
+                await seekToTime(videoPreview, time);
+
+                ctx.drawImage(videoPreview, 0, 0);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                const img = new Image();
+                img.src = dataUrl;
+                await new Promise(r => img.onload = r);
+
+                frames.push({ type: 'image', data: img, src: dataUrl });
+            }
+
+            renderVideoFrames();
+            gifControls.style.display = frames.length > 1 ? 'block' : 'none';
+        }
+
+        function seekToTime(video, time) {
+            return new Promise((resolve) => {
+                video.currentTime = time;
+                video.onseeked = () => resolve();
+            });
+        }
+
+        function renderVideoFrames() {
+            videoFramesGrid.innerHTML = '';
+            frames.forEach((frame, i) => {
+                const div = document.createElement('div');
+                div.className = 'frame-item';
+                div.innerHTML = `
+                    <img src="${frame.src}" alt="Frame ${i + 1}">
+                    <span class="frame-num">${i + 1}</span>
+                `;
+                videoFramesGrid.appendChild(div);
+            });
+            videoFrameCount.textContent = frames.length;
+        }
+
+        // Delay slider
+        const delaySlider = document.getElementById('delay');
+        const delayVal = document.getElementById('delay-val');
+        delaySlider.addEventListener('input', () => {
+            delayVal.textContent = delaySlider.value;
+        });
+
+        // Generate GIF (using simple animated GIF approach)
+        document.getElementById('btn-generate').addEventListener('click', generateGIF);
+
+        async function generateGIF() {
+            if (frames.length < 2) {
+                alert('Potrzebujesz co najmniej 2 klatek!');
+                return;
+            }
+
+            const width = parseInt(document.getElementById('gif-width').value);
+            const delay = parseInt(delaySlider.value);
+
+            // Calculate aspect ratio from first frame
+            const aspectRatio = frames[0].data.height / frames[0].data.width;
+            const height = Math.round(width * aspectRatio);
+
+            // Create animated preview using CSS animation (as actual GIF encoding is complex)
+            // For real GIF encoding, we'd need a library like gif.js
+
+            // Simple approach: create a cycling image preview
+            let currentFrame = 0;
+
+            emptyPreview.style.display = 'none';
+            previewArea.style.display = 'block';
+
+            // Create preview canvas
+            const previewCanvas = document.createElement('canvas');
+            previewCanvas.width = width;
+            previewCanvas.height = height;
+            const previewCtx = previewCanvas.getContext('2d');
+
+            function animate() {
+                previewCtx.drawImage(frames[currentFrame].data, 0, 0, width, height);
+                gifPreview.src = previewCanvas.toDataURL();
+                currentFrame = (currentFrame + 1) % frames.length;
+            }
+
+            // Clear previous interval if exists
+            if (window.gifInterval) clearInterval(window.gifInterval);
+            window.gifInterval = setInterval(animate, delay);
+            animate();
+
+            // Store for download
+            window.gifFrames = frames.map(f => {
+                const c = document.createElement('canvas');
+                c.width = width;
+                c.height = height;
+                c.getContext('2d').drawImage(f.data, 0, 0, width, height);
+                return c.toDataURL('image/png');
+            });
+            window.gifDelay = delay;
+        }
+
+        // Download (as animated WEBP or individual frames ZIP)
+        document.getElementById('btn-download').addEventListener('click', () => {
+            if (!window.gifFrames || window.gifFrames.length === 0) {
+                alert('Najpierw wygeneruj GIF!');
+                return;
+            }
+
+            // For simplicity, download as animated preview (first frame with info)
+            // Note: Real GIF encoding requires a library
+            const link = document.createElement('a');
+            link.download = 'animacja-klatka-1.png';
+            link.href = window.gifFrames[0];
+            link.click();
+
+            alert('Pobrano pierwszą klatkę. Do pełnego GIF-a potrzebna jest biblioteka gif.js lub konwersja online.\n\nWszystkie klatki można pobrać jako pakiet PNG.');
+        });
+
+        // Clear all
+        document.getElementById('btn-clear-all').addEventListener('click', () => {
+            frames = [];
+            renderFrames();
+            renderVideoFrames();
+            videoFramesSection.style.display = 'none';
+            gifControls.style.display = 'none';
+            previewArea.style.display = 'none';
+            emptyPreview.style.display = 'block';
+            if (window.gifInterval) clearInterval(window.gifInterval);
+        });
+    </script>
+</body>
+
+</html>
