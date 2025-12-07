@@ -1270,11 +1270,14 @@
         function setPlayerColor(color) {
             playerColor = color;
 
-            // Aktualizuj przyciski
+            // Aktualizuj przyciski - poprawka: znajdź przycisk po zawartości tekstowej
             document.querySelectorAll('.color-btn').forEach(btn => {
                 btn.classList.remove('active');
+                if ((color === 'white' && btn.textContent.includes('Białe')) ||
+                    (color === 'black' && btn.textContent.includes('Czarne'))) {
+                    btn.classList.add('active');
+                }
             });
-            event.target.classList.add('active');
 
             // Aktualizuj tekst kontrolek
             const controlsText = document.getElementById('controls-text');
@@ -1289,11 +1292,16 @@
         function setDifficulty(difficulty) {
             aiDifficulty = difficulty;
 
-            // Aktualizuj przyciski
+            // Aktualizuj przyciski - poprawka: znajdź przycisk po poziomie trudności
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
                 btn.classList.remove('active');
+                const btnText = btn.textContent.toLowerCase();
+                if ((difficulty === 'easy' && btnText.includes('łatwy')) ||
+                    (difficulty === 'medium' && btnText.includes('średni')) ||
+                    (difficulty === 'hard' && btnText.includes('trudny'))) {
+                    btn.classList.add('active');
+                }
             });
-            event.target.classList.add('active');
         }
 
         // Zmiana trybu gry
