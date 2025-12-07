@@ -233,7 +233,7 @@ const gamesCatalog = [
   },
   {
     slug: "flappy-bird",
-    title: "Flappy Bird (Klon)",
+    title: "Flappy Bird",
     description:
       "Proste zasady, nieskończona irytacja. Klikaj, aby utrzymać ptaka w powietrzu i omijać przeszkody.",
     cover: "https://images.unsplash.com/photo-1454789476662-bdd71606334f?auto=format&fit=crop&w=800&q=80",

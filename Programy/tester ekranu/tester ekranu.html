@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,23 +37,71 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Zapobiega paskom przewijania podczas testu */
+            overflow: hidden;
         }
 
         /* Menu główne */
         header {
-            padding: 1rem 2rem;
+            background: var(--card-bg);
             border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            gap: 2rem;
         }
 
         .logo {
+            font-size: 1.5rem;
             font-weight: 700;
-            text-decoration: none;
             color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        #theme-toggle:hover {
+            background: var(--border);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
         }
 
         .controls {
@@ -60,11 +109,10 @@
             gap: 1rem;
             flex-wrap: wrap;
             justify-content: center;
-            padding: 2rem;
-            z-index: 10;
+            margin-top: 2rem;
         }
 
-        button {
+        button.control-btn {
             padding: 1rem 2rem;
             font-size: 1.1rem;
             border: none;
@@ -77,11 +125,13 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-weight: 600;
         }
 
-        button:hover {
+        button.control-btn:hover {
             transform: translateY(-2px);
             border-color: var(--accent);
+            color: var(--accent);
         }
 
         /* Ekran testowy (Overlay) */
@@ -92,12 +142,11 @@
             width: 100%;
             height: 100%;
             background: black;
-            z-index: 100;
+            z-index: 2000;
             display: none;
-            cursor: none; /* Ukryj kursor podczas testu */
+            cursor: none;
         }
 
-        /* Informacja o wyjściu */
         #info-overlay {
             position: fixed;
             top: 50%;
@@ -109,55 +158,135 @@
             border-radius: 8px;
             pointer-events: none;
             text-align: center;
-            z-index: 101;
+            z-index: 2001;
             display: none;
         }
 
-        /* Specyficzne dla Ghosting Test */
         #ghosting-canvas {
             width: 100%;
             height: 100%;
-            display: none;
+            display: block;
         }
 
-        .stats-panel {
+        /* Panel sterowania wewnątrz testu */
+        .test-controls {
             position: fixed;
             top: 20px;
             left: 20px;
-            color: #0f0;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px;
+            border-radius: 12px;
+            color: white;
             font-family: monospace;
-            font-size: 1.2rem;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-            pointer-events: none;
+            z-index: 2002;
             display: none;
-            z-index: 102;
+            border: 1px solid #444;
+            backdrop-filter: blur(5px);
+            min-width: 250px;
+            cursor: default;
+        }
+
+        .test-controls h3 {
+            margin-bottom: 10px;
+            color: var(--accent);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .control-group {
+            margin-top: 15px;
+            border-top: 1px solid #444;
+            padding-top: 10px;
+        }
+
+        .control-label {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .speed-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+        }
+
+        .speed-btn {
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            padding: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .speed-btn:hover,
+        .speed-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .toggle-btn {
+            width: 100%;
+            margin-top: 5px;
+            padding: 8px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .toggle-btn:hover {
+            background: #444;
         }
     </style>
 </head>
+
 <body>
     <header>
-        <a href="../programy.html" class="logo">← Powrót do Narzędzi</a>
-        <button id="theme-toggle">🌙</button>
+        <nav>
+            <a href="../../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../../gry/gry.html">Gry</a>
+                <a href="../../muzyka/muzyka.html">Muzyka</a>
+                <a href="../../filmy/filmy glowna.html">Filmy</a>
+                <a href="../programy.html">Narzędzia</a>
+            </div>
+            <button id="theme-toggle">🌙</button>
+        </nav>
     </header>
 
-    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <h1 style="margin-bottom: 1rem;">📺 Tester Ekranu</h1>
+    <div class="container">
+        <h1 style="margin-bottom: 1rem;">📺 Tester Ekranu Pro</h1>
         <p style="color: var(--text-secondary); margin-bottom: 2rem; text-align: center; max-width: 600px;">
-            Zaleca się włączenie trybu pełnoekranowego (F11) przed rozpoczęciem testów.
-            <br>Naciśnij <b>ESC</b> lub kliknij dwukrotnie, aby wyjść z testu.
+            Zaawansowane narzędzie do testowania monitora.<br>
+            Zaleca się włączenie trybu pełnoekranowego (F11).
         </p>
 
         <div class="controls">
-            <button onclick="startPixelTest()">
+            <button class="control-btn" onclick="startTest('pixels')">
                 🎨 Martwe Piksele
             </button>
-            <button onclick="startGhostingTest()">
-                👻 Test Ghostingu (Hz)
+            <button class="control-btn" onclick="startTest('ufo')">
+                🛸 UFO Motion Test
             </button>
-            <button onclick="startGradientTest()">
+            <button class="control-btn" onclick="startTest('gradient')">
                 🌈 Gradienty
+            </button>
+            <button class="control-btn" onclick="startTest('text')">
+                📜 Czytelność Tekstu
             </button>
         </div>
     </div>
@@ -166,30 +295,350 @@
     <div id="test-layer">
         <canvas id="ghosting-canvas"></canvas>
     </div>
-    
-    <div id="info-overlay">Kliknij, aby zmienić kolor<br>ESC aby wyjść</div>
-    <div id="stats-panel" class="stats-panel">FPS: <span id="fps-counter">0</span> | Speed: 960px/s</div>
+
+    <div id="info-overlay">Kliknij, aby zmienić<br>ESC aby wyjść</div>
+
+    <!-- Panel sterowania dla testu UFO -->
+    <div id="ufo-controls" class="test-controls">
+        <h3>Statystyki</h3>
+        <div class="stat-row"><span>FPS:</span> <span id="fps-val" style="color: #0f0">0</span></div>
+        <div class="stat-row"><span>Hz (est):</span> <span id="hz-val">0</span></div>
+        <div class="stat-row"><span>Piksele/sek:</span> <span id="pps-val">960</span></div>
+
+        <div class="control-group">
+            <span class="control-label">Prędkość (px/s)</span>
+            <div class="speed-buttons">
+                <button class="speed-btn" onclick="setSpeed(240)">240</button>
+                <button class="speed-btn" onclick="setSpeed(480)">480</button>
+                <button class="speed-btn active" onclick="setSpeed(960)">960</button>
+                <button class="speed-btn" onclick="setSpeed(1440)">1440</button>
+                <button class="speed-btn" onclick="setSpeed(1920)">1920</button>
+                <button class="speed-btn" onclick="setSpeed(2560)">2560</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">Limit FPS</span>
+            <div class="speed-buttons">
+                <button class="speed-btn active" onclick="setFPS(null)">Max</button>
+                <button class="speed-btn" onclick="setFPS(144)">144</button>
+                <button class="speed-btn" onclick="setFPS(120)">120</button>
+                <button class="speed-btn" onclick="setFPS(60)">60</button>
+                <button class="speed-btn" onclick="setFPS(30)">30</button>
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <input type="number" id="custom-fps" placeholder="Inne"
+                    style="width: 70px; padding: 5px; background: #333; border: 1px solid #555; color: white; border-radius: 4px; font-size: 0.8rem;">
+                <button class="speed-btn" style="flex: 1;" onclick="setCustomFPS()">Ustaw</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">Opcje</span>
+            <button class="toggle-btn" onclick="toggleBackgrounds()">Zmień Tła</button>
+        </div>
+
+        <div style="margin-top: 15px; font-size: 0.7rem; color: #888; text-align: center;">
+            Naciśnij ESC aby wyjść
+        </div>
+    </div>
 
     <script>
         const testLayer = document.getElementById('test-layer');
         const infoOverlay = document.getElementById('info-overlay');
         const canvas = document.getElementById('ghosting-canvas');
-        const ctx = canvas.getContext('2d');
-        const statsPanel = document.getElementById('stats-panel');
-        const fpsCounter = document.getElementById('fps-counter');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optymalizacja
+        const ufoControls = document.getElementById('ufo-controls');
+
+        // Elementy UI
+        const fpsEl = document.getElementById('fps-val');
+        const hzEl = document.getElementById('hz-val');
+        const ppsEl = document.getElementById('pps-val');
+        const speedBtns = document.querySelectorAll('.speed-btn');
 
         let activeTest = null;
-        let colorIndex = 0;
-        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF', '#000000'];
         let animationId;
-        
-        // Zmienne do Ghosting Test
-        let lastTime = 0;
-        let xPos = 0;
-        let frameCount = 0;
-        let lastFpsTime = 0;
 
-        // Obsługa motywu
+        // Stan UFO Testu
+        let ufoState = {
+            speed: 960,
+            xPos: 0,
+            lastTime: 0,
+            frameCount: 0,
+            lastFpsTime: 0,
+            backgroundMode: 0,
+            targetFPS: null, // null = Max (VSync)
+            frameInterval: 0,
+            lastDrawTime: 0
+        };
+
+        // Stan Innych Testów
+        let otherTestState = {
+            index: 0,
+            colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF', '#000000'],
+            gradients: [
+                'linear-gradient(to right, black, white)',
+                'linear-gradient(to right, red, black)',
+                'linear-gradient(to right, green, black)',
+                'linear-gradient(to right, blue, black)',
+                'radial-gradient(circle, white, black)'
+            ]
+        };
+
+        // --- Zarządzanie Testami ---
+
+        function startTest(type) {
+            activeTest = type;
+            testLayer.style.display = 'block';
+
+            // Reset
+            ufoControls.style.display = 'none';
+            canvas.style.display = 'none';
+            testLayer.style.background = 'black';
+            testLayer.style.cursor = 'none';
+            infoOverlay.style.display = 'none';
+
+            if (type === 'ufo') {
+                startUfoTest();
+            } else if (type === 'pixels') {
+                otherTestState.index = 0;
+                testLayer.style.background = otherTestState.colors[0];
+                showInfo("Kliknij: Zmień kolor");
+            } else if (type === 'gradient') {
+                otherTestState.index = 0;
+                testLayer.style.background = otherTestState.gradients[0];
+                showInfo("Kliknij: Zmień gradient");
+            } else if (type === 'text') {
+                startTextTest();
+            }
+        }
+
+        function exitTest() {
+            activeTest = null;
+            testLayer.style.display = 'none';
+            ufoControls.style.display = 'none';
+            cancelAnimationFrame(animationId);
+            document.body.style.cursor = 'default';
+        }
+
+        function showInfo(text) {
+            infoOverlay.innerHTML = text + "<br><span style='font-size:0.8em; opacity:0.7'>ESC: Wyjście</span>";
+            infoOverlay.style.display = 'block';
+            setTimeout(() => infoOverlay.style.display = 'none', 2000);
+        }
+
+        // --- UFO Test Logic ---
+
+        function startUfoTest() {
+            canvas.style.display = 'block';
+            ufoControls.style.display = 'block';
+            testLayer.style.cursor = 'default'; // Pokaż kursor dla panelu
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            ufoState.xPos = 0;
+            ufoState.lastTime = performance.now();
+            ufoState.lastDrawTime = performance.now();
+            ufoState.frameCount = 0;
+            ufoState.lastFpsTime = performance.now();
+
+            requestAnimationFrame(ufoLoop);
+        }
+
+        function setSpeed(speed) {
+            ufoState.speed = speed;
+            ppsEl.textContent = speed;
+
+            // Update UI (tylko przyciski prędkości - te w pierwszej grupie)
+            const speedGroup = ufoControls.querySelectorAll('.control-group')[0].querySelectorAll('.speed-btn');
+            speedGroup.forEach(btn => {
+                if (parseInt(btn.textContent) === speed) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function setFPS(fps) {
+            ufoState.targetFPS = fps;
+            ufoState.frameInterval = fps ? 1000 / fps : 0;
+
+            // Update UI (przyciski FPS - te w drugiej grupie)
+            const fpsGroup = ufoControls.querySelectorAll('.control-group')[1].querySelectorAll('.speed-btn');
+            fpsGroup.forEach(btn => {
+                const btnText = btn.textContent;
+                // Sprawdzamy czy to przycisk "Ustaw" (który też ma klasę speed-btn) - ignorujemy go w tej pętli
+                if (btnText === 'Ustaw') return;
+
+                const isActive = (fps === null && btnText === 'Max') || (parseInt(btnText) === fps);
+                if (isActive) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function setCustomFPS() {
+            const input = document.getElementById('custom-fps');
+            const val = parseInt(input.value);
+            if (val > 0) {
+                setFPS(val);
+            } else {
+                alert("Podaj poprawną wartość FPS (> 0)");
+            }
+        }
+
+        function toggleBackgrounds() {
+            ufoState.backgroundMode = (ufoState.backgroundMode + 1) % 2;
+        }
+
+        function drawUFO(x, y) {
+            // Spodek
+            ctx.fillStyle = '#888';
+            ctx.beginPath();
+            ctx.ellipse(x, y, 40, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Kopuła
+            ctx.fillStyle = '#00ffff';
+            ctx.beginPath();
+            ctx.arc(x, y - 5, 20, Math.PI, 0);
+            ctx.fill();
+
+            // Światełka
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.arc(x - 25, y, 3, 0, Math.PI * 2);
+            ctx.arc(x, y + 5, 3, 0, Math.PI * 2);
+            ctx.arc(x + 25, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Obcy (Pixel art style simple)
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(x - 5, y - 20, 10, 10);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x - 3, y - 18, 2, 2);
+            ctx.fillRect(x + 1, y - 18, 2, 2);
+        }
+
+        function ufoLoop(timestamp) {
+            if (activeTest !== 'ufo' && activeTest !== 'text') return;
+
+            requestAnimationFrame(ufoLoop);
+
+            // FPS Throttling
+            if (ufoState.targetFPS) {
+                const elapsed = timestamp - ufoState.lastDrawTime;
+                if (elapsed < ufoState.frameInterval) return;
+                ufoState.lastDrawTime = timestamp - (elapsed % ufoState.frameInterval);
+            } else {
+                ufoState.lastDrawTime = timestamp;
+            }
+
+            const dt = timestamp - ufoState.lastTime;
+            ufoState.lastTime = timestamp;
+
+            // FPS Counter
+            ufoState.frameCount++;
+            if (timestamp - ufoState.lastFpsTime >= 1000) {
+                const fps = ufoState.frameCount;
+                fpsEl.textContent = fps;
+                // Hz estymacja działa dobrze tylko przy Max FPS (VSync)
+                if (!ufoState.targetFPS) hzEl.textContent = fps;
+                else hzEl.textContent = "N/A";
+
+                ufoState.frameCount = 0;
+                ufoState.lastFpsTime = timestamp;
+            }
+
+            // Physics (zawsze bazuje na rzeczywistym czasie, aby ruch był poprawny nawet przy niskim FPS)
+            const move = (ufoState.speed * dt) / 1000;
+            ufoState.xPos = (ufoState.xPos + move) % (canvas.width + 100); // +100 marginesu
+
+            // Drawing
+            const w = canvas.width;
+            const h = canvas.height;
+            const laneHeight = h / 3;
+
+            // Tła
+            if (ufoState.backgroundMode === 0) {
+                // 3 Pasy: Ciemny, Szary, Jasny
+                ctx.fillStyle = '#1a1a1a'; // Dark
+                ctx.fillRect(0, 0, w, laneHeight);
+
+                ctx.fillStyle = '#808080'; // Grey
+                ctx.fillRect(0, laneHeight, w, laneHeight);
+
+                ctx.fillStyle = '#e0e0e0'; // Light
+                ctx.fillRect(0, laneHeight * 2, w, laneHeight);
+            } else {
+                // Jednolite tło
+                ctx.fillStyle = '#222';
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.beginPath();
+            for (let i = 0; i < w; i += 100) { ctx.moveTo(i, 0); ctx.lineTo(i, h); }
+            ctx.stroke();
+
+            // Rysowanie Obiektów
+            const drawX = ufoState.xPos - 50; // Offset startowy
+
+            if (activeTest === 'ufo') {
+                // Rysuj UFO na każdym pasie
+                drawUFO(drawX, laneHeight * 0.5);
+                drawUFO(drawX, laneHeight * 1.5);
+                drawUFO(drawX, laneHeight * 2.5);
+
+                // Tekst pomocniczy
+                ctx.fillStyle = 'white';
+                ctx.font = '12px monospace';
+                ctx.fillText(`${ufoState.speed} px/s`, drawX - 20, laneHeight * 0.5 + 40);
+            } else if (activeTest === 'text') {
+                // Test Tekstu
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 30px Arial';
+                ctx.fillText("Czytelność Tekstu w Ruchu - Sprawdź Smużenie", drawX, laneHeight * 0.5);
+
+                ctx.fillStyle = 'black';
+                ctx.fillText("Czytelność Tekstu w Ruchu - Sprawdź Smużenie", drawX, laneHeight * 1.5);
+
+                ctx.fillStyle = 'blue';
+                ctx.fillText("Czytelność Tekstu w Ruchu - Sprawdź Smużenie", drawX, laneHeight * 2.5);
+            }
+        }
+
+        function startTextTest() {
+            startUfoTest(); // Używa tej samej pętli
+            activeTest = 'text'; // Nadpisz typ
+            ufoControls.style.display = 'block';
+        }
+
+        // --- Event Listeners ---
+
+        testLayer.addEventListener('click', (e) => {
+            if (e.target.closest('.test-controls')) return;
+
+            if (activeTest === 'pixels') {
+                otherTestState.index = (otherTestState.index + 1) % otherTestState.colors.length;
+                testLayer.style.background = otherTestState.colors[otherTestState.index];
+            } else if (activeTest === 'gradient') {
+                otherTestState.index = (otherTestState.index + 1) % otherTestState.gradients.length;
+                testLayer.style.background = otherTestState.gradients[otherTestState.index];
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') exitTest();
+        });
+
+        window.addEventListener('resize', () => {
+            if (activeTest === 'ufo' || activeTest === 'text') {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+
+        // Theme Logic
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -197,157 +646,12 @@
         themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
         themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
         });
-
-        // Logika Testów
-        function enterFullScreen() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(e => console.log(e));
-            }
-        }
-
-        function exitTest() {
-            activeTest = null;
-            testLayer.style.display = 'none';
-            infoOverlay.style.display = 'none';
-            statsPanel.style.display = 'none';
-            canvas.style.display = 'none';
-            testLayer.style.background = 'black';
-            testLayer.style.cursor = 'default';
-            cancelAnimationFrame(animationId);
-            
-            // Przywróć kursor
-            document.body.style.cursor = 'default';
-        }
-
-        // 1. Test Pikseli
-        function startPixelTest() {
-            activeTest = 'pixels';
-            colorIndex = 0;
-            testLayer.style.display = 'block';
-            testLayer.style.background = colors[0];
-            infoOverlay.style.display = 'block';
-            infoOverlay.innerHTML = "Kliknij: Zmień kolor<br>ESC: Wyjście";
-            
-            // Ukryj info po 2 sekundach
-            setTimeout(() => {
-                infoOverlay.style.display = 'none';
-            }, 2000);
-        }
-
-        // 2. Test Gradientów
-        function startGradientTest() {
-            activeTest = 'gradient';
-            testLayer.style.display = 'block';
-            testLayer.style.background = 'linear-gradient(to right, black, white)';
-            infoOverlay.style.display = 'block';
-            infoOverlay.innerHTML = "Kliknij: Zmień typ<br>ESC: Wyjście";
-             setTimeout(() => { infoOverlay.style.display = 'none'; }, 2000);
-        }
-
-        // 3. Test Ghostingu
-        function startGhostingTest() {
-            activeTest = 'ghosting';
-            testLayer.style.display = 'block';
-            canvas.style.display = 'block';
-            statsPanel.style.display = 'block';
-            
-            // Ustawienia Canvas
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            xPos = 0;
-            lastTime = performance.now();
-            requestAnimationFrame(ghostingLoop);
-        }
-
-        function ghostingLoop(timestamp) {
-            if (activeTest !== 'ghosting') return;
-
-            const dt = timestamp - lastTime;
-            lastTime = timestamp;
-
-            // Licznik FPS
-            frameCount++;
-            if (timestamp - lastFpsTime >= 1000) {
-                fpsCounter.textContent = frameCount;
-                frameCount = 0;
-                lastFpsTime = timestamp;
-            }
-
-            // Czyszczenie tła
-            ctx.fillStyle = '#222'; // Ciemnoszare tło dla kontrastu
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Rysowanie pasów (Grid)
-            ctx.strokeStyle = '#444';
-            ctx.beginPath();
-            for(let i=0; i<canvas.width; i+=100) {
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-            }
-            ctx.stroke();
-
-            // Prędkość: 960 pikseli na sekundę
-            const speed = 960; 
-            const move = (speed * dt) / 1000;
-            xPos = (xPos + move) % canvas.width;
-
-            // 1. Rząd: Biały kwadrat (High Contrast)
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(xPos, 200, 50, 50);
-            ctx.fillStyle = '#FFF';
-            ctx.font = '14px Arial';
-            ctx.fillText("960 px/s (White)", 20, 190);
-
-            // 2. Rząd: Cyjan (Mid Contrast)
-            ctx.fillStyle = '#00FFFF';
-            ctx.fillRect(xPos, 350, 50, 50);
-            ctx.fillText("960 px/s (Cyan)", 20, 340);
-
-            // 3. Rząd: Tekst (Czytelność w ruchu)
-            ctx.fillStyle = '#FF00FF';
-            ctx.font = 'bold 20px Arial';
-            ctx.fillText("TEXT READABILITY TEST", xPos, 500);
-
-            animationId = requestAnimationFrame(ghostingLoop);
-        }
-
-        // Obsługa zdarzeń
-        testLayer.addEventListener('click', () => {
-            if (activeTest === 'pixels') {
-                colorIndex = (colorIndex + 1) % colors.length;
-                testLayer.style.background = colors[colorIndex];
-            } else if (activeTest === 'gradient') {
-                const grads = [
-                    'linear-gradient(to right, black, white)',
-                    'linear-gradient(to right, red, black)',
-                    'linear-gradient(to right, green, black)',
-                    'linear-gradient(to right, blue, black)',
-                    'linear-gradient(to bottom, black, white)'
-                ];
-                colorIndex = (colorIndex + 1) % grads.length;
-                testLayer.style.background = grads[colorIndex];
-            }
-        });
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                exitTest();
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            if (activeTest === 'ghosting') {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-        });
     </script>
 </body>
+
 </html>
