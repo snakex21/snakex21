@@ -24,6 +24,20 @@ const durationScale = {
 
 const gamesCatalog = [
   {
+    slug: "wojna-er",
+    title: "Wojna Er",
+    description: "Poprowadź swoją cywilizację od epoki kamienia aż po futurystyczne mechy. Zniszcz bazę wroga w tej strategicznej grze typu 'Age of War'.",
+    cover: "wojna_er/cover.jpg",
+    coverAlt: "Ewolucja jednostek od jaskiniowca do mecha",
+    url: "wojna_er/index.html",
+    genres: ["Strategia", "Obrona"],
+    modes: ["Solo"],
+    tags: ["Ewolucja", "Wojna", "Baza"],
+    difficulty: "classic",
+    duration: "medium",
+    spotlight: "Ewoluuj, rekrutuj i niszcz! Przejdź przez 4 epoki historyczne."
+  },
+  {
     slug: "memory",
     title: "Gra na zapamiętywanie",
     description:
