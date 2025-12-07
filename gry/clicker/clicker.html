@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,7 @@
     <style>
         :root {
             --bg: #ffffff;
-            --text-main: #006400; /* Dark Green on White */
+            --text-main: #006400;
             --header-bg: #f0f0f0;
             --nav-text: #666;
             --nav-hover: #000;
@@ -22,7 +23,7 @@
 
         [data-theme="dark"] {
             --bg: #000000;
-            --text-main: #0f0; /* Bright Green on Black */
+            --text-main: #0f0;
             --header-bg: #050505;
             --nav-text: #0a0;
             --nav-hover: #0f0;
@@ -35,44 +36,233 @@
             --btn-hover-shadow: #0f0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text-main); font-family: 'Courier New', Courier, monospace; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* HEADER - HACKER STYLE */
-        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; transition: background 0.3s; }
-        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--text-main); text-decoration: none; text-transform: uppercase; }
-        .nav-links { display: flex; gap: 2rem; flex: 1; }
-        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; font-weight: bold; }
-        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); text-shadow: 0 0 5px var(--text-main); }
-        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
-        @media (max-width: 768px) { .nav-links { display: none; } }
+        body {
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s;
+        }
 
-        .container { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-        
-        .terminal { border: 1px solid var(--terminal-border); padding: 1rem; border-radius: 4px; background: var(--terminal-bg); height: 100%; display: flex; flex-direction: column; }
-        .terminal-header { border-bottom: 1px solid var(--terminal-border); padding-bottom: 0.5rem; margin-bottom: 1rem; font-weight: bold; }
-        
-        .stats { font-size: 2rem; margin-bottom: 2rem; text-align: center; text-shadow: 0 0 10px var(--text-main); }
-        .per-sec { font-size: 1rem; color: var(--text-main); opacity: 0.8; text-align: center; margin-bottom: 2rem; }
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            width: 100%;
+            z-index: 100;
+            transition: background 0.3s;
+        }
 
-        .hack-btn { background: var(--btn-bg); border: 2px solid var(--btn-border); color: var(--btn-text); padding: 2rem; font-size: 1.5rem; font-family: inherit; cursor: pointer; width: 100%; transition: 0.1s; text-transform: uppercase; font-weight: bold; }
-        .hack-btn:active { background: var(--btn-border); color: var(--bg); }
-        .hack-btn:hover { box-shadow: 0 0 15px var(--btn-hover-shadow); }
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
 
-        .upgrade-list { overflow-y: auto; flex: 1; }
-        .upgrade-item { border: 1px solid var(--terminal-border); padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .upgrade-item:hover { background: rgba(0, 100, 0, 0.1); border-color: var(--terminal-border); }
-        .upgrade-item.disabled { opacity: 0.5; cursor: not-allowed; border-color: #555; color: #555; }
-        .upgrade-info h4 { margin-bottom: 5px; }
-        .upgrade-info p { font-size: 0.8rem; opacity: 0.8; }
-        .upgrade-cost { font-weight: bold; }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-main);
+            text-decoration: none;
+            text-transform: uppercase;
+        }
 
-        .log-area { font-size: 0.8rem; opacity: 0.8; margin-top: auto; height: 150px; overflow: hidden; display: flex; flex-direction: column-reverse; }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
 
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+            text-shadow: 0 0 5px var(--text-main);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .terminal {
+            border: 1px solid var(--terminal-border);
+            padding: 1rem;
+            border-radius: 4px;
+            background: var(--terminal-bg);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            border-bottom: 1px solid var(--terminal-border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .stats {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 0 10px var(--text-main);
+        }
+
+        .per-sec {
+            font-size: 1rem;
+            color: var(--text-main);
+            opacity: 0.8;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hack-btn {
+            background: var(--btn-bg);
+            border: 2px solid var(--btn-border);
+            color: var(--btn-text);
+            padding: 2rem;
+            font-size: 1.5rem;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.1s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .hack-btn:active {
+            background: var(--btn-border);
+            color: var(--bg);
+        }
+
+        .hack-btn:hover {
+            box-shadow: 0 0 15px var(--btn-hover-shadow);
+        }
+
+        .reset-btn {
+            background: #300;
+            border: 2px solid #f00;
+            color: #f00;
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.1s;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .reset-btn:hover {
+            box-shadow: 0 0 15px #f00;
+            background: #500;
+        }
+
+        .reset-btn:active {
+            background: #f00;
+            color: #000;
+        }
+
+        .upgrade-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .upgrade-item {
+            border: 1px solid var(--terminal-border);
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .upgrade-item:hover:not(.disabled) {
+            background: rgba(0, 100, 0, 0.2);
+            border-color: var(--terminal-border);
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #555;
+            color: #555;
+            pointer-events: none;
+        }
+
+        .upgrade-info h4 {
+            margin-bottom: 5px;
+        }
+
+        .upgrade-info p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .upgrade-cost {
+            font-weight: bold;
+        }
+
+        .log-area {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: auto;
+            height: 150px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
     <header>
         <nav>
@@ -97,6 +287,7 @@
                 GPS (Generate Per Sec): <span id="gps">0</span>
             </div>
             <button class="hack-btn" id="hackBtn">HACK SYSTEM</button>
+            <button class="reset-btn" id="resetBtn">🔄 RESET PROGRESS</button>
             <div class="log-area" id="log"></div>
         </div>
 
@@ -123,43 +314,145 @@
         });
 
         // Game Logic
-        const state = {
-            bits: 0, gps: 0, clickValue: 1,
-            upgrades: [
-                { id: 'script', name: 'Simple Script', cost: 15, gps: 0.5, count: 0 },
-                { id: 'bot', name: 'IRC Bot', cost: 100, gps: 3, count: 0 },
-                { id: 'gpu', name: 'GPU Mining', cost: 500, gps: 10, count: 0 },
-                { id: 'server', name: 'Dedicated Server', cost: 2000, gps: 50, count: 0 },
-                { id: 'ai', name: 'AI Assistant', cost: 10000, gps: 250, count: 0 },
-                { id: 'quantum', name: 'Quantum Core', cost: 50000, gps: 1000, count: 0 }
-            ]
-        };
-        const els = { bits: document.getElementById('bits'), gps: document.getElementById('gps'), hackBtn: document.getElementById('hackBtn'), list: document.getElementById('upgradeList'), log: document.getElementById('log') };
+        const defaultUpgrades = [
+            { id: 'script', name: 'Simple Script', cost: 15, gps: 0.5, count: 0 },
+            { id: 'bot', name: 'IRC Bot', cost: 100, gps: 3, count: 0 },
+            { id: 'gpu', name: 'GPU Mining', cost: 500, gps: 10, count: 0 },
+            { id: 'server', name: 'Dedicated Server', cost: 2000, gps: 50, count: 0 },
+            { id: 'ai', name: 'AI Assistant', cost: 10000, gps: 250, count: 0 },
+            { id: 'quantum', name: 'Quantum Core', cost: 50000, gps: 1000, count: 0 }
+        ];
 
-        function log(msg) { const div = document.createElement('div'); div.textContent = `> ${msg}`; els.log.prepend(div); if(els.log.children.length > 10) els.log.lastChild.remove(); }
-        function updateUI() { els.bits.textContent = Math.floor(state.bits); els.gps.textContent = state.gps.toFixed(1); renderUpgrades(); }
-        function renderUpgrades() {
-            els.list.innerHTML = state.upgrades.map((u, i) => `
-                <div class="upgrade-item ${state.bits >= u.cost ? '' : 'disabled'}" onclick="buy(${i})">
-                    <div class="upgrade-info"><h4>${u.name} [x${u.count}]</h4><p>+${u.gps} GPS</p></div>
-                    <div class="upgrade-cost">${Math.floor(u.cost)} BITS</div>
-                </div>
-            `).join('');
+        const state = {
+            bits: 0,
+            gps: 0,
+            clickValue: 1,
+            upgrades: JSON.parse(JSON.stringify(defaultUpgrades))
+        };
+
+        const els = {
+            bits: document.getElementById('bits'),
+            gps: document.getElementById('gps'),
+            hackBtn: document.getElementById('hackBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            list: document.getElementById('upgradeList'),
+            log: document.getElementById('log')
+        };
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = `> ${msg}`;
+            els.log.prepend(div);
+            if (els.log.children.length > 10) els.log.lastChild.remove();
         }
+
+        function updateUI() {
+            els.bits.textContent = Math.floor(state.bits);
+            els.gps.textContent = state.gps.toFixed(1);
+            renderUpgrades();
+        }
+
+        function renderUpgrades() {
+            // Inicjalizacja listy tylko raz (lub gdy pusta)
+            if (els.list.children.length !== state.upgrades.length) {
+                els.list.innerHTML = state.upgrades.map((u, i) => `
+                    <div class="upgrade-item" data-index="${i}">
+                        <div class="upgrade-info">
+                            <h4>${u.name} [x<span class="count">${u.count}</span>]</h4>
+                            <p>+${u.gps} GPS</p>
+                        </div>
+                        <div class="upgrade-cost"><span class="cost">${Math.floor(u.cost)}</span> BITS</div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            // Aktualizacja istniejących elementów
+            const items = els.list.children;
+            for (let i = 0; i < items.length; i++) {
+                const u = state.upgrades[i];
+                const item = items[i];
+
+                // Aktualizacja klasy disabled
+                if (state.bits >= u.cost) {
+                    item.classList.remove('disabled');
+                } else {
+                    item.classList.add('disabled');
+                }
+
+                // Aktualizacja tekstów
+                item.querySelector('.count').textContent = u.count;
+                item.querySelector('.cost').textContent = Math.floor(u.cost);
+            }
+        }
+
         function buy(index) {
             const u = state.upgrades[index];
-            if(state.bits >= u.cost) {
-                state.bits -= u.cost; state.gps += u.gps; u.count++; u.cost *= 1.15;
-                log(`Installed ${u.name}`); updateUI();
-            } else { log(`Error: Insufficient resources for ${u.name}`); }
+            if (state.bits >= u.cost) {
+                state.bits -= u.cost;
+                state.gps += u.gps;
+                u.count++;
+                u.cost *= 1.15;
+                log(`Installed ${u.name}`);
+                updateUI();
+            }
         }
-        els.hackBtn.addEventListener('click', () => { state.bits += state.clickValue; updateUI(); });
-        setInterval(() => { if(state.gps > 0) { state.bits += state.gps / 10; updateUI(); } }, 100);
-        if(localStorage.getItem('hacker_save')) {
-            try { const saved = JSON.parse(localStorage.getItem('hacker_save')); state.bits = saved.bits; state.gps = saved.gps; state.upgrades = saved.upgrades; log('System Restored...'); } catch(e) {}
+
+        function resetProgress() {
+            if (confirm('Czy na pewno chcesz zresetować cały postęp? Ta akcja jest nieodwracalna!')) {
+                localStorage.removeItem('hacker_save');
+                state.bits = 0;
+                state.gps = 0;
+                state.clickValue = 1;
+                state.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
+                els.log.innerHTML = '';
+                log('SYSTEM RESET - All progress wiped!');
+                updateUI();
+            }
         }
-        setInterval(() => { localStorage.setItem('hacker_save', JSON.stringify(state)); }, 5000);
-        updateUI(); log('System Initialized.');
+
+        // Event delegation dla upgrade'ów - naprawia glitch ze spamowaniem
+        els.list.addEventListener('click', (e) => {
+            const item = e.target.closest('.upgrade-item');
+            if (!item || item.classList.contains('disabled')) return;
+            const index = parseInt(item.dataset.index);
+            if (!isNaN(index)) buy(index);
+        });
+
+        els.hackBtn.addEventListener('click', () => {
+            state.bits += state.clickValue;
+            updateUI();
+        });
+
+        els.resetBtn.addEventListener('click', resetProgress);
+
+        // Pasywne generowanie bitów
+        setInterval(() => {
+            if (state.gps > 0) {
+                state.bits += state.gps / 10;
+                updateUI();
+            }
+        }, 100);
+
+        // Wczytaj zapisany stan
+        if (localStorage.getItem('hacker_save')) {
+            try {
+                const saved = JSON.parse(localStorage.getItem('hacker_save'));
+                state.bits = saved.bits;
+                state.gps = saved.gps;
+                state.upgrades = saved.upgrades;
+                log('System Restored...');
+            } catch (e) { }
+        }
+
+        // Automatyczne zapisywanie
+        setInterval(() => {
+            localStorage.setItem('hacker_save', JSON.stringify(state));
+        }, 5000);
+
+        updateUI();
+        log('System Initialized.');
     </script>
 </body>
+
 </html>
