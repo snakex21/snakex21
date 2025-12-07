@@ -124,16 +124,20 @@
             const pipeGap = 130;
             const pipeLoc = Math.random() * (250) + 50;
             const pipeTop = document.createElement('div'); pipeTop.className = 'pipe'; pipeTop.style.left = '320px'; pipeTop.style.top = '0'; pipeTop.style.height = pipeLoc + 'px';
-            const pipeBottom = document.createElement('div'); pipeBottom.className = 'pipe'; pipeBottom.style.left = '320px'; pipeBottom.style.bottom = '40px'; pipeBottom.style.height = (400 - pipeLoc - pipeGap) + 'px';
+            // Poprawka: canvas ma 480px wysokości, ground 40px, więc dostępne 440px
+            const pipeBottom = document.createElement('div'); pipeBottom.className = 'pipe'; pipeBottom.style.left = '320px'; pipeBottom.style.bottom = '40px'; pipeBottom.style.height = (440 - pipeLoc - pipeGap) + 'px';
             game.appendChild(pipeTop); game.appendChild(pipeBottom);
 
             let pipePos = 320;
+            let scored = false;
             const timer = setInterval(() => {
                 if (!isGameRunning) { clearInterval(timer); return; }
                 pipePos -= 2; pipeTop.style.left = pipePos + 'px'; pipeBottom.style.left = pipePos + 'px';
-                if (pipePos === 48) { score++; scoreEl.innerText = score; }
+                // Poprawka: użyj flagi zamiast dokładnego porównania
+                if (pipePos <= 50 && !scored) { score++; scoreEl.innerText = score; scored = true; }
                 if (pipePos < -60) { clearInterval(timer); pipeTop.remove(); pipeBottom.remove(); }
-                if ((pipePos > 20 && pipePos < 80) && (birdY < pipeLoc || birdY > pipeLoc + pipeGap)) gameOver();
+                // Poprawka: uwzględnij rozmiar ptaka (15px promień = 30px wysokość)
+                if ((pipePos > 20 && pipePos < 80) && (birdY - 15 < pipeLoc || birdY + 15 > pipeLoc + pipeGap)) gameOver();
             }, 20);
         }
 

@@ -371,26 +371,35 @@
 
         /* RANDOM TILE CREATOR */
         function cellCreator(c, timeOut) {
-            for (let i = 0; i < c; i++) {
-                let randomX;
-                let randomY;
-
-                for (let value = 1; value < 2; value++) {
-                    randomX = Math.floor(Math.random() * 4 + 1);
-                    randomY = Math.floor(Math.random() * 4 + 1);
-                    const checker = document.getElementById('' + randomX + randomY);
-                    if (checker.innerHTML !== '') {
-                        value = 0;
+            // Sprawdź czy są dostępne pola
+            const emptyCells = [];
+            for (let x = 1; x <= 4; x++) {
+                for (let y = 1; y <= 4; y++) {
+                    const cell = document.getElementById('' + x + y);
+                    if (cell && cell.innerHTML === '') {
+                        emptyCells.push({x, y});
                     }
                 }
+            }
 
-                let randomValue = Math.floor(Math.random() * 4 + 1);
-                if (randomValue === 3) { randomValue = 4; }
-                if (randomValue === 1) { randomValue = 2; }
-                const position = document.getElementById('' + randomX + randomY);
+            // Jeśli nie ma pustych pól, nie twórz nowych kafelków
+            if (emptyCells.length === 0) return;
+
+            // Utwórz c kafelków lub ile jest dostępnych pól (cokolwiek jest mniejsze)
+            const tilesToCreate = Math.min(c, emptyCells.length);
+
+            for (let i = 0; i < tilesToCreate; i++) {
+                // Wybierz losowe puste pole
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const {x, y} = emptyCells.splice(randomIndex, 1)[0];
+
+                // 90% szans na 2, 10% szans na 4
+                let randomValue = Math.random() < 0.9 ? 2 : 4;
+
+                const position = document.getElementById('' + x + y);
                 const tile = document.createElement('DIV');
                 position.appendChild(tile);
-                tile.id = 'tile_' + randomX + randomY;
+                tile.id = 'tile_' + x + y;
                 position.classList.add('active');
 
                 colorSet(randomValue, tile);
