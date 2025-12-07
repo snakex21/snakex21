@@ -117,6 +117,23 @@ function startMultipleQuestionsQuiz() {
     displayMultipleQuestions(selectedQuestions); // Zaktualizuj, aby przyjmować wybrane pytania
 }
 
+// Funkcja mieszająca odpowiedzi - POPRAWKA: dodana brakująca funkcja
+function shuffleAnswers(question) {
+    const answers = [...question.answers];
+    const correctAnswer = answers[question.correct];
+
+    // Algorytm Fisher-Yates do tasowania tablicy
+    for (let i = answers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [answers[i], answers[j]] = [answers[j], answers[i]];
+    }
+
+    // Znajdź nowy indeks poprawnej odpowiedzi
+    const correctIndex = answers.indexOf(correctAnswer);
+
+    return { shuffledAnswers: answers, correctIndex };
+}
+
 // Funkcja wyświetlająca wiele pytań z mieszaniem odpowiedzi
 function displayMultipleQuestions(selectedQuestions) {
     const quizPage = document.getElementById('quiz-page');
@@ -138,43 +155,64 @@ function displayMultipleQuestions(selectedQuestions) {
 
 function checkAnswer(selectedAnswer, isMultiple, questionIndex = currentQuestionIndex) {
     const question = questions[questionIndex];
-    const buttons = document.getElementById('quiz-page').querySelectorAll('button');
 
-    if (selectedAnswer === question.correct) {
-        buttons.forEach((btn, index) => {
-            if (index === question.correct) {
-                btn.classList.add('correct-answer');
-            } else {
-                btn.disabled = true;
-            }
-        });
+    // POPRAWKA: dla quizu wielopytaniowego używamy correctIndex z przetasowanych odpowiedzi
+    const correctAnswerIndex = isMultiple ? question.correctIndex : question.correct;
+
+    if (isMultiple) {
+        // Tryb wielopytaniowy - tylko oznacz odpowiedź i zwiększ wynik
+        const questionDiv = document.querySelectorAll('.question')[questionIndex];
+        const buttons = questionDiv.querySelectorAll('button');
+
+        if (selectedAnswer === correctAnswerIndex) {
+            buttons[selectedAnswer].classList.add('correct-answer');
+            score++;
+        } else {
+            buttons[selectedAnswer].classList.add('wrong-answer');
+            buttons[correctAnswerIndex].classList.add('correct-answer');
+        }
+
+        buttons.forEach(btn => btn.disabled = true);
     } else {
-        buttons.forEach((btn, index) => {
-            if (index === question.correct) {
-                btn.classList.add('correct-answer');
-            } else if (index === selectedAnswer) {
-                btn.classList.add('wrong-answer');
-                btn.innerText += " - Zła odpowiedź";
-            }
-            btn.disabled = true; // Wyłącz wszystkie przyciski po wyborze
-        });
-    }
+        // Tryb pojedynczego pytania
+        const buttons = document.getElementById('quiz-page').querySelectorAll('button');
 
-    // Usuń istniejące przyciski nawigacji (jeśli istnieją), zanim dodasz nowe
-    const existingNavButtons = document.getElementById('navigation-buttons');
-    if (existingNavButtons) {
-        existingNavButtons.remove();
-    }
+        if (selectedAnswer === correctAnswerIndex) {
+            buttons.forEach((btn, index) => {
+                if (index === correctAnswerIndex) {
+                    btn.classList.add('correct-answer');
+                } else {
+                    btn.disabled = true;
+                }
+            });
+        } else {
+            buttons.forEach((btn, index) => {
+                if (index === correctAnswerIndex) {
+                    btn.classList.add('correct-answer');
+                } else if (index === selectedAnswer) {
+                    btn.classList.add('wrong-answer');
+                    btn.innerText += " - Zła odpowiedź";
+                }
+                btn.disabled = true;
+            });
+        }
 
-    // Dodajemy przyciski nawigacji tylko dla pojedynczego pytania
-    const quizPage = document.getElementById('quiz-page');
-    quizPage.innerHTML += `
-        <div id="navigation-buttons">
-            <button onclick="restartQuiz()">Losowe pytanie</button>
-            <button onclick="returnToStart()">Powrót do strony głównej</button>
-        </div>
-    `;
-}  
+        // Usuń istniejące przyciski nawigacji (jeśli istnieją), zanim dodasz nowe
+        const existingNavButtons = document.getElementById('navigation-buttons');
+        if (existingNavButtons) {
+            existingNavButtons.remove();
+        }
+
+        // Dodajemy przyciski nawigacji tylko dla pojedynczego pytania
+        const quizPage = document.getElementById('quiz-page');
+        quizPage.innerHTML += `
+            <div id="navigation-buttons">
+                <button onclick="restartQuiz()">Losowe pytanie</button>
+                <button onclick="returnToStart()">Powrót do strony głównej</button>
+            </div>
+        `;
+    }
+}
 
 function showResults() {
     document.getElementById('quiz-page').classList.add('hidden');

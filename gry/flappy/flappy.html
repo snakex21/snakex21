@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,30 +26,190 @@
             --body-bg: #333;
         }
 
-        body { margin: 0; padding: 0; background: var(--body-bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; font-family: 'Segoe UI', sans-serif; overflow: hidden; transition: background 0.3s; }
-        
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--body-bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
         /* HEADER */
-        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; transition: background 0.3s; }
-        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
-        .nav-links { display: flex; gap: 2rem; flex: 1; }
-        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; }
-        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); }
-        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
-        @media (max-width: 768px) { .nav-links { display: none; } }
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            width: 100%;
+            z-index: 100;
+            transition: background 0.3s;
+        }
 
-        .game-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; }
-        .game-container { position: relative; width: 320px; height: 480px; background: #70c5ce; overflow: hidden; border: 4px solid #fff; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
 
-        .bird { position: absolute; left: 50px; top: 200px; width: 30px; height: 30px; background: #f4d03f; border-radius: 50%; border: 2px solid #000; }
-        .pipe { position: absolute; width: 50px; background: #2ecc71; border: 2px solid #000; }
-        .ground { position: absolute; bottom: 0; width: 100%; height: 40px; background: #ded895; border-top: 3px solid #73bf2e; z-index: 10; }
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); color: white; z-index: 20; }
-        .overlay.hidden { display: none; }
-        .score { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 3rem; color: white; font-weight: bold; text-shadow: 2px 2px 0 #000; z-index: 15; }
-        .btn { background: #ff5555; border: none; color: white; padding: 10px 20px; font-size: 1.2rem; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--nav-text);
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--nav-hover);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        .game-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            position: relative;
+            width: 480px;
+            height: 640px;
+            background: #70c5ce;
+            overflow: hidden;
+            border: 4px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .bird {
+            position: absolute;
+            left: 80px;
+            top: 280px;
+            width: 50px;
+            height: 50px;
+            background: #f4d03f;
+            border-radius: 50%;
+            border: 3px solid #000;
+        }
+
+        .pipe {
+            position: absolute;
+            width: 70px;
+            background: #2ecc71;
+            border: 3px solid #000;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: #ded895;
+            border-top: 4px solid #73bf2e;
+            z-index: 10;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            z-index: 20;
+        }
+
+        .overlay h2 {
+            font-size: 3.5rem;
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 15px;
+        }
+
+        .overlay p {
+            font-size: 1.4rem;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .score {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 4rem;
+            color: white;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 #000;
+            z-index: 15;
+        }
+
+        .btn {
+            background: #ff5555;
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 25px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #000;
+            box-shadow: 0 4px 0 #cc3333;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn:hover {
+            background: #ff6666;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #cc3333;
+        }
     </style>
 </head>
+
 <body>
     <header>
         <nav>
@@ -68,7 +229,7 @@
             <div class="score" id="score">0</div>
             <div class="bird" id="bird"></div>
             <div class="ground"></div>
-            
+
             <div class="overlay" id="start-screen">
                 <h2>Flappy Bird</h2>
                 <p>Kliknij lub Spacja aby skakać</p>
@@ -107,48 +268,64 @@
         const gameOverScreen = document.getElementById('game-over-screen');
         const finalScoreEl = document.getElementById('final-score');
 
-        let birdY = 200, velocity = 0, gravity = 0.5, isGameRunning = false, score = 0, gameLoop, pipeInterval;
+        let birdY = 280, velocity = 0, gravity = 0.5, isGameRunning = false, score = 0, gameLoop, pipeInterval;
 
         function jump() { if (!isGameRunning) return; velocity = -7; }
         document.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); handleInput(); } });
         game.addEventListener('mousedown', (e) => { e.preventDefault(); handleInput(); });
 
         function handleInput() {
-            if(!isGameRunning && !gameOverScreen.classList.contains('hidden')) resetGame();
-            else if(!isGameRunning && startScreen.style.display !== 'none') startGame();
+            if (!isGameRunning && !gameOverScreen.classList.contains('hidden')) resetGame();
+            else if (!isGameRunning && startScreen.style.display !== 'none') startGame();
             else jump();
         }
 
         function createPipe() {
             if (!isGameRunning) return;
-            const pipeGap = 130;
-            const pipeLoc = Math.random() * (250) + 50;
-            const pipeTop = document.createElement('div'); pipeTop.className = 'pipe'; pipeTop.style.left = '320px'; pipeTop.style.top = '0'; pipeTop.style.height = pipeLoc + 'px';
-            const pipeBottom = document.createElement('div'); pipeBottom.className = 'pipe'; pipeBottom.style.left = '320px'; pipeBottom.style.bottom = '40px'; pipeBottom.style.height = (400 - pipeLoc - pipeGap) + 'px';
+            const pipeGap = 180;
+            const pipeLoc = Math.random() * (350) + 80;
+            const pipeTop = document.createElement('div'); pipeTop.className = 'pipe'; pipeTop.style.left = '480px'; pipeTop.style.top = '0'; pipeTop.style.height = pipeLoc + 'px';
+            // Poprawka: canvas ma 640px wysokości, ground 50px, więc dostępne 590px
+            const pipeBottom = document.createElement('div'); pipeBottom.className = 'pipe'; pipeBottom.style.left = '480px'; pipeBottom.style.bottom = '50px'; pipeBottom.style.height = (590 - pipeLoc - pipeGap) + 'px';
             game.appendChild(pipeTop); game.appendChild(pipeBottom);
 
-            let pipePos = 320;
+            let pipePos = 480;
+            let scored = false;
             const timer = setInterval(() => {
                 if (!isGameRunning) { clearInterval(timer); return; }
-                pipePos -= 2; pipeTop.style.left = pipePos + 'px'; pipeBottom.style.left = pipePos + 'px';
-                if (pipePos === 48) { score++; scoreEl.innerText = score; }
-                if (pipePos < -60) { clearInterval(timer); pipeTop.remove(); pipeBottom.remove(); }
-                if ((pipePos > 20 && pipePos < 80) && (birdY < pipeLoc || birdY > pipeLoc + pipeGap)) gameOver();
+                pipePos -= 3; pipeTop.style.left = pipePos + 'px'; pipeBottom.style.left = pipePos + 'px';
+
+                // Punktacja
+                if (pipePos <= 80 && !scored) { score++; scoreEl.innerText = score; scored = true; }
+
+                // Usuwanie rur
+                if (pipePos < -80) { clearInterval(timer); pipeTop.remove(); pipeBottom.remove(); }
+
+                // Kolizja (hitbox nieco mniejszy niż grafika dla lepszego "feelingu")
+                // Ptak: left 80px, width 50px. Rura: width 70px.
+                // X: Rura jest w strefie ptaka gdy pipePos < 130 (80+50) i pipePos > 10 (80-70)
+                // Y: Ptak uderza góra gdy birdY + buffer < pipeLoc
+                // Y: Ptak uderza dół gdy birdY + height - buffer > pipeLoc + pipeGap
+                if ((pipePos > 10 && pipePos < 130) &&
+                    (birdY + 10 < pipeLoc || birdY + 40 > pipeLoc + pipeGap)) {
+                    gameOver();
+                }
             }, 20);
         }
 
         function update() {
             velocity += gravity; birdY += velocity; bird.style.top = birdY + 'px';
-            if (birdY > 410 || birdY < 0) gameOver();
+            if (birdY > 565 || birdY < 0) gameOver();
         }
 
         function startGame() { startScreen.style.display = 'none'; isGameRunning = true; gameLoop = setInterval(update, 20); pipeInterval = setInterval(createPipe, 1500); }
         function gameOver() { isGameRunning = false; clearInterval(gameLoop); clearInterval(pipeInterval); gameOverScreen.classList.remove('hidden'); finalScoreEl.innerText = score; }
         function resetGame() {
             document.querySelectorAll('.pipe').forEach(p => p.remove());
-            birdY = 200; velocity = 0; score = 0; scoreEl.innerText = '0'; bird.style.top = '200px';
+            birdY = 280; velocity = 0; score = 0; scoreEl.innerText = '0'; bird.style.top = '280px';
             gameOverScreen.classList.add('hidden'); startGame();
         }
     </script>
 </body>
+
 </html>
