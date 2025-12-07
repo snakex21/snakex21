@@ -42,32 +42,30 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
         header {
             background: var(--header-bg);
             border-bottom: 1px solid var(--border);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
             z-index: 100;
             box-shadow: 0 2px 4px var(--shadow);
         }
 
         nav {
-            max-width: 100%;
-            padding: 0.8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.8rem 1.5rem;
             display: flex;
             align-items: center;
             gap: 2rem;
         }
 
         .logo {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--text);
             text-decoration: none;
@@ -75,13 +73,13 @@
 
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
+            flex: 1;
         }
 
         .nav-links a {
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.9rem;
         }
 
         .nav-links a:hover,
@@ -92,35 +90,30 @@
         #theme-toggle {
             background: none;
             border: none;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             cursor: pointer;
         }
 
+        /* Toolbar */
         .toolbar {
             display: flex;
             gap: 0.5rem;
-            flex: 1;
-            justify-content: center;
-            flex-wrap: wrap;
+            align-items: center;
         }
 
         .toolbar-btn {
             padding: 0.5rem 1rem;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
             background: var(--card-bg);
             color: var(--text);
-            font-size: 0.9rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
+            font-size: 0.9rem;
             transition: all 0.2s;
         }
 
         .toolbar-btn:hover {
-            background: var(--accent);
-            color: white;
+            background: var(--bg);
             border-color: var(--accent);
         }
 
@@ -130,82 +123,103 @@
             border-color: var(--accent);
         }
 
-        /* Canvas Container */
+        .color-picker {
+            display: flex;
+            gap: 0.3rem;
+            margin: 0 1rem;
+            align-items: center;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: var(--text);
+        }
+
+        /* Canvas */
         .canvas-container {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow: hidden;
+            flex: 1;
+            position: relative;
             background: var(--canvas-bg);
-            background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
             background-size: 20px 20px;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .canvas-container:active {
+            cursor: grabbing;
         }
 
         #mindmap-canvas {
             position: absolute;
-            cursor: grab;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* Allow clicks to pass to SVG/Nodes */
         }
 
-        #mindmap-canvas.grabbing {
-            cursor: grabbing;
-        }
-
-        /* Node Styles */
         .node {
             position: absolute;
             background: var(--card-bg);
             border: 2px solid var(--accent);
             border-radius: 12px;
-            padding: 12px 20px;
+            padding: 10px;
             min-width: 120px;
             max-width: 250px;
-            text-align: center;
-            cursor: move;
             box-shadow: 0 4px 12px var(--shadow);
-            user-select: none;
+            cursor: move;
+            pointer-events: auto;
             transition: box-shadow 0.2s, transform 0.1s;
-        }
-
-        .node:hover {
-            box-shadow: 0 8px 24px var(--shadow);
-        }
-
-        .node.selected {
-            border-color: #f97316;
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
         .node.root {
-            background: linear-gradient(135deg, var(--accent), #0891b2);
+            background: var(--accent);
             color: white;
-            font-weight: bold;
+            border-color: var(--accent);
+            font-weight: 700;
             font-size: 1.1rem;
-            min-width: 150px;
+        }
+
+        .node.selected {
+            box-shadow: 0 0 0 3px var(--accent), 0 8px 24px var(--shadow);
+            z-index: 10;
         }
 
         .node-text {
             outline: none;
             min-height: 1.2em;
-        }
-
-        .node-text:focus {
-            cursor: text;
+            word-break: break-word;
         }
 
         .node-delete {
             position: absolute;
             top: -8px;
             right: -8px;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
+            width: 20px;
+            height: 20px;
             background: #ef4444;
             color: white;
             border: none;
+            border-radius: 50%;
+            font-size: 12px;
             cursor: pointer;
-            font-size: 14px;
             display: none;
             align-items: center;
             justify-content: center;
@@ -215,61 +229,42 @@
             display: flex;
         }
 
-        .node.root .node-delete {
-            display: none !important;
-        }
-
-        /* Connection Lines (SVG) */
-        #connections-svg {
+        /* Connections */
+        svg {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            overflow: visible;
+            z-index: 0;
         }
 
         .connection-line {
             fill: none;
-            stroke: var(--accent);
+            stroke: var(--border);
             stroke-width: 2;
+            transition: stroke 0.3s;
         }
 
-        /* Color Picker */
-        .color-picker {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .color-option {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .color-option:hover {
-            transform: scale(1.2);
-        }
-
-        .color-option.selected {
-            border-color: var(--text);
+        [data-theme="dark"] .connection-line {
+            stroke: #475569;
         }
 
         /* Instructions */
         .instructions {
-            position: fixed;
+            position: absolute;
             bottom: 20px;
             left: 20px;
             background: var(--card-bg);
             padding: 1rem;
-            border-radius: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
             box-shadow: 0 4px 12px var(--shadow);
+            pointer-events: none;
+            opacity: 0.8;
             font-size: 0.85rem;
             max-width: 280px;
-            border: 1px solid var(--border);
         }
 
         .instructions h4 {
@@ -475,13 +470,18 @@
         let dragOffset = { x: 0, y: 0 };
 
         function onNodeMouseDown(e, node) {
+            // Jeśli kliknięto w tekst (do edycji), nie zaczynaj przesuwania i pozwól na focus
+            if (e.target.classList.contains('node-text')) {
+                return;
+            }
+
             if (e.target.classList.contains('node-delete')) return;
-            if (e.target.classList.contains('node-text') && document.activeElement === e.target) return;
 
             dragging = node;
             const rect = document.getElementById(node.id).getBoundingClientRect();
             dragOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-            e.preventDefault();
+            e.preventDefault(); // Zapobiegaj zaznaczaniu tekstu podczas przesuwania
+            e.stopPropagation();
         }
 
         document.addEventListener('mousemove', (e) => {
@@ -704,39 +704,13 @@
                 // Update selected node color
                 if (selectedNode && !selectedNode.isRoot) {
                     selectedNode.color = currentColor;
-                    const el = document.getElementById(selectedNode.id);
-                    el.style.borderColor = currentColor;
-                    renderConnections();
+                    renderAll();
                 }
             });
         });
 
-        // Keyboard
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Delete' && selectedNode && !selectedNode.isRoot) {
-                deleteNode(selectedNode.id);
-            }
-        });
-
-        // Click on empty space to deselect
-        container.addEventListener('click', (e) => {
-            if (e.target === container || e.target === canvas) {
-                if (selectedNode) {
-                    const el = document.getElementById(selectedNode.id);
-                    if (el) el.classList.remove('selected');
-                    selectedNode = null;
-                }
-                if (connectStart) {
-                    const el = document.getElementById(connectStart.id);
-                    if (el) el.classList.remove('selected');
-                    connectStart = null;
-                }
-            }
-        });
-
-        // Initialize
+        // Init
         init();
-        window.addEventListener('resize', renderConnections);
     </script>
 </body>
 

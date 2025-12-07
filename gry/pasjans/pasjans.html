@@ -285,7 +285,11 @@
         }
 
         function drawCard() {
-            if (stock.length === 0) { stock = waste.reverse(); waste = []; }
+            if (stock.length === 0) {
+                stock = [...waste].reverse();
+                stock.forEach(c => c.faceUp = false);
+                waste = [];
+            }
             else { let c = stock.pop(); c.faceUp = true; waste.push(c); }
             selected = null; render();
         }
@@ -341,7 +345,16 @@
                 if (selected.type === 'waste') waste.pop();
                 else { piles[selected.index].pop(); if (piles[selected.index].length > 0) piles[selected.index][piles[selected.index].length - 1].faceUp = true; }
                 foundations[fIndex].push(card);
-                selected = null; render();
+                selected = null;
+                checkWin();
+                render();
+            }
+        }
+
+        function checkWin() {
+            const totalInFoundations = foundations.reduce((sum, f) => sum + f.length, 0);
+            if (totalInFoundations === 52) {
+                setTimeout(() => alert('Gratulacje! Wygrałeś!'), 100);
             }
         }
 
