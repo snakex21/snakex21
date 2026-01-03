@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skanuj Linki - LinkHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .scan-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            transition: width 0.3s;
+        }
+
+        .progress-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-ok {
+            color: var(--success);
+        }
+
+        .stat-error {
+            color: var(--error);
+        }
+
+        .stat-pending {
+            color: var(--text-secondary);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--card-bg);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .filter-tab.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-card.ok {
+            border-left: 4px solid var(--success);
+        }
+
+        .result-card.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .result-card.pending {
+            border-left: 4px solid var(--border);
+        }
+
+        .result-status {
+            font-size: 1.2rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .result-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .result-url {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .result-error {
+            font-size: 0.75rem;
+            color: var(--error);
+            margin-top: 4px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">← LinkHub</a>
+    </header>
+
+    <main>
+        <h1>🔍 Skanuj Linki</h1>
+        <p class="subtitle">Sprawdź czy Twoje zapisane linki nadal działają</p>
+
+        <div class="scan-controls">
+            <button class="btn btn-primary" id="start-scan">▶️ Rozpocznij skanowanie</button>
+            <button class="btn btn-warning" id="pause-scan" style="display:none;">⏸️ Pauza</button>
+            <button class="btn btn-success" id="resume-scan" style="display:none;">▶️ Wznów</button>
+            <button class="btn btn-secondary" id="reset-scan" style="display:none;">🔄 Od nowa</button>
+        </div>
+
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-stats">
+                <span class="stat"><span id="scanned-count">0</span> / <span id="total-count">0</span> sprawdzono</span>
+                <span class="stat stat-ok">✅ <span id="ok-count">0</span> działa</span>
+                <span class="stat stat-error">❌ <span id="error-count">0</span> nie działa</span>
+            </div>
+        </div>
+
+        <div class="filter-tabs" id="filter-tabs" style="display:none;">
+            <button class="filter-tab active" data-filter="all">Wszystko</button>
+            <button class="filter-tab" data-filter="ok">✅ Działające</button>
+            <button class="filter-tab" data-filter="error">❌ Niedziałające</button>
+            <button class="filter-tab" data-filter="pending">⏳ Oczekujące</button>
+        </div>
+
+        <div id="results-list" class="results-list">
+            <div class="empty-state">Kliknij "Rozpocznij skanowanie" aby sprawdzić linki</div>
+        </div>
+
+        <a href="index.html" class="back-link">← Wróć do LinkHub</a>
+    </main>
+
+    <script src="data.js"></script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+
+        const owner = 'snakex21';
+        const repo = 'snakex21';
+
+        let scanState = {
+            results: [],  // {url, name, index, status: 'ok'|'error'|'pending', error: ''}
+            currentIndex: 0,
+            isRunning: false,
+            isPaused: false
+        };
+
+        // Load saved state
+        function loadState() {
+            const saved = localStorage.getItem('linkhub_scan_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Check if it's for the same links
+                    if (parsed.totalLinks === LINKHUB_LINKS.length) {
+                        scanState = parsed;
+                        return true;
+                    }
+                } catch (e) { }
+            }
+            return false;
+        }
+
+        function saveState() {
+            scanState.totalLinks = LINKHUB_LINKS.length;
+            localStorage.setItem('linkhub_scan_state', JSON.stringify(scanState));
+        }
+
+        function clearState() {
+            localStorage.removeItem('linkhub_scan_state');
+            scanState = {
+                results: [],
+                currentIndex: 0,
+                isRunning: false,
+                isPaused: false
+            };
+        }
+
+        // Initialize results from links
+        function initResults() {
+            scanState.results = LINKHUB_LINKS.map((link, index) => ({
+                url: link.url,
+                name: link.name,
+                category: link.category,
+                index: index,
+                status: 'pending',
+                error: ''
+            }));
+        }
+
+        // Check if URL is reachable (client-side)
+        async function checkUrl(url) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                // Try fetch with no-cors (won't give status but will fail if unreachable)
+                await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return { ok: true };
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    return { ok: false, error: 'timeout' };
+                }
+                return { ok: false, error: e.message || 'connection_error' };
+            }
+        }
+
+        // Update UI
+        function updateProgress() {
+            const total = scanState.results.length;
+            const scanned = scanState.results.filter(r => r.status !== 'pending').length;
+            const ok = scanState.results.filter(r => r.status === 'ok').length;
+            const errors = scanState.results.filter(r => r.status === 'error').length;
+
+            document.getElementById('progress-fill').style.width = (scanned / total * 100) + '%';
+            document.getElementById('scanned-count').textContent = scanned;
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('ok-count').textContent = ok;
+            document.getElementById('error-count').textContent = errors;
+        }
+
+        function renderResults(filter = 'all') {
+            const container = document.getElementById('results-list');
+            let filtered = scanState.results;
+
+            if (filter !== 'all') {
+                filtered = scanState.results.filter(r => r.status === filter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state">Brak wyników dla tego filtra</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(r => `
+                <div class="result-card ${r.status}" data-index="${r.index}">
+                    <div class="result-status">
+                        ${r.status === 'ok' ? '✅' : r.status === 'error' ? '❌' : '⏳'}
+                    </div>
+                    <div class="result-content">
+                        <div class="result-name">${r.name}</div>
+                        <div class="result-url">${r.url}</div>
+                        ${r.status === 'error' ? `<div class="result-error">Błąd: ${r.error}</div>` : ''}
+                    </div>
+                    <div class="result-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="window.open('${r.url}', '_blank')">🔗</button>
+                        ${r.status === 'error' ? `
+                            <button class="btn btn-sm btn-warning edit-btn" data-index="${r.index}">✏️</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-index="${r.index}">🗑️</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            // Edit handlers
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.onclick = () => showEditForm(parseInt(btn.dataset.index));
+            });
+
+            // Delete handlers
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.onclick = () => deleteLink(parseInt(btn.dataset.index));
+            });
+        }
+
+        function showEditForm(resultIndex) {
+            const result = scanState.results[resultIndex];
+            const card = document.querySelector(`.result-card[data-index="${resultIndex}"]`);
+            const content = card.querySelector('.result-content');
+
+            // Check if already editing
+            if (card.querySelector('.edit-input')) return;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-input';
+            input.value = result.url;
+            input.placeholder = 'Nowy URL...';
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'btn btn-sm btn-success';
+            saveBtn.style.marginTop = '8px';
+            saveBtn.textContent = '💾 Zapisz';
+            saveBtn.onclick = () => saveEditedUrl(resultIndex, input.value);
+
+            content.appendChild(input);
+            content.appendChild(saveBtn);
+            input.focus();
+        }
+
+        async function saveEditedUrl(resultIndex, newUrl) {
+            if (!newUrl || !newUrl.startsWith('http')) {
+                alert('Podaj poprawny URL');
+                return;
+            }
+
+            const token = localStorage.getItem('gh_pat');
+            if (!token) {
+                alert('Ustaw token GitHub PAT w ustawieniach');
+                return;
+            }
+
+            const result = scanState.results[resultIndex];
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/dispatches`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_type: 'edit_link',
+                        client_payload: {
+                            index: result.index,
+                            new_url: newUrl
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ URL zostanie zaktualizowany!');
+                    result.url = newUrl;
+                    result.status = 'pending';
+                    saveState();
+                    renderResults();
+                }
+            } catch (e) {
+                alert('Błąd: ' + e.message);
+            }
+        }
+
+        async function deleteLink(resultIndex) {
+            if (!confirm('Na pewno usunąć ten link?')) return;
+
+            const token = localStorage.getItem('gh_pat');
+            if (!token) {
+                alert('Ustaw token GitHub PAT w ustawieniach');
+                return;
+            }
+
+            const result = scanState.results[resultIndex];
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/dispatches`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_type: 'delete_link',
+                        client_payload: { index: result.index }
+                    })
+                });
+
+                if (response.ok) {
+                    alert('🗑️ Link zostanie usunięty!');
+                    scanState.results.splice(resultIndex, 1);
+                    saveState();
+                    renderResults();
+                }
+            } catch (e) {
+                alert('Błąd: ' + e.message);
+            }
+        }
+
+        // Scan loop
+        async function runScan() {
+            scanState.isRunning = true;
+            scanState.isPaused = false;
+            updateButtons();
+
+            while (scanState.currentIndex < scanState.results.length && !scanState.isPaused) {
+                const result = scanState.results[scanState.currentIndex];
+
+                if (result.status === 'pending') {
+                    const check = await checkUrl(result.url);
+                    result.status = check.ok ? 'ok' : 'error';
+                    result.error = check.error || '';
+
+                    updateProgress();
+                    renderResults(currentFilter);
+                    saveState();
+                }
+
+                scanState.currentIndex++;
+
+                // Small delay between requests
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            if (!scanState.isPaused) {
+                scanState.isRunning = false;
+                alert('✅ Skanowanie zakończone!');
+            }
+            updateButtons();
+        }
+
+        function pauseScan() {
+            scanState.isPaused = true;
+            scanState.isRunning = false;
+            saveState();
+            updateButtons();
+        }
+
+        function resumeScan() {
+            runScan();
+        }
+
+        function resetScan() {
+            if (!confirm('Zresetować wyniki skanowania?')) return;
+            clearState();
+            initResults();
+            updateProgress();
+            renderResults();
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const startBtn = document.getElementById('start-scan');
+            const pauseBtn = document.getElementById('pause-scan');
+            const resumeBtn = document.getElementById('resume-scan');
+            const resetBtn = document.getElementById('reset-scan');
+            const progressContainer = document.getElementById('progress-container');
+            const filterTabs = document.getElementById('filter-tabs');
+
+            if (scanState.isRunning) {
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                resumeBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
+            } else if (scanState.isPaused || scanState.currentIndex > 0) {
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'none';
+                resumeBtn.style.display = scanState.currentIndex < scanState.results.length ? 'inline-block' : 'none';
+                resetBtn.style.display = 'inline-block';
+            } else {
+                startBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                resumeBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
+            }
+
+            progressContainer.style.display = scanState.results.length > 0 ? 'block' : 'none';
+            filterTabs.style.display = scanState.results.length > 0 ? 'flex' : 'none';
+        }
+
+        // Filter tabs
+        let currentFilter = 'all';
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                renderResults(currentFilter);
+            };
+        });
+
+        // Button handlers
+        document.getElementById('start-scan').onclick = () => {
+            initResults();
+            updateProgress();
+            renderResults();
+            runScan();
+        };
+        document.getElementById('pause-scan').onclick = pauseScan;
+        document.getElementById('resume-scan').onclick = resumeScan;
+        document.getElementById('reset-scan').onclick = resetScan;
+
+        // Initialize
+        if (typeof LINKHUB_LINKS !== 'undefined') {
+            if (loadState() && scanState.results.length > 0) {
+                // Restore previous session
+                updateProgress();
+                renderResults();
+                updateButtons();
+            }
+        }
+    </script>
+</body>
+
+</html>

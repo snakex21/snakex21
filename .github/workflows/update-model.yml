@@ -1,0 +1,64 @@
+name: LinkHub Update Model
+
+on:
+  repository_dispatch:
+    types: [update_model]
+
+permissions:
+  contents: write
+
+jobs:
+  update-model:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Update model in data.js
+        env:
+          NEW_MODEL: ${{ github.event.client_payload.model }}
+        run: |
+          python << 'EOF'
+          import os
+          import re
+          from datetime import datetime
+
+          new_model = os.getenv("NEW_MODEL", "zai-org/GLM-4.7")
+          data_file = "LinkHub/data.js"
+
+          with open(data_file, "r", encoding="utf-8") as f:
+              content = f.read()
+
+          # Update model in config
+          content = re.sub(
+              r'"model": "[^"]*"',
+              f'"model": "{new_model}"',
+              content
+          )
+
+          # Update last_updated
+          today = datetime.now().strftime("%Y-%m-%d")
+          content = re.sub(
+              r'"last_updated": "[^"]*"',
+              f'"last_updated": "{today}"',
+              content
+          )
+
+          with open(data_file, "w", encoding="utf-8") as f:
+              f.write(content)
+
+          print(f"Updated model to: {new_model}")
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "LinkHub AI"
+          git config --global user.email "linkhub-ai@github.com"
+          git add LinkHub/data.js
+          git commit -m "LinkHub: Model changed to ${{ github.event.client_payload.model }}" || echo "No changes"
+          git push

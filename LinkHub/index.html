@@ -21,6 +21,7 @@
             --card-hover: #e9ecef;
             --header-bg: #ffffff;
             --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #3b82f6;
         }
 
         [data-theme="dark"] {
@@ -83,6 +84,37 @@
             color: var(--text-secondary);
             text-align: center;
             margin-bottom: 2rem;
+        }
+
+        /* Tabs */
+        .view-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+
+        .view-tab {
+            padding: 12px 24px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .view-tab:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .view-tab:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .view-tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
         .category-nav {
@@ -150,14 +182,21 @@
             color: var(--text-secondary);
         }
 
+        .link-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            opacity: 0.7;
+        }
+
         .add-btn {
             position: fixed;
             bottom: 30px;
             right: 30px;
             width: 60px;
             height: 60px;
-            background: var(--text);
-            color: var(--bg);
+            background: var(--accent);
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -178,6 +217,78 @@
             border-bottom: 1px solid var(--border);
         }
 
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--accent), #8b5cf6, #ec4899);
+            border-radius: 3px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -31px;
+            top: 5px;
+            width: 14px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 3px solid var(--bg);
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            text-decoration: none;
+            color: var(--text);
+            display: block;
+            transition: all 0.2s;
+        }
+
+        .timeline-card:hover {
+            background: var(--card-hover);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .timeline-cat {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
         @media (max-width: 768px) {
             .link-grid {
                 grid-template-columns: 1fr;
@@ -189,13 +300,29 @@
 <body>
     <header>
         <a href="../index.html" class="logo">Hub</a>
-        <button id="theme-toggle">🌙</button>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <a href="scan.html" title="Skanuj linki" style="font-size:1.3rem;text-decoration:none;">🔍</a>
+            <a href="pending.html" title="Oczekujące" style="font-size:1.3rem;text-decoration:none;position:relative;">
+                ⏳
+                <span id="pending-badge"
+                    style="display:none;position:absolute;top:-8px;right:-10px;background:#ef4444;color:white;font-size:0.7rem;padding:2px 6px;border-radius:10px;font-weight:bold;"></span>
+            </a>
+            <a href="settings.html" title="Ustawienia" style="font-size:1.3rem;text-decoration:none;">⚙️</a>
+            <button id="theme-toggle">🌙</button>
+        </div>
     </header>
 
     <main>
         <h1>🔗 LinkHub</h1>
         <p class="subtitle">Baza linków posegregowana przez AI</p>
 
+        <!-- View Tabs -->
+        <div class="view-tabs">
+            <button class="view-tab active" data-view="categories">📂 Kategorie</button>
+            <button class="view-tab" data-view="timeline">📅 Historia</button>
+        </div>
+
+        <!-- Category Nav (only visible in categories view) -->
         <div class="category-nav" id="category-nav">
             <button class="category-btn active" data-category="all">Wszystko</button>
         </div>
@@ -207,9 +334,10 @@
 
     <a href="add.html" class="add-btn" title="Dodaj link">+</a>
 
-    <!-- Dane ładowane z tego samego folderu -->
     <script src="data.js"></script>
     <script>
+        let currentView = 'categories';
+
         // Theme
         const themeToggle = document.getElementById('theme-toggle');
         if (localStorage.getItem('theme') === 'dark') {
@@ -223,13 +351,29 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         };
 
-        // Render
+        // View Tabs
+        document.querySelectorAll('.view-tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentView = tab.dataset.view;
+
+                const catNav = document.getElementById('category-nav');
+                catNav.style.display = currentView === 'categories' ? 'flex' : 'none';
+
+                if (currentView === 'timeline') {
+                    renderTimeline();
+                } else {
+                    renderLinks('all');
+                }
+            };
+        });
+
         function init() {
             if (typeof LINKHUB_LINKS === 'undefined') {
-                document.getElementById('links-container').innerHTML = '<p style="text-align:center;padding:50px;color:#dc3545;">Błąd ładowania danych.</p>';
+                document.getElementById('links-container').innerHTML = '<p style="text-align:center;padding:50px;color:#dc3545;">Błąd ładowania.</p>';
                 return;
             }
-
             renderCategories();
             renderLinks('all');
         }
@@ -280,13 +424,7 @@
                     return `
                         <h2 class="section-header">${info.name}</h2>
                         <div class="link-grid">
-                            ${items.map(item => `
-                                <a href="${item.url}" target="_blank" class="link-card">
-                                    <span class="link-tag" style="color:${info.color}">${info.name}</span>
-                                    <div class="link-title">${item.name}</div>
-                                    <div class="link-desc">${item.description || ''}</div>
-                                </a>
-                            `).join('')}
+                            ${items.map(item => renderCard(item, info)).join('')}
                         </div>
                     `;
                 }).join('');
@@ -294,18 +432,66 @@
                 const info = LINKHUB_CATEGORIES[filter] || { name: filter, color: '#666' };
                 container.innerHTML = `
                     <div class="link-grid">
-                        ${links.map(item => `
-                            <a href="${item.url}" target="_blank" class="link-card">
-                                <span class="link-tag" style="color:${info.color}">${info.name}</span>
-                                <div class="link-title">${item.name}</div>
-                                <div class="link-desc">${item.description || ''}</div>
-                            </a>
-                        `).join('')}
+                        ${links.map(item => renderCard(item, info)).join('')}
                     </div>
                 `;
             }
         }
 
+        function renderCard(item, info) {
+            return `
+                <a href="${item.url}" target="_blank" class="link-card">
+                    <span class="link-tag" style="color:${info.color}">${info.name}</span>
+                    <div class="link-title">${item.name}</div>
+                    <div class="link-desc">${item.description || ''}</div>
+                    ${item.added ? `<div class="link-date">📅 ${item.added}</div>` : ''}
+                </a>
+            `;
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('links-container');
+
+            // Sort by date (newest first)
+            const sortedLinks = [...LINKHUB_LINKS].sort((a, b) => {
+                if (!a.added) return 1;
+                if (!b.added) return -1;
+                return b.added.localeCompare(a.added);
+            });
+
+            if (sortedLinks.length === 0) {
+                container.innerHTML = '<p style="text-align:center;padding:50px;">Brak historii.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="timeline">
+                    ${sortedLinks.map(item => {
+                const info = LINKHUB_CATEGORIES[item.category] || { name: item.category, color: '#666' };
+                return `
+                            <div class="timeline-item">
+                                <div class="timeline-date">${item.added || 'Nieznana data'}</div>
+                                <a href="${item.url}" target="_blank" class="timeline-card">
+                                    <div class="timeline-title">${item.name}</div>
+                                    <div class="timeline-cat" style="color:${info.color}">${info.name}</div>
+                                </a>
+                            </div>
+                        `;
+            }).join('')}
+                </div>
+            `;
+        }
+
+        // Show pending count badge
+        function updatePendingBadge() {
+            const badge = document.getElementById('pending-badge');
+            if (typeof LINKHUB_PENDING !== 'undefined' && LINKHUB_PENDING.length > 0) {
+                badge.textContent = LINKHUB_PENDING.length;
+                badge.style.display = 'block';
+            }
+        }
+
+        updatePendingBadge();
         init();
     </script>
 </body>

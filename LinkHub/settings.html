@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ustawienia - LinkHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --accent: #3b82f6;
+            --success: #22c55e;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .model-info {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .search-result {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .search-result:last-child {
+            border-bottom: none;
+        }
+
+        .search-result:hover {
+            background: var(--card-bg);
+        }
+
+        .search-result-name {
+            font-weight: 600;
+        }
+
+        .search-result-info {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+            display: block;
+        }
+
+        .current-model {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .current-model-badge {
+            background: var(--accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">← LinkHub</a>
+    </header>
+
+    <main>
+        <h1>⚙️ Ustawienia</h1>
+        <p class="subtitle">Konfiguracja modeli AI i ustawień LinkHub</p>
+
+        <!-- Current Model -->
+        <div class="card">
+            <div class="card-title">🤖 Aktualny Model AI</div>
+            <div class="current-model">
+                <span class="current-model-badge">GŁÓWNY</span>
+                <span id="current-model-name">Ładowanie...</span>
+            </div>
+            <p class="model-info">Ten model jest używany do klasyfikacji linków.</p>
+        </div>
+
+        <!-- Model Search -->
+        <div class="card">
+            <div class="card-title">🔍 Zmień Model</div>
+            <div class="form-group">
+                <label>Wyszukaj model na HuggingFace</label>
+                <input type="text" id="model-search" placeholder="np. mistral, llama, glm...">
+                <div class="search-results" id="search-results"></div>
+            </div>
+            <div class="form-group">
+                <label>Lub wpisz pełną nazwę modelu</label>
+                <input type="text" id="model-manual" placeholder="np. zai-org/GLM-4.7">
+            </div>
+            <button class="btn" id="save-model-btn">💾 Zapisz Model</button>
+            <div class="status" id="model-status"></div>
+        </div>
+
+        <!-- Popular Models -->
+        <div class="card">
+            <div class="card-title">⭐ Popularne Modele</div>
+            <p class="model-info" style="margin-bottom: 1rem;">Kliknij, aby wybrać:</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button class="btn btn-secondary model-preset" data-model="zai-org/GLM-4.7">GLM-4.7</button>
+                <button class="btn btn-secondary model-preset"
+                    data-model="mistralai/Ministral-8B-Instruct-2410">Ministral 8B</button>
+                <button class="btn btn-secondary model-preset" data-model="mistralai/Mistral-7B-Instruct-v0.3">Mistral
+                    7B</button>
+                <button class="btn btn-secondary model-preset" data-model="meta-llama/Llama-3.2-3B-Instruct">Llama 3.2
+                    3B</button>
+                <button class="btn btn-secondary model-preset" data-model="Qwen/Qwen2.5-7B-Instruct">Qwen 2.5
+                    7B</button>
+            </div>
+        </div>
+
+        <!-- Token -->
+        <div class="card">
+            <div class="card-title">🔑 Token</div>
+            <div class="form-group">
+                <label>GitHub PAT</label>
+                <input type="text" id="gh-token" placeholder="ghp_..." value="">
+            </div>
+            <div class="form-group">
+                <label>HuggingFace Token</label>
+                <input type="text" id="hf-token" placeholder="hf_..." value="">
+                <p class="model-info">Token HF jest używany tylko do wyszukiwania modeli.</p>
+            </div>
+            <button class="btn" id="save-tokens-btn">💾 Zapisz Tokeny</button>
+        </div>
+
+        <a href="index.html" class="back-link">← Wróć do LinkHub</a>
+    </main>
+
+    <script src="data.js"></script>
+    <script>
+        // Theme sync
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+
+        // Load current settings
+        function loadSettings() {
+            // Load from data.js config if exists
+            const currentModel = (typeof LINKHUB_CONFIG !== 'undefined' && LINKHUB_CONFIG.model)
+                ? LINKHUB_CONFIG.model
+                : 'zai-org/GLM-4.7';
+
+            document.getElementById('current-model-name').textContent = currentModel;
+            document.getElementById('model-manual').value = currentModel;
+
+            // Load tokens from localStorage
+            document.getElementById('gh-token').value = localStorage.getItem('gh_pat') || '';
+            document.getElementById('hf-token').value = localStorage.getItem('hf_token') || '';
+        }
+
+        // Model presets
+        document.querySelectorAll('.model-preset').forEach(btn => {
+            btn.onclick = () => {
+                document.getElementById('model-manual').value = btn.dataset.model;
+            };
+        });
+
+        // Search models
+        let searchTimeout;
+        document.getElementById('model-search').oninput = (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+
+            if (query.length < 2) {
+                document.getElementById('search-results').style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                const hfToken = localStorage.getItem('hf_token');
+                const headers = hfToken ? { 'Authorization': `Bearer ${hfToken}` } : {};
+
+                try {
+                    const res = await fetch(
+                        `https://huggingface.co/api/models?search=${encodeURIComponent(query)}&filter=text-generation&limit=10`,
+                        { headers }
+                    );
+                    const models = await res.json();
+
+                    const container = document.getElementById('search-results');
+                    container.innerHTML = models.map(m => `
+                        <div class="search-result" data-model="${m.id}">
+                            <div class="search-result-name">${m.id}</div>
+                            <div class="search-result-info">⬇️ ${m.downloads?.toLocaleString() || '?'} downloads</div>
+                        </div>
+                    `).join('');
+                    container.style.display = 'block';
+
+                    container.querySelectorAll('.search-result').forEach(item => {
+                        item.onclick = () => {
+                            document.getElementById('model-manual').value = item.dataset.model;
+                            container.style.display = 'none';
+                            document.getElementById('model-search').value = '';
+                        };
+                    });
+                } catch (err) {
+                    console.error('Search failed:', err);
+                }
+            }, 500);
+        };
+
+        // Save model - this updates the config and triggers a workflow
+        document.getElementById('save-model-btn').onclick = async () => {
+            const model = document.getElementById('model-manual').value.trim();
+            if (!model) {
+                alert('Podaj nazwę modelu');
+                return;
+            }
+
+            const status = document.getElementById('model-status');
+            const btn = document.getElementById('save-model-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'Zapisywanie...';
+
+            try {
+                const token = localStorage.getItem('gh_pat');
+                if (!token) throw new Error('Brak GitHub PAT');
+
+                // Trigger a special workflow to update the model
+                const response = await fetch('https://api.github.com/repos/snakex21/snakex21/dispatches', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_type: 'update_model',
+                        client_payload: { model: model }
+                    })
+                });
+
+                if (response.ok) {
+                    status.textContent = '✅ Model zostanie zmieniony za ~1 minutę!';
+                    status.className = 'status status-success';
+                    document.getElementById('current-model-name').textContent = model + ' (aktualizacja...)';
+                } else {
+                    throw new Error('Błąd API');
+                }
+            } catch (err) {
+                alert('Błąd: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Zapisz Model';
+            }
+        };
+
+        // Save tokens
+        document.getElementById('save-tokens-btn').onclick = () => {
+            const ghToken = document.getElementById('gh-token').value.trim();
+            const hfToken = document.getElementById('hf-token').value.trim();
+
+            if (ghToken) localStorage.setItem('gh_pat', ghToken);
+            if (hfToken) localStorage.setItem('hf_token', hfToken);
+
+            alert('Tokeny zapisane!');
+        };
+
+        loadSettings();
+    </script>
+</body>
+
+</html>
