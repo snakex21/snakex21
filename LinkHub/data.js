@@ -80,13 +80,7 @@ const LINKHUB_CATEGORIES = {
 };
 
 // Linki oczekujące na ręczną weryfikację (nie przeszły walidacji)
-const LINKHUB_PENDING = [
-  {
-    "url": "https://1337x.to",
-    "reason": "403",
-    "attempted": "2026-01-03 21:53"
-  }
-];
+const LINKHUB_PENDING = [];
 
 const LINKHUB_LINKS = [
   {
