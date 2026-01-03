@@ -27,6 +27,7 @@ jobs:
       - name: Classify and Update DB
         env:
           LINK_URL: ${{ github.event.client_payload.link_url }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python .github/scripts/classify_link.py
 
