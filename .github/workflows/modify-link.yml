@@ -1,0 +1,93 @@
+name: LinkHub Edit/Delete Link
+
+on:
+  repository_dispatch:
+    types: [edit_link, delete_link]
+
+permissions:
+  contents: write
+
+jobs:
+  modify-link:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Modify link
+        env:
+          EVENT_TYPE: ${{ github.event.action }}
+          LINK_INDEX: ${{ github.event.client_payload.index }}
+          NEW_URL: ${{ github.event.client_payload.new_url }}
+        run: |
+          python << 'EOF'
+          import os
+          import re
+          import json
+
+          data_file = "LinkHub/data.js"
+          event_type = os.getenv("EVENT_TYPE", "")
+          link_index = os.getenv("LINK_INDEX")
+          new_url = os.getenv("NEW_URL", "")
+
+          # Read current data
+          with open(data_file, "r", encoding="utf-8") as f:
+              content = f.read()
+
+          # Extract links
+          links = []
+          links_match = re.search(r'const LINKHUB_LINKS = (\[[\s\S]*?\]);', content)
+          if links_match:
+              try:
+                  links = json.loads(links_match.group(1))
+              except:
+                  print("Failed to parse links")
+                  exit(1)
+
+          try:
+              idx = int(link_index)
+          except:
+              print("Invalid index")
+              exit(1)
+
+          if idx < 0 or idx >= len(links):
+              print(f"Index {idx} out of range (0-{len(links)-1})")
+              exit(1)
+
+          if event_type == "delete_link":
+              deleted = links.pop(idx)
+              print(f"Deleted link: {deleted.get('name', 'unknown')}")
+          elif event_type == "edit_link" and new_url:
+              old_url = links[idx].get('url', '')
+              links[idx]['url'] = new_url
+              print(f"Updated URL: {old_url} -> {new_url}")
+          else:
+              print("Unknown action or missing data")
+              exit(1)
+
+          # Update file
+          new_links = json.dumps(links, ensure_ascii=False, indent=2)
+          content = re.sub(
+              r'const LINKHUB_LINKS = \[[\s\S]*?\];',
+              f'const LINKHUB_LINKS = {new_links};',
+              content
+          )
+
+          with open(data_file, "w", encoding="utf-8") as f:
+              f.write(content)
+
+          print("Data file updated successfully")
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "LinkHub AI"
+          git config --global user.email "linkhub-ai@github.com"
+          git add LinkHub/data.js
+          git commit -m "LinkHub: Modified link" || echo "No changes"
+          git push
