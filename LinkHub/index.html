@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkHub - Agregator Linków</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e0e0e0;
+            --card-bg: #f8f9fa;
+            --card-hover: #e9ecef;
+            --header-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --card-bg: #2a2a2a;
+            --card-hover: #3a3a3a;
+            --header-bg: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--card-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .link-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .link-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .link-tag {
+            font-size: 0.75rem;
+            color: #007aff;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .link-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .link-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-grow: 1;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--text);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .link-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="../index.html" class="logo">Hub</a>
+            <div class="nav-links">
+                <a href="../gry/gry.html">Gry</a>
+                <a href="../muzyka/muzyka.html">Muzyka</a>
+                <a href="../filmy/filmy glowna.html">Filmy</a>
+                <a href="../Programy/programy.html">Narzędzia</a>
+                <a href="../zmiany.html">Zmiany</a>
+            </div>
+            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <h1>🔗 LinkHub</h1>
+        <p class="subtitle">Moja inteligentna baza linków, posegregowana przez AI.</p>
+
+        <div class="category-nav" id="category-nav">
+            <button class="category-btn active" data-category="all">Wszystko</button>
+        </div>
+
+        <div id="links-container">
+            <p style="text-align: center; padding: 50px; color: var(--text-secondary);">Ładowanie linków...</p>
+        </div>
+    </main>
+
+    <a href="add.html" class="add-btn" title="Dodaj nowy link">+</a>
+
+    <script src="../db/links.js"></script>
+    <script>
+        const CATEGORY_MAP = {
+            "ai": "🤖 AI",
+            "gry": "🎮 Gry",
+            "programowanie": "💻 Programowanie",
+            "filmy": "🎬 Filmy",
+            "muzyka": "🎵 Muzyka",
+            "ebooki": "📚 eBooki",
+            "komiksy": "💥 Komiksy",
+            "linux-macos": "🍎 Linux/macOS",
+            "privacy": "🛡️ Prywatność",
+            "sport": "⚽ Sport",
+            "narzedzia-graficzne": "🎨 Grafika",
+            "torrenty": "🏴‍☠️ Torrenty",
+            "pobieranie": "📥 Pobieranie",
+            "pozostale": "📦 Pozostałe"
+        };
+
+        // Theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '☀️';
+        }
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            themeToggle.textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        });
+
+        let allLinks = [];
+
+        function loadLinks() {
+            try {
+                if (typeof LINKHUB_DATA === 'undefined') {
+                    throw new Error('Nie można załadować bazy danych.');
+                }
+                allLinks = LINKHUB_DATA.links;
+                renderCategories();
+                renderLinks('all');
+            } catch (err) {
+                document.getElementById('links-container').innerHTML = `
+                    <p style="text-align: center; padding: 50px; color: #dc3545;">
+                        ${err.message}<br><small>Upewnij się, że plik db/links.js istnieje.</small>
+                    </p>
+                `;
+            }
+        }
+
+        function renderCategories() {
+            const nav = document.getElementById('category-nav');
+            const categories = [...new Set(allLinks.map(l => l.category))];
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.dataset.category = cat;
+                btn.textContent = CATEGORY_MAP[cat] || cat;
+                btn.onclick = () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderLinks(cat);
+                };
+                nav.appendChild(btn);
+            });
+
+            document.querySelector('.category-btn[data-category="all"]').onclick = () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('.category-btn[data-category="all"]').classList.add('active');
+                renderLinks('all');
+            };
+        }
+
+        function renderLinks(filter) {
+            const container = document.getElementById('links-container');
+            const filteredLinks = filter === 'all' ? allLinks : allLinks.filter(l => l.category === filter);
+
+            if (filteredLinks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 50px;">Brak linków w tej kategorii.</p>';
+                return;
+            }
+
+            if (filter === 'all') {
+                const groups = {};
+                filteredLinks.forEach(link => {
+                    if (!groups[link.category]) groups[link.category] = [];
+                    groups[link.category].push(link);
+                });
+
+                container.innerHTML = Object.entries(groups).map(([cat, items]) => `
+                    <h2 class="section-header">${CATEGORY_MAP[cat] || cat}</h2>
+                    <div class="link-grid">
+                        ${items.map(item => `
+                            <a href="${item.url}" target="_blank" class="link-card">
+                                <span class="link-tag">${cat}</span>
+                                <div class="link-title">${item.name}</div>
+                                <div class="link-desc">${item.description || 'Brak opisu.'}</div>
+                            </a>
+                        `).join('')}
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = `
+                    <div class="link-grid">
+                        ${filteredLinks.map(item => `
+                            <a href="${item.url}" target="_blank" class="link-card">
+                                <span class="link-tag">${item.category}</span>
+                                <div class="link-title">${item.name}</div>
+                                <div class="link-desc">${item.description || 'Brak opisu.'}</div>
+                            </a>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        loadLinks();
+    </script>
+</body>
+
+</html>

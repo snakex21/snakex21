@@ -1,0 +1,39 @@
+name: LinkHub AI Auto-Classifier
+
+on:
+  repository_dispatch:
+    types: [add_link]
+
+permissions:
+  contents: write
+
+jobs:
+  classify-and-add:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Classify and Update DB
+        env:
+          LINK_URL: ${{ github.event.client_payload.link_url }}
+        run: |
+          python .github/scripts/classify_link.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "LinkHub AI"
+          git config --global user.email "linkhub-ai@github.com"
+          git add db/links.js
+          git commit -m "LinkHub: Auto-added link [${{ github.event.client_payload.link_url }}]" || echo "No changes to commit"
+          git push
