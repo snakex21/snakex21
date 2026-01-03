@@ -24,7 +24,6 @@
             --header-bg: #ffffff;
             --shadow: rgba(0, 0, 0, 0.1);
             --accent: #8b5cf6;
-            /* Violet */
             --input-bg: #ffffff;
         }
 
@@ -120,7 +119,6 @@
             font-size: 1.1rem;
         }
 
-        /* Compressor UI */
         .grid-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -222,7 +220,6 @@
             width: 100%;
             height: 250px;
             background: var(--input-bg);
-            /* Checkerboard pattern could be added here */
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -250,6 +247,7 @@
         .stat-item {
             display: flex;
             flex-direction: column;
+            text-align: left;
         }
 
         .stat-label {
@@ -276,6 +274,10 @@
             width: 100%;
             font-size: 1rem;
             transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn:hover {
@@ -318,12 +320,202 @@
                 <a href="../programy.html" class="active">Narzędzia</a>
             </div>
             <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1>🗜️ Kompresor Obrazów</h1>
+            <p>Zmniejsz wagę zdjęć i zmieniaj format w przeglądarce</p>
+        </div>
+
+        <div class="grid-container">
+            <div class="upload-area" id="drop-area">
+                <div id="upload-content">
+                    <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📸</span>
+                    <h3>Przeciągnij zdjęcie tutaj</h3>
+                    <p>lub kliknij by wybrać plik</p>
+                </div>
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp">
+            </div>
+
+            <div class="settings-card" id="settings-area" style="display: none;">
+                <div class="setting-group">
+                    <label>Jakość <span id="quality-val">80%</span></label>
+                    <input type="range" id="quality-slider" min="1" max="100" value="80">
+                </div>
+
+                <div class="setting-group">
+                    <label>Format wyjściowy</label>
+                    <select id="format-select">
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/png">PNG</option>
+                        <option value="image/webp">WEBP</option>
+                    </select>
+                </div>
+
+                <button class="btn" id="download-btn">📥 Pobierz skompresowany obraz</button>
+            </div>
+
+            <div class="preview-card" id="preview-area" style="display: none;">
+                <div class="image-preview-container">
+                    <img id="preview-img" src="" alt="Podgląd">
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-label">Oryginał</span>
+                        <span class="stat-value" id="orig-size">0 KB</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Skompresowany</span>
+                        <span class="stat-value good" id="comp-size">0 KB</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Zaoszczędzone</span>
+                        <span class="stat-value good" id="save-percent">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Compressor Logic
+        const fileInput = document.getElementById('file-input');
+        const qualitySlider = document.getElementById('quality-slider');
+        const qualityVal = document.getElementById('quality-val');
+        const formatSelect = document.getElementById('format-select');
+        const previewImg = document.getElementById('preview-img');
+        const origSizeEl = document.getElementById('orig-size');
+        const compSizeEl = document.getElementById('comp-size');
+        const savePercentEl = document.getElementById('save-percent');
+        const downloadBtn = document.getElementById('download-btn');
+        const settingsArea = document.getElementById('settings-area');
+        const previewArea = document.getElementById('preview-area');
+        const uploadContent = document.getElementById('upload-content');
+
+        let originalImg = null;
+        let originalSize = 0;
+        let originalName = '';
+
+        fileInput.addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            originalSize = file.size;
+            originalName = file.name.substring(0, file.name.lastIndexOf('.'));
+            origSizeEl.textContent = formatBytes(file.size);
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImg = img;
+                    settingsArea.style.display = 'flex';
+                    previewArea.style.display = 'flex';
+                    uploadContent.style.display = 'none';
+                    compressImage();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        qualitySlider.addEventListener('input', () => {
+            qualityVal.textContent = qualitySlider.value + '%';
+            compressImage();
+        });
+
+        formatSelect.addEventListener('change', compressImage);
+
+        function compressImage() {
+            if (!originalImg) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = originalImg.width;
+            canvas.height = originalImg.height;
+            ctx.drawImage(originalImg, 0, 0);
+
+            const quality = qualitySlider.value / 100;
+            const format = formatSelect.value;
+
+            const compressedDataUrl = canvas.toDataURL(format, quality);
+            previewImg.src = compressedDataUrl;
+
+            // Estimate size from data URL
+            const head = 'data:' + format + ';base64,';
+            const compressedSize = Math.round((compressedDataUrl.length - head.length) * 3 / 4);
+
+            compSizeEl.textContent = formatBytes(compressedSize);
+
+            const saved = originalSize - compressedSize;
+            const percent = Math.max(0, Math.round((saved / originalSize) * 100));
+            savePercentEl.textContent = percent + '%';
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            const format = formatSelect.value.split('/')[1];
+            link.download = `${originalName}-kompresja.${format}`;
+            link.href = previewImg.src;
+            link.click();
+        });
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
             const sizes = ['B', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-            }
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
 
-            </script>
+        // Drag and drop events
+        const dropArea = document.getElementById('drop-area');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFileUpload({ target: { files: files } });
+        });
+    </script>
 </body>
 
 </html>
