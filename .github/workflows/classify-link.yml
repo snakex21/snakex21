@@ -35,6 +35,6 @@ jobs:
         run: |
           git config --global user.name "LinkHub AI"
           git config --global user.email "linkhub-ai@github.com"
-          git add db/links.js
-          git commit -m "LinkHub: Auto-added link [${{ github.event.client_payload.link_url }}]" || echo "No changes to commit"
+          git add LinkHub/data.js
+          git commit -m "LinkHub: Added link [${{ github.event.client_payload.link_url }}]" || echo "No changes"
           git push

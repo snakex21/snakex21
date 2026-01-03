@@ -5,19 +5,30 @@ import json
 import re
 
 # Configuration
-DB_FILE = "db/links.js"
+DATA_FILE = "LinkHub/data.js"
 URL = os.getenv("LINK_URL")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-# Hugging Face model for classification
+# Hugging Face model
 HF_MODEL = "zai-org/GLM-4.7"
 HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
 
-CATEGORIES = [
-    "ai", "gry", "programowanie", "filmy", "muzyka", "ebooki", 
-    "komiksy", "linux-macos", "privacy", "sport", 
-    "narzedzia-graficzne", "torrenty", "pobieranie", "pozostale"
-]
+DEFAULT_CATEGORIES = {
+    "ai": {"name": "🤖 AI", "color": "#8b5cf6"},
+    "gry": {"name": "🎮 Gry", "color": "#ef4444"},
+    "programowanie": {"name": "💻 Programowanie", "color": "#3b82f6"},
+    "filmy": {"name": "🎬 Filmy", "color": "#f59e0b"},
+    "muzyka": {"name": "🎵 Muzyka", "color": "#ec4899"},
+    "ebooki": {"name": "📚 eBooki", "color": "#10b981"},
+    "komiksy": {"name": "💥 Komiksy", "color": "#f97316"},
+    "linux-macos": {"name": "🍎 Linux/macOS", "color": "#6366f1"},
+    "privacy": {"name": "🛡️ Prywatność", "color": "#14b8a6"},
+    "sport": {"name": "⚽ Sport", "color": "#22c55e"},
+    "narzedzia-graficzne": {"name": "🎨 Grafika", "color": "#a855f7"},
+    "torrenty": {"name": "🏴‍☠️ Torrenty", "color": "#64748b"},
+    "pobieranie": {"name": "📥 Pobieranie", "color": "#0ea5e9"},
+    "pozostale": {"name": "📦 Pozostałe", "color": "#78716c"}
+}
 
 def scrape_metadata(url):
     try:
@@ -41,122 +52,124 @@ def scrape_metadata(url):
         return url, ""
 
 def classify_with_ai(title, description):
-    """Use Hugging Face API to classify the link."""
     if not HF_TOKEN:
-        print("No HF_TOKEN provided, falling back to keyword classification.")
+        print("No HF_TOKEN, using fallback.")
         return classify_fallback(title, description)
     
-    prompt = f"""<s>[INST] You are a link categorizer. Based on the title and description, choose ONE category from this list:
-{', '.join(CATEGORIES)}
+    categories = list(DEFAULT_CATEGORIES.keys())
+    prompt = f"""<s>[INST] Classify this link into ONE category.
+Categories: {', '.join(categories)}
 
 Title: {title}
 Description: {description[:300]}
 
-Reply with ONLY the category name, nothing else. [/INST]"""
-
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 20,
-            "temperature": 0.1,
-            "return_full_text": False
-        }
-    }
+Reply with ONLY the category name. [/INST]"""
 
     try:
-        response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
+        response = requests.post(HF_API_URL, 
+            headers={"Authorization": f"Bearer {HF_TOKEN}"},
+            json={"inputs": prompt, "parameters": {"max_new_tokens": 20, "temperature": 0.1}},
+            timeout=60)
+        
         if response.status_code == 200:
             result = response.json()
             if isinstance(result, list) and len(result) > 0:
                 generated = result[0].get("generated_text", "").strip().lower()
-                # Extract category from response
-                for cat in CATEGORIES:
+                for cat in categories:
                     if cat in generated:
-                        print(f"AI classified as: {cat}")
                         return cat
-        else:
-            print(f"HF API error: {response.status_code} - {response.text}")
     except Exception as e:
-        print(f"Error calling HF API: {e}")
+        print(f"HF API error: {e}")
     
-    print("AI classification failed, using fallback.")
     return classify_fallback(title, description)
 
 def classify_fallback(title, description):
-    """Fallback keyword-based classification."""
     KEYWORDS = {
-        "ai": ["ai", "gpt", "chatbot", "intelligence", "llm", "machine learning"],
-        "gry": ["game", "gry", "steam", "crack", "emulator", "gaming"],
-        "programowanie": ["code", "programming", "github", "python", "dev", "api"],
-        "filmy": ["movie", "film", "serial", "streaming", "netflix"],
-        "muzyka": ["music", "muzyka", "audio", "mp3", "spotify"],
-        "ebooki": ["ebook", "książka", "pdf", "libgen", "book"],
-        "komiksy": ["comic", "manga", "manhwa"],
-        "linux-macos": ["linux", "macos", "apple", "ubuntu"],
-        "privacy": ["privacy", "vpn", "proxy", "security"],
-        "sport": ["sport", "football", "match"],
-        "narzedzia-graficzne": ["graphic", "design", "photo", "editor"],
-        "torrenty": ["torrent", "1337x", "pirate", "magnet"],
+        "ai": ["ai", "gpt", "chatbot", "llm", "machine learning"],
+        "gry": ["game", "gry", "steam", "gaming"],
+        "programowanie": ["code", "programming", "github", "python", "dev"],
+        "filmy": ["movie", "film", "serial", "streaming", "youtube", "video"],
+        "muzyka": ["music", "muzyka", "audio", "spotify"],
+        "ebooki": ["ebook", "książka", "pdf", "book"],
+        "komiksy": ["comic", "manga"],
+        "linux-macos": ["linux", "macos", "ubuntu"],
+        "privacy": ["privacy", "vpn", "security"],
+        "sport": ["sport", "football"],
+        "narzedzia-graficzne": ["graphic", "design", "photo"],
+        "torrenty": ["torrent", "pirate", "magnet"],
         "pobieranie": ["download", "pobierz"],
     }
     
     text = (title + " " + description).lower()
-    scores = {cat: sum(1 for kw in keywords if kw in text) for cat, keywords in KEYWORDS.items()}
-    best_cat = max(scores, key=scores.get)
-    return best_cat if scores[best_cat] > 0 else "pozostale"
+    scores = {cat: sum(1 for kw in kws if kw in text) for cat, kws in KEYWORDS.items()}
+    best = max(scores, key=scores.get)
+    return best if scores[best] > 0 else "pozostale"
 
-def load_db():
-    if not os.path.exists(DB_FILE):
-        return {"links": []}
+def load_data():
+    if not os.path.exists(DATA_FILE):
+        return DEFAULT_CATEGORIES.copy(), []
     
-    with open(DB_FILE, "r", encoding="utf-8") as f:
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
         content = f.read()
     
-    match = re.search(r'const LINKHUB_DATA = ({[\s\S]*});', content)
-    if match:
+    # Parse categories
+    categories = DEFAULT_CATEGORIES.copy()
+    cat_match = re.search(r'const LINKHUB_CATEGORIES = ({[\s\S]*?});', content)
+    if cat_match:
         try:
-            return json.loads(match.group(1))
+            categories = json.loads(cat_match.group(1).replace("'", '"'))
         except:
-            return {"links": []}
-    return {"links": []}
-
-def save_db(data):
-    js_content = f"// LinkHub Database - Auto-updated by AI\nconst LINKHUB_DATA = {json.dumps(data, ensure_ascii=False, indent=2)};\n"
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        f.write(js_content)
-
-def update_db(category, name, url, description):
-    data = load_db()
+            pass
     
-    new_link = {
-        "name": name,
-        "url": url,
-        "category": category,
-        "description": description[:150] + "..." if len(description) > 150 else description
-    }
+    # Parse links
+    links = []
+    links_match = re.search(r'const LINKHUB_LINKS = (\[[\s\S]*?\]);', content)
+    if links_match:
+        try:
+            links = json.loads(links_match.group(1))
+        except:
+            pass
     
-    if any(l['url'] == url for l in data['links']):
-        print(f"Link {url} already exists in DB.")
-        return
+    return categories, links
 
-    data["links"].insert(0, new_link)
-    save_db(data)
-    print(f"Added {name} to {category} in {DB_FILE}")
+def save_data(categories, links):
+    js = f"""// LinkHub Database - Auto-updated by AI
+const LINKHUB_CATEGORIES = {json.dumps(categories, ensure_ascii=False, indent=2)};
+
+const LINKHUB_LINKS = {json.dumps(links, ensure_ascii=False, indent=2)};
+"""
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        f.write(js)
 
 def main():
     if not URL:
         print("No URL provided.")
         return
 
-    print(f"Processing URL: {URL}")
+    print(f"Processing: {URL}")
     title, description = scrape_metadata(URL)
-    print(f"Found title: {title}")
+    print(f"Title: {title}")
     
     category = classify_with_ai(title, description)
-    print(f"Final category: {category}")
+    print(f"Category: {category}")
     
-    update_db(category, title, URL, description)
+    categories, links = load_data()
+    
+    # Don't add duplicates
+    if any(l['url'] == URL for l in links):
+        print("Link already exists.")
+        return
+    
+    # Add new link at the beginning
+    links.insert(0, {
+        "name": title,
+        "url": URL,
+        "category": category,
+        "description": description[:150] if description else ""
+    })
+    
+    save_data(categories, links)
+    print(f"Added to {DATA_FILE}")
 
 if __name__ == "__main__":
     main()
