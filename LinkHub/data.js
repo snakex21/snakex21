@@ -96,12 +96,5 @@ const LINKHUB_LINKS = [
     "category": "sport",
     "description": "Watch free sports streaming anywhere on any device.",
     "added": "2026-01-03 20:10"
-  },
-  {
-    "name": "YouTube",
-    "url": "https://www.youtube.com/?gl=PL&hl=pl",
-    "category": "filmy",
-    "description": "W YouTube możesz cieszyć się filmami i muzyką, które lubisz.",
-    "added": "2026-01-03 20:00"
   }
 ];
