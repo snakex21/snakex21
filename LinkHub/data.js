@@ -84,13 +84,6 @@ const LINKHUB_PENDING = [];
 
 const LINKHUB_LINKS = [
   {
-    "name": "FitGirl Repacks - The ONLY official site for FitGirl Repacks. Every single FG re",
-    "url": "https://fitgirl-repacks.site",
-    "category": "pozostale",
-    "description": "The ONLY official site for FitGirl Repacks. Every single FG repack installer has a link inside, which leads here. Do not fall for fake and scam sites,",
-    "added": "2026-01-03 20:47"
-  },
-  {
     "name": "YouTube",
     "url": "https://www.youtube.com",
     "category": "filmy",
