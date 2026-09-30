@@ -162,6 +162,7 @@
         }
 
         [data-game-root] {
+            touch-action: none;
             position: relative;
             width: min(500px, 100%);
             aspect-ratio: 1 / 1;
@@ -217,9 +218,6 @@
             transform: scale(1);
         }
 
-        .tile::after {
-            content: attr(data-value);
-        }
 
         .tile[data-value="2"] { background: #fef3c7; }
         .tile[data-value="4"] { background: #fde68a; }
@@ -288,7 +286,7 @@
     <main>
         <div class="game-header">
             <h1>🎮 2048</h1>
-            <p>Przesuwaj kafelki strzałkami, łącz te same liczby i osiągnij 2048!</p>
+            <p>Przesuwaj kafelki strzałkami lub gestem na planszy, łącz te same liczby i osiągnij 2048!</p>
         </div>
 
         <div class="game-controls">
@@ -308,7 +306,8 @@
     <script>
         // Motyw ciemny
         const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        let savedTheme = 'light';
+        try { savedTheme = localStorage.getItem('theme') || 'light'; } catch (_) {}
         html.setAttribute('data-theme', savedTheme);
 
         const themeToggle = document.getElementById('theme-toggle');
@@ -318,7 +317,7 @@
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            try { localStorage.setItem('theme', newTheme); } catch (_) {}
             themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
         });
 
@@ -418,6 +417,11 @@
         function directions(e) {
             if (!gameActive) return;
             e = e || window.event;
+            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey ||
+                e.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+            if (![37, 38, 39, 40].includes(Number(e.keyCode))) return;
+            e.preventDefault();
+            const before = boardSignature();
 
             if (e.keyCode == '38') {
                 let count = 2;
@@ -432,7 +436,7 @@
                     }
                     if (count > 4) { break; }
                 }
-                cellReset();
+                cellReset(boardSignature() !== before);
             }
 
             else if (e.keyCode == '40') {
@@ -447,7 +451,7 @@
                     }
                     if (count < -4) { break; }
                 }
-                cellReset();
+                cellReset(boardSignature() !== before);
             }
 
             else if (e.keyCode == '37') {
@@ -462,7 +466,7 @@
                     }
                     if (count > 4) { break; }
                 }
-                cellReset();
+                cellReset(boardSignature() !== before);
             }
 
             else if (e.keyCode == '39') {
@@ -478,7 +482,7 @@
                     }
                     if (count < -4) { break; }
                 }
-                cellReset();
+                cellReset(boardSignature() !== before);
             }
         }
 
@@ -502,10 +506,6 @@
                         checker.removeChild(tile);
                         checker.className = 'grid_cell';
                         around.className = 'grid_cell active merged';
-                        const gridElement = getGridElement();
-                        if (gridElement) {
-                            gridElement.dataset.value = parseInt(gridElement.dataset.value || '0', 10) + value;
-                        }
                         score(value);
                     }
                 }
@@ -527,8 +527,13 @@
             tile.innerHTML = '' + value;
         }
 
-        function cellReset() {
-            cellCreator(1, 200);
+        function boardSignature() {
+            return Array.from(document.querySelectorAll('[data-game-root] .grid_cell'),
+                cell => cell.firstElementChild?.dataset.value || '0').join(',');
+        }
+
+        function cellReset(changed) {
+            if (changed) cellCreator(1, 200);
             const merged = document.getElementsByClassName('merged');
             while (merged.length) {
                 merged[0].classList.remove('merged');
@@ -543,6 +548,7 @@
         }
 
         function reset() {
+            touchStart = null;
             gameActive = true;
             buildGridOverlay();
             const status = document.getElementById('status');
@@ -594,28 +600,34 @@
         }
 
         function check(id) {
-            const arr = [];
-            const a = [];
-            arr.push(id);
-            const test = Number(arr[0]);
-            let count = test;
-
-            for (let i = 0; i < 4; i++) {
-                count += 1;
-                a.push(count);
-            }
-
-            const tile = document.getElementById('tile_' + test);
-            const right = document.getElementById('tile_' + a[0]);
-            const bottom = document.getElementById('tile_' + a[2]);
-            if (tile && right && tile.innerHTML == right.innerHTML) {
-                return 1;
-            }
-            if (tile && bottom && tile.innerHTML == bottom.innerHTML) {
-                return 1;
-            }
-            return 0;
+            const row = Number(id[0]);
+            const col = Number(id[1]);
+            const tile = document.getElementById('tile_' + id);
+            const right = col < 4 ? document.getElementById('tile_' + row + (col + 1)) : null;
+            const bottom = row < 4 ? document.getElementById('tile_' + (row + 1) + col) : null;
+            return tile && ((right && tile.dataset.value === right.dataset.value) ||
+                (bottom && tile.dataset.value === bottom.dataset.value)) ? 1 : 0;
         }
+
+        // One swipe is one move. A cancelled/multi-touch gesture never moves tiles.
+        const boardRoot = document.querySelector('[data-game-root]');
+        let touchStart = null;
+        boardRoot.addEventListener('touchstart', event => {
+            touchStart = event.touches.length === 1
+                ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+        }, { passive: true });
+        boardRoot.addEventListener('touchcancel', () => { touchStart = null; });
+        boardRoot.addEventListener('touchend', event => {
+            const start = touchStart;
+            touchStart = null;
+            if (!start || event.touches.length || event.changedTouches.length !== 1) return;
+            const dx = event.changedTouches[0].clientX - start.x;
+            const dy = event.changedTouches[0].clientY - start.y;
+            if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+            const keyCode = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 39 : 37) : (dy > 0 ? 40 : 38);
+            directions({ keyCode, preventDefault() {} });
+        }, { passive: true });
+
     </script>
 </body>
 </html>
