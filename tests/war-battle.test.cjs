@@ -65,3 +65,11 @@ test('Wojna Er: seeded mixed armies have an opening and advance through eras; on
   }
   assert.ok(mixedWins>=3&&mixedWins>rushWins&&mixedWins>rangedWins,JSON.stringify({mixedWins,rushWins,rangedWins}));
 });
+test('Wojna Er: artwork clips to the virtual battlefield before any scenery is painted',()=>{
+  const p=war();p.drawing.length=0;p.run('draw()');
+  const scale=p.drawing.findIndex(c=>c[0]==='scale');
+  const bounds=p.drawing.findIndex(c=>c[0]==='rect'&&c[1]===0&&c[2]===0&&c[3]===1200&&c[4]===600);
+  const clip=p.drawing.findIndex(c=>c[0]==='clip');
+  const firstScenery=p.drawing.findIndex((c,i)=>i>scale&&c[0]==='fillRect');
+  assert.ok(scale<bounds&&bounds<clip&&clip<firstScenery,'Unclipped scenery may paint into the aspect-ratio gutters');
+});

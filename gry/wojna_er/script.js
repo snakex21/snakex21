@@ -504,6 +504,9 @@ function draw() {
     ctx.save();
     ctx.translate((canvas.width - GAME_WIDTH * scale) / 2, (canvas.height - GAME_HEIGHT * scale) / 2);
     ctx.scale(scale, scale);
+    ctx.beginPath();
+    ctx.rect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    ctx.clip();
     drawBattlefieldArt(ctx, state.era, state.elapsed);
     drawBaseArt(ctx, 'player', state.era, state.playerHP / state.maxHP, state.turret.level);
     drawBaseArt(ctx, 'enemy', state.enemyEra, state.enemyHP / state.enemyMaxHP, 0);
