@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Szachy - Hub</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
             margin: 0;
@@ -513,26 +512,33 @@
                 min-width: 80px;
             }
         }
+        main { width: 100%; padding: 2rem clamp(8px, 3vw, 32px); }
+        .game-container { padding: clamp(8px, 2vw, 32px); min-width: 0; }
+        #chess-board { --square-size: min(60px, calc((100vw - 58px) / 8)); grid-template-columns: repeat(8, var(--square-size)); grid-template-rows: repeat(8, var(--square-size)); }
+        #chess-board .square { width: var(--square-size); height: var(--square-size); font-size: clamp(1.5rem, 6vw, 2.8rem); }
+        #chess-board .square:focus-visible { outline: 3px solid #2563eb; outline-offset: -3px; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <main>
+
+    <main id="main-content" tabindex="-1">
         <div class="game-header">
             <h1>♟️ Szachy</h1>
-            <p>Klasyczna gra szachowa dla dwóch graczy</p>
+            <p>Szachy dla dwóch graczy lub przeciw komputerowi</p>
+            <p>Wersja uproszczona: bez bicia w przelocie oraz automatycznych remisów za powtórzenia, 50 posunięć i niewystarczający materiał.</p>
         </div>
 
         <div class="game-container">
@@ -586,20 +592,7 @@
 
     <script>
         // Tryb ciemny
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', savedTheme);
-
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Logika szachów
         const board = [];
@@ -607,6 +600,14 @@
         let currentPlayer = 'white';
         let gameMode = 'pvp'; // 'pvp', 'ai', 'auto'
         let autoPlayInterval = null;
+        let aiTimeout = null;
+        function queueAIMove() {
+            clearTimeout(aiTimeout);
+            aiTimeout = setTimeout(() => {
+                aiTimeout = null;
+                if (!gameOver && !pendingPromotion && gameMode === 'ai' && currentPlayer !== playerColor) makeAIMove();
+            }, 500);
+        }
         let playerColor = 'white'; // Kolor gracza w trybie AI
         let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
         let gameOver = false;
@@ -702,7 +703,20 @@
                         }
                     }
 
+                    square.tabIndex = 0;
+                    square.setAttribute('role', 'button');
+                    square.setAttribute('aria-label', `${String.fromCharCode(97 + col)}${8 - row}: ${board[row][col]?.symbol || 'puste'}`);
                     square.addEventListener('click', () => handleSquareClick(row, col));
+                    square.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault(); handleSquareClick(row, col);
+                            document.querySelector(`[data-row="${row}"][data-col="${col}"]`)?.focus();
+                        } else {
+                            const directions = {ArrowUp:[-1,0], ArrowDown:[1,0], ArrowLeft:[0,-1], ArrowRight:[0,1]};
+                            const step = directions[e.key];
+                            if (step) { e.preventDefault(); document.querySelector(`[data-row="${Math.max(0, Math.min(7, row + step[0]))}"][data-col="${Math.max(0, Math.min(7, col + step[1]))}"]`)?.focus(); }
+                        }
+                    });
                     boardElement.appendChild(square);
                 }
             }
@@ -711,7 +725,8 @@
         // Sprawdzanie czy ruch jest możliwy
         function isValidMove(fromRow, fromCol, toRow, toCol, skipCheckValidation = false) {
             const piece = board[fromRow][fromCol];
-            if (!piece) return false;
+            if (!piece || (fromRow === toRow && fromCol === toCol)) return false;
+            if (!skipCheckValidation && board[toRow][toCol]?.type === 'king') return false;
 
             const rowDiff = Math.abs(toRow - fromRow);
             const colDiff = Math.abs(toCol - fromCol);
@@ -774,7 +789,7 @@
                         // Roszada krótka (w prawo)
                         if (toCol === fromCol + 2) {
                             const rook = board[fromRow][7];
-                            if (rook && rook.type === 'rook' && !rook.hasMoved &&
+                            if (rook && rook.type === 'rook' && rook.color === piece.color && !rook.hasMoved &&
                                 !board[fromRow][fromCol + 1] && !board[fromRow][fromCol + 2]) {
                                 // Sprawdź czy król nie jest w szachu i nie przechodzi przez szach
                                 if (!skipCheckValidation) {
@@ -793,7 +808,7 @@
                         // Roszada długa (w lewo)
                         else if (toCol === fromCol - 2) {
                             const rook = board[fromRow][0];
-                            if (rook && rook.type === 'rook' && !rook.hasMoved &&
+                            if (rook && rook.type === 'rook' && rook.color === piece.color && !rook.hasMoved &&
                                 !board[fromRow][fromCol - 1] && !board[fromRow][fromCol - 2] && !board[fromRow][fromCol - 3]) {
                                 // Sprawdź czy król nie jest w szachu i nie przechodzi przez szach
                                 if (!skipCheckValidation) {
@@ -845,7 +860,12 @@
                 for (let fromCol = 0; fromCol < 8; fromCol++) {
                     const piece = board[fromRow][fromCol];
                     if (piece && piece.color === byColor) {
-                        if (isValidMove(fromRow, fromCol, row, col, true)) {
+                        const attacks = piece.type === 'pawn'
+                            ? Math.abs(col - fromCol) === 1 && row - fromRow === (piece.color === 'white' ? -1 : 1)
+                            : piece.type === 'king'
+                                ? Math.max(Math.abs(row - fromRow), Math.abs(col - fromCol)) === 1
+                                : isValidMove(fromRow, fromCol, row, col, true);
+                        if (attacks) {
                             return true;
                         }
                     }
@@ -990,7 +1010,7 @@
 
         // Ukończ promocję pionka
         function completePromotion(newType) {
-            if (!pendingPromotion) return;
+            if (!pendingPromotion || !['queen', 'rook', 'bishop', 'knight'].includes(newType)) return;
 
             const { row, col, color } = pendingPromotion;
 
@@ -1016,9 +1036,7 @@
             if (!gameOver && gameMode === 'ai') {
                 const aiColor = playerColor === 'white' ? 'black' : 'white';
                 if (currentPlayer === aiColor) {
-                    setTimeout(() => {
-                        makeAIMove();
-                    }, 500);
+                    queueAIMove();
                 }
             }
         }
@@ -1026,7 +1044,7 @@
         // Obsługa kliknięcia na pole
         function handleSquareClick(row, col) {
             // Nie pozwalaj na ruchy gdy gra się skończyła
-            if (gameOver) return;
+            if (gameOver || pendingPromotion) return;
 
             // W trybie auto, nie pozwalaj na kliknięcia
             if (gameMode === 'auto') return;
@@ -1080,9 +1098,7 @@
                     if (!gameOver) {
                         const aiColor = playerColor === 'white' ? 'black' : 'white';
                         if (gameMode === 'ai' && currentPlayer === aiColor) {
-                            setTimeout(() => {
-                                makeAIMove();
-                            }, 500); // 0.5 sekundy opóźnienia dla lepszego UX
+                            queueAIMove(); // 0.5 sekundy opóźnienia dla lepszego UX
                         }
                     }
                     return;
@@ -1185,7 +1201,7 @@
 
         // AI wykonuje ruch
         function makeAIMove() {
-            if (gameOver) return;
+            if (gameOver || pendingPromotion || (gameMode === 'ai' && currentPlayer === playerColor)) return;
 
             const validMoves = getAllValidMoves(currentPlayer);
             if (validMoves.length === 0) {
@@ -1312,7 +1328,8 @@
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            const modes = ['pvp', 'ai', 'auto'];
+            document.querySelectorAll('.mode-btn')[modes.indexOf(mode)]?.classList.add('active');
 
             // Zatrzymaj auto-play jeśli był aktywny
             if (autoPlayInterval) {
@@ -1356,6 +1373,7 @@
 
         // Reset gry
         function resetGame() {
+            clearTimeout(aiTimeout); aiTimeout = null;
             // Zatrzymaj auto-play jeśli był aktywny
             if (autoPlayInterval) {
                 clearInterval(autoPlayInterval);
@@ -1382,9 +1400,7 @@
             }
             // Jeśli tryb AI i gracz gra jako czarne, AI zaczyna (białe)
             else if (gameMode === 'ai' && playerColor === 'black') {
-                setTimeout(() => {
-                    makeAIMove();
-                }, 500);
+                queueAIMove();
             }
         }
 

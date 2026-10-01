@@ -14,3 +14,14 @@ body{background:#101b23;color:#e9eef1}.game-toolbar{background:#101b23;border-bo
 
 .unit-btn{flex-direction:row;gap:7px}.unit-portrait{width:44px;height:48px;flex-shrink:0}.unit-info{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px}.unit-role{max-width:150px}
 @media(max-width:760px){.unit-btn{flex-direction:column;gap:2px}.unit-portrait{width:36px;height:39px}.unit-info{align-items:center;text-align:center}.unit-btn{min-height:112px}.unit-role{font-size:8px}.unit-cost{margin-top:1px}.unit-name{font-size:10px}}
+
+/* The shared site navigation stays outside the battle surface. */
+.war-shell #game-container{height:calc(100svh - var(--site-header-height,120px));min-height:570px}
+.war-shell .progress-copy{flex-basis:100%;font-size:10px;color:#bcd3de;text-align:center}
+.war-shell .fair-play{font-size:12px;color:#cad6dc;border-top:1px solid #627e8b;padding-top:12px}
+.war-shell .overlay{padding:18px;align-items:safe center}
+.war-shell .overlay-card{max-height:100%;overflow:auto}
+@media(max-width:760px){.war-shell #game-container{height:auto;min-height:650px}.war-shell #enemy-status{font-size:8px;max-width:110px}.war-shell .progress-copy{font-size:8px}.war-shell .overlay{position:absolute;padding:12px}.war-shell .overlay-card h2{font-size:29px}}
+
+.war-shell .progress-copy[data-ready="true"]{color:#17232c;background:#edc16d;border-radius:3px;padding:3px 8px;font-weight:700}
+.war-shell .action-btn.evolve.ready{background:#edc16d;color:#17232c;border-color:#ffe8b1;box-shadow:0 0 0 2px #edc16d33}

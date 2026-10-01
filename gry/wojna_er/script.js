@@ -7,13 +7,19 @@ const GAME_HEIGHT = 600; // Virtual height
 const GROUND_Y = 450;
 const BASE_OFFSET = 100;
 const STEP_MS = 1000 / 60;
+const ENEMY_ORDER_MS = 2000;
+const ENEMY_OPENING_MS = 4000;
+const ENEMY_EVOLUTION_DELAY = 12000;
 let accumulator = 0;
 let incomeElapsed = 0;
-let enemyElapsed = 0;
+let enemyElapsed = ENEMY_ORDER_MS - ENEMY_OPENING_MS;
 let uiElapsed = 0;
 const ARMY_LIMIT = 14;
 const TRAINING_MS = 1200;
 const ERA_INCOME = [7, 20, 65, 220];
+const ERA_RESEARCH = [2, 5, 12, 0];
+// Normal mode: the opponent earns the same resources and may follow an
+// evolution after a short response window, but never unlocks an era first.
 // Target the fortress front, where defenders emerge, rather than its centre.
 function opposingBaseFront(team) { return team === 'player' ? GAME_WIDTH - BASE_OFFSET : BASE_OFFSET; }
 
@@ -76,6 +82,8 @@ ERAS[3].units[2].type = 'ranged';
 // --- Game State ---
 let state = {
     elapsed: 0,
+    playerEraUnlocks: [0],
+    enemyEraStartedAt: 0,
     training: {player: 0, enemy: 0},
     gold: 100,
     xp: 0,
@@ -97,10 +105,10 @@ let state = {
     turret: {
         level: 0, // 0 = none
         cost: 100,
-        dmg: 20,
+        dmg: 10,
         range: 300,
         cooldown: 0,
-        maxCooldown: 60
+        maxCooldown: 80
     }
 };
 
@@ -114,12 +122,6 @@ class Unit {
         this.y = GROUND_Y;
         this.hp = def.hp;
         this.maxHp = def.hp;
-
-        // Buff Enemy HP
-        if (team === 'enemy') {
-            this.hp *= 1.2;
-            this.maxHp *= 1.2;
-        }
 
         this.cooldown = 0;
         this.state = 'walk'; // walk, idle, attack
@@ -271,12 +273,15 @@ function damageFor(amount, attacker, target) {
 }
 function damageUnit(target, amount, team, def) {
     if (target.hp <= 0) return;
-    target.hp -= damageFor(amount, def, target);
+    const damage = Math.min(target.hp, Math.max(0, damageFor(amount, def, target)));
+    target.hp -= damage;
     target.hitFlash = 8;
     const xpKey = team === 'player' ? 'xp' : 'enemyXP';
     const goldKey = team === 'player' ? 'gold' : 'enemyGold';
-    const experience = 1 + (def?.era || 0) * 2;
-    state[xpKey] += 2 * experience;
+    // Each victim has a fixed XP budget. Rapid fire, overkill and attacking
+    // obsolete troops cannot manufacture extra research for an advanced army.
+    const experience = 1 + (target.def.era || 0) * 2;
+    state[xpKey] += 2 * experience * damage / target.maxHp;
     if (target.hp <= 0) {
         state[xpKey] += 20 * experience;
         state[goldKey] += Math.ceil(target.def.cost * 0.2);
@@ -300,6 +305,8 @@ function isRunning() { return state.started && !state.paused && !state.gameOver;
 function init() {
     resize();
     window.addEventListener('resize', resize);
+    // Header wrapping and mobile layout can resize the field without a window event.
+    if (typeof ResizeObserver === 'function') new ResizeObserver(resize).observe(document.getElementById('battlefield'));
     document.getElementById('start-btn').addEventListener('click', startGame);
     document.getElementById('pause-btn').addEventListener('click', togglePause);
     document.getElementById('resume-btn').addEventListener('click', togglePause);
@@ -311,10 +318,17 @@ function init() {
     });
     document.addEventListener('keydown', event => {
         if (event.repeat || event.altKey || event.ctrlKey || event.metaKey ||
-            event.target?.matches?.('input, textarea, select, [contenteditable="true"]')) return;
-        if (event.key?.toLowerCase() === 'p') { event.preventDefault(); togglePause(); }
+            event.target?.closest?.('input, textarea, select, [contenteditable="true"]')) return;
+        const key = event.key?.toLowerCase();
+        if (key === 'p') { event.preventDefault(); togglePause(); }
+        const navigationFocus = event.target?.closest?.('.site-header, a');
+        if (isRunning() && !navigationFocus && (key === 'e' || key === 't')) {
+            event.preventDefault();
+            if (key === 'e') evolve();
+            else buyTurret();
+        }
         const slot = ['1', '2', '3'].indexOf(event.key);
-        if (slot >= 0 && isRunning()) { event.preventDefault(); spawnUnit(ERAS[state.era].units[slot].id, 'player'); }
+        if (slot >= 0 && isRunning() && !navigationFocus) { event.preventDefault(); spawnUnit(ERAS[state.era].units[slot].id, 'player'); }
     });
     updateUI();
     requestAnimationFrame(loop);
@@ -341,8 +355,10 @@ function togglePause() { setPaused(!state.paused); }
 
 function resize() {
     const bounds = canvas.getBoundingClientRect();
-    canvas.width = Math.max(1, Math.round(bounds.width));
-    canvas.height = Math.max(1, Math.round(bounds.height));
+    const width = Math.max(1, Math.round(bounds.width));
+    const height = Math.max(1, Math.round(bounds.height));
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
 }
 
 function spawnUnit(unitId, team) {
@@ -374,6 +390,7 @@ function evolve() {
     if (nextEra && state.xp >= ERAS[state.era].evolveCost) {
         state.xp -= ERAS[state.era].evolveCost;
         state.era++;
+        state.playerEraUnlocks[state.era] = state.elapsed;
         state.maxHP += 500;
         state.playerHP += 500; // Heal on evolve
         updateUI();
@@ -387,7 +404,7 @@ function buyTurret() {
         state.gold -= state.turret.cost;
         state.turret.level++;
         state.turret.cost = Math.floor(state.turret.cost * 1.5);
-        state.turret.dmg += 10;
+        state.turret.dmg += 5;
         state.turret.range += 50;
         updateUI();
         addParticle(BASE_OFFSET, GROUND_Y - 150, "WIEŻYCZKA UP!", 60);
@@ -423,6 +440,12 @@ function updateTurret() {
     }
 }
 
+function enemyEvolutionReadyAt() {
+    const playerUnlock = state.playerEraUnlocks[state.enemyEra + 1];
+    return playerUnlock === undefined ? Infinity :
+        Math.max(playerUnlock, state.enemyEraStartedAt) + ENEMY_EVOLUTION_DELAY;
+}
+
 function enemyAI() {
     if (!isRunning()) return;
 
@@ -430,9 +453,11 @@ function enemyAI() {
     const nextEra = ERAS[state.enemyEra + 1];
     const enemyEvolveCost = ERAS[state.enemyEra].evolveCost; // Both sides pay the same XP cost
 
-    if (nextEra && state.enemyXP >= enemyEvolveCost) {
+    if (nextEra && state.enemyEra < state.era &&
+        state.elapsed + 0.001 >= enemyEvolutionReadyAt() && state.enemyXP >= enemyEvolveCost) {
         state.enemyXP -= enemyEvolveCost;
         state.enemyEra++;
+        state.enemyEraStartedAt = state.elapsed;
         state.enemyMaxHP += 500;
         state.enemyHP += 500;
     }
@@ -468,8 +493,10 @@ function update(dt = STEP_MS) {
         incomeElapsed -= 1000;
         state.gold += ERA_INCOME[state.era];
         state.enemyGold += ERA_INCOME[state.enemyEra];
+        state.xp += ERA_RESEARCH[state.era];
+        state.enemyXP += ERA_RESEARCH[state.enemyEra];
     }
-    if (enemyElapsed + 0.001 >= 1600) { enemyElapsed -= 1600; enemyAI(); }
+    if (enemyElapsed + 0.001 >= ENEMY_ORDER_MS) { enemyElapsed -= ENEMY_ORDER_MS; enemyAI(); }
 
     // Update Units
     state.units = state.units.filter(u => u.hp > 0);
@@ -539,6 +566,7 @@ function loop(timestamp) {
 // --- UI Updates ---
 
 function updateUI() {
+    canvas.tabIndex = isRunning() ? 0 : -1;
     // Stats
     document.getElementById('gold-display').textContent = Math.floor(state.gold);
     document.getElementById('xp-display').textContent = Math.floor(state.xp);
@@ -571,7 +599,7 @@ function updateUI() {
                 const sample = new Unit(u, 'player'); sample.x = 48; sample.y = 96;
                 drawUnitArt(painter, sample); btn.prepend(portrait);
             }
-            btn.title = `${u.roleLabel} · ${u.hp} HP · ${u.dmg} obrażeń · zasięg ${u.range}`;
+            btn.title = `${u.roleLabel} · ${u.hp} HP · ${u.dmg} obrażeń co ${(u.reload / 60).toFixed(1)} s · zasięg ${u.range}`;
             btn.addEventListener('click', () => spawnUnit(u.id, 'player'));
             unitPanel.appendChild(btn);
         });
@@ -583,13 +611,28 @@ function updateUI() {
     document.getElementById('training-status').textContent = state.training.player > 0 ? 'Mobilizacja…' : canRecruit('player') ? 'Oddział gotowy do wymarszu' : 'Poczekaj na miejsce w szyku';
     document.getElementById('evolution-progress').style.width = `${Number.isFinite(ERAS[state.era].evolveCost) ? Math.min(100, state.xp / ERAS[state.era].evolveCost * 100) : 100}%`;
     document.getElementById('enemy-era-display').textContent = ERAS[state.enemyEra].name;
+    const researchDisplay = document.getElementById('research-display');
+    if (researchDisplay) researchDisplay.textContent = `+${ERA_RESEARCH[state.era]}/s`;
+    const evolutionStatus = document.getElementById('evolution-status');
+    if (evolutionStatus) {
+        evolutionStatus.dataset.ready = String(isRunning() && state.xp >= ERAS[state.era].evolveCost);
+        evolutionStatus.textContent = state.era === ERAS.length - 1 ? 'Ostatnia epoka' :
+            state.xp >= ERAS[state.era].evolveCost ? 'Ewolucja gotowa! Naciśnij E' :
+            `${Math.floor(state.xp)}/${ERAS[state.era].evolveCost} XP · walka i badania`;
+    }
+    const enemyStatus = document.getElementById('enemy-status');
+    if (enemyStatus) {
+        const remaining = Math.max(0, Math.ceil((enemyEvolutionReadyAt() - state.elapsed) / 1000));
+        enemyStatus.textContent = state.enemyEra === state.era ? 'Wróg nie wyprzedzi twojej epoki' :
+            remaining > 0 ? `Rozwój wroga najwcześniej za ${remaining} s` : 'Wróg zbiera XP na rozwój';
+    }
     document.getElementById('pause-btn').disabled = !state.started || state.gameOver;
 
     // Turret Button
     const turretBtn = document.getElementById('turret-btn');
     if (turretBtn) {
         const tCost = state.turret.cost;
-        turretBtn.innerHTML = state.turret.level === 0 ? `Wieżyczka (${tCost}g)` : `Ulepsz Wieżę (${tCost}g)`;
+        turretBtn.innerHTML = state.turret.level === 0 ? `Wieżyczka (${tCost}g) · T` : `Ulepsz Wieżę (${tCost}g) · T`;
         if (state.turret.level >= 3) turretBtn.textContent = 'Wieża: poziom maks.';
         turretBtn.disabled = !isRunning() || state.turret.level >= 3 || state.gold < tCost;
     }
@@ -597,8 +640,9 @@ function updateUI() {
     // Evolve Button
     const evolveBtn = document.getElementById('evolve-btn');
     const nextEra = ERAS[state.era + 1];
+    evolveBtn.classList.toggle('ready', Boolean(nextEra && isRunning() && state.xp >= ERAS[state.era].evolveCost));
     if (nextEra) {
-        evolveBtn.innerHTML = `Ewolucja (${ERAS[state.era].evolveCost}xp)`;
+        evolveBtn.innerHTML = `Ewolucja (${ERAS[state.era].evolveCost}xp) · E`;
         evolveBtn.disabled = !isRunning() || state.xp < ERAS[state.era].evolveCost;
     } else {
         evolveBtn.innerHTML = "Ostatnia epoka";

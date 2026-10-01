@@ -136,29 +136,33 @@
             font-size: 0.9rem;
             color: #888;
         }
+        canvas { max-width: 100%; height: auto; touch-action: manipulation; }
+        .round-controls button { padding: 10px 16px; border-radius: 8px; cursor: pointer; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">🌙</button>
-        </nav>
-    </header>
-    <div class="game-container">
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
+
+    <div class="game-container" id="main-content" tabindex="-1" role="main">
         <div class="score">🦖 <span id="score">00000</span></div>
         <div class="game-wrapper">
             <div class="highscore">HI: <span id="highscore">00000</span></div>
-            <canvas id="game" width="800" height="250"></canvas>
+            <canvas id="game" width="800" height="250" tabindex="0" aria-label="Dino. Spacja lub dotknięcie: skok. P: pauza."></canvas>
         </div>
-        <div class="msg" id="msg">Spacja lub kliknij aby skoczyć</div>
+        <div class="msg" id="msg" role="status">Spacja lub kliknij aby skoczyć</div>
+        <div class="round-controls"><button type="button" onclick="jump()">Start / skok</button> <button id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button> <button type="button" onclick="running=false;start()">Nowa gra</button></div>
     </div>
     <script>
         const cvs = document.getElementById('game');
@@ -166,7 +170,10 @@
 
         let dino = { x: 60, y: 180, w: 44, h: 47, dy: 0, jumpPower: -14, grounded: true, frame: 0 };
         let obstacles = [], clouds = [], frame = 0, score = 0, speed = 7, running = false, gravity = 0.7;
-        let highScore = parseInt(localStorage.getItem('dinoHighScore') || '0');
+        let highScore = 0;
+        try { highScore = Math.max(0, parseInt(localStorage.getItem('dinoHighScore'), 10) || 0); } catch (_) {}
+        let paused = false, lastTime = null, accumulator = 0;
+        const stepMs = 1000 / 60;
         document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0');
 
         // Dino sprite drawing
@@ -234,18 +241,19 @@
 
         function start() {
             if (running) return;
-            running = true;
+            running = true; paused = false; lastTime = null; accumulator = 0;
+            document.getElementById("pause-game").textContent = "Pauza";
             document.getElementById('msg').innerText = '';
             dino.y = 180; dino.grounded = true; dino.dy = 0;
             obstacles = []; clouds = []; score = 0; speed = 5; frame = 0;
             // Initial clouds
             for (let i = 0; i < 3; i++) clouds.push({ x: 200 + i * 300, y: 30 + Math.random() * 40, size: 15 + Math.random() * 10 });
-            loop();
+            document.getElementById("score").innerText = "00000";
+            cvs.focus();
         }
 
-        function loop() {
-            if (!running) return;
-            requestAnimationFrame(loop);
+        function step() {
+            if (!running || paused) return;
             frame++;
             ctx.fillStyle = '#fff';
             ctx.fillRect(0, 0, 800, 250);
@@ -285,31 +293,51 @@
                 // Collision (with smaller hitbox)
                 if (dino.x + 20 < obs.x + 14 && dino.x + 40 > obs.x + 4 && dino.y + 47 > 227 - obs.h) {
                     running = false;
-                    if (score > highScore) { highScore = score; localStorage.setItem('dinoHighScore', highScore); document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0'); }
+                    if (score > highScore) { highScore = score; try { localStorage.setItem('dinoHighScore', highScore); } catch (_) {} document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0'); }
                     document.getElementById('msg').innerText = "Game Over! Spacja by zagrać";
                 }
             });
             obstacles = obstacles.filter(o => o.x > -30);
 
+            if (!running) return;
             // Score
-            if (frame % 5 === 0) score++;
-            if (score % 100 === 0 && score > 0) speed += 0.15;
+            if (frame % 5 === 0) { score++; if (score % 100 === 0) speed = Math.min(12, speed + 0.15); }
             document.getElementById('score').innerText = score.toString().padStart(5, '0');
         }
 
-        const html = document.documentElement, themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
+        // Theme is handled by assets/workshop/shell.js.
 
-        function jump() {
-            if (!running) start();
-            else if (dino.grounded) { dino.dy = dino.jumpPower; dino.grounded = false; }
+        function setPaused(value) {
+            if (!running) return;
+            paused = !!value; lastTime = null; accumulator = 0;
+            document.getElementById('pause-game').textContent = paused ? 'Wznów' : 'Pauza';
+            document.getElementById('msg').innerText = paused ? 'Pauza • P lub dotknij planszy, aby wznowić' : '';
+            if (!paused) cvs.focus();
         }
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); jump(); } });
+        function loop(timestamp) {
+            requestAnimationFrame(loop);
+            if (lastTime === null) lastTime = timestamp;
+            const elapsed = Math.max(0, Math.min(100, timestamp - lastTime));
+            lastTime = timestamp;
+            if (!running || paused || document.hidden) { accumulator = 0; return; }
+            accumulator += elapsed;
+            while (accumulator + 0.00001 >= stepMs && running) { step(); accumulator -= stepMs; }
+        }
+        function jump() {
+            if (paused) { setPaused(false); return; }
+            if (!running) start();
+            if (dino.grounded) { dino.dy = dino.jumpPower; dino.grounded = false; }
+        }
+        document.addEventListener('keydown', e => {
+            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select')) return;
+            if (!e.target?.closest?.('button') && (e.code === 'Space' || e.code === 'ArrowUp')) { e.preventDefault(); jump(); }
+            if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); setPaused(!paused); }
+        });
         cvs.addEventListener('click', jump);
-        document.querySelector('.game-container').addEventListener('click', (e) => { if (e.target === document.querySelector('.game-container')) jump(); });
+        document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); lastTime = null; });
+        drawDino(dino.x, dino.y, 0);
+        ctx.fillRect(0, 227, 800, 2);
+        requestAnimationFrame(loop);
     </script>
 </body>
 

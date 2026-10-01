@@ -1,52 +1,83 @@
-/**
- * Pong code taken from http://codegolf.stackexchange.com/questions/10713/pong-in-the-shortest-code
- * to demonstrate responsive canvas
+/* Original Pong inspired by the Code Golf Stack Exchange example:
+ * https://codegolf.stackexchange.com/questions/10713/pong-in-the-shortest-code
+ * This version keeps the Q/A and arrow controls, with explicit round lifecycle.
  */
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const status = document.getElementById('game-status');
+const keys = {};
+const state = { left: 190, right: 190, leftScore: 0, rightScore: 0, x: 300, y: 235, vx: -5, vy: 3, running: false, paused: false, over: false };
 
-c=document.getElementById('c').getContext('2d')
-c.fillStyle="#FFF"
-c.font="60px monospace"
-w=s=1
-p=q=a=b=0
-m=n=190
-x=300;y=235
-u=-5;v=3
-setInterval(function(){if(w&&!s)return;s=0
-c.clearRect(0,0,640,480)
-for(i=5;i<480;i+=20)c.fillRect(318,i,4,10)
-m+=p;n+=q
-m=m<0?0:m;m=m>380?380:m
-n=n<0?0:n;n=n>380?380:n
-x+=u;y+=v
-if(y<=0){y=0;v=-v}
-if(y>=470){y=470;v=-v}
-if(x<=40&&x>=20&&y<m+110&&y>m-10){u=-u+0.2;v+=(y-m-45)/20}
-if(x<=610&&x>=590&&y<n+110&&y>n-10){u=-u-0.2;v+=(y-n-45)/20}
-if(x<-10){b++;x=360;y=235;u=5;w=1}
-if(x>640){a++;x=280;y=235;u=-5;w=1}
-c.fillText(a+" "+b,266,60)
-c.fillRect(20,m,20,100)
-c.fillRect(600,n,20,100)
-c.fillRect(x,y,10,10)},30)
-document.onkeydown=function(e){k=(e||window.event).keyCode;w=w?0:k=='27'?1:0;p=k=='65'?5:k=='81'?-5:p;q=k=='40'?5:k=='38'?-5:q;}
-document.onkeyup=function(e){k=(e||window.event).keyCode;p=k=='65'||k=='81'?0:p;q=k=='38'||k=='40'?0:q}
-
-
-/* Variable index:
-a -> left player score
-b -> right player score
-c -> context
-e -> event
-i -> counter for dashed line
-k -> keycode
-m -> left paddle y
-n -> right paddle y
-p -> left paddle y velocity
-q -> right paddle y velocity
-s -> is start of game
-u -> ball x velocity
-v -> ball y velocity
-w -> game is waiting (paused)
-x -> ball x
-y -> ball y
-*/
+function render() {
+  ctx.clearRect(0, 0, 640, 480);
+  ctx.fillStyle = '#fff';
+  for (let y = 5; y < 480; y += 20) ctx.fillRect(318, y, 4, 10);
+  ctx.font = '48px monospace'; ctx.textAlign = 'center';
+  ctx.fillText(state.leftScore + ' : ' + state.rightScore, 320, 60);
+  ctx.fillRect(20, state.left, 20, 100);
+  ctx.fillRect(600, state.right, 20, 100);
+  ctx.fillRect(state.x, state.y, 10, 10);
+}
+function clearKeys() { Object.keys(keys).forEach(key => { keys[key] = false; }); }
+function startGame() {
+  if (state.over) { restartGame(); return; }
+  state.running = true; state.paused = false; clearKeys(); canvas.focus();
+  document.getElementById('pause-game').textContent = 'Pauza';
+  status.textContent = 'Do 7 punktów · Q/A: lewa · ↑/↓: prawa · Esc: pauza';
+}
+function restartGame() {
+  Object.assign(state, { left: 190, right: 190, leftScore: 0, rightScore: 0, x: 300, y: 235, vx: -5, vy: 3, over: false });
+  startGame(); render();
+}
+function setPaused(value) {
+  if (!state.running || state.over) return;
+  state.paused = !!value; clearKeys(); if (!state.paused) canvas.focus();
+  document.getElementById('pause-game').textContent = state.paused ? 'Wznów' : 'Pauza';
+  status.textContent = state.paused ? 'Pauza' : 'Do 7 punktów · Q/A: lewa · ↑/↓: prawa';
+}
+function point(side) {
+  state[side + 'Score']++;
+  state.running = false; clearKeys();
+  state.x = 315; state.y = 235; state.vx = side === 'left' ? -5 : 5; state.vy = 3;
+  if (state[side + 'Score'] >= 7) {
+    state.over = true;
+    status.textContent = `Wygrywa ${side === 'left' ? 'lewy' : 'prawy'} gracz! Start lub Nowy mecz, aby zagrać ponownie.`;
+  } else status.textContent = 'Punkt! Enter lub Start rozpoczyna następną wymianę.';
+}
+function update() {
+  if (!state.running || state.paused || document.hidden) return;
+  state.left += (keys.KeyA ? 5 : 0) - (keys.KeyQ ? 5 : 0);
+  state.right += (keys.ArrowDown ? 5 : 0) - (keys.ArrowUp ? 5 : 0);
+  state.left = Math.max(0, Math.min(380, state.left));
+  state.right = Math.max(0, Math.min(380, state.right));
+  state.x += state.vx; state.y += state.vy;
+  if (state.y < 0) { state.y = 0; state.vy = Math.abs(state.vy); }
+  if (state.y > 470) { state.y = 470; state.vy = -Math.abs(state.vy); }
+  if (state.vx < 0 && state.x <= 40 && state.x >= 20 && state.y + 10 > state.left && state.y < state.left + 100) {
+    state.x = 40; state.vx = Math.min(15, -state.vx + 0.2); state.vy = Math.max(-10, Math.min(10, state.vy + (state.y - state.left - 45) / 20));
+  }
+  if (state.vx > 0 && state.x + 10 >= 600 && state.x <= 620 && state.y + 10 > state.right && state.y < state.right + 100) {
+    state.x = 590; state.vx = Math.max(-15, -state.vx - 0.2); state.vy = Math.max(-10, Math.min(10, state.vy + (state.y - state.right - 45) / 20));
+  }
+  if (state.x < -10) point('right');
+  else if (state.x > 640) point('left');
+}
+document.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select')) return;
+  if (['Escape', 'KeyP'].includes(e.code) && !e.repeat) { e.preventDefault(); setPaused(!state.paused); return; }
+  if (e.target?.closest?.('button')) return;
+  if (e.code === 'Enter' && !e.repeat) { e.preventDefault(); if (!state.running || state.paused) startGame(); return; }
+  if (['KeyQ', 'KeyA', 'ArrowUp', 'ArrowDown'].includes(e.code)) { e.preventDefault(); keys[e.code] = true; }
+});
+document.addEventListener('keyup', e => { keys[e.code] = false; });
+document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
+function movePointer(e) {
+  if (!state.running || state.paused) return;
+  const rect = canvas.getBoundingClientRect(); if (!rect.width || !rect.height) return;
+  const side = e.clientX - rect.left < rect.width / 2 ? 'left' : 'right';
+  state[side] = Math.max(0, Math.min(380, (e.clientY - rect.top) * 480 / rect.height - 50));
+}
+canvas.addEventListener('pointerdown', e => { e.preventDefault(); canvas.setPointerCapture?.(e.pointerId); movePointer(e); });
+canvas.addEventListener('pointermove', e => { if (e.buttons || e.pressure) movePointer(e); });
+setInterval(() => { update(); render(); }, 30);
+render();

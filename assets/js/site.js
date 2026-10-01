@@ -68,27 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const highlightRefresh = document.querySelector("[data-highlight-refresh]");
   const nameDayEl = document.querySelector("[data-name-day]");
 
-  /* Theme handling */
-  const storedTheme = localStorage.getItem("site-theme");
-  if (storedTheme === "dark") {
-    body.classList.add("theme-dark");
-  }
-
-  const updateThemeToggleLabel = () => {
-    if (!themeToggle) return;
-    const isDark = body.classList.contains("theme-dark");
-    themeToggle.setAttribute("aria-pressed", String(isDark));
-    themeToggle.innerHTML = isDark ? "☀️ Jasny motyw" : "🌙 Tryb nocny";
-  };
-
-  themeToggle?.addEventListener("click", () => {
-    body.classList.toggle("theme-dark");
-    const isDark = body.classList.contains("theme-dark");
-    localStorage.setItem("site-theme", isDark ? "dark" : "light");
-    updateThemeToggleLabel();
-  });
-
-  updateThemeToggleLabel();
+  /* Shared theme handling lives in assets/workshop/shell.js. */
 
   /* Navigation toggles */
   navToggle?.addEventListener("click", () => {

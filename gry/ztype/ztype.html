@@ -148,28 +148,33 @@
             text-align: center;
             display: none;
         }
+        #game-area { min-height: 380px; height: min(65vh, 700px); flex: none; background: #0a111c; }
+        .game-over { color: #fff; font-size: 1.5rem; width: min(90%, 480px); }
+        .round-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; padding: 12px; }
+        .round-controls button, .round-controls input { min-height: 44px; padding: 8px 12px; max-width: 100%; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">☀️</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#game-area">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div id="game-area">
+
+    <div id="game-area" tabindex="-1" role="main">
         <div class="ship" id="ship"></div>
-        <div class="game-over" id="go">GAME OVER<br><small style="font-size:1rem">Odśwież aby zagrać</small></div>
+        <div class="game-over" id="go" role="status">Z-Type<br><small style="font-size:1rem">Wpisuj litery nadlatujących słów</small></div>
     </div>
-    <div class="score-box" id="score">0</div>
+    <div class="round-controls"><span>Wynik: <strong id="score">0</strong></span><button id="start-game" type="button" onclick="startGame()">Start / nowa gra</button><button id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button><label for="typing-input">Klawiatura: </label><input id="typing-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Pisz litery…" aria-label="Wpisuj litery słów"></div>
 
     <script>
         const words = ["KOD", "JAVA", "HTML", "CSS", "NODE", "REACT", "DATA", "BIT", "BYTE", "PIXEL", "LINUX", "SERVER", "CLOUD", "WIFI", "MOUSE", "SCREEN", "LOGIC", "ARRAY", "LOOP", "INPUT", "OUTPUT", "FILE", "DISK", "ERROR", "DEBUG"];
@@ -178,100 +183,63 @@
         const scoreEl = document.getElementById('score');
         const ship = document.getElementById('ship');
 
-        let enemies = [];
-        let score = 0;
-        let activeTarget = null;
-        let spawnRate = 2000;
-        let gameOver = false;
-
+        let enemies = [], score = 0, activeTarget = null, spawnRate = 2000;
+        let gameOver = false, started = false, paused = false, lastTime = null, spawnElapsed = 0;
+        const message = document.getElementById('go');
+        const input = document.getElementById('typing-input');
+        message.style.display='block';
+        function startGame() {
+            enemies.forEach(e=>e.el.remove());area.querySelectorAll('.laser').forEach(e=>e.remove());
+            enemies=[];score=0;activeTarget=null;spawnRate=2000;spawnElapsed=1000;lastTime=null;gameOver=false;started=true;paused=false;
+            scoreEl.textContent=0;message.style.display='none';document.getElementById('pause-game').textContent='Pauza';
+            input.value='';input.focus();
+        }
+        function setPaused(value) {
+            if(!started||gameOver)return;
+            paused=!!value;lastTime=null;message.textContent='Pauza';message.style.display=paused?'block':'none';
+            document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';if(!paused)input.focus();
+        }
         function spawn() {
-            if (gameOver) return;
-            const word = words[Math.floor(Math.random() * words.length)];
-            const div = document.createElement('div');
-            div.className = 'enemy';
-            div.style.left = Math.random() * (window.innerWidth - 100) + 'px';
-            div.style.top = '-30px';
-            div.innerHTML = word.split('').map(l => `<span>${l}</span>`).join('');
-            area.appendChild(div);
-            enemies.push({ el: div, word: word, progress: 0, x: parseFloat(div.style.left), y: -30 });
-
-            if (spawnRate > 500) spawnRate -= 50;
-            setTimeout(spawn, spawnRate);
+            if(!started||gameOver||paused)return;
+            const word=words[Math.floor(Math.random()*words.length)],div=document.createElement('div');
+            div.className='enemy';
+            const width=area.getBoundingClientRect().width||window.innerWidth;
+            div.style.left=(12+Math.random()*Math.max(0,width-word.length*16-24))+'px';div.style.top='-30px';
+            div.innerHTML=word.split('').map(l=>`<span>${l}</span>`).join('');area.appendChild(div);
+            enemies.push({el:div,word,progress:0,x:parseFloat(div.style.left),y:-30});spawnRate=Math.max(700,spawnRate-40);
         }
-
-        function update() {
-            if (gameOver) return;
-            enemies.forEach(e => {
-                e.y += 0.5;
-                e.el.style.top = e.y + 'px';
-                if (e.y > window.innerHeight - 50) {
-                    gameOver = true;
-                    document.getElementById('go').style.display = 'block';
-                }
-            });
+        function update(timestamp) {
             requestAnimationFrame(update);
+            if(lastTime===null)lastTime=timestamp;
+            const dt=Math.max(0,Math.min(100,timestamp-lastTime));lastTime=timestamp;
+            if(!started||gameOver||paused||document.hidden)return;
+            spawnElapsed+=dt;if(spawnElapsed>=spawnRate){spawnElapsed-=spawnRate;spawn();}
+            const bottom=(area.getBoundingClientRect().height||400)-65;
+            for(const e of enemies){e.y+=30*dt/1000;e.el.style.top=e.y+'px';if(e.y>=bottom){gameOver=true;message.textContent=`Koniec gry • wynik: ${score}. Naciśnij Start / nowa gra`;message.style.display='block';break;}}
         }
-
-        function shoot(targetX, targetY) {
-            const l = document.createElement('div');
-            l.className = 'laser';
-            l.style.left = '50%';
-            l.style.bottom = '60px';
-            area.appendChild(l);
-            const endX = targetX + 20;
-            l.animate([
-                { left: '50%', bottom: '60px', opacity: 1 },
-                { left: endX + 'px', top: targetY + 'px', opacity: 0 }
-            ], { duration: 200, fill: 'forwards' }).onfinish = () => l.remove();
+        function shoot(x,y) {
+            const laser=document.createElement('div');laser.className='laser';area.appendChild(laser);
+            if(!laser.animate){laser.remove();return;}
+            const animation=laser.animate([{left:'50%',bottom:'60px',opacity:1},{left:(x+20)+'px',top:y+'px',opacity:0}],{duration:200,fill:'forwards'});
+            animation.onfinish=()=>laser.remove();
         }
-
-        document.addEventListener('keydown', e => {
-            if (gameOver) return;
-            const char = e.key.toUpperCase();
-            if (activeTarget) {
-                const letter = activeTarget.word[activeTarget.progress];
-                if (char === letter) {
-                    activeTarget.el.children[activeTarget.progress].className = 'matched';
-                    activeTarget.progress++;
-                    shoot(activeTarget.x, activeTarget.y);
-                    if (activeTarget.progress === activeTarget.word.length) {
-                        activeTarget.el.remove();
-                        enemies = enemies.filter(en => en !== activeTarget);
-                        activeTarget = null;
-                        score += 10;
-                        scoreEl.innerText = score;
-                    }
-                }
-            } else {
-                const potential = enemies.filter(en => en.word.startsWith(char));
-                potential.sort((a, b) => b.y - a.y);
-                if (potential.length > 0) {
-                    activeTarget = potential[0];
-                    activeTarget.el.children[0].className = 'matched';
-                    activeTarget.progress = 1;
-                    shoot(activeTarget.x, activeTarget.y);
-                    Array.from(activeTarget.el.children).forEach(s => s.classList.add('target'));
-                }
-            }
+        function typeLetter(char) {
+            if(!started||gameOver||paused||!/^[A-Z]$/.test(char))return;
+            if(!activeTarget){activeTarget=enemies.filter(e=>e.word.startsWith(char)).sort((a,b)=>b.y-a.y)[0]||null;if(activeTarget)Array.from(activeTarget.el.children).forEach(el=>el.classList.add('target'));}
+            if(!activeTarget||activeTarget.word[activeTarget.progress]!==char)return;
+            activeTarget.el.children[activeTarget.progress++].classList.add('matched');shoot(activeTarget.x,activeTarget.y);
+            if(activeTarget.progress===activeTarget.word.length){activeTarget.el.remove();enemies=enemies.filter(e=>e!==activeTarget);activeTarget=null;score+=10;scoreEl.textContent=score;}
+        }
+        document.addEventListener('keydown',e=>{
+            if(e.altKey||e.ctrlKey||e.metaKey||e.isComposing)return;
+            if(e.code==='Escape'&&!e.repeat){e.preventDefault();setPaused(!paused);return;}
+            if(e.target===input||e.target?.closest?.('button,a,input,textarea,select'))return;
+            if(e.code==='Enter'&&!e.repeat){e.preventDefault();if(!started||gameOver)startGame();else if(paused)setPaused(false);return;}
+            if(!e.repeat&&/^[a-z]$/i.test(e.key)){e.preventDefault();typeLetter(e.key.toUpperCase());}
         });
-
-        // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
-
-        setTimeout(spawn, 1000);
-        update();
+        input.addEventListener('input',e=>{if(e.isComposing)return;for(const char of input.value.toUpperCase())typeLetter(char);input.value='';});
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);lastTime=null;});
+        requestAnimationFrame(update);
     </script>
 </body>
 

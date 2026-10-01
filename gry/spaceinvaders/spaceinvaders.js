@@ -180,6 +180,8 @@ var alienYDown = 0;
 var alienCount = 0;
 var wave = 1;
 var hasGameStarted = false;
+var paused = false;
+var ended = false;
 
 
 
@@ -248,7 +250,8 @@ var Player = SheetSprite.extend({
     this.lives = 3;
     this.xVel = 0;
     this.bullets = [];
-    this.bulletDelayAccumulator = 0;
+    this.bulletDelayAccumulator = 0.5;
+    this.invulnerable = 0;
     this.score = 0;
   },
   
@@ -270,8 +273,8 @@ var Player = SheetSprite.extend({
       this.xVel = 175;
     } else this.xVel = 0;
     
-    if (wasKeyPressed(SHOOT_KEY)) {
-      if (this.bulletDelayAccumulator > 0.5) {
+    if (isKeyDown(SHOOT_KEY) || isKeyDown(32)) {
+      if (this.bulletDelayAccumulator >= 0.5) {
         this.shoot(); 
         this.bulletDelayAccumulator = 0;
       }
@@ -291,6 +294,7 @@ var Player = SheetSprite.extend({
   },
   
   update: function(dt) {
+    this.invulnerable = Math.max(0, this.invulnerable - dt);
     // update time passed between shots
     this.bulletDelayAccumulator += dt;
     
@@ -300,6 +304,7 @@ var Player = SheetSprite.extend({
     // cap player position in screen bounds
     this.position.x = clamp(this.position.x, this.bounds.w/2, CANVAS_WIDTH - this.bounds.w/2);
     this.updateBullets(dt);
+    this._updateBounds();
   },
   
   draw: function(resized) {
@@ -326,7 +331,8 @@ var Bullet = BaseSprite.extend({
   update: function(dt) {
     this.position.y -= (this.speed * this.direction) * dt;
     
-    if (this.position.y < 0) {
+    this._updateBounds();
+    if (this.position.y < -20 || this.position.y > CANVAS_HEIGHT + 20) {
       this.alive = false;
     }
   },
@@ -367,8 +373,8 @@ var Enemy = SheetSprite.extend({
     } if (alienDirection === 1 && this.position.x > CANVAS_WIDTH - this.bounds.w/2 - 20) {
       updateAlienLogic = true;
     }
-      if (this.position.y > CANVAS_WIDTH - 50) {
-        reset();
+      if (this.position.y >= CANVAS_HEIGHT - 85) {
+        endGame(); return;
       }
       
       var fireTest = Math.floor(Math.random() * (this.stepDelay + 1));
@@ -380,6 +386,7 @@ var Enemy = SheetSprite.extend({
       this.stepAccumulator = 0;
     }
     this.position.y += alienYDown;
+    this._updateBounds();
     
     if (this.bullet !== null && this.bullet.alive) {
       this.bullet.update(dt);  
@@ -480,6 +487,15 @@ function initCanvas() {
   window.addEventListener('resize', resize);
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
+  document.getElementById('start-game').addEventListener('click', startGame);
+  document.getElementById('pause-game').addEventListener('click', function(){setPaused(!paused);});
+  document.querySelectorAll('[data-game-key]').forEach(function(button){
+    var key=Number(button.dataset.gameKey);
+    button.addEventListener('pointerdown',function(e){e.preventDefault();button.setPointerCapture?.(e.pointerId);if(!hasGameStarted)startGame();keyStates[key]=true;});
+    ['pointerup','pointercancel','lostpointercapture'].forEach(function(type){button.addEventListener(type,function(){keyStates[key]=false;});});
+  });
+  document.addEventListener('visibilitychange',function(){if(document.hidden)setPaused(true);});
+  window.addEventListener('blur',function(){setPaused(true);});
 }
 
 function preDrawImages() {
@@ -500,6 +516,7 @@ function setImageSmoothing(value) {
 }
 
 function initGame() {
+  wave=1;alienDirection=-1;alienYDown=0;updateAlienLogic=false;
   dirtyRects = [];
   aliens = [];
   player = new Player();
@@ -526,10 +543,20 @@ function setupAlienFormation() {
   }
 }
 
-function reset() {
-  aliens = [];
-  setupAlienFormation();
-  player.reset();
+function reset() { startGame(); }
+function startGame() {
+  initGame();hasGameStarted=true;ended=false;paused=false;keyStates=[];prevKeyStates=[];lastTime=window.performance.now();
+  document.getElementById('game-status').textContent='';document.getElementById('pause-game').textContent='Pauza';canvas.focus();
+}
+function setPaused(value) {
+  keyStates=[];prevKeyStates=[];
+  if(!hasGameStarted)return;
+  paused=!!value;lastTime=window.performance.now();if(!paused)canvas.focus();
+  document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';document.getElementById('game-status').textContent=paused?'Pauza':'';
+}
+function endGame() {
+  hasGameStarted=false;ended=true;paused=false;keyStates=[];prevKeyStates=[];
+  document.getElementById('game-status').textContent='Koniec gry. Wynik: '+player.score+' · fala: '+wave+'. Enter lub Start: nowa gra';
 }
 
 function init() {
@@ -599,29 +626,26 @@ function resolveBulletEnemyCollisions() {
     var bullet = bullets[i];
     for (var j = 0, alen = aliens.length; j < alen; j++) {
       var alien = aliens[j];
-      if (checkRectCollision(bullet.bounds, alien.bounds)) {
+      if (bullet.alive && alien.alive && checkRectCollision(bullet.bounds, alien.bounds)) {
         alien.alive = bullet.alive = false;
         particleManager.createExplosion(alien.position.x, alien.position.y, 'white', 70, 5,5,3,.15,50);
         player.score += 25;
+        break;
       }
     }
   }
 }
 
 function resolveBulletPlayerCollisions() {
-  for (var i = 0, len = aliens.length; i < len; i++) {
-    var alien = aliens[i];
-    if (alien.bullet !== null && checkRectCollision(alien.bullet.bounds, player.bounds)) {
-      if (player.lives === 0) {
-        hasGameStarted = false;
-      } else {
-       alien.bullet.alive = false;
-       particleManager.createExplosion(player.position.x, player.position.y, 'green', 100, 8,8,6,0.001,40);
-       player.position.set(CANVAS_WIDTH/2, CANVAS_HEIGHT - 70);
-       player.lives--;
-        break;
-      }
-
+  if(player.invulnerable>0)return;
+  for(var i=0;i<aliens.length;i++) {
+    var bullet=aliens[i].bullet;
+    if(bullet&&bullet.alive&&checkRectCollision(bullet.bounds,player.bounds)) {
+      bullet.alive=false;player.lives=Math.max(0,player.lives-1);
+      particleManager.createExplosion(player.position.x,player.position.y,'green',50,8,8,6,0.001,40);
+      if(player.lives===0){endGame();return;}
+      player.position.set(CANVAS_WIDTH/2,CANVAS_HEIGHT-70);player._updateBounds();player.invulnerable=1;
+      break;
     }
   }
 }
@@ -693,19 +717,16 @@ function drawGame(resized) {
 
 function drawStartScreen() {
   fillCenteredText("Space Invaders", CANVAS_WIDTH/2, CANVAS_HEIGHT/2.75, '#FFFFFF', 36);
-  fillBlinkingText("Enter by zagrać! X strzelanie", CANVAS_WIDTH/2, CANVAS_HEIGHT/2, 500, '#FFFFFF', 36);
+  fillBlinkingText(ended ? "Koniec gry • Enter: nowa gra" : "Enter: start • Spacja / X: strzał", CANVAS_WIDTH/2, CANVAS_HEIGHT/2, 500, '#FFFFFF', 36);
 }
 
 function animate() {
   var now = window.performance.now();
   var dt = now - lastTime;
   if (dt > 100) dt = 100;
-  if (wasKeyPressed(13) && !hasGameStarted) {
-    initGame();
-    hasGameStarted = true;
-  }
+  if (wasKeyPressed(13) && !hasGameStarted) startGame();
   
-  if (hasGameStarted) {
+  if (hasGameStarted && !paused && !document.hidden) {
      updateGame(dt / 1000);  
   }
 
@@ -717,6 +738,7 @@ function animate() {
   } else {
     drawStartScreen();
   }
+  prevKeyStates = keyStates.slice();
   lastTime = now;
   requestAnimationFrame(animate);
 }
@@ -728,34 +750,22 @@ function animate() {
 //
 // ###################################################################
 function resize() {
-  var w = window.innerWidth;
-  var h = window.innerHeight;
-
-	// calculate the scale factor to keep a correct aspect ratio
-  var scaleFactor = Math.min(w / CANVAS_WIDTH, h / CANVAS_HEIGHT);
-  
-  if (IS_CHROME) {
-    canvas.width = CANVAS_WIDTH * scaleFactor;
-    canvas.height = CANVAS_HEIGHT * scaleFactor;
-    setImageSmoothing(false);
-    ctx.transform(scaleFactor, 0, 0, scaleFactor, 0, 0);   
-  } else {
-    // resize the canvas css properties
-    canvas.style.width = CANVAS_WIDTH * scaleFactor + 'px';
-    canvas.style.height = CANVAS_HEIGHT * scaleFactor + 'px'; 
-  }
+  canvas.width=CANVAS_WIDTH;canvas.height=CANVAS_HEIGHT;setImageSmoothing(false);
+  canvas.style.width='100%';canvas.style.maxWidth=CANVAS_WIDTH+'px';canvas.style.height='auto';
 }
-
 function onKeyDown(e) {
-  e.preventDefault();
-  keyStates[e.keyCode] = true;
+  if(e.altKey||e.ctrlKey||e.metaKey||e.target?.closest?.('header,a,input,textarea,select'))return;
+  if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){e.preventDefault();setPaused(!paused);return;}
+  if(e.target?.closest?.('button'))return;
+  var key=e.keyCode||({ArrowLeft:37,ArrowRight:39,Space:32,Enter:13,KeyX:88})[e.code];
+  if(![13,32,37,39,88].includes(key))return;
+  e.preventDefault();keyStates[key]=true;
 }
-
 function onKeyUp(e) {
-  e.preventDefault();
-  keyStates[e.keyCode] = false;
+  var key=e.keyCode||({ArrowLeft:37,ArrowRight:39,Space:32,Enter:13,KeyX:88})[e.code];
+  if(![13,32,37,39,88].includes(key))return;
+  keyStates[key]=false;
 }
-
 
 // ###################################################################
 // Start game!

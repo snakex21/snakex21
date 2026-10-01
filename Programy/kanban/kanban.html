@@ -5,8 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tablica Kanban - Hub</title>
-    <link rel="icon" type="image/x-icon"
-        href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
             margin: 0;
@@ -338,7 +336,7 @@
 
         .btn-primary {
             background: var(--accent);
-            color: white;
+            color: var(--accent-contrast);
         }
 
         .btn-secondary {
@@ -351,22 +349,24 @@
             background: rgba(99, 102, 241, 0.1);
         }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../../gry/gry.html">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../programy.html" class="active">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell content-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html" aria-current="location">Narzędzia</a><a href="../../gry/gry.html">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../Programy/programy.html">← Wszystkie narzędzia</a></div>
+</header>
 
-    <div class="page-header">
+
+    <div class="page-header" id="main-content" tabindex="-1" role="main">
         <h1>📋 Tablica Kanban</h1>
         <p>Zarządzaj zadaniami metodą Kanban</p>
     </div>
@@ -435,18 +435,7 @@
 
     <script>
         // Theme
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', savedTheme);
-        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeToggle.addEventListener('click', () => {
-            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Kanban Logic
         let tasks = JSON.parse(localStorage.getItem('kanban-tasks')) || [];

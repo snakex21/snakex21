@@ -261,23 +261,24 @@
             }
         }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub_System</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">/games</a>
-                <a href="../../muzyka/muzyka.html">/music</a>
-                <a href="../../filmy/filmy glowna.html">/movies</a>
-                <a href="../../Programy/programy.html">/tools</a>
-            </div>
-            <button id="theme-toggle">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div class="container">
+
+    <div class="container" id="main-content" tabindex="-1" role="main">
         <div class="terminal">
             <div class="terminal-header">/// MAIN_PROCESS</div>
             <div class="stats">
@@ -299,19 +300,7 @@
 
     <script>
         // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Game Logic
         const defaultUpgrades = [
@@ -356,7 +345,7 @@
             // Inicjalizacja listy tylko raz (lub gdy pusta)
             if (els.list.children.length !== state.upgrades.length) {
                 els.list.innerHTML = state.upgrades.map((u, i) => `
-                    <div class="upgrade-item" data-index="${i}">
+                    <div class="upgrade-item" role="button" tabindex="0" data-index="${i}">
                         <div class="upgrade-info">
                             <h4>${u.name} [x<span class="count">${u.count}</span>]</h4>
                             <p>+${u.gps} GPS</p>
@@ -364,7 +353,6 @@
                         <div class="upgrade-cost"><span class="cost">${Math.floor(u.cost)}</span> BITS</div>
                     </div>
                 `).join('');
-                return;
             }
 
             // Aktualizacja istniejących elementów
@@ -380,6 +368,7 @@
                     item.classList.add('disabled');
                 }
 
+                item.setAttribute('aria-disabled', String(state.bits < u.cost));
                 // Aktualizacja tekstów
                 item.querySelector('.count').textContent = u.count;
                 item.querySelector('.cost').textContent = Math.floor(u.cost);
@@ -388,6 +377,7 @@
 
         function buy(index) {
             const u = state.upgrades[index];
+            if (!u) return;
             if (state.bits >= u.cost) {
                 state.bits -= u.cost;
                 state.gps += u.gps;
@@ -400,7 +390,7 @@
 
         function resetProgress() {
             if (confirm('Czy na pewno chcesz zresetować cały postęp? Ta akcja jest nieodwracalna!')) {
-                localStorage.removeItem('hacker_save');
+                try { localStorage.removeItem('hacker_save'); } catch (_) {}
                 state.bits = 0;
                 state.gps = 0;
                 state.clickValue = 1;
@@ -419,6 +409,11 @@
             if (!isNaN(index)) buy(index);
         });
 
+        els.list.addEventListener('keydown', e => {
+            if (e.repeat || (e.key !== 'Enter' && e.key !== ' ')) return;
+            const item=e.target.closest('.upgrade-item');if(!item)return;e.preventDefault();buy(Number(item.dataset.index));
+        });
+
         els.hackBtn.addEventListener('click', () => {
             state.bits += state.clickValue;
             updateUI();
@@ -434,21 +429,22 @@
             }
         }, 100);
 
-        // Wczytaj zapisany stan
-        if (localStorage.getItem('hacker_save')) {
-            try {
-                const saved = JSON.parse(localStorage.getItem('hacker_save'));
-                state.bits = saved.bits;
-                state.gps = saved.gps;
-                state.upgrades = saved.upgrades;
+        // Only numeric progress is restored; names, costs and rates come from the game.
+        try {
+            const raw = localStorage.getItem('hacker_save');
+            const saved = raw ? JSON.parse(raw) : null;
+            if (saved && Number.isFinite(saved.bits) && saved.bits >= 0 && Array.isArray(saved.upgrades) && saved.upgrades.length === defaultUpgrades.length) {
+                state.bits = Math.min(saved.bits, Number.MAX_SAFE_INTEGER);
+                state.upgrades = defaultUpgrades.map((base,i) => {
+                    const value=saved.upgrades[i];
+                    const count=value && value.id===base.id && Number.isInteger(value.count) && value.count>=0 ? Math.min(value.count,1000) : 0;
+                    return {...base,count,cost:base.cost*Math.pow(1.15,count)};
+                });
+                state.gps=state.upgrades.reduce((sum,u)=>sum+u.gps*u.count,0);
                 log('System Restored...');
-            } catch (e) { }
-        }
-
-        // Automatyczne zapisywanie
-        setInterval(() => {
-            localStorage.setItem('hacker_save', JSON.stringify(state));
-        }, 5000);
+            }
+        } catch (_) { log('Zapis niedostępny. Możesz grać bez zapisywania.'); }
+        setInterval(() => { try { localStorage.setItem('hacker_save', JSON.stringify(state)); } catch (_) {} }, 5000);
 
         updateUI();
         log('System Initialized.');

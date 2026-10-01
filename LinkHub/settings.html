@@ -114,7 +114,7 @@
         .btn {
             padding: 10px 20px;
             background: var(--accent);
-            color: white;
+            color: var(--accent-contrast);
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -194,7 +194,7 @@
 
         .current-model-badge {
             background: var(--accent);
-            color: white;
+            color: var(--accent-contrast);
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
@@ -208,14 +208,24 @@
             text-decoration: none;
         }
     </style>
+<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/workshop/shell.css">
+<script src="../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <a href="index.html" class="logo">← LinkHub</a>
-    </header>
+<body class="site-shell content-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../index.html">Start</a><a href="../Programy/programy.html">Narzędzia</a><a href="../gry/gry.html">Gry</a><a href="../LinkHub/index.html" aria-current="location">LinkHub</a><a href="../muzyka/muzyka.html">Muzyka</a><a href="../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<nav class="site-subnav" aria-label="LinkHub"><a href="index.html">Przeglądaj</a><a href="add.html">Dodaj linki</a><a href="pending.html">Oczekujące</a><a href="scan.html">Skanuj</a><a href="settings.html" aria-current="page">Ustawienia</a></nav>
+</header>
 
-    <main>
+
+    <main id="main-content" tabindex="-1">
         <h1>⚙️ Ustawienia</h1>
         <p class="subtitle">Konfiguracja modeli AI i ustawień LinkHub</p>
 
@@ -282,10 +292,7 @@
 
     <script src="data.js"></script>
     <script>
-        // Theme sync
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-        }
+        // Theme is handled by assets/workshop/shell.js.
 
         // Load current settings
         function loadSettings() {

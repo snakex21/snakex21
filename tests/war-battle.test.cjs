@@ -55,7 +55,7 @@ test('Wojna Er: all twelve silhouettes render with balanced transforms and never
 test('Wojna Er: seeded mixed armies have an opening and advance through eras; one-unit spam is not dominant',()=>{
   let mixedWins=0, rushWins=0, rangedWins=0;
   for(const seed of [1,7,42,77]) {
-    const mixed=simulate(seed,'mixed'),rush=simulate(seed,'rush'),ranged=simulate(seed,'ranged');
+    const mixed=simulate(seed,'mixed',600),rush=simulate(seed,'rush',600),ranged=simulate(seed,'ranged',600);
     assert.ok(mixed.ended&&rush.ended&&ranged.ended,JSON.stringify({seed,mixed,rush,ranged}));
     mixedWins+=Number(mixed.won);rushWins+=Number(rush.won);rangedWins+=Number(ranged.won);
     assert.ok(mixed.seconds>=100&&mixed.seconds<=360,JSON.stringify({seed,mixed}));
@@ -63,8 +63,9 @@ test('Wojna Er: seeded mixed armies have an opening and advance through eras; on
     assert.ok(mixed.era>=1,JSON.stringify({seed,mixed}));
     assert.ok(mixed.peak<=28&&rush.peak<=28&&ranged.peak<=28);
   }
-  // Correct firing-line movement also helps the AI; a mixed force must remain
-  // competitive, not preserve a particular pre-fix seed's victory.
+  // Normal-mode research is damage-based, so failed one-unit tactics can
+  // survive longer while still losing. Keep these separate from human-paced
+  // purchase/evolution tests in war-balance.test.cjs.
   assert.ok(mixedWins>=2&&mixedWins>rushWins&&mixedWins>rangedWins,JSON.stringify({mixedWins,rushWins,rangedWins}));
 });
 test('Wojna Er: artwork clips to the virtual battlefield before any scenery is painted',()=>{

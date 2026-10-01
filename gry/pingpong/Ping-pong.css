@@ -70,3 +70,5 @@
     height: auto;
   }
 }
+
+#pong { touch-action: none; }

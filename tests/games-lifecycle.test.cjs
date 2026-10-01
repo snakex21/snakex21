@@ -51,7 +51,7 @@ test('Wojna Er: a finished battle shows zero HP immediately and rejects further 
 test('Wojna Er: a projectile collides with a moving unit before its old target point',()=>{
   const p=war();prepareWar(p);
   p.run("state.units=[new Unit(ERAS[0].units[0],'enemy')];state.units[0].x=150;state.projectiles=[new Projectile(140,420,200,420,10,'player')];state.projectiles[0].update()");
-  assert.equal(p.run('state.units[0].hp'),50);
+  assert.equal(p.run('state.units[0].hp'),40);
 });
 test('Tower: start and rapid restart keep exactly one animation loop',()=>{
   const p=load('gry/tower/tower.html');assert.equal(p.frames.size,1);p.run('place()');assert.equal(p.frames.size,1);p.run('gameOver=true;place()');assert.equal(p.frames.size,1);
@@ -105,7 +105,7 @@ test('Wojna Er: evolution preserves health damage and changes recruitment exactl
 });
 test('Wojna Er: a projectile hits only the first enemy and awards a kill once',()=>{
   const p=war();p.run("startGame();state.units=[new Unit(ERAS[0].units[0],'enemy'),new Unit(ERAS[0].units[0],'enemy')];state.units[0].x=150;state.units[0].hp=5;state.units[1].x=151;const shot=new Projectile(140,420,200,420,10,'player');shot.update();shot.update()");
-  assert.equal(p.run('state.xp'),22);assert.equal(p.run('state.units[1].hp'),60);
+  assert.equal(p.run('state.xp'),20.2);assert.equal(p.run('state.units[1].hp'),50);
 });
 test('Wojna Er: a missed distant shot never damages a base',()=>{
   const p=war();p.run("startGame();const shot=new Projectile(100,420,200,420,10,'player');for(let i=0;i<20;i++)shot.update()");assert.equal(p.run('state.enemyHP'),500);
@@ -165,8 +165,9 @@ test('Flappy: the bird cannot remain alive after crossing the ground hitbox',()=
 test('Flappy and Tower: narrow layouts retain the visible games catalogue backlink',()=>{
   for(const file of ['gry/flappy/flappy.html','gry/tower/tower.html']) {
     const source=read(file);const {document}=parseHTML(source);
-    assert.equal(document.querySelector('.nav-links .active').getAttribute('href'),'../gry.html');
-    assert.match(source,/\.nav-links\s*\{\s*display:\s*flex;\s*flex:\s*1;\s*justify-content:\s*flex-end/);
-    assert.doesNotMatch(source,/\.nav-links\s*\{\s*display:\s*none/);
+    assert.equal(document.querySelector('.site-context a').getAttribute('href'),'../../gry/gry.html');
+    assert.equal(document.querySelector('.site-links a[aria-current="location"]').textContent,'Gry');
+    assert.ok(document.querySelector('link[href="../../assets/workshop/shell.css"]'));
+    assert.doesNotMatch(read('assets/workshop/shell.css'),/\.site-(?:links|context)\s*\{[^}]*display:\s*none/);
   }
 });

@@ -187,26 +187,36 @@
                 transform: scale(1.1);
             }
         }
+        .keyboard { width: min(100%, 520px); }
+        .key-row { width: 100%; justify-content: center; }
+        .key { flex: 1; min-width: 0; padding: 14px 0; border: 0; color: white; font: inherit; font-weight: bold; }
+        .key.big { flex: 1.6; padding: 14px 2px; font-size: .75rem; }
+        .tile { width: min(60px, calc((100vw - 60px) / 5)); height: auto; aspect-ratio: 1; }
+        #wordle-message { text-align: center; margin-bottom: 12px; }
+        .tile.correct, .tile.present, .tile.absent { color: white; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">☀️</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div class="game-container">
+
+    <div class="game-container" id="main-content" tabindex="-1" role="main">
+        <p id="wordle-message" aria-live="polite">Odgadnij pięcioliterowe słowo. Masz 6 prób.</p>
         <div class="board-container" id="board"></div>
         <div class="keyboard" id="keyboard"></div>
+        <button type="button" onclick="resetGame()">Nowa gra</button>
     </div>
 
     <script>
@@ -216,11 +226,25 @@
         let currentRow = 0;
         let currentCol = 0;
         let gameOver = false;
+        const revealTimers = new Set();
+        const message = document.getElementById('wordle-message');
+        function later(callback, delay) {
+            const id = setTimeout(() => { revealTimers.delete(id); callback(); }, delay);
+            revealTimers.add(id);
+        }
+        function resetGame() {
+            revealTimers.forEach(clearTimeout); revealTimers.clear();
+            secret = words[Math.floor(Math.random() * words.length)];
+            grid = Array.from({length:6}, () => Array(5).fill(''));
+            currentRow = currentCol = 0; gameOver = false; message.textContent = 'Odgadnij pięcioliterowe słowo. Masz 6 prób.';
+            init();
+        }
 
         const boardEl = document.getElementById('board');
         const keyboardEl = document.getElementById('keyboard');
 
         function init() {
+            boardEl.innerHTML = '';
             for (let r = 0; r < 6; r++) {
                 const rowEl = document.createElement('div');
                 rowEl.className = 'row';
@@ -244,7 +268,8 @@
                 rowDiv.className = 'key-row';
 
                 if (i === 2) {
-                    const enter = document.createElement('div');
+                    const enter = document.createElement('button');
+                    enter.type = 'button';
                     enter.className = 'key big';
                     enter.innerText = 'ENTER';
                     enter.onclick = submit;
@@ -252,7 +277,8 @@
                 }
 
                 rowStr.split('').forEach(char => {
-                    const key = document.createElement('div');
+                    const key = document.createElement('button');
+                    key.type = 'button';
                     key.className = 'key';
                     key.id = `key-${char}`;
                     key.innerText = char;
@@ -261,7 +287,8 @@
                 });
 
                 if (i === 2) {
-                    const back = document.createElement('div');
+                    const back = document.createElement('button');
+                    back.type = 'button';
                     back.className = 'key big';
                     back.innerText = '⌫';
                     back.onclick = backspace;
@@ -315,7 +342,7 @@
                 const tile = document.getElementById(`tile-${currentRow}-${i}`);
                 const key = document.getElementById(`key-${guess[i]}`);
 
-                setTimeout(() => {
+                later(() => {
                     tile.classList.add(status[i]);
                     if (status[i] === 'correct') key.className = 'key correct';
                     else if (status[i] === 'present' && !key.classList.contains('correct')) key.className = 'key present';
@@ -325,10 +352,11 @@
 
             if (guess === secret) {
                 gameOver = true;
-                setTimeout(() => alert("Wygrałeś!"), 1500);
+                later(() => { message.textContent = 'Wygrałeś! Możesz zacząć nową grę.'; }, 1000);
             } else if (currentRow === 5) {
                 gameOver = true;
-                setTimeout(() => alert(`Koniec! Słowo to: ${secret}`), 1500);
+                const answer = secret;
+                later(() => { message.textContent = `Koniec! Słowo to: ${answer}`; }, 1000);
             }
 
             currentRow++;
@@ -336,26 +364,16 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.target?.matches?.('input, textarea, select, [contenteditable]')) return;
             const key = e.key.toUpperCase();
-            if (key === 'ENTER') submit();
-            else if (key === 'BACKSPACE') backspace();
-            else if (/^[A-Z]$/.test(key)) type(key);
+            if (key === 'ENTER' && e.target?.closest?.('button, a')) return;
+            if (key === 'ENTER') { e.preventDefault(); if (!e.repeat) submit(); }
+            else if (key === 'BACKSPACE') { e.preventDefault(); backspace(); }
+            else if (/^[A-Z]$/.test(key)) { e.preventDefault(); type(key); }
         });
 
         // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         init();
     </script>
