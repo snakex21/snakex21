@@ -54,3 +54,6 @@
     height: auto;
   }
 }
+
+#c { touch-action: none; }
+.pongcoop-game button { min-height: 44px; padding: 10px 14px; cursor: pointer; }

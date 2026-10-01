@@ -63,23 +63,30 @@
         .cell.revealed { background: var(--cell-revealed); border: 1px solid #999; }
         .cell.bomb { background: #ff5555; }
         .cell[data-num="1"] { color: blue; } .cell[data-num="2"] { color: green; } .cell[data-num="3"] { color: red; }
+        .game-wrapper { min-width: 0; max-width: 100%; padding: 12px; }
+        .game-wrapper > div[style] { width: max-content; max-width: 100%; }
+        .grid { width: max-content; }
+        .header { max-width: 100%; gap: 8px; flex-wrap: wrap; }
+        .cell { padding: 0; color: inherit; font: inherit; }
+        .cell:focus-visible { outline: 3px solid #2563eb; outline-offset: -3px; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div class="game-wrapper">
+
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <h1>Saper</h1>
         <div class="header">
             <select class="difficulty-select" id="difficulty-select">
@@ -91,24 +98,14 @@
             <button class="reset-btn" id="reset-btn">🙂</button>
             <div class="stat" id="timer">000</div>
         </div>
-        <div class="grid" id="grid"></div>
+        <button type="button" id="flag-mode" aria-pressed="false">🚩 Tryb flagi: wyłączony</button>
+        <p>Kliknij pole, aby odkryć. Flaga: prawy przycisk, klawisz F lub tryb flagi.</p>
+        <div style="max-width:100%;overflow-x:auto"><div class="grid" id="grid"></div></div>
     </div>
 
     <script>
         // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Game Logic
         const grid = document.getElementById('grid');
@@ -117,15 +114,22 @@
         const resetBtn = document.getElementById('reset-btn');
         const diffSelect = document.getElementById('difficulty-select');
         
-        let width = 10;
-        let height = 10;
-        let bombAmount = 10;
-        let flags = 0;
-        let squares = [];
-        let isGameOver = false;
-        let timer = 0;
-        let timerId;
-
+        let width = 10, height = 10, bombAmount = 10, flags = 0;
+        let squares = [], isGameOver = false, timer = 0, timerId = null, started = false, flagMode = false;
+        const flagButton = document.getElementById('flag-mode');
+        function neighbors(id) {
+            const row = Math.floor(id / width), col = id % width, result = [];
+            for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+                const y = row + dy, x = col + dx;
+                if ((dy || dx) && y >= 0 && y < height && x >= 0 && x < width) result.push(y * width + x);
+            }
+            return result;
+        }
+        function calculateNumbers() {
+            squares.forEach((square, id) => {
+                if (square.dataset.type === 'valid') square.setAttribute('data', neighbors(id).filter(n => squares[n].dataset.type === 'bomb').length);
+            });
+        }
         function setDifficulty() {
             const val = diffSelect.value;
             if (val === 'easy') { width = 10; height = 10; bombAmount = 10; }
@@ -133,112 +137,80 @@
             else if (val === 'hard') { width = 30; height = 16; bombAmount = 99; }
             createBoard();
         }
-
         diffSelect.addEventListener('change', setDifficulty);
-
+        flagButton.addEventListener('click', () => {
+            flagMode = !flagMode;
+            flagButton.setAttribute('aria-pressed', String(flagMode));
+            flagButton.textContent = flagMode ? '🚩 Tryb flagi: włączony' : '🚩 Tryb flagi: wyłączony';
+        });
         function createBoard() {
-            grid.innerHTML = ''; squares = []; isGameOver = false; flags = 0; timer = 0;
-            
-            // Set grid styles
+            clearInterval(timerId); timerId = null;
+            grid.innerHTML = ''; squares = []; isGameOver = false; flags = 0; timer = 0; started = false;
+            timerEl.textContent = '000';
             grid.style.gridTemplateColumns = `repeat(${width}, 30px)`;
             grid.style.gridTemplateRows = `repeat(${height}, 30px)`;
-            
-            clearInterval(timerId);
-            timerId = setInterval(() => { timer++; timerEl.innerText = timer.toString().padStart(3, '0'); }, 1000);
-            bombCountEl.innerText = (bombAmount - flags).toString().padStart(3, '0');
-            resetBtn.innerText = '🙂';
-
-            const bombsArray = Array(bombAmount).fill('bomb');
-            const emptyArray = Array(width * height - bombAmount).fill('valid');
-            const gameArray = emptyArray.concat(bombsArray).sort(() => Math.random() - 0.5);
-
-            for (let i = 0; i < width * height; i++) {
-                const square = document.createElement('div');
-                square.setAttribute('id', i); square.classList.add('cell'); square.dataset.type = gameArray[i];
+            bombCountEl.textContent = String(bombAmount).padStart(3, '0'); resetBtn.textContent = '🙂';
+            const gameArray = Array(width * height).fill('valid');
+            for (let i = 0; i < bombAmount; i++) gameArray[i] = 'bomb';
+            for (let i = gameArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameArray[i], gameArray[j]] = [gameArray[j], gameArray[i]];
+            }
+            for (let i = 0; i < gameArray.length; i++) {
+                const square = document.createElement('button');
+                square.type = 'button'; square.id = i; square.className = 'cell'; square.dataset.type = gameArray[i];
+                square.setAttribute('aria-label', `Wiersz ${Math.floor(i / width) + 1}, kolumna ${i % width + 1}: zakryte`);
                 grid.appendChild(square); squares.push(square);
-                square.addEventListener('click', () => click(square));
-                square.oncontextmenu = (e) => { e.preventDefault(); addFlag(square); }
+                square.addEventListener('click', () => flagMode ? addFlag(square) : click(square));
+                square.addEventListener('contextmenu', e => { e.preventDefault(); addFlag(square); });
+                square.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'f') { e.preventDefault(); addFlag(square); } });
             }
-            
-            // Calculate Numbers
-            for (let i = 0; i < squares.length; i++) {
-                let total = 0;
-                const isLeftEdge = (i % width === 0);
-                const isRightEdge = (i % width === width - 1);
-
-                if (squares[i].dataset.type === 'valid') {
-                    if (i > 0 && !isLeftEdge && squares[i - 1].dataset.type === 'bomb') total++; // West
-                    if (i > width - 1 && !isRightEdge && squares[i + 1 - width].dataset.type === 'bomb') total++; // North-East
-                    if (i > width && squares[i - width].dataset.type === 'bomb') total++; // North
-                    if (i > width + 1 && !isLeftEdge && squares[i - 1 - width].dataset.type === 'bomb') total++; // North-West
-                    if (i < width * height - 2 && !isRightEdge && squares[i + 1].dataset.type === 'bomb') total++; // East
-                    if (i < width * (height - 1) && !isLeftEdge && squares[i - 1 + width].dataset.type === 'bomb') total++; // South-West
-                    if (i < width * (height - 1) - 2 && !isRightEdge && squares[i + 1 + width].dataset.type === 'bomb') total++; // South-East
-                    if (i < width * (height - 1) - 1 && squares[i + width].dataset.type === 'bomb') total++; // South
-                    squares[i].setAttribute('data', total);
-                }
-            }
+            calculateNumbers();
         }
-
         function addFlag(square) {
-            if (isGameOver) return;
-            if (!square.classList.contains('revealed') && (flags < bombAmount)) {
-                if (!square.classList.contains('flag')) {
-                    square.classList.add('flag'); square.innerHTML = '🚩'; flags++;
-                    bombCountEl.innerText = (bombAmount - flags).toString().padStart(3, '0'); checkForWin();
-                } else {
-                    square.classList.remove('flag'); square.innerHTML = ''; flags--;
-                    bombCountEl.innerText = (bombAmount - flags).toString().padStart(3, '0');
-                }
+            if (isGameOver || square.classList.contains('revealed')) return;
+            if (square.classList.contains('flag')) {
+                square.classList.remove('flag'); square.textContent = ''; flags--;
+                square.setAttribute('aria-label', 'Zakryte pole');
+            } else if (flags < bombAmount) {
+                square.classList.add('flag'); square.textContent = '🚩'; flags++;
+                square.setAttribute('aria-label', 'Flaga');
             }
+            bombCountEl.textContent = String(bombAmount - flags).padStart(3, '0'); checkForWin();
         }
-
         function click(square) {
             if (isGameOver || square.classList.contains('revealed') || square.classList.contains('flag')) return;
-            if (square.dataset.type === 'bomb') { gameOver(square); } else {
-                let total = square.getAttribute('data');
-                if (total != 0) {
-                    square.classList.add('revealed'); square.innerHTML = total; square.dataset.num = total; checkForWin(); return;
+            if (!started) {
+                // The first revealed square is always safe; move a mine rather than rerolling the board.
+                if (square.dataset.type === 'bomb') {
+                    const target = squares.find(s => s !== square && s.dataset.type === 'valid');
+                    target.dataset.type = 'bomb'; square.dataset.type = 'valid'; calculateNumbers();
                 }
-                checkSquare(square, parseInt(square.id));
+                started = true;
+                timerId = setInterval(() => { timer++; timerEl.textContent = String(timer).padStart(3, '0'); }, 1000);
             }
-            square.classList.add('revealed'); checkForWin();
-        }
-
-        function checkSquare(square, currentId) {
-            const isLeftEdge = (currentId % width === 0);
-            const isRightEdge = (currentId % width === width - 1);
-
-            setTimeout(() => {
-                if (currentId > 0 && !isLeftEdge) clickSquareById(currentId - 1);
-                if (currentId > width - 1 && !isRightEdge) clickSquareById(currentId + 1 - width);
-                if (currentId >= width) clickSquareById(currentId - width);
-                if (currentId > width && !isLeftEdge) clickSquareById(currentId - 1 - width);
-                if (currentId < width * height - 1 && !isRightEdge) clickSquareById(currentId + 1);
-                if (currentId < width * (height - 1) && !isLeftEdge) clickSquareById(currentId - 1 + width);
-                if (currentId < width * (height - 1) - 2 && !isRightEdge) clickSquareById(currentId + 1 + width);
-                if (currentId < width * (height - 1)) clickSquareById(currentId + width);
-            }, 10);
-        }
-
-        function clickSquareById(id) {
-            if (id >= 0 && id < width * height) {
-                const newSquare = document.getElementById(id);
-                if(newSquare) click(newSquare);
+            if (square.dataset.type === 'bomb') { gameOver(); return; }
+            // Synchronous queue: no delayed callbacks can reveal a replacement board.
+            const queue = [Number(square.id)];
+            while (queue.length) {
+                const id = queue.pop(), cell = squares[id];
+                if (cell.classList.contains('revealed') || cell.classList.contains('flag') || cell.dataset.type === 'bomb') continue;
+                const total = Number(cell.getAttribute('data'));
+                cell.classList.add('revealed'); cell.textContent = total || ''; cell.dataset.num = total;
+                cell.setAttribute('aria-label', total ? `${total} sąsiednich min` : 'Puste pole');
+                if (!total) queue.push(...neighbors(id));
             }
+            checkForWin();
         }
-
-        function gameOver(square) {
-            isGameOver = true; resetBtn.innerText = '😵'; clearInterval(timerId);
-            squares.forEach(sq => { if (sq.dataset.type === 'bomb') { sq.innerHTML = '💣'; sq.classList.remove('flag'); sq.classList.add('revealed', 'bomb'); } });
+        function gameOver() {
+            isGameOver = true; resetBtn.textContent = '😵'; clearInterval(timerId);
+            squares.forEach(sq => { if (sq.dataset.type === 'bomb') { sq.textContent = '💣'; sq.classList.remove('flag'); sq.classList.add('revealed', 'bomb'); sq.setAttribute('aria-label', 'Mina'); } });
         }
-
         function checkForWin() {
-            let matches = 0;
-            for (let i = 0; i < squares.length; i++) {
-                if (squares[i].classList.contains('flag') && squares[i].dataset.type === 'bomb') matches++;
-                if (matches === bombAmount) { isGameOver = true; resetBtn.innerText = '😎'; clearInterval(timerId); }
-            }
+            if (isGameOver) return;
+            const allSafeRevealed = squares.every(s => s.dataset.type === 'bomb' || s.classList.contains('revealed'));
+            const allMinesFlagged = squares.filter(s => s.classList.contains('flag') && s.dataset.type === 'bomb').length === bombAmount;
+            if (allSafeRevealed || allMinesFlagged) { isGameOver = true; resetBtn.textContent = '😎'; clearInterval(timerId); }
         }
 
         resetBtn.addEventListener('click', createBoard); 

@@ -206,7 +206,7 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 #cc3333;
         }
-        #game { flex-shrink: 0; touch-action: manipulation; }
+        #game { box-sizing: content-box; flex-shrink: 0; touch-action: manipulation; }
         #game:focus-visible { outline: 3px solid #e6a600; outline-offset: 4px; }
         .game-wrapper { padding: 16px; }
         @media (max-width: 520px) {
@@ -215,25 +215,32 @@
             .game-wrapper { min-height: 650px; align-items: flex-start; overflow: hidden; }
             #game { transform: scale(var(--game-scale, 1)); transform-origin: top center; }
         }
+        .game-wrapper { box-sizing: content-box; min-height: 0; align-items: center; justify-content: center; flex: none; margin: auto; overflow: visible; padding: 16px; }
+        #game { transform: scale(var(--game-scale, 1)); transform-origin: center center; }
+        #pause-game { position: absolute; right: 12px; top: 12px; z-index: 25; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        #pause-screen h2 { font-size: 2.5rem; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div class="game-wrapper">
+
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <div class="game-container" id="game" tabindex="0" aria-label="Flappy Bird. Dotknij planszy lub naciśnij Spację, aby skoczyć.">
+            <button id="pause-game" type="button" onclick="setPaused(!paused)" hidden>Pauza</button>
+            <div class="overlay hidden" id="pause-screen"><h2>Pauza</h2><button class="btn" onclick="setPaused(false)">Wznów</button></div>
             <div class="score" id="score">0</div>
             <div class="bird" id="bird"></div>
             <div class="ground"></div>
@@ -254,20 +261,7 @@
 
     <script>
         // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        let savedTheme = 'dark';
-        try { savedTheme = localStorage.getItem('theme') || 'dark'; } catch (_) {}
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            try { localStorage.setItem('theme', next); } catch (_) {}
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Game Logic
         const game = document.getElementById('game');
@@ -277,17 +271,32 @@
         const gameOverScreen = document.getElementById('game-over-screen');
         const finalScoreEl = document.getElementById('final-score');
 
-        function resizeGame() { game.style.setProperty('--game-scale', Math.min(1, (window.innerWidth - 32) / 488)); }
+        function resizeGame() {
+            const headerHeight = document.querySelector('[data-site-shell]')?.getBoundingClientRect().height || 93;
+            const scale = Math.max(0.25, Math.min(1, (window.innerWidth - 32) / 488, (window.innerHeight - headerHeight - 32) / 648));
+            game.style.setProperty('--game-scale', scale);
+            const wrapper = game.parentElement; wrapper.style.width = (488 * scale) + 'px'; wrapper.style.height = (648 * scale) + 'px';
+        }
         resizeGame(); window.addEventListener('resize', resizeGame);
 
         let birdY = 280, velocity = 0, gravity = 0.5, isGameRunning = false, score = 0, gameLoop, pipeInterval;
         const pipeTimers = new Set();
-        let round = 0;
+        let round = 0, paused = false;
 
-        function jump() { if (!isGameRunning) return; velocity = -7; }
+        function setPaused(value) {
+            if (!isGameRunning) return;
+            paused = !!value;
+            document.getElementById("pause-screen").classList.toggle("hidden", !paused);
+            document.getElementById("pause-game").textContent = paused ? "Wznów" : "Pauza";
+            if (!paused) game.focus();
+        }
+        document.addEventListener("visibilitychange", () => { if (document.hidden) setPaused(true); });
+
+        function jump() { if (!isGameRunning || paused) return; velocity = -7; }
         document.addEventListener('keydown', (e) => {
-            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('button, a, input, textarea, select')) return;
-            if (e.code === 'Space') { e.preventDefault(); handleInput(); }
+            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select')) return;
+            if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); setPaused(!paused); return; }
+            if (!e.target?.closest?.('button') && e.code === 'Space') { e.preventDefault(); handleInput(); }
         });
         game.addEventListener('pointerdown', (e) => {
             if (!e.isPrimary || e.button !== 0 || e.target.closest('button, a')) return;
@@ -295,13 +304,14 @@
         });
 
         function handleInput() {
+            if (paused) { setPaused(false); return; }
             if (!isGameRunning && !gameOverScreen.classList.contains('hidden')) resetGame();
             else if (!isGameRunning && startScreen.style.display !== 'none') startGame();
             else jump();
         }
 
         function createPipe() {
-            if (!isGameRunning) return;
+            if (!isGameRunning || paused) return;
             const pipeGap = 180;
             const pipeLoc = Math.random() * 280 + 80; // Both pipes remain on the 590px playing field.
             const pipeTop = document.createElement('div'); pipeTop.className = 'pipe'; pipeTop.style.left = '480px'; pipeTop.style.top = '0'; pipeTop.style.height = pipeLoc + 'px';
@@ -314,6 +324,7 @@
             const createdRound = round;
             const timer = setInterval(() => {
                 if (!isGameRunning || createdRound !== round) { clearInterval(timer); pipeTimers.delete(timer); return; }
+                if (paused || document.hidden) return;
                 pipePos -= 3; pipeTop.style.left = pipePos + 'px'; pipeBottom.style.left = pipePos + 'px';
 
                 // Punktacja
@@ -336,7 +347,7 @@
         }
 
         function update() {
-            if (!isGameRunning) return;
+            if (!isGameRunning || paused || document.hidden) return;
             velocity += gravity; birdY += velocity; bird.style.top = birdY + 'px';
             if (birdY + 40 >= 590 || birdY + 10 <= 0) gameOver();
         }
@@ -344,7 +355,10 @@
         function startGame() {
             if (isGameRunning) return;
             startScreen.style.display = 'none'; gameOverScreen.classList.add('hidden');
-            isGameRunning = true;
+            isGameRunning = true; paused = false;
+            document.getElementById("pause-game").hidden = false;
+            document.getElementById("pause-screen").classList.add("hidden");
+            document.getElementById("pause-game").textContent = "Pauza";
             const startedRound = round;
             gameLoop = setInterval(() => { if (startedRound === round) update(); }, 20);
             pipeInterval = setInterval(() => { if (startedRound === round) createPipe(); }, 1500);
@@ -357,7 +371,9 @@
         }
         function gameOver() {
             if (!isGameRunning) return;
-            isGameRunning = false; clearTimers();
+            isGameRunning = false; paused = false; clearTimers();
+            document.getElementById("pause-game").hidden = true;
+            document.getElementById("pause-screen").classList.add("hidden");
             gameOverScreen.classList.remove('hidden'); finalScoreEl.textContent = score;
             gameOverScreen.querySelector('button').focus();
         }

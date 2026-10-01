@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Muzyka - Hub</title>
-    <link rel="icon" href="ikona.png" type="image/png">
     <style>
         * {
             margin: 0;
@@ -911,32 +910,33 @@
             background: #404040;
         }
     </style>
+<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/workshop/shell.css">
+<script src="../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
+<body class="site-shell music-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
     <div class="app-container">
-        <header>
-            <div class="header-left">
-                <a href="../index.html" class="logo">Hub</a>
-                <nav class="nav-links">
-                    <a href="../gry/gry.html">Gry</a>
-                    <a href="muzyka.html" class="active">Muzyka</a>
-                    <a href="../filmy/filmy glowna.html">Filmy</a>
-                    <a href="../Programy/programy.html">Narzędzia</a>
-                </nav>
-            </div>
-        </header>
+        <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../index.html">Start</a><a href="../Programy/programy.html">Narzędzia</a><a href="../gry/gry.html">Gry</a><a href="../LinkHub/index.html">LinkHub</a><a href="../muzyka/muzyka.html" aria-current="page">Muzyka</a><a href="../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+</header>
+
 
         <div class="main-content">
             <aside class="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-tabs">
-                        <button class="sidebar-tab active" data-tab="library" title="Biblioteka">📚</button>
-                        <button class="sidebar-tab" data-tab="favorites" title="Ulubione">❤️</button>
-                        <button class="sidebar-tab" data-tab="playlists" title="Playlisty">🎵</button>
-                        <button class="sidebar-tab" data-tab="history" title="Historia">📜</button>
+                        <button class="sidebar-tab active" data-tab="library" title="Biblioteka" aria-label="Biblioteka">📚</button>
+                        <button class="sidebar-tab" data-tab="favorites" title="Ulubione" aria-label="Ulubione">❤️</button>
+                        <button class="sidebar-tab" data-tab="playlists" title="Playlisty" aria-label="Playlisty">🎵</button>
+                        <button class="sidebar-tab" data-tab="history" title="Historia" aria-label="Historia">📜</button>
                     </div>
-                    <input type="search" class="search-input" id="library-search" placeholder="Szukaj utworów...">
+                    <input type="search" class="search-input" id="library-search" aria-label="Szukaj utworów w bibliotece" placeholder="Szukaj utworów...">
                 </div>
 
                 <div class="library-list" id="library-list"></div>
@@ -946,13 +946,13 @@
                 <div class="playlist-section" id="playlist-section">
                     <div class="playlist-header">
                         <h3>Twoje playlisty</h3>
-                        <button class="create-playlist-btn" id="create-playlist-btn" title="Utwórz playlistę">+</button>
+                        <button class="create-playlist-btn" id="create-playlist-btn" title="Utwórz playlistę" aria-label="Utwórz playlistę">+</button>
                     </div>
                     <div class="playlist-list" id="playlist-list"></div>
                 </div>
             </aside>
 
-            <main class="player-area">
+            <main class="player-area" id="main-content" tabindex="-1">
                 <div class="now-playing" id="now-playing">
                     <div class="empty-state">
                         <h2>Witaj w odtwarzaczu!</h2>
@@ -973,11 +973,11 @@
 
             <div class="bar-controls">
                 <div class="bar-buttons">
-                    <button class="control-btn" id="bar-shuffle" title="Losuj">🔀</button>
-                    <button class="control-btn" id="bar-prev" title="Poprzedni">⏮️</button>
-                    <button class="control-btn play-btn" id="bar-play" title="Odtwórz">▶️</button>
-                    <button class="control-btn" id="bar-next" title="Następny">⏭️</button>
-                    <button class="control-btn" id="bar-repeat" title="Powtarzaj">🔁</button>
+                    <button class="control-btn" id="bar-shuffle" title="Losuj" aria-label="Losuj">🔀</button>
+                    <button class="control-btn" id="bar-prev" title="Poprzedni" aria-label="Poprzedni">⏮️</button>
+                    <button class="control-btn play-btn" id="bar-play" title="Odtwórz" aria-label="Odtwórz">▶️</button>
+                    <button class="control-btn" id="bar-next" title="Następny" aria-label="Następny">⏭️</button>
+                    <button class="control-btn" id="bar-repeat" title="Powtarzaj" aria-label="Powtarzaj">🔁</button>
                 </div>
                 <div class="bar-progress">
                     <span class="bar-time" id="bar-current-time">0:00</span>
@@ -989,9 +989,9 @@
             </div>
 
             <div class="bar-right">
-                <button class="control-btn" id="bar-stats-btn" title="Statystyki">📈</button>
-                <button class="control-btn" id="bar-timer-btn" title="Sleep Timer">💤</button>
-                <button class="control-btn" id="bar-shortcuts-btn" title="Skróty klawiszowe">⌨️</button>
+                <button class="control-btn" id="bar-stats-btn" title="Statystyki" aria-label="Statystyki">📈</button>
+                <button class="control-btn" id="bar-timer-btn" title="Sleep Timer" aria-label="Sleep Timer">💤</button>
+                <button class="control-btn" id="bar-shortcuts-btn" title="Skróty klawiszowe" aria-label="Skróty klawiszowe">⌨️</button>
                 <select id="bar-speed-select" class="speed-select" title="Prędkość">
                     <option value="0.5">0.5x</option>
                     <option value="0.75">0.75x</option>
@@ -1000,8 +1000,8 @@
                     <option value="1.5">1.5x</option>
                     <option value="2">2.0x</option>
                 </select>
-                <button class="control-btn" id="bar-visualizer-toggle" title="Wizualizator">📊</button>
-                <button class="control-btn" id="bar-volume-icon" title="Głośność">🔊</button>
+                <button class="control-btn" id="bar-visualizer-toggle" title="Wizualizator" aria-label="Wizualizator">📊</button>
+                <button class="control-btn" id="bar-volume-icon" title="Głośność" aria-label="Głośność">🔊</button>
                 <div class="volume-slider" id="bar-volume-slider">
                     <div class="volume-fill" id="bar-volume-fill"></div>
                 </div>
@@ -1013,7 +1013,7 @@
     <div class="modal-overlay" id="create-playlist-modal">
         <div class="modal">
             <h3>Utwórz nową playlistę</h3>
-            <input type="text" class="modal-input" id="playlist-name-input" placeholder="Nazwa playlisty...">
+            <input type="text" class="modal-input" id="playlist-name-input" aria-label="Nazwa playlisty" placeholder="Nazwa playlisty...">
             <div class="modal-buttons">
                 <button class="modal-btn secondary" id="cancel-create-playlist">Anuluj</button>
                 <button class="modal-btn primary" id="confirm-create-playlist">Utwórz</button>
@@ -1466,9 +1466,9 @@
                     <div class="library-item-artist">${track.artist}</div>
                   </div>
                   <div class="library-item-actions">
-                    <button class="favorite-btn ${isFav ? 'active' : ''}" onclick="window.triggerFavorite(event, ${realIndex})" title="Ulubione">${isFav ? '❤️' : '♡'}</button>
-                    <button class="action-btn" onclick="window.triggerQueue(event, ${realIndex})" title="Dodaj do kolejki">🎯</button>
-                    <button class="action-btn add-to-playlist-btn" data-index="${realIndex}" title="Dodaj do playlisty">➕</button>
+                    <button class="favorite-btn ${isFav ? 'active' : ''}" onclick="window.triggerFavorite(event, ${realIndex})" title="Ulubione" aria-label="Ulubione">${isFav ? '❤️' : '♡'}</button>
+                    <button class="action-btn" onclick="window.triggerQueue(event, ${realIndex})" title="Dodaj do kolejki" aria-label="Dodaj do kolejki">🎯</button>
+                    <button class="action-btn add-to-playlist-btn" data-index="${realIndex}" title="Dodaj do playlisty" aria-label="Dodaj do playlisty">➕</button>
                   </div>
                 </div>
               `;
@@ -1614,11 +1614,11 @@
           <div class="album-art-container">
             <div class="album-art ${state.visualizerActive ? 'hidden' : ''}" style="background: ${track.accent}">🎵</div>
             <canvas id="visualizer-canvas" class="visualizer-canvas ${state.visualizerActive ? 'active' : ''}"></canvas>
-            <button class="visualizer-toggle ${state.visualizerActive ? 'active' : ''}" id="visualizer-toggle-main" title="Wizualizator">📊</button>
+            <button class="visualizer-toggle ${state.visualizerActive ? 'active' : ''}" id="visualizer-toggle-main" title="Wizualizator" aria-label="Wizualizator">📊</button>
           </div>
           <div class="track-info">
             <h2 class="track-title">${track.title} 
-                <button class="favorite-btn ${isFav ? 'active' : ''}" id="main-fav-btn" onclick="window.triggerFavorite(event, ${index})" style="font-size: 1.5rem; margin-left: 1rem;">${isFav ? '❤️' : '♡'}</button>
+                <button class="favorite-btn ${isFav ? 'active' : ''}" id="main-fav-btn" aria-label="Ulubione" aria-pressed="${isFav}" onclick="window.triggerFavorite(event, ${index})" style="font-size: 1.5rem; margin-left: 1rem;">${isFav ? '❤️' : '♡'}</button>
             </h2>
             <p class="track-artist">${track.artist}</p>
             <p class="track-album">${track.album}</p>
@@ -1626,11 +1626,11 @@
           <div class="player-controls">
             <div class="control-buttons">
               <!-- Dodano warunkowe klasy 'active' -->
-              <button class="control-btn ${state.shuffle ? 'active' : ''}" id="main-shuffle" title="Losuj">🔀</button>
-              <button class="control-btn" id="main-prev" title="Poprzedni">⏮️</button>
-              <button class="control-btn play-btn" id="main-play" title="Odtwórz">▶️</button>
-              <button class="control-btn" id="main-next" title="Następny">⏭️</button>
-              <button class="control-btn ${state.repeat !== 'off' ? 'active' : ''}" id="main-repeat" title="Powtarzaj">${state.repeat === 'one' ? '🔂' : '🔁'}</button>
+              <button class="control-btn ${state.shuffle ? 'active' : ''}" id="main-shuffle" title="Losuj" aria-label="Losuj">🔀</button>
+              <button class="control-btn" id="main-prev" title="Poprzedni" aria-label="Poprzedni">⏮️</button>
+              <button class="control-btn play-btn" id="main-play" title="Odtwórz" aria-label="Odtwórz">▶️</button>
+              <button class="control-btn" id="main-next" title="Następny" aria-label="Następny">⏭️</button>
+              <button class="control-btn ${state.repeat !== 'off' ? 'active' : ''}" id="main-repeat" title="Powtarzaj" aria-label="Powtarzaj">${state.repeat === 'one' ? '🔂' : '🔁'}</button>
             </div>
             <div class="progress-container">
               <div class="progress-bar" id="main-progress-bar">
@@ -1754,8 +1754,8 @@
                 const mainBtn = document.getElementById('main-shuffle');
                 const barBtn = document.getElementById('bar-shuffle');
                 
-                if (mainBtn) mainBtn.classList.toggle('active', state.shuffle);
-                if (barBtn) barBtn.classList.toggle('active', state.shuffle);
+                if (mainBtn) { mainBtn.classList.toggle('active', state.shuffle); mainBtn.setAttribute('aria-pressed', String(state.shuffle)); }
+                if (barBtn) { barBtn.classList.toggle('active', state.shuffle); barBtn.setAttribute('aria-pressed', String(state.shuffle)); }
             }
 
             function updateRepeatButton() {
@@ -1768,10 +1768,14 @@
                 if (mainBtn) {
                     mainBtn.textContent = icon;
                     mainBtn.classList.toggle('active', isActive);
+                    mainBtn.setAttribute('aria-label', state.repeat === 'one' ? 'Powtarzaj utwór' : state.repeat === 'all' ? 'Powtarzaj wszystko' : 'Powtarzanie wyłączone');
+                    mainBtn.setAttribute('aria-pressed', String(isActive));
                 }
                 if (barBtn) {
                     barBtn.textContent = icon;
                     barBtn.classList.toggle('active', isActive);
+                    barBtn.setAttribute('aria-label', state.repeat === 'one' ? 'Powtarzaj utwór' : state.repeat === 'all' ? 'Powtarzaj wszystko' : 'Powtarzanie wyłączone');
+                    barBtn.setAttribute('aria-pressed', String(isActive));
                 }
             }
 
@@ -2066,12 +2070,12 @@
                 elements.audio.addEventListener('loadedmetadata', updateProgress);
                 elements.audio.addEventListener('play', () => {
                     state.isPlaying = true;
-                    [document.getElementById('main-play'), elements.barPlay].forEach(el => { if (el) el.textContent = '⏸️'; });
+                    [document.getElementById('main-play'), elements.barPlay].forEach(el => { if (el) { el.textContent = '⏸️'; el.setAttribute('aria-label', 'Wstrzymaj'); el.setAttribute('title', 'Wstrzymaj'); } });
                     if (state.visualizerActive) drawSimulatedVisualizer();
                 });
                 elements.audio.addEventListener('pause', () => {
                     state.isPlaying = false;
-                    [document.getElementById('main-play'), elements.barPlay].forEach(el => { if (el) el.textContent = '▶️'; });
+                    [document.getElementById('main-play'), elements.barPlay].forEach(el => { if (el) { el.textContent = '▶️'; el.setAttribute('aria-label', 'Odtwórz'); el.setAttribute('title', 'Odtwórz'); } });
                 });
                 elements.audio.addEventListener('ended', () => {
                     if (state.repeat === 'one') { elements.audio.currentTime = 0; elements.audio.play(); }
@@ -2081,7 +2085,8 @@
                 setVolume(state.volume * 100);
 
                 document.addEventListener('keydown', (e) => {
-                    if (e.target.tagName === 'INPUT') return;
+                    if (e.repeat || e.altKey || e.ctrlKey || e.metaKey ||
+                        e.target?.closest?.('.site-header, button, a, input, textarea, select, [contenteditable="true"]')) return;
                     switch(e.code) {
                         case 'Space': e.preventDefault(); togglePlay(); break;
                         case 'ArrowRight': e.preventDefault(); nextTrack(); break;
@@ -2150,7 +2155,7 @@
               <div class="playlist-name">${p.name}</div>
               <div class="playlist-count">${p.tracks.length} utworów</div>
             </div>
-            <button class="action-btn playlist-delete" data-index="${i}" title="Usuń">🗑️</button>
+            <button class="action-btn playlist-delete" data-index="${i}" title="Usuń" aria-label="Usuń">🗑️</button>
           </div>
         `).join('');
             }

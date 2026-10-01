@@ -1,22 +1,188 @@
-/* The shared workshop shell is deliberately scoped away from game internals. */
-:root{--bg:#f6f5ef;--text:#202b27;--text-secondary:#65716a;--border:#d9ddd4;--card-bg:#fffefa;--card-hover:#eef1e7;--header-bg:#f6f5ef;--accent:#21654d;--soft:#e7ecdd;--shadow:rgba(28,49,36,.06);--input-bg:#fffefa}
-:root[data-theme="dark"]{--bg:#17231e;--text:#eef2e7;--text-secondary:#afbeb1;--border:#3a4d40;--card-bg:#203127;--card-hover:#2b4031;--header-bg:#17231e;--accent:#b8d58e;--soft:#304532;--shadow:rgba(0,0,0,.15);--input-bg:#203127}
-.workshop{margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
-.workshop *{box-sizing:border-box}.workshop a{color:inherit}.workshop button,.workshop input{font:inherit}.workshop [hidden]{display:none!important}
-.workshop :focus-visible{outline:3px solid var(--accent);outline-offset:4px}.workshop .sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.site-header{position:relative!important;z-index:20;background:var(--header-bg)!important;border-bottom:1px solid var(--border)!important;box-shadow:none!important}
-.site-header .site-nav{display:flex;gap:32px;align-items:center;max-width:1264px;padding:22px 40px;margin:0 auto}
-.site-header .site-brand{display:flex;gap:11px;align-items:center;text-decoration:none;font-size:18px;font-weight:750;letter-spacing:-.5px;flex-shrink:0;line-height:1.1}
-.brand-note{display:block;font-size:10px;color:var(--text-secondary);font-weight:500;letter-spacing:1.15px;margin-top:7px;text-transform:uppercase}.brand-mark{background:var(--accent);color:var(--bg);width:41px;height:41px;border-radius:12px;display:grid;place-content:center;font-family:monospace;font-size:26px;position:relative}.brand-mark span{position:absolute;right:4px;bottom:5px;font-size:16px}
-.site-header .site-links{display:flex;gap:7px;margin-left:auto;align-items:center}.site-header .site-links a{padding:9px 12px;text-decoration:none;font-size:13px;font-weight:600;color:var(--text-secondary);border-radius:7px;white-space:nowrap}.site-header .site-links a:hover,.site-header .site-links a[aria-current]{background:var(--soft);color:var(--text)}
-.site-header #theme-toggle{display:grid;place-content:center;flex-shrink:0;width:40px;height:40px;border:1px solid var(--border);border-radius:50%;background:transparent;color:var(--text);font-size:22px;cursor:pointer;margin:0;padding:0}
-.skip-link{position:fixed;z-index:100;top:8px;left:8px;padding:10px 18px;background:var(--text);color:var(--bg)!important;transform:translateY(-150%)}.skip-link:focus{transform:translateY(0)}
-.eyebrow{font-size:10px!important;font-weight:750;letter-spacing:2px;color:var(--accent)!important;text-transform:uppercase;margin:0 0 16px!important}
-.site-footer{display:flex;gap:24px;max-width:1184px;padding:30px 0;margin:64px auto 0;border-top:1px solid var(--border);font-size:11px;color:var(--text-secondary)}.site-footer span{margin-right:auto}.site-footer a{text-underline-offset:4px;text-decoration:none}.site-footer a:hover{text-decoration:underline}
-.legacy-page main{padding-top:3rem}.legacy-page .site-footer{padding-left:24px;padding-right:24px}
-@media(max-width:1020px){.site-header .site-nav{padding:18px 24px;gap:16px}.site-header .site-links{gap:0}.site-header .site-links a{padding:9px}.site-footer{margin-left:24px;margin-right:24px}}
-@media(max-width:760px){.site-header .site-nav{padding:16px 20px 10px;flex-wrap:wrap;gap:14px}.site-header .site-brand{font-size:17px}.site-header .site-links{order:3;flex-basis:100%;margin:0;overflow-x:auto;gap:5px;padding-bottom:4px}.site-header .site-links a{flex:1;text-align:center;padding:9px 10px;font-size:12px}.site-header #theme-toggle{margin-left:auto}.site-footer{flex-wrap:wrap;gap:14px;margin-top:40px;padding-top:24px}.site-footer span{flex-basis:100%}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-/* Keep the existing changelog badge readable in both themes. */
-.legacy-page .version-badge{color:var(--bg)}
-.site-header .site-links a{font-size:14px}.brand-note{font-size:10px}.site-footer{font-size:12px}
+/* Shared site chrome. Shell tokens do not recolor game boards or the music player. */
+:root {
+  --shell-bg: #f6f5ef;
+  --shell-text: #202b27;
+  --shell-muted: #65716a;
+  --shell-border: #d9ddd4;
+  --shell-card: #fffefa;
+  --shell-hover: #eef1e7;
+  --shell-accent: #21654d;
+  --shell-soft: #e7ecdd;
+  --shell-shadow: rgba(28,49,36,.06);
+  --site-header-height: 86px;
+}
+:root[data-theme="dark"] {
+  --shell-bg: #17231e;
+  --shell-text: #eef2e7;
+  --shell-muted: #afbeb1;
+  --shell-border: #3a4d40;
+  --shell-card: #203127;
+  --shell-hover: #2b4031;
+  --shell-accent: #b8d58e;
+  --shell-soft: #304532;
+  --shell-shadow: rgba(0,0,0,.15);
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+.workshop:not(.home-page), .content-shell {
+  --bg: var(--shell-bg);
+  --text: var(--shell-text);
+  --text-secondary: var(--shell-muted);
+  --border: var(--shell-border);
+  --card-bg: var(--shell-card);
+  --card-hover: var(--shell-hover);
+  --header-bg: var(--shell-bg);
+  --accent: var(--shell-accent);
+  --accent-contrast: var(--shell-bg);
+  --soft: var(--shell-soft);
+  --shadow: var(--shell-shadow);
+  --input-bg: var(--shell-card);
+}
+.home-page { --accent: var(--shell-accent); }
+.workshop, .content-shell {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height: 1.6;
+}
+.site-shell { margin: 0; min-width: 0; }
+.workshop *, .site-header *, .site-footer * { box-sizing: border-box; }
+.workshop a { color: inherit; }
+.workshop button, .workshop input { font: inherit; }
+.site-shell [hidden], .workshop [hidden] { display: none !important; }
+.workshop :focus-visible, .content-shell :focus-visible, .site-header :focus-visible {
+  outline: 3px solid var(--shell-accent);
+  outline-offset: 3px;
+}
+.workshop .sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+/* Reset legacy header/nav rules once, only within the shared chrome. */
+.site-shell .site-header {
+  position: relative; inset: auto; z-index: 20;
+  display: block; flex: 0 0 auto; width: 100%; height: auto; min-height: 0;
+  margin: 0; padding: 0;
+  background: var(--shell-bg); color: var(--shell-text);
+  border: 0; border-bottom: 1px solid var(--shell-border);
+  border-radius: 0; box-shadow: none;
+  font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height: 1.4;
+}
+.site-header .site-nav {
+  display: flex; flex-wrap: nowrap; gap: 24px; align-items: center; justify-content: flex-start;
+  width: 100%; max-width: 1264px; min-height: 85px; padding: 18px 40px; margin: 0 auto;
+}
+.site-header .site-brand {
+  display: flex; gap: 11px; align-items: center; flex-shrink: 0;
+  color: var(--shell-text); text-decoration: none; text-transform: none;
+  font-size: 18px; font-weight: 750; letter-spacing: -.5px; line-height: 1.1;
+}
+.site-header .brand-note {
+  display: block; font-size: 10px; color: var(--shell-muted); font-weight: 500;
+  letter-spacing: 1.15px; margin-top: 7px; text-transform: uppercase;
+}
+.site-header .brand-mark {
+  background: var(--shell-accent); color: var(--shell-bg); width: 41px; height: 41px;
+  border-radius: 12px; display: grid; place-content: center;
+  font-family: monospace; font-size: 26px; position: relative;
+}
+.site-header .brand-mark span { position: absolute; right: 4px; bottom: 5px; font-size: 16px; }
+.site-header .site-links {
+  display: flex; flex-wrap: wrap; gap: 3px; margin-left: auto; align-items: center;
+}
+.site-header .site-links a, .site-header .site-subnav a {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 9px 10px; text-decoration: none;
+  font-size: 14px; font-weight: 600; color: var(--shell-muted);
+  border-radius: 7px; white-space: nowrap; line-height: 1.4;
+}
+.site-header .site-links a:hover, .site-header .site-links a[aria-current],
+.site-header .site-subnav a:hover, .site-header .site-subnav a[aria-current] {
+  background: var(--shell-soft); color: var(--shell-text);
+}
+.site-header #theme-toggle {
+  display: grid; place-content: center; flex-shrink: 0;
+  width: 44px; height: 44px; min-height: 44px;
+  border: 1px solid var(--shell-border); border-radius: 50%;
+  background: transparent; color: var(--shell-text);
+  font: 24px/1 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  cursor: pointer; margin: 0; padding: 0;
+  box-shadow: none; transform: none; letter-spacing: 0;
+}
+.site-header #theme-toggle:hover { background: var(--shell-soft); }
+.site-header .site-context, .site-header .site-subnav {
+  width: 100%; max-width: 1264px; margin: 0 auto; padding: 0 40px 10px;
+  display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center;
+}
+.site-header .site-context a {
+  display: inline-flex; align-items: center; min-height: 32px;
+  color: var(--shell-accent); font-size: 13px; font-weight: 600;
+  text-decoration: none; text-underline-offset: 3px;
+}
+.site-header .site-context a:hover { text-decoration: underline; }
+.site-header .site-subnav a { font-size: 13px; }
+.site-header .site-pending-badge {
+  display: inline-block; margin-left: 6px; padding: 2px 6px; border-radius: 8px;
+  background: #b93832; color: #fff; font-size: 11px;
+}
+.site-shell .skip-link {
+  position: fixed; z-index: 10000; top: 8px; left: 8px;
+  padding: 10px 18px; border-radius: 4px;
+  background: var(--shell-text); color: var(--shell-bg);
+  font: 600 14px/1.5 system-ui,sans-serif; text-decoration: none;
+  transform: translateY(-200%);
+}
+.site-shell .skip-link:focus { transform: translateY(0); }
+.workshop .eyebrow {
+  font-size: 10px; font-weight: 750; letter-spacing: 2px;
+  color: var(--shell-accent); text-transform: uppercase; margin: 0 0 16px;
+}
+.site-footer {
+  display: flex; flex-wrap: wrap; gap: 24px; max-width: 1184px;
+  padding: 30px 0; margin: 64px auto 0; border-top: 1px solid var(--shell-border);
+  font-size: 12px; color: var(--shell-muted);
+}
+.site-footer span { margin-right: auto; }
+.site-footer a { text-underline-offset: 4px; text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+.legacy-page main { padding-top: 3rem; }
+.legacy-page .site-footer { padding-left: 24px; padding-right: 24px; }
+.legacy-page .version-badge { color: var(--bg); }
+/* Full-height tools keep usable workspaces when navigation wraps or text is zoomed. */
+.tool-workspace { display: flex; flex-direction: column; height: 100vh; height: 100svh; min-height: 480px; overflow: auto; }
+.tool-workspace > .app-container, .tool-workspace > .editor-container {
+  flex: 1 1 auto; height: auto; min-height: 300px; padding-top: 0;
+}
+.site-shell .shell-tool-toolbar { flex: 0 0 auto; flex-wrap: wrap; padding: 10px 20px; border-bottom: 1px solid var(--border); }
+.game-shell { overflow-x: hidden; overflow-y: auto; }
+/* Keep music's inner player dark and independent of the site theme. */
+.music-shell { color-scheme: dark; }
+.music-shell > .app-container { height: 100vh; height: 100svh; min-height: 480px; }
+@media (max-width: 1020px) {
+  .site-header .site-nav { padding: 16px 24px; gap: 16px; }
+  .site-header .site-links a { padding: 9px 8px; }
+  .site-header .site-context, .site-header .site-subnav { padding-left: 24px; padding-right: 24px; }
+  .site-footer { margin-left: 24px; margin-right: 24px; }
+}
+@media (max-width: 860px) {
+  .site-header .site-nav { padding: 14px 20px 8px; flex-wrap: wrap; gap: 10px 14px; }
+  .site-header .site-brand { font-size: 17px; }
+  .site-header .site-links { order: 3; flex-basis: 100%; margin: 0; gap: 3px; }
+  .site-header .site-links a { flex: 1 0 auto; padding: 9px; font-size: 13px; }
+  .site-header #theme-toggle { margin-left: auto; }
+  .site-header .site-context, .site-header .site-subnav { padding: 0 20px 8px; }
+  .site-footer { gap: 14px; margin-top: 40px; padding-top: 24px; }
+  .site-footer span { flex-basis: 100%; }
+}
+@media (max-width: 420px) {
+  .site-header .site-links a { flex-basis: calc(33.333% - 3px); }
+  .site-header .site-subnav { gap: 2px; }
+  .site-header .site-subnav a { flex: 1 0 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header *, .workshop *, .workshop *::before, .workshop *::after {
+    scroll-behavior: auto !important; transition: none !important; animation: none !important;
+  }
+}

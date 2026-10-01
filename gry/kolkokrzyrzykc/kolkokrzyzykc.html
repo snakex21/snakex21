@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kółko i krzyżyk - Hub</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
             margin: 0;
@@ -291,22 +290,23 @@
             }
         }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <main>
+
+    <main id="main-content" tabindex="-1">
         <div class="game-header">
             <h1>🎮 Kółko i krzyżyk</h1>
             <p>Graj z przyjacielem lub przeciwko AI</p>
@@ -364,20 +364,7 @@
 
     <script>
         // Motyw ciemny
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', savedTheme);
-
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Tic-tac-toe game
         (() => {
@@ -420,6 +407,7 @@
                 },
                 mode: 'human',
                 aiPlayer: 'O',
+                aiTimeout: null,
             };
 
             const modeButtons = document.querySelectorAll('[data-mode]');
@@ -456,15 +444,15 @@
                 });
             }
 
-            function checkWinner() {
+            function checkWinner(board = state.board) {
                 for (const combo of winningCombos) {
                     const [a, b, c] = combo;
-                    const mark = state.board[a];
-                    if (mark && mark === state.board[b] && mark === state.board[c]) {
+                    const mark = board[a];
+                    if (mark && mark === board[b] && mark === board[c]) {
                         return { winner: mark, combo };
                     }
                 }
-                if (state.moves === state.board.length) {
+                if (board.every(Boolean)) {
                     return { winner: null, combo: [] };
                 }
                 return null;
@@ -517,7 +505,7 @@
             }
 
             function minimax(board, depth, isMaximizing) {
-                const result = checkWinner();
+                const result = checkWinner(board);
                 if (result) {
                     if (result.winner === state.aiPlayer) return 10 - depth;
                     if (result.winner) return depth - 10;
@@ -567,7 +555,10 @@
                 }
 
                 if (bestMove !== -1) {
-                    setTimeout(() => {
+                    clearTimeout(state.aiTimeout);
+                    state.aiTimeout = setTimeout(() => {
+                        state.aiTimeout = null;
+                        if (state.mode !== 'ai' || state.current !== state.aiPlayer || state.finished) return;
                         makeMove(bestMove);
                     }, 500);
                 }
@@ -619,6 +610,7 @@
             }
 
             function newRound(resetScore = false) {
+                clearTimeout(state.aiTimeout); state.aiTimeout = null;
                 state.board.fill(null);
                 state.moves = 0;
                 state.finished = false;

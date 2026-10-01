@@ -168,24 +168,31 @@
         .reset-btn:hover {
             background: #444;
         }
+        .game-area { padding: clamp(8px, 3vw, 32px); }
+        .board { width: min(100%, 500px); gap: 4px; }
+        .col { min-width: 0; padding: 3px; gap: 4px; }
+        .col:focus-visible { outline: 3px solid #fff; }
+        .slot { width: 100%; height: auto; aspect-ratio: 1; }
+        .status { flex-wrap: wrap; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">☀️</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div class="game-area">
+
+    <div class="game-area" id="main-content" tabindex="-1" role="main">
         <div class="status">Tura gracza: <span id="turn-color" class="turn-indicator red"></span></div>
         <div class="board" id="board"></div>
         <button class="reset-btn" onclick="resetGame()">Restart</button>
@@ -207,6 +214,9 @@
                 const colDiv = document.createElement('div');
                 colDiv.className = 'col';
                 colDiv.onclick = () => dropToken(c);
+                colDiv.tabIndex = 0; colDiv.setAttribute('role', 'button');
+                colDiv.setAttribute('aria-label', `Wrzuć pionek do kolumny ${c + 1}`);
+                colDiv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dropToken(c); } });
 
                 for (let r = 0; r < rows; r++) {
                     const slot = document.createElement('div');
@@ -232,6 +242,9 @@
 
             if (checkWin(col, row)) {
                 document.querySelector('.status').innerText = (currentPlayer === 1 ? "Czerwony" : "Żółty") + " Wygrywa!";
+                gameOver = true;
+            } else if (board.every(column => column.every(Boolean))) {
+                document.querySelector('.status').textContent = 'Remis! Plansza jest pełna.';
                 gameOver = true;
             } else {
                 currentPlayer = currentPlayer === 1 ? 2 : 1;
@@ -273,19 +286,7 @@
         }
 
         // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         init();
     </script>

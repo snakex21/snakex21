@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dziennik Zmian - Hub</title>
-    <link rel="icon" href="assets/workshop/favicon.svg" type="image/svg+xml">
     <style>
         * {
             margin: 0;
@@ -255,17 +254,23 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
+<link rel="icon" href="assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/workshop/shell.css">
 <script src="assets/workshop/shell.js" defer></script>
 </head>
-<body class="workshop legacy-page">
-    <a class="skip-link" href="#main-content">Przejdź do treści</a>
-<header class="site-header"><nav class="site-nav" aria-label="Główna nawigacja">
+<body class="workshop legacy-page site-shell content-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
 <a class="site-brand" href="index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
-<div class="site-links"><a href="index.html">Start</a><a href="Programy/programy.html">Narzędzia</a><a href="gry/gry.html">Gry</a><a href="LinkHub/index.html">LinkHub</a><a href="muzyka/muzyka.html">Muzyka</a><a href="filmy/filmy glowna.html">Filmy</a></div><button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
-</nav></header>
+<div class="site-links"><a href="index.html">Start</a><a href="Programy/programy.html">Narzędzia</a><a href="gry/gry.html">Gry</a><a href="LinkHub/index.html">LinkHub</a><a href="muzyka/muzyka.html">Muzyka</a><a href="filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="index.html">← Strona główna</a></div>
+</header>
 
-    <main id="main-content">
+
+    <main id="main-content" tabindex="-1">
         <div class="hero">
             <h1>Dziennik Zmian</h1>
             <p>Historia rozwoju i aktualizacji Hubu</p>
@@ -273,6 +278,15 @@
 
         <div class="timeline">
             <article class="entry latest">
+                <div class="entry-header"><h2>Spójny Hub i spokojniejszy start gry</h2><div class="entry-meta"><span class="date-badge">01.10.2026</span></div></div>
+                <div class="entry-content"><p>Wspólna nawigacja i zapamiętany motyw na wszystkich podstronach. Na stronie głównej zostają zegar, pogoda dla zapisanego miasta i cytat.</p>
+                <ul>
+                    <li>Wojna Er: jednakowe statystyki obu armii, XP zależne od celu, badania i czytelny awans. W trybie normalnym wróg nie wyprzedza epoki gracza.</li>
+                    <li>Gry: poprawki restartów, pauzy, sterowania i opóźnionych ruchów komputera. Nowe zabezpieczenia przed równoległymi rundami.</li>
+                    <li>LinkHub: wyszukiwanie i kategorie działają także w Historii; kolejne linki wczytują się na żądanie, bez zmniejszania bazy.</li>
+                </ul></div>
+            </article>
+            <article class="entry">
                 <div class="entry-header"><h2>Osobisty warsztat</h2><div class="entry-meta"><span class="date-badge">01.10.2026</span></div></div>
                 <div class="entry-content"><p>Nowa strona startowa z wyszukiwaniem narzędzi i gier, wybranymi projektami oraz odnośnikami do ich kodu. Czytelna nawigacja także na telefonie.</p><ul><li>Katalogi zapamiętują wyszukiwanie i pozycję listy po powrocie.</li><li>Liczba narzędzi wynika z rzeczywistego katalogu. Brakująca okładka gry ma czytelny zamiennik.</li><li>Pong: naprawione powtarzające się restarty po wygranej i sterowanie myszą na skalowanej planszy.</li></ul></div>
             </article>

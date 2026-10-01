@@ -1,335 +1,95 @@
-// Przypisanie obsługi zdarzeń do przycisków rozpoczynających quiz
-document.getElementById('single-question').addEventListener('click', function() {
-    startQuiz(false);
-});
-
-document.getElementById('multiple-questions').addEventListener('click', function() {
-    startQuiz(true);
-});
-
-// Inicjalizacja zmiennych stanu quizu
-let currentQuestionIndex = 0; // Index bieżącego pytania
-let score = 0; // Wynik użytkownika
-// Definicja pytań quizu
 const questions = [
-    { question: "Jaka była najbardziej popularna karta w 2010 roku?", answers: ["ATI Radeon HD 4870", "GeForce 8800 GT", "GeForce 9800 GT", "GTX 260", "HD 5870", "HD 5770"], correct: 0 },
-    { question: "1 procesor 4-rdzeniowy", answers: ["Intel Q6/QX6", "AMD Phenom X4", "Intel Xeon", "AMD Opteron"], correct: 0 },
-    { question: "1 procesor 64-bitowy", answers: ["AMD Athlon 64", "Pentium 4 'Prescott'", "Core 2 Duo", "Athlon 64 FX"], correct: 0 },
-    { question: "Ile faktycznie rdzeni/wątków miały procesory FX 8000?", answers: ["Co ty, miały tyle, ile pisano", "4 rdzenie i wątki", "6 rdzeni i wątków", "4 rdzenie 8 wątków"], correct: 3 },
-    { question: "Wymień model Core 2 Duo, którego wartość nie spadła do końca życia sklepowego", answers: ["E4600", "E6600", "X6800", "E8400", "E7500"], correct: 3 },
-    {
-        question: "Która z tych kart ma pamięci GDDR4?",
-        answers: ["HD 3870", "HD 4870", "GeForce 8800 GTX", "GTX 280", "GTX 480"],
-        correct: 0 // HD 4870
-    },
-    {
-        question: "Ile pamięci zakładając, że mamy różne płyty, ile standardów DDR można było mieć na sockecie 775?",
-        answers: ["3 standardy DDR, DDR2, DDR3", "2 standardy DDR2, DDR3", "2 standardy DDR, DDR2", "1 standard DDR2"],
-        correct: 0 // 3 standardy DDR, DDR2, DDR3
-    },
-    {
-        question: "Która karta 1 procesorowa była najszybsza w 2009 roku?",
-        answers: ["HD 5870", "GTX 285", "HD 4890"],
-        correct: 0 // HD 5870
-    },
-    {
-        question: "Kiedy AMD kupiło firmę ATI?",
-        answers: ["Poprawna data", "Losowa data 1", "Losowa data 2", "Losowa data 3", "Losowa data 4"], // Załóżmy, że "Poprawna data" to prawidłowa odpowiedź
-        correct: 0
-    },
-    {
-        question: "Ile lat NVIDIA produkowała karty GTX?",
-        answers: ["16 lat", "15 lat", "14 lat", "10 lat"],
-        correct: 1 // 15 lat
-    },
-    {
-        question: "Wymień ostatni socket gdzie AMD i Intel miało wspólnie procesory",
-        answers: ["Socket 7", "Socket 3", "Socket 378"],
-        correct: 0 // Socket 7
-    },
-    {
-        question: "Kto jako pierwszy wprowadził standard PCIe 4.0 do swoich kart graficznych?",
-        answers: ["AMD", "NVIDIA"],
-        correct: 0 // AMD
-    },
-    {
-        question: "Kiedy wyszły pierwsze płyty, które wspierały DDR4?",
-        answers: ["2014", "2015", "2016", "2017"],
-        correct: 0 // 2014
-    },
-    {
-        question: "Kiedy DisplayPort został użyty po raz pierwszy w karcie graficznej?",
-        answers: ["2007", "2006", "2008", "2009", "2010"],
-        correct: 0 // 2007
-    },
-    {
-        question: "Kiedy powstały technologie G-Sync i FreeSync?",
-        answers: ["2014", "2013", "2011", "2012", "2015"],
-        correct: 0 // 2014
-    }
+    { question: "Ile bitów ma jeden bajt?", answers: ["8", "2", "16", "100"], correct: 0 },
+    { question: "Jakie cyfry wykorzystuje system binarny?", answers: ["0 i 1", "1 i 2", "Od 0 do 9", "Tylko 1"], correct: 0 },
+    { question: "Który podzespół wykonuje instrukcje programu?", answers: ["Procesor (CPU)", "Obudowa", "Monitor", "Klawiatura"], correct: 0 },
+    { question: "Do czego służy układ graficzny (GPU)?", answers: ["Przetwarzania grafiki", "Zasilania komputera", "Chłodzenia obudowy", "Wprowadzania tekstu"], correct: 0 },
+    { question: "Co zwykle dzieje się z danymi w pamięci RAM po odłączeniu zasilania?", answers: ["Zostają utracone", "Trafiają do drukarki", "Automatycznie trafiają do chmury", "Zawsze pozostają w RAM"], correct: 0 },
+    { question: "Który nośnik nie ma ruchomych części mechanicznych?", answers: ["SSD", "Dysk twardy HDD", "Dyskietka w stacji", "Płyta CD w napędzie"], correct: 0 },
+    { question: "Które złącze może przesyłać cyfrowy obraz i dźwięk?", answers: ["HDMI", "PS/2", "VGA", "Złącze zasilania ATX"], correct: 0 },
+    { question: "Który z tych programów jest przeglądarką internetową?", answers: ["Firefox", "Kalkulator", "Notatnik", "Paint"], correct: 0 },
+    { question: "Który z tych formatów służy do zapisu obrazów?", answers: ["PNG", "MP3", "WAV", "TXT"], correct: 0 },
+    { question: "Co oznacza skrót HTML?", answers: ["HyperText Markup Language", "High Transfer Memory Link", "Home Tool Machine Logic", "HyperText Music Library"], correct: 0 },
+    { question: "Które złącze jest powszechnie używane do podłączania klawiatury, myszy i pendrive’a?", answers: ["USB", "HDMI", "Gniazdo procesora", "Złącze wentylatora"], correct: 0 },
+    { question: "Do czego służy karta sieciowa?", answers: ["Łączenia komputera z siecią", "Wyświetlania obrazu", "Zasilania procesora", "Drukowania dokumentów"], correct: 0 },
+    { question: "Które oprogramowanie zarządza zasobami komputera i uruchamianiem aplikacji?", answers: ["System operacyjny", "Tapeta pulpitu", "Plik tekstowy", "Kabel USB"], correct: 0 },
+    { question: "Który podzespół rozprowadza energię elektryczną do części komputera?", answers: ["Zasilacz", "Dysk SSD", "Karta dźwiękowa", "Pamięć RAM"], correct: 0 },
+    { question: "Jaki znak zwykle oddziela nazwę użytkownika od domeny w adresie e-mail?", answers: ["@", "#", "%", "&"], correct: 0 }
 ];
 
-// Funkcja rozpoczynająca quiz
+let currentQuestionIndex = 0, score = 0, quizMode = 'single', answered = false;
+let activeQuestions = [], selectedAnswers = [];
+const quizPage = document.getElementById('quiz-page');
+const resultPage = document.getElementById('result-page');
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
 function startQuiz(isMultiple) {
-    currentQuestionIndex = 0;
-    score = 0;
-    // Ukrywanie i pokazywanie odpowiednich sekcji strony
+    quizMode = isMultiple ? 'multiple' : 'single';
+    activeQuestions = shuffle([...questions]).slice(0, isMultiple ? 10 : 1);
+    currentQuestionIndex = 0; score = 0; selectedAnswers = []; answered = false;
     document.getElementById('start-page').classList.add('hidden');
-    document.getElementById('quiz-page').classList.remove('hidden');
-    document.getElementById('result-page').classList.add('hidden');
-    // Decyzja o typie quizu do wyświetlenia
-    if (isMultiple) {
-        displayMultipleQuestions();
-    } else {
-        displaySingleQuestion();
-    }
-}
-
-function getRandomQuestions(questions, numOfQuestions) {
-    let shuffled = [...questions].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, numOfQuestions);
-}
-
-// Funkcja wyświetlająca pojedyncze pytanie quizu
-function displaySingleQuestion() {
-    const question = questions[currentQuestionIndex];
-    const quizPage = document.getElementById('quiz-page');
-    // Wyświetlenie pytania i przycisków z odpowiedziami
-    quizPage.innerHTML = `
-        <h2>${question.question}</h2>
-        ${question.answers.map((answer, index) => 
-            `<button onclick="checkAnswer(${index}, false)">${answer}</button>`
-        ).join('')}
-    `;
-}
-
-
-// Funkcja inicjująca quiz z wieloma pytaniami
-function startMultipleQuestionsQuiz() {
-    // Pobierz losowo 10 pytań z pełnej listy
-    let selectedQuestions = getRandomQuestions(questions, 10);
-
-    currentQuestionIndex = 0;
-    score = 0;
-    document.getElementById('start-page').classList.add('hidden');
-    document.getElementById('quiz-page').classList.remove('hidden');
-    document.getElementById('result-page').classList.add('hidden');
-    displayMultipleQuestions(selectedQuestions); // Zaktualizuj, aby przyjmować wybrane pytania
-}
-
-// Funkcja mieszająca odpowiedzi - POPRAWKA: dodana brakująca funkcja
-function shuffleAnswers(question) {
-    const answers = [...question.answers];
-    const correctAnswer = answers[question.correct];
-
-    // Algorytm Fisher-Yates do tasowania tablicy
-    for (let i = answers.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [answers[i], answers[j]] = [answers[j], answers[i]];
-    }
-
-    // Znajdź nowy indeks poprawnej odpowiedzi
-    const correctIndex = answers.indexOf(correctAnswer);
-
-    return { shuffledAnswers: answers, correctIndex };
-}
-
-// Funkcja wyświetlająca wiele pytań z mieszaniem odpowiedzi
-function displayMultipleQuestions(selectedQuestions) {
-    const quizPage = document.getElementById('quiz-page');
-    quizPage.innerHTML = selectedQuestions.map((question, questionIndex) => {
-        // Przetasuj odpowiedzi dla każdego pytania i zaktualizuj indeks poprawnej odpowiedzi
-        let { shuffledAnswers, correctIndex } = shuffleAnswers(question);
-        question.shuffledAnswers = shuffledAnswers;
-        question.correctIndex = correctIndex;
-        return `
-            <div class="question">
-                <h2>${question.question}</h2>
-                ${shuffledAnswers.map((answer, index) => `
-                    <button onclick="checkAnswer(${index}, true, ${questionIndex})">${answer}</button>
-                `).join('')}
-            </div>
-        `;
-    }).join('') + `<button onclick="showResults()">Zakończ quiz</button>`;
-}
-
-function checkAnswer(selectedAnswer, isMultiple, questionIndex = currentQuestionIndex) {
-    const question = questions[questionIndex];
-
-    // POPRAWKA: dla quizu wielopytaniowego używamy correctIndex z przetasowanych odpowiedzi
-    const correctAnswerIndex = isMultiple ? question.correctIndex : question.correct;
-
-    if (isMultiple) {
-        // Tryb wielopytaniowy - tylko oznacz odpowiedź i zwiększ wynik
-        const questionDiv = document.querySelectorAll('.question')[questionIndex];
-        const buttons = questionDiv.querySelectorAll('button');
-
-        if (selectedAnswer === correctAnswerIndex) {
-            buttons[selectedAnswer].classList.add('correct-answer');
-            score++;
-        } else {
-            buttons[selectedAnswer].classList.add('wrong-answer');
-            buttons[correctAnswerIndex].classList.add('correct-answer');
-        }
-
-        buttons.forEach(btn => btn.disabled = true);
-    } else {
-        // Tryb pojedynczego pytania
-        const buttons = document.getElementById('quiz-page').querySelectorAll('button');
-
-        if (selectedAnswer === correctAnswerIndex) {
-            buttons.forEach((btn, index) => {
-                if (index === correctAnswerIndex) {
-                    btn.classList.add('correct-answer');
-                } else {
-                    btn.disabled = true;
-                }
-            });
-        } else {
-            buttons.forEach((btn, index) => {
-                if (index === correctAnswerIndex) {
-                    btn.classList.add('correct-answer');
-                } else if (index === selectedAnswer) {
-                    btn.classList.add('wrong-answer');
-                    btn.innerText += " - Zła odpowiedź";
-                }
-                btn.disabled = true;
-            });
-        }
-
-        // Usuń istniejące przyciski nawigacji (jeśli istnieją), zanim dodasz nowe
-        const existingNavButtons = document.getElementById('navigation-buttons');
-        if (existingNavButtons) {
-            existingNavButtons.remove();
-        }
-
-        // Dodajemy przyciski nawigacji tylko dla pojedynczego pytania
-        const quizPage = document.getElementById('quiz-page');
-        quizPage.innerHTML += `
-            <div id="navigation-buttons">
-                <button onclick="restartQuiz()">Losowe pytanie</button>
-                <button onclick="returnToStart()">Powrót do strony głównej</button>
-            </div>
-        `;
-    }
-}
-
-function showResults() {
-    document.getElementById('quiz-page').classList.add('hidden');
-    const resultPage = document.getElementById('result-page');
-    resultPage.classList.remove('hidden');
-    resultPage.innerHTML = `
-        <h1>Twój wynik: ${score} z ${questions.length}</h1>
-        <button onclick="restartQuiz()">Restart</button>
-        <button onclick="returnToStart()">Powrót do strony głównej</button>
-    `;
-}
-
-function restartQuiz() {
-    // Wybierz losowy indeks pytania z dostępnych pytań
-    currentQuestionIndex = Math.floor(Math.random() * questions.length);
-    document.getElementById('quiz-page').innerHTML = ''; // Czyść zawartość strony quizu
-    displaySingleQuestion(); // Wyświetl losowe pytanie
-}
-
-function returnToStart() {
-    document.getElementById('start-page').classList.remove('hidden');
-    document.getElementById('quiz-page').classList.add('hidden');
-    document.getElementById('result-page').classList.add('hidden');
-}
-
-// Przypisz obsługę zdarzeń do przycisków na stronie startowej
-document.getElementById('single-question').addEventListener('click', () => startQuiz(false));
-document.getElementById('multiple-questions').addEventListener('click', () => startQuiz(true));
-
-
-// Funkcja inicjująca quiz z wieloma pytaniami
-function startMultipleQuestionsQuiz() {
-    currentQuestionIndex = 0;
-    score = 0;
-    document.getElementById('start-page').classList.add('hidden');
-    document.getElementById('quiz-page').classList.remove('hidden');
-    document.getElementById('result-page').classList.add('hidden');
+    resultPage.classList.add('hidden'); quizPage.classList.remove('hidden');
     displayNextQuestion();
 }
-
-// Funkcja wyświetlająca następne pytanie w trybie wielu pytań
+function startMultipleQuestionsQuiz() { startQuiz(true); }
+function startRandomQuestionsQuiz() { startQuiz(true); }
+function restartQuiz() { startQuiz(quizMode === 'multiple'); }
 function displayNextQuestion() {
-    if (currentQuestionIndex < questions.length) {
-        const question = questions[currentQuestionIndex];
-        const quizPage = document.getElementById('quiz-page');
-        quizPage.innerHTML = `
-            <h2>${question.question}</h2>
-            ${question.answers.map((answer, index) => `<button onclick="checkAnswerMultiple(${index})">${answer}</button>`).join('')}
-        `;
-    } else {
-        showMultipleQuestionsResults();
-    }
+    if (currentQuestionIndex >= activeQuestions.length) { showResults(); return; }
+    answered = false; quizPage.innerHTML = '';
+    const question = activeQuestions[currentQuestionIndex];
+    const progress = document.createElement('p');
+    progress.textContent = `Pytanie ${currentQuestionIndex + 1} z ${activeQuestions.length}`;
+    const title = document.createElement('h2'); title.textContent = question.question;
+    quizPage.append(progress, title);
+    const expectedIndex = currentQuestionIndex;
+    shuffle(question.answers.map((text, index) => ({text, index}))).forEach(answer => {
+        const button = document.createElement('button'); button.type = 'button';
+        button.textContent = answer.text; button.dataset.answer = answer.index;
+        button.addEventListener('click', () => {
+            if (expectedIndex === currentQuestionIndex) checkAnswerMultiple(answer.index);
+        });
+        quizPage.appendChild(button);
+    });
 }
-
-// Zaktualizujmy strukturę przechowującą zaznaczone odpowiedzi
-let selectedAnswers = new Array(questions.length);
-
-// Funkcja sprawdzająca odpowiedź w trybie wielu pytań
 function checkAnswerMultiple(selectedAnswer) {
-    const question = questions[currentQuestionIndex];
-    // Zapisz wybraną odpowiedź
-    selectedAnswers[currentQuestionIndex] = selectedAnswer;
-    if (selectedAnswer === question.correct) {
-        score++;
-    }
+    if (answered || currentQuestionIndex >= activeQuestions.length || quizPage.classList.contains('hidden')) return;
+    const question = activeQuestions[currentQuestionIndex];
+    if (!Number.isInteger(selectedAnswer) || selectedAnswer < 0 || selectedAnswer >= question.answers.length) return;
+    answered = true; selectedAnswers[currentQuestionIndex] = selectedAnswer;
+    if (selectedAnswer === question.correct) score++;
+    quizPage.querySelectorAll('button[data-answer]').forEach(button => {
+        const index = Number(button.dataset.answer); button.disabled = true;
+        if (index === question.correct) button.classList.add('correct-answer');
+        else if (index === selectedAnswer) button.classList.add('wrong-answer');
+    });
     currentQuestionIndex++;
-    displayNextQuestion();
+    const next = document.createElement('button'); next.type = 'button';
+    next.textContent = currentQuestionIndex === activeQuestions.length ? 'Pokaż wynik' : 'Następne pytanie';
+    next.addEventListener('click', displayNextQuestion); quizPage.appendChild(next);
+    if (currentQuestionIndex === activeQuestions.length) showResults();
 }
-
-// Funkcja wyświetlająca wyniki dla wielu pytań
-function showMultipleQuestionsResults() {
-    const quizPage = document.getElementById('quiz-page');
-    quizPage.classList.add('hidden');
-    const resultPage = document.getElementById('result-page');
-    resultPage.classList.remove('hidden');
-    resultPage.innerHTML = `<h1>Twój wynik: ${score} z ${questions.length}</h1>`;
-    
-    // Wyświetl każde pytanie z odpowiedziami
-    resultPage.innerHTML += questions.map((question, index) => `
-        <div>
-            <h2>${question.question}</h2>
-            ${question.answers.map((answer, answerIndex) => `
-                <div class="${answerIndex === selectedAnswers[index] ? 'selected-answer' : ''} 
-                            ${answerIndex === question.correct ? 'correct-answer' : 'incorrect-answer'}">
-                    ${answer} - ${answerIndex === question.correct ? 'Poprawna' : 'Niepoprawna'}
-                </div>
-            `).join('')}
-        </div>
-    `).join('');
-
-    // Przycisk do rozpoczęcia nowego quizu z losowymi pytaniami
-    resultPage.innerHTML += `
-        <button onclick="startRandomQuestionsQuiz()">Daj następne pytania</button>
-        <button onclick="returnToStart()">Powrót do strony głównej</button>
-    `;
-}
-
-// Funkcja inicjująca nowy quiz z losowo wybranymi pytaniami
-function startRandomQuestionsQuiz() {
-    shuffleQuestions(); // Losowe przetasowanie pytań
-    startMultipleQuestionsQuiz(); // Rozpoczęcie quizu wielokrotnego
-}
-
-// Funkcja do przetasowania pytań
-function shuffleQuestions() {
-    for (let i = questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [questions[i], questions[j]] = [questions[j], questions[i]]; // zamiana miejscami
+function showResults() {
+    quizPage.classList.add('hidden'); resultPage.classList.remove('hidden'); resultPage.innerHTML = '';
+    const title = document.createElement('h1'); title.textContent = `Twój wynik: ${score} z ${activeQuestions.length}`; resultPage.appendChild(title);
+    activeQuestions.forEach((question, index) => {
+        const review = document.createElement('p');
+        const selected = selectedAnswers[index];
+        review.textContent = `${question.question} — Twoja odpowiedź: ${selected === undefined ? 'brak' : question.answers[selected]}. Poprawna: ${question.answers[question.correct]}`;
+        resultPage.appendChild(review);
+    });
+    for (const [label, action] of [['Zagraj ponownie', restartQuiz], ['Powrót do wyboru trybu', returnToStart]]) {
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
+        button.addEventListener('click', action); resultPage.appendChild(button);
     }
-    selectedAnswers = new Array(questions.length).fill(null); // Resetowanie zaznaczonych odpowiedzi
 }
-
-// Przypomnienie funkcji returnToStart()
 function returnToStart() {
     document.getElementById('start-page').classList.remove('hidden');
-    document.getElementById('quiz-page').classList.add('hidden');
-    document.getElementById('result-page').classList.add('hidden');
+    quizPage.classList.add('hidden'); resultPage.classList.add('hidden'); answered = true;
 }
-
+document.getElementById('single-question').addEventListener('click', () => startQuiz(false));
 document.getElementById('multiple-questions').addEventListener('click', startMultipleQuestionsQuiz);

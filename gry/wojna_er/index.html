@@ -4,31 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wojna Er - Hub</title>
-  <link rel="stylesheet" href="style.css?v=20261001-battle2">
+  <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=20261001-fair-battle">
+  <link rel="stylesheet" href="../../assets/workshop/shell.css">
+  <script src="../../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-  <main id="game-container">
+<body class="site-shell game-shell war-shell">
+  <a class="skip-link" href="#game-container">Przejdź do gry</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
+  <main id="game-container" tabindex="-1">
     <header class="game-toolbar">
       <a href="../gry.html">← Gry</a><h1>WOJNA <span>ER</span></h1><span id="battle-time" class="battle-clock">0:00</span><button id="pause-btn" type="button" disabled>Pauza (P)</button>
     </header>
     <section id="ui-top" aria-label="Stan bitwy">
       <div class="base-stat"><span>Twoja baza</span><div class="base-health" id="player-health-bar"><div class="bar-fill" id="player-hp-fill"></div><span id="player-hp-text">500/500</span></div></div>
-      <div class="resources"><span class="res-gold">Złoto: <strong id="gold-display">100</strong> <small id="income-display">+7/s</small></span><span class="res-xp">XP: <strong id="xp-display">0</strong></span><span class="era-name" id="era-display">Epoka Kamienia</span><div class="evolution-track" aria-hidden="true"><div id="evolution-progress"></div></div></div>
-      <div class="base-stat"><span>Baza wroga <small id="enemy-era-display">Epoka Kamienia</small></span><div class="base-health enemy" id="enemy-health-bar"><div class="bar-fill enemy" id="enemy-hp-fill"></div><span id="enemy-hp-text">500/500</span></div></div>
+      <div class="resources"><span class="res-gold">Złoto: <strong id="gold-display">100</strong> <small id="income-display">+7/s</small></span><span class="res-xp">XP: <strong id="xp-display">0</strong> <small id="research-display">+2/s</small></span><span class="era-name" id="era-display">Epoka Kamienia</span><span id="evolution-status" class="progress-copy">0/500 XP · walka i badania</span><div class="evolution-track" aria-hidden="true"><div id="evolution-progress"></div></div></div>
+      <div class="base-stat"><span>Baza wroga <small id="enemy-era-display">Epoka Kamienia</small><small id="enemy-status">Wróg nie wyprzedzi twojej epoki</small></span><div class="base-health enemy" id="enemy-health-bar"><div class="bar-fill enemy" id="enemy-hp-fill"></div><span id="enemy-hp-text">500/500</span></div></div>
     </section>
-    <div id="battlefield"><canvas id="game-canvas" tabindex="0" aria-label="Pole bitwy. Rekrutacja: klawisze 1, 2 i 3. Pauza: P."></canvas></div>
+    <div id="battlefield"><canvas id="game-canvas" tabindex="0" aria-label="Pole bitwy. Rekrutacja: 1, 2, 3. Ewolucja: E. Wieżyczka: T. Pauza: P."></canvas></div>
     <section id="ui-bottom" aria-label="Rekrutacja i ulepszenia">
       <div class="recruitment"><div class="recruitment-caption"><span id="training-status">Oddział gotowy do wymarszu</span><span>Armia <strong id="army-display">0/14</strong></span></div><div class="unit-panel" id="unit-buttons"></div></div>
       <div class="special-panel"><button id="turret-btn" class="action-btn" type="button">Wieżyczka (100g)</button><button id="evolve-btn" class="action-btn evolve" type="button" disabled>Ewolucja (500xp)</button></div>
     </section>
-    <p class="game-hint">1–3: rekrutacja · P: pauza · Osłona zatrzymuje ostrzał. Przebicie łamie osłonę. Ostrzał kontruje szturm.</p>
+    <p class="game-hint">1–3: rekrutacja · E: epoka · T: wieżyczka · P: pauza · Osłona zatrzymuje ostrzał. Przebicie łamie osłonę. Ostrzał kontruje szturm.</p>
     <section id="start-screen" class="overlay" aria-labelledby="start-title">
-      <div class="overlay-card"><div class="eyebrow">CZTERY EPOKI · JEDNO POLE BITWY</div><h2 id="start-title">Od kamienia<br>do gwiazd.</h2><p>Zbuduj armię, przełam linię wroga i poprowadź swoją cywilizację przez cztery epoki.</p><ol><li>Twoja armia nosi błękit. Każdy oddział potrzebuje chwili na wymarsz; w polu mieści się 14 jednostek.</li><li>Łącz osłonę z ostrzałem i jednostkami przebijającymi obronę. Opisy kart wskazują ich mocne strony.</li><li>XP z walki odblokowuje epoki i większy dochód. Wieżyczka chroni bazę. Klawisz P daje czas na decyzję.</li></ol><button id="start-btn" type="button">Rozpocznij bitwę</button><a href="../gry.html">Wróć do gier</a></div>
+      <div class="overlay-card"><div class="eyebrow">TRYB NORMALNY · CZTERY EPOKI</div><h2 id="start-title">Od kamienia<br>do gwiazd.</h2><p>Zbuduj armię, przełam linię wroga i poprowadź swoją cywilizację przez cztery epoki.</p><ol><li>Twoja armia nosi błękit. Każdy oddział potrzebuje chwili na wymarsz; w polu mieści się 14 jednostek.</li><li>Na początek: Maczugowiec → Procarz → Jeździec Dino. Dalej mieszaj oddziały. Przy zapasie złota kup wieżyczkę (T). Wspiera obronę, ale bez armii nie zatrzyma całego natarcia.</li><li>Walka i badania dają XP. Gdy ewolucja jest gotowa, naciśnij E, by zwiększyć dochód i odblokować nowe jednostki. P zatrzymuje bitwę.</li></ol><p class="fair-play">Obie armie mają identyczne statystyki jednostek. Wróg płaci za rozwój i może wejść do twojej epoki najwcześniej 12 sekund po tobie.</p><button id="start-btn" type="button">Rozpocznij bitwę</button><a href="../gry.html">Wróć do gier</a></div>
     </section>
     <section id="pause-screen" class="overlay hidden" aria-labelledby="pause-title"><div class="overlay-card"><h2 id="pause-title">Pauza</h2><p>Bitwa i przyrost zasobów są zatrzymane.</p><button id="resume-btn" type="button">Wznów bitwę</button><a href="../gry.html">Wróć do gier</a></div></section>
     <section id="game-over-screen" class="overlay hidden" aria-labelledby="game-over-title"><div class="overlay-card"><h2 id="game-over-title">Koniec gry</h2><button id="restart-btn" type="button" onclick="location.reload()">Zagraj ponownie</button><a href="../gry.html">Wróć do gier</a></div></section>
   </main>
   <script src="art.js?v=20261001-battle2"></script>
-    <script src="script.js?v=20261001-battle4"></script>
+    <script src="script.js?v=20261001-fair-battle"></script>
 </body>
 </html>

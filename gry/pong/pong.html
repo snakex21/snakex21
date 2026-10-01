@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pong - Hub</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
     <style>
         * {
             margin: 0;
@@ -239,23 +238,25 @@
                 flex-direction: column;
             }
         }
+        #pong-canvas { touch-action: none; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <main>
+
+    <main id="main-content" tabindex="-1">
         <div class="game-header">
             <h1>🏓 Pong</h1>
             <p>Klasyczna gra w ping-ponga</p>
@@ -267,12 +268,13 @@
         </div>
 
         <div class="game-container">
-            <canvas id="pong-canvas" width="900" height="600"></canvas>
+            <canvas tabindex="0" id="pong-canvas" width="900" height="600"></canvas>
             <div class="controls" id="controls-text">
                 <strong>Sterowanie:</strong> <span id="control-info">Ruch myszą w pionie porusza paletką</span>
             </div>
             <div class="btn-group">
                 <button class="start-btn" id="start-btn" onclick="startGame()">▶ START</button>
+                <button type="button" id="pause-game" class="restart-btn" onclick="setPaused(!paused)">Pauza</button><span id="round-status" role="status"></span>
                 <button class="restart-btn hidden" id="restart-btn" onclick="restartGame()">Zagraj ponownie</button>
             </div>
         </div>
@@ -280,20 +282,7 @@
 
     <script>
         // Tryb ciemny
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', savedTheme);
-
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Logika gry Pong
         const canvas = document.getElementById('pong-canvas');
@@ -308,6 +297,7 @@
         let gameInterval = null;
         let serveTimeout = null;
         let matchRestartTimeout = null;
+        let paused = false, pendingServe = false, pendingWin = false, timerGeneration = 0, serveGeneration = 0;
 
         // Paletki
         const paddleWidth = 30;
@@ -371,20 +361,44 @@
         }
 
         // Kontrola myszą (tryb AI)
-        canvas.addEventListener('mousemove', (evt) => {
-            if (gameMode === 'ai' && gameStarted) {
+        function moveMouse(evt) {
+            if (gameMode === 'ai' && gameStarted && !paused) {
                 const rect = canvas.getBoundingClientRect();
                 if (rect.height <= 0) return;
                 const pointerY = (evt.clientY - rect.top) * canvas.height / rect.height;
                 leftPaddle.y = Math.max(0, Math.min(canvas.height - leftPaddle.height,
                     pointerY - leftPaddle.height / 2));
             }
-        });
+        }
+        canvas.addEventListener('mousemove', moveMouse);
+        canvas.addEventListener('pointerdown', e => { e.preventDefault();canvas.setPointerCapture?.(e.pointerId);movePointer(e); });
+        canvas.addEventListener('pointermove', e => { if(e.pointerType==='mouse'||e.buttons||e.pressure)movePointer(e); });
+        function movePointer(e) {
+            if(gameMode==='ai'){moveMouse(e);return;}
+            if(!gameStarted||paused)return;
+            const rect=canvas.getBoundingClientRect();if(!rect.height||!rect.width)return;
+            const paddle=e.clientX-rect.left<rect.width/2?leftPaddle:rightPaddle;
+            paddle.y=Math.max(0,Math.min(canvas.height-paddle.height,(e.clientY-rect.top)*canvas.height/rect.height-paddle.height/2));
+        }
+        function setPaused(value) {
+            if(!gameStarted)return;
+            const next=!!value;if(next===paused)return;paused=next;
+            if (!paused) canvas.focus();
+            Object.keys(keys).forEach(key=>keys[key]=false);
+            document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';
+            document.getElementById('round-status').textContent=paused?'Pauza':'';
+            if(paused){pendingWin=matchRestartTimeout!==null;pendingServe=serveTimeout!==null;clearTimeout(matchRestartTimeout);clearTimeout(serveTimeout);matchRestartTimeout=null;serveTimeout=null;++timerGeneration;++serveGeneration;}
+            else if(pendingWin){pendingWin=false;scheduleMatchRestart();}
+            else if(pendingServe){pendingServe=false;resetBall();}
+        }
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);});
 
         // Kontrola klawiaturą (tryb Coop)
         const keys = {};
         document.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
+            if(e.altKey||e.ctrlKey||e.metaKey||e.target?.closest?.('header,a,input,textarea,select'))return;
+            if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){e.preventDefault();setPaused(!paused);return;}
+            if(!e.target?.closest?.('button')&&['ArrowUp','ArrowDown','w','W','s','S'].includes(e.key)){e.preventDefault();keys[e.key] = true;}
         });
 
         document.addEventListener('keyup', (e) => {
@@ -401,6 +415,7 @@
 
         // Stare opóźnienia nie mogą zmieniać nowej gry ani ekranu startowego.
         function clearPendingTimers() {
+            ++timerGeneration;++serveGeneration;pendingServe=false;pendingWin=false;
             clearTimeout(serveTimeout);
             clearTimeout(matchRestartTimeout);
             serveTimeout = null;
@@ -418,7 +433,9 @@
             ball.speed = 10;
 
             // Pauza 2 sekundy przed następną rundą
+            const version=timerGeneration, serve=++serveGeneration;
             serveTimeout = setTimeout(() => {
+                if(version!==timerGeneration||serve!==serveGeneration||paused)return;
                 serveTimeout = null;
                 if (!gameStarted) return;
                 ball.velocityX = (Math.random() > 0.5 ? 1 : -1) * 5;
@@ -429,7 +446,9 @@
 
         // Start gry
         function startGame() {
-            gameStarted = true;
+            if(gameStarted)return;
+            gameStarted = true;paused=false;canvas.focus();
+            document.getElementById("pause-game").textContent="Pauza";
             startBtn.classList.add('hidden');
             restartBtn.classList.remove('hidden');
             ball.velocityX = 5;
@@ -442,7 +461,8 @@
 
         // Restart gry
         function restartGame() {
-            clearPendingTimers();
+            clearPendingTimers();paused=false;canvas.focus();
+            document.getElementById("pause-game").textContent="Pauza";document.getElementById("round-status").textContent="Nowa runda";
             leftPaddle.score = 0;
             rightPaddle.score = 0;
             ball.speed = 10;
@@ -450,9 +470,13 @@
             resetBall();
         }
 
+        function scheduleMatchRestart() {
+            const version=timerGeneration;
+            matchRestartTimeout=setTimeout(()=>{if(version!==timerGeneration||paused)return;matchRestartTimeout=null;restartGame();},2000);
+        }
         // Update
         function update() {
-            if (!gameStarted) return;
+            if (!gameStarted || paused || document.hidden) return;
 
             // Ruch piłki tylko gdy nie ma cooldowna
             if (!scoringCooldown) {
@@ -461,6 +485,8 @@
             }
 
             if (gameMode === 'ai') {
+                if(keys.ArrowUp||keys.w||keys.W)leftPaddle.y-=7;
+                if(keys.ArrowDown||keys.s||keys.S)leftPaddle.y+=7;
                 // AI dla prawej paletki
                 let AILevel = 0.1;
                 rightPaddle.y += (ball.y - (rightPaddle.y + rightPaddle.height / 2)) * AILevel;
@@ -500,7 +526,7 @@
                 let direction = (ball.x < canvas.width / 2 ? 1 : -1);
                 ball.velocityX = direction * ball.speed * Math.cos(angleRad);
                 ball.velocityY = ball.speed * Math.sin(angleRad);
-                ball.speed += 0.5;
+                ball.speed = Math.min(24, ball.speed + 0.5);
             }
 
             // Punkty - tylko gdy nie ma cooldowna
@@ -518,10 +544,8 @@
             if ((leftPaddle.score >= 7 || rightPaddle.score >= 7) && matchRestartTimeout === null) {
                 clearTimeout(serveTimeout);
                 serveTimeout = null;
-                matchRestartTimeout = setTimeout(() => {
-                    matchRestartTimeout = null;
-                    restartGame();
-                }, 2000);
+                document.getElementById("round-status").textContent=leftPaddle.score>=7?"Wygrywa lewy gracz!":"Wygrywa prawy gracz!";
+                scheduleMatchRestart();
             }
         }
 
@@ -579,7 +603,8 @@
 
                 // Reset gry przy zmianie trybu
                 clearPendingTimers();
-                gameStarted = false;
+                gameStarted = false;paused=false;
+                document.getElementById("pause-game").textContent="Pauza";document.getElementById("round-status").textContent="";
                 if (gameInterval) {
                     clearInterval(gameInterval);
                     gameInterval = null;

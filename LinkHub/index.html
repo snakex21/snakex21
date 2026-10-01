@@ -113,7 +113,7 @@
 
         .view-tab.active {
             background: var(--accent);
-            color: white;
+            color: var(--accent-contrast);
             border-color: var(--accent);
         }
 
@@ -196,7 +196,7 @@
             width: 60px;
             height: 60px;
             background: var(--accent);
-            color: white;
+            color: var(--accent-contrast);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -321,31 +321,31 @@
             }
         }
     </style>
+<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/workshop/shell.css">
+<script src="../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <a href="../index.html" class="logo">Hub</a>
-        <div style="display:flex;gap:10px;align-items:center;">
-            <a href="scan.html" title="Skanuj linki" style="font-size:1.3rem;text-decoration:none;">🔍</a>
-            <a href="pending.html" title="Oczekujące" style="font-size:1.3rem;text-decoration:none;position:relative;">
-                ⏳
-                <span id="pending-badge"
-                    style="display:none;position:absolute;top:-8px;right:-10px;background:#ef4444;color:white;font-size:0.7rem;padding:2px 6px;border-radius:10px;font-weight:bold;"></span>
-            </a>
-            <a href="settings.html" title="Ustawienia" style="font-size:1.3rem;text-decoration:none;">⚙️</a>
-            <button id="theme-toggle">🌙</button>
-        </div>
-    </header>
+<body class="site-shell content-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../index.html">Start</a><a href="../Programy/programy.html">Narzędzia</a><a href="../gry/gry.html">Gry</a><a href="../LinkHub/index.html" aria-current="page">LinkHub</a><a href="../muzyka/muzyka.html">Muzyka</a><a href="../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<nav class="site-subnav" aria-label="LinkHub"><a href="index.html" aria-current="page">Przeglądaj</a><a href="add.html">Dodaj linki</a><a href="pending.html">Oczekujące<span id="pending-badge" class="site-pending-badge" style="display:none"></span></a><a href="scan.html">Skanuj</a><a href="settings.html">Ustawienia</a></nav>
+</header>
 
-    <main>
+
+    <main id="main-content" tabindex="-1">
         <h1>🔗 LinkHub</h1>
         <p class="subtitle">Baza linków posegregowana przez AI</p>
 
         <!-- Search -->
         <div class="search-container">
-            <input type="text" id="search-input" class="search-input" placeholder="🔍 Szukaj linków...">
-            <div class="search-stats" id="search-stats"></div>
+            <input type="text" id="search-input" class="search-input" placeholder="Szukaj linków..." aria-label="Szukaj linków">
+            <div class="search-stats" id="search-stats" role="status" aria-live="polite"></div>
         </div>
 
         <!-- View Tabs -->
@@ -362,207 +362,13 @@
         <div id="links-container">
             <p style="text-align: center; padding: 50px;">Ładowanie...</p>
         </div>
+        <button id="links-more" class="category-btn" type="button" hidden>Pokaż kolejne 60</button>
     </main>
 
     <a href="add.html" class="add-btn" title="Dodaj link">+</a>
 
     <script src="data.js"></script>
-    <script>
-        let currentView = 'categories';
-
-        // Theme
-        const themeToggle = document.getElementById('theme-toggle');
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            themeToggle.textContent = '☀️';
-        }
-        themeToggle.onclick = () => {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            themeToggle.textContent = isDark ? '🌙' : '☀️';
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-        };
-
-        // View Tabs
-        document.querySelectorAll('.view-tab').forEach(tab => {
-            tab.onclick = () => {
-                document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentView = tab.dataset.view;
-
-                const catNav = document.getElementById('category-nav');
-                catNav.style.display = currentView === 'categories' ? 'flex' : 'none';
-
-                if (currentView === 'timeline') {
-                    renderTimeline();
-                } else {
-                    renderLinks('all');
-                }
-            };
-        });
-
-        function init() {
-            if (typeof LINKHUB_LINKS === 'undefined') {
-                document.getElementById('links-container').innerHTML = '<p style="text-align:center;padding:50px;color:#dc3545;">Błąd ładowania.</p>';
-                return;
-            }
-            renderCategories();
-            renderLinks('all');
-        }
-
-        function renderCategories() {
-            const nav = document.getElementById('category-nav');
-            const usedCats = [...new Set(LINKHUB_LINKS.map(l => l.category))];
-
-            usedCats.forEach(cat => {
-                const info = LINKHUB_CATEGORIES[cat] || { name: cat, color: '#666' };
-                const btn = document.createElement('button');
-                btn.className = 'category-btn';
-                btn.dataset.category = cat;
-                btn.textContent = info.name;
-                btn.onclick = () => {
-                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderLinks(cat);
-                };
-                nav.appendChild(btn);
-            });
-
-            document.querySelector('.category-btn[data-category="all"]').onclick = () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                document.querySelector('.category-btn[data-category="all"]').classList.add('active');
-                renderLinks('all');
-            };
-        }
-
-        function renderLinks(filter) {
-            const container = document.getElementById('links-container');
-            let links = filter === 'all' ? LINKHUB_LINKS : LINKHUB_LINKS.filter(l => l.category === filter);
-            const totalCount = links.length;
-
-            // Apply search filter
-            links = filterBySearch(links);
-            updateSearchStats(links.length, LINKHUB_LINKS.length);
-
-            if (links.length === 0) {
-                container.innerHTML = searchQuery
-                    ? '<p style="text-align:center;padding:50px;">🔍 Brak wyników dla "' + searchQuery + '"</p>'
-                    : '<p style="text-align:center;padding:50px;">Brak linków.</p>';
-                return;
-            }
-
-            if (filter === 'all' && !searchQuery) {
-                const groups = {};
-                links.forEach(link => {
-                    if (!groups[link.category]) groups[link.category] = [];
-                    groups[link.category].push(link);
-                });
-
-                container.innerHTML = Object.entries(groups).map(([cat, items]) => {
-                    const info = LINKHUB_CATEGORIES[cat] || { name: cat, color: '#666' };
-                    return `
-                        <h2 class="section-header">${info.name}</h2>
-                        <div class="link-grid">
-                            ${items.map(item => renderCard(item, info)).join('')}
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                container.innerHTML = `
-                    <div class="link-grid">
-                        ${links.map(item => {
-                    const info = LINKHUB_CATEGORIES[item.category] || { name: item.category, color: '#666' };
-                    return renderCard(item, info);
-                }).join('')}
-                    </div>
-                `;
-            }
-        }
-
-        function renderCard(item, info) {
-            return `
-                <a href="${item.url}" target="_blank" class="link-card">
-                    <span class="link-tag" style="color:${info.color}">${info.name}</span>
-                    <div class="link-title">${item.name}</div>
-                    <div class="link-desc">${item.description || ''}</div>
-                    ${item.added ? `<div class="link-date">📅 ${item.added}</div>` : ''}
-                </a>
-            `;
-        }
-
-        function renderTimeline() {
-            const container = document.getElementById('links-container');
-
-            // Sort by date (newest first)
-            const sortedLinks = [...LINKHUB_LINKS].sort((a, b) => {
-                if (!a.added) return 1;
-                if (!b.added) return -1;
-                return b.added.localeCompare(a.added);
-            });
-
-            if (sortedLinks.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:50px;">Brak historii.</p>';
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="timeline">
-                    ${sortedLinks.map(item => {
-                const info = LINKHUB_CATEGORIES[item.category] || { name: item.category, color: '#666' };
-                return `
-                            <div class="timeline-item">
-                                <div class="timeline-date">${item.added || 'Nieznana data'}</div>
-                                <a href="${item.url}" target="_blank" class="timeline-card">
-                                    <div class="timeline-title">${item.name}</div>
-                                    <div class="timeline-cat" style="color:${info.color}">${info.name}</div>
-                                </a>
-                            </div>
-                        `;
-            }).join('')}
-                </div>
-            `;
-        }
-
-        // Show pending count badge
-        function updatePendingBadge() {
-            const badge = document.getElementById('pending-badge');
-            if (typeof LINKHUB_PENDING !== 'undefined' && LINKHUB_PENDING.length > 0) {
-                badge.textContent = LINKHUB_PENDING.length;
-                badge.style.display = 'block';
-            }
-        }
-
-        // Search functionality
-        let searchQuery = '';
-        const searchInput = document.getElementById('search-input');
-        const searchStats = document.getElementById('search-stats');
-
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
-            const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'all';
-            renderLinks(activeCategory);
-        });
-
-        function filterBySearch(links) {
-            if (!searchQuery) return links;
-            return links.filter(link =>
-                link.name.toLowerCase().includes(searchQuery) ||
-                link.url.toLowerCase().includes(searchQuery) ||
-                (link.description && link.description.toLowerCase().includes(searchQuery))
-            );
-        }
-
-        function updateSearchStats(shown, total) {
-            if (searchQuery) {
-                searchStats.textContent = `Znaleziono ${shown} z ${total} linków`;
-            } else {
-                searchStats.textContent = `Łącznie ${total} linków`;
-            }
-        }
-
-        updatePendingBadge();
-        init();
-    </script>
+    <script src="app.js"></script>
 </body>
 
 </html>

@@ -6,7 +6,8 @@
     card.dataset.search = [game.title, game.description, ...(game.genres || []), ...(game.tags || [])].join(' ');
     const cover = document.createElement('div'); cover.className = 'game-cover-wrapper';
     const fallback = document.createElement('span'); fallback.className = 'game-fallback'; fallback.setAttribute('aria-hidden', 'true');
-    fallback.textContent = game.title === '2048' ? '2048' : game.title.split(' ').map(word => word[0]).slice(0,2).join('');
+    const titleWords = game.title.split('(')[0].match(/[\p{L}\p{N}]+/gu) || [];
+    fallback.textContent = game.title === '2048' ? '2048' : titleWords.slice(0, 2).map(word => word[0]).join('').toLocaleUpperCase('pl');
     cover.appendChild(fallback);
     // A local text cover remains visible for missing, blocked or empty artwork.
     if (game.cover && game.slug !== 'wojna-er') {

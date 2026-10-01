@@ -153,3 +153,33 @@ still lose all four. Mixed battles last 130–148 seconds with first evolution a
 more wins than either repeated-unit probe, rather than tuning stats to preserve
 the old seeds' outcomes. Additional mixed seed 2026 needs 451 seconds to finish
 with a full army of old catapults/snipers; the fix is not a maximum-match timer.
+
+## Whole-site/game overhaul (2026-10-01)
+
+The integrated pre-publication suite now passes **224 checks**. All 77 HTML
+entrypoints share static project-relative navigation, a focusable skip target,
+common theme storage and a catalogue/section return path where applicable.
+No runtime npm dependency or build step is required; serve the repository with
+a static HTTP server. The calm homepage clock, saved `weatherCity` and quote
+remain covered. Theme fallback, blocked storage, chart/converter redraw inputs,
+contrast tokens and missing remote film posters have regression checks.
+
+[ARCADE_GAMES.md](ARCADE_GAMES.md), [BOARD_GAMES.md](BOARD_GAMES.md) and
+[WAR_BALANCE.md](WAR_BALANCE.md) describe exact coverage, rules, reproducible
+probes and remaining browser/device work. Startup smoke of the 24 non-Wojna
+catalogue entries is not a full playthrough of each title. Existing URLs and the
+25-game catalogue remain; legacy direct game routes have explicit coverage limits.
+
+LinkHub searches, category filters and history sort operate on all 5529 records
+before rendering a 60-item tranche. Loading more retains the full dataset and
+moves keyboard focus into newly revealed results. Search text and record text
+are escaped; only HTTP(S) links are emitted. No saved user data is migrated or
+cleared. Music keyboard shortcuts leave shared navigation and native controls
+alone.
+
+Independent source review caught and led to corrections for arcade Start/Resume
+focus, scaled Flappy alignment, deferred-header canvas dimensions, music shortcut
+collisions and tower-only research camping. Synthetic tests cannot verify visual
+fit, real touch/audio, external media hosts, complete chess rules, or human
+balance. Publication and final real-browser QA are separate, authorization-gated
+steps. Do not call this an all-games playability certification.

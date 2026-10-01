@@ -179,23 +179,33 @@
             cursor: pointer;
             border-radius: 5px;
         }
+        .game-area { --card-width: min(80px, calc((100vw - 52px) / 7)); padding: 8px; }
+        .card-placeholder, .card, .pile { width: var(--card-width); }
+        .card-placeholder, .card { height: calc(var(--card-width) * 1.5); }
+        .card-placeholder { position: relative; }
+        .card:not(.back) { background: #fff; }
+        .card { font-size: clamp(.75rem, 2.5vw, 1.2rem); padding: 3px; }
+        .deck-area, .foundations { gap: 6px; }
+        .top-row { height: calc(var(--card-width) * 1.5 + 10px); }
+        .tableau { min-height: 420px; gap: 6px; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
 
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">☀️</button>
-        </nav>
-    </header>
-    <div class="game-area">
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
+
+    <div class="game-area" id="main-content" tabindex="-1" role="main">
         <div class="top-row">
             <div class="deck-area">
                 <div class="card-placeholder" id="stock" onclick="drawCard()"></div>
@@ -216,12 +226,14 @@
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         let deck = [], piles = [], waste = [], stock = [], foundations = [[], [], [], []];
         let selected = null;
+        let winTimer = null;
 
         function createCard(suit, value) {
             return { suit, value, color: (suit === '♥' || suit === '♦') ? 'red' : 'black', faceUp: false, id: Math.random() };
         }
 
         function initGame() {
+            selected = null; clearTimeout(winTimer); winTimer = null;
             deck = [];
             suits.forEach(s => values.forEach(v => deck.push(createCard(s, v))));
             deck.sort(() => Math.random() - 0.5);
@@ -256,7 +268,12 @@
             foundations.forEach((f, i) => {
                 const el = document.getElementById('f' + i);
                 el.innerHTML = '';
-                if (f.length > 0) { el.appendChild(renderCardDiv(f[f.length - 1])); }
+                if (f.length > 0) {
+                    const card = renderCardDiv(f[f.length - 1]);
+                    card.onclick = e => { e.stopPropagation(); clickFoundation(i); };
+                    if (selected?.type === 'foundation' && selected.index === i) card.classList.add('selected');
+                    el.appendChild(card);
+                }
             });
             const tabEl = document.getElementById('tableau');
             tabEl.innerHTML = '';
@@ -264,6 +281,8 @@
                 const pileDiv = document.createElement('div');
                 pileDiv.className = 'pile';
                 pileDiv.onclick = (e) => clickPile(i);
+                pileDiv.tabIndex = 0; pileDiv.setAttribute('role', 'button'); pileDiv.setAttribute('aria-label', `Kolumna ${i + 1}`);
+                pileDiv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); clickPile(i); } });
                 pile.forEach((c, idx) => {
                     const div = renderCardDiv(c);
                     div.style.top = (idx * 25) + 'px';
@@ -280,7 +299,11 @@
         function renderCardDiv(c) {
             const div = document.createElement('div');
             div.className = 'card ' + (c.faceUp ? c.color : 'back');
-            if (c.faceUp) div.innerHTML = '<div>' + c.value + '</div><div style="font-size:1.5rem">' + c.suit + '</div>';
+            if (c.faceUp) {
+                div.innerHTML = '<div>' + c.value + '</div><div style="font-size:1.5rem">' + c.suit + '</div>';
+                div.tabIndex = 0; div.setAttribute('role', 'button'); div.setAttribute('aria-label', c.value + ' ' + c.suit);
+                div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); div.onclick?.(e); } });
+            }
             return div;
         }
 
@@ -302,15 +325,21 @@
         }
 
         function clickPile(index) { if (selected) attemptMoveToPile(index); }
-        function clickFoundation(index) { if (selected) attemptMoveToFoundation(index); }
+        function clickFoundation(index) {
+            if (selected?.type === 'foundation' && selected.index === index) { selected = null; render(); return; }
+            if (selected) attemptMoveToFoundation(index);
+            else if (foundations[index].length) { selected = {type:'foundation', index, cardIndex:foundations[index].length - 1}; render(); }
+        }
 
         function attemptMoveToPile(toIndex) {
             if (!selected) return;
             let sourceCards = [];
             if (selected.type === 'waste') sourceCards = [waste[waste.length - 1]];
             else if (selected.type === 'pile') sourceCards = piles[selected.index].slice(selected.cardIndex);
+            else if (selected.type === 'foundation') sourceCards = [foundations[selected.index][foundations[selected.index].length - 1]];
             const targetPile = piles[toIndex];
             const bottomCard = sourceCards[0];
+            if (!bottomCard || (selected.type === 'pile' && selected.index === toIndex)) return;
             let valid = false;
             if (targetPile.length === 0) { if (bottomCard.value === 'K') valid = true; }
             else {
@@ -319,6 +348,7 @@
             }
             if (valid) {
                 if (selected.type === 'waste') waste.pop();
+                else if (selected.type === 'foundation') foundations[selected.index].pop();
                 else piles[selected.index].splice(selected.cardIndex);
                 if (selected.type === 'pile' && piles[selected.index].length > 0) piles[selected.index][piles[selected.index].length - 1].faceUp = true;
                 piles[toIndex].push(...sourceCards);
@@ -327,13 +357,14 @@
         }
 
         function attemptMoveToFoundation(fIndex) {
-            if (!selected) return;
+            if (!selected || selected.type === 'foundation') return;
             let card;
             if (selected.type === 'waste') card = waste[waste.length - 1];
             else if (selected.type === 'pile') {
                 if (selected.cardIndex !== piles[selected.index].length - 1) return;
                 card = piles[selected.index][selected.cardIndex];
             }
+            if (!card) return;
             const targetF = foundations[fIndex];
             let valid = false;
             if (targetF.length === 0) { if (card.value === 'A') valid = true; }
@@ -354,15 +385,23 @@
         function checkWin() {
             const totalInFoundations = foundations.reduce((sum, f) => sum + f.length, 0);
             if (totalInFoundations === 52) {
-                setTimeout(() => alert('Gratulacje! Wygrałeś!'), 100);
+                clearTimeout(winTimer);
+                winTimer = setTimeout(() => {
+                    winTimer = null;
+                    if (foundations.reduce((sum, f) => sum + f.length, 0) === 52) alert('Gratulacje! Wygrałeś!');
+                }, 100);
             }
         }
 
-        const html = document.documentElement, themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
+        // Theme is handled by assets/workshop/shell.js.
+        document.getElementById('stock').tabIndex = 0;
+        document.getElementById('stock').setAttribute('role', 'button');
+        document.getElementById('stock').setAttribute('aria-label', 'Dobierz kartę lub przełóż stos');
+        document.getElementById('stock').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); drawCard(); } });
+        foundations.forEach((_, i) => {
+            const target = document.getElementById('f' + i); target.tabIndex = 0; target.setAttribute('role', 'button'); target.setAttribute('aria-label', `Stos końcowy ${i + 1}`);
+            target.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); clickFoundation(i); } });
+        });
         initGame();
     </script>
 </body>

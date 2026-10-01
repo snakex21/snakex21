@@ -1,6 +1,9 @@
 const cvs = document.getElementById("pong")
 const ctx = cvs.getContext('2d')
 const winmsg = document.getElementById("winmsg")
+const status = document.getElementById("game-status")
+let running = false, paused = false
+const keys = {}
 
 //drawing rectange(game board)
 // creating user paddle
@@ -76,6 +79,7 @@ ctx.strokeStyle = "white"
 }
 
 function resetGame(){
+running = false
 ball.x = cvs.width/2
 ball.y = cvs.height/2
 ball.velocityX = 0
@@ -103,9 +107,13 @@ drawCircle(ball.x,ball.y,ball.radius,ball.color)
 
 //controlling users paddle
 cvs.addEventListener("mousemove",paddleMove)
+cvs.addEventListener("pointerdown",e=>{e.preventDefault();cvs.setPointerCapture?.(e.pointerId);paddleMove(e)})
+cvs.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")paddleMove(e)})
 function paddleMove(evt){
+if(!running||paused)return
 let rect = cvs.getBoundingClientRect()
-user.y = evt.clientY - rect.top - user.height/2
+if(!rect.height)return
+user.y = Math.max(0,Math.min(cvs.height-user.height,(evt.clientY-rect.top)*cvs.height/rect.height-user.height/2))
 }
 
 //collision detection
@@ -131,6 +139,11 @@ ball.velocityX = -ball.velocityX
 ball.speed = 10
 }
 function restartGame(){
+running=true;paused=false
+status.textContent="Do 7 punktów · P lub Esc: pauza"
+document.getElementById("pause-game").textContent="Pauza"
+Object.keys(keys).forEach(key=>keys[key]=false)
+user.y=com.y=cvs.height/2-user.height/2
 user.score = 0
 com.score = 0
 ball.speed = 10
@@ -139,13 +152,17 @@ ball.velocityY = 5
 ball.x = cvs.width / 2
 ball.y = cvs.height / 2
 if (winmsg) {
-  winmsg.blur()
+  cvs.focus()
 }
 }
 
 
 //update the game
 function update(){
+if(!running||paused||document.hidden)return
+if(keys.ArrowUp||keys.w||keys.W)user.y-=8
+if(keys.ArrowDown||keys.s||keys.S)user.y+=8
+user.y=Math.max(0,Math.min(cvs.height-user.height,user.y))
 ball.x += ball.velocityX
 ball.y += ball.velocityY
 
@@ -167,7 +184,7 @@ let angleRad = cp * Math.PI/4
 let direction = (ball.x < cvs.width/2 ? 1 : -1)
 ball.velocityX = direction * ball.speed * Math.cos(angleRad)
 ball.velocityY = ball.speed * Math.sin(angleRad)
-ball.speed += 1
+ball.speed = Math.min(24,ball.speed+1)
 }
 //update score
 if (ball.x - ball.radius < 0){
@@ -178,19 +195,28 @@ user.score++
 resetBall()
 }
 
-if (collision(ball,player) && user.score === 7){
-//winmsg.innerText = "YOU WON!"
-//winmsg.classList.add("winningmsg")
+if(user.score>=7||com.score>=7){
+status.textContent=user.score>=7?"Wygrywasz! Zagraj ponownie, aby rozpocząć nowy mecz.":"Wygrywa komputer. Zagraj ponownie, aby spróbować jeszcze raz."
 resetGame()
-restartGame()
-}else if(collision(ball,player) && com.score === 7){
-//winmsg.innerText = "YOU LOST!"
-//winmsg.classList.add("winningmsg")
-resetGame()
-restartGame()
 }
 }
 
+function setPaused(value){
+if(!running)return
+paused=!!value
+if(!paused)cvs.focus()
+Object.keys(keys).forEach(key=>keys[key]=false)
+document.getElementById("pause-game").textContent=paused?"Wznów":"Pauza"
+status.textContent=paused?"Pauza":"Do 7 punktów · P lub Esc: pauza"
+}
+document.addEventListener("keydown",e=>{
+if(e.altKey||e.ctrlKey||e.metaKey||e.target?.closest?.('header,a,input,textarea,select'))return
+if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){e.preventDefault();setPaused(!paused);return}
+if(e.target?.closest?.('button'))return
+if(['ArrowUp','ArrowDown','w','W','s','S'].includes(e.key)){e.preventDefault();keys[e.key]=true}
+})
+document.addEventListener("keyup",e=>{keys[e.key]=false})
+document.addEventListener("visibilitychange",()=>{if(document.hidden)setPaused(true)})
 function game(){
 render()
 update()
@@ -198,3 +224,5 @@ update()
 
 const fps = 50
 setInterval(game,1000/fps)
+
+render()

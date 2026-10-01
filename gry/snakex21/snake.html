@@ -52,29 +52,36 @@
             .btn { padding: 15px; background: #333; border: none; color: white; border-radius: 8px; font-size: 1.5rem; }
             .btn:active { background: #1db954; }
         }
+        canvas { max-width: calc(100vw - 32px); height: auto; touch-action: none; }
+        .game-wrapper { padding: 16px; }
+        .round-controls button { padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+        #game-status { max-width: 400px; text-align: center; }
     </style>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css">
+<script src="../../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="../../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry.html" class="active">Gry</a>
-                <a href="../../muzyka/muzyka.html">Muzyka</a>
-                <a href="../../filmy/filmy glowna.html">Filmy</a>
-                <a href="../../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle">🌙</button>
-        </nav>
-    </header>
+<body class="site-shell game-shell">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
+</header>
 
-    <div class="game-wrapper">
+
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <div class="score-board">
             <span>Wynik: <span id="score">0</span></span>
             <span>Rekord: <span id="high-score">0</span></span>
         </div>
         
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="400" height="400" tabindex="0" aria-label="Plansza Snake"></canvas>
+        <p id="game-status" role="status">Strzałki rozpoczynają grę. P: pauza.</p>
+        <div class="round-controls"><button type="button" onclick="newGame()">Nowa gra</button> <button id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button></div>
 
         <div class="controls">
             <div></div>
@@ -88,108 +95,98 @@
 
     <script>
         // Theme Logic
-        const html = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeBtn.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
+        // Theme is handled by assets/workshop/shell.js.
 
         // Game Logic
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('high-score');
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
-        let speed = 7;
-        let score = 0;
-        let highScore = localStorage.getItem('snake_highscore') || 0;
+        const statusElement = document.getElementById('game-status');
+        const gridSize = 20, tileCount = canvas.width / gridSize;
+        let speed = 7, score = 0, highScore = 0;
+        try { highScore = Math.max(0, parseInt(localStorage.getItem('snake_highscore'), 10) || 0); } catch (_) {}
         highScoreElement.textContent = highScore;
-        let velocityX = 0;
-        let velocityY = 0;
-        let snake = [{x: 10, y: 10}];
-        let food = {x: 15, y: 15};
-        let gameInterval;
-        let isGameRunning = false;
-
-        function startGame() {
-            if(isGameRunning) return;
-            isGameRunning = true;
-            velocityX = 1; velocityY = 0;
-            gameInterval = setInterval(update, 1000 / speed);
+        let velocityX = 1, velocityY = 0;
+        let snake = [{x:10,y:10}], food = {x:15,y:15};
+        let gameInterval, isGameRunning = false, paused = false, directionChanged = false, round = 0, ended = false;
+        function scheduleTick() {
+            clearInterval(gameInterval);
+            const startedRound = ++round;
+            gameInterval = setInterval(() => { if (startedRound === round) update(); }, 1000 / speed);
         }
-
+        function startGame() {
+            if (isGameRunning) return;
+            if (ended) resetGame();
+            isGameRunning = true; paused = false; directionChanged = false;
+            statusElement.textContent = 'Strzałki: ruch · P: pauza';
+            scheduleTick();
+            canvas.focus();
+        }
+        function setPaused(value) {
+            if (!isGameRunning) return;
+            paused = !!value;
+            document.getElementById('pause-game').textContent = paused ? 'Wznów' : 'Pauza';
+            statusElement.textContent = paused ? 'Pauza · P lub Wznów, aby kontynuować' : 'Strzałki: ruch · P: pauza';
+            if (!paused) canvas.focus();
+        }
+        function finish(won = false) {
+            clearInterval(gameInterval); ++round; isGameRunning = false; paused = false; ended = true;
+            statusElement.textContent = `${won ? 'Wygrana!' : 'Koniec gry!'} Wynik: ${score}. Strzałka lub Nowa gra: zagraj ponownie.`;
+        }
         function update() {
-            const head = { x: snake[0].x + velocityX, y: snake[0].y + velocityY };
-            if (head.x < 0) head.x = tileCount - 1;
-            if (head.x >= tileCount) head.x = 0;
-            if (head.y < 0) head.y = tileCount - 1;
-            if (head.y >= tileCount) head.y = 0;
-
-            for (let i = 0; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    resetGame(); return;
-                }
-            }
-
+            if (!isGameRunning || paused || document.hidden) return;
+            directionChanged = false;
+            const head = {x:(snake[0].x + velocityX + tileCount) % tileCount, y:(snake[0].y + velocityY + tileCount) % tileCount};
+            const eating = food && head.x === food.x && head.y === food.y;
+            // The tail vacates its cell during a non-growing move.
+            const body = eating ? snake : snake.slice(0, -1);
+            if (body.some(part => part.x === head.x && part.y === head.y)) { finish(); return; }
             snake.unshift(head);
-            if (head.x === food.x && head.y === food.y) {
+            if (eating) {
                 score += 10; scoreElement.textContent = score;
-                if (score > highScore) {
-                    highScore = score; localStorage.setItem('snake_highscore', highScore); highScoreElement.textContent = highScore;
-                }
-                if(score % 50 === 0) { clearInterval(gameInterval); speed++; gameInterval = setInterval(update, 1000 / speed); }
+                if (score > highScore) { highScore = score; highScoreElement.textContent = highScore; try { localStorage.setItem('snake_highscore', highScore); } catch (_) {} }
+                if (score % 50 === 0) { speed = Math.min(18, speed + 1); scheduleTick(); }
                 placeFood();
-            } else { snake.pop(); }
+            } else snake.pop();
             draw();
         }
-
         function draw() {
-            ctx.fillStyle = '#1e1e1e'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#1db954';
-            snake.forEach((part, index) => {
-                if(index === 0) ctx.fillStyle = '#1ed760'; else ctx.fillStyle = '#1db954';
-                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
-            });
-            ctx.fillStyle = '#ff5555'; ctx.beginPath();
-            ctx.arc((food.x * gridSize) + gridSize/2, (food.y * gridSize) + gridSize/2, gridSize/2 - 2, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = '#1e1e1e'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            snake.forEach((part,index) => { ctx.fillStyle = index ? '#1db954' : '#1ed760'; ctx.fillRect(part.x*gridSize,part.y*gridSize,gridSize-2,gridSize-2); });
+            if (food) { ctx.fillStyle='#ff5555';ctx.beginPath();ctx.arc(food.x*gridSize+10,food.y*gridSize+10,8,0,Math.PI*2);ctx.fill(); }
         }
-
         function placeFood() {
-            food.x = Math.floor(Math.random() * tileCount);
-            food.y = Math.floor(Math.random() * tileCount);
-            snake.forEach(part => { if(part.x === food.x && part.y === food.y) placeFood(); });
+            const occupied = new Set(snake.map(part => part.y * tileCount + part.x));
+            const free = [];
+            for (let i=0;i<tileCount*tileCount;i++) if (!occupied.has(i)) free.push(i);
+            if (!free.length) { food = null; finish(true); return; }
+            const cell = free[Math.floor(Math.random()*free.length)];
+            food = {x:cell%tileCount,y:Math.floor(cell/tileCount)};
         }
-
         function resetGame() {
-            clearInterval(gameInterval); isGameRunning = false;
-            alert(`Koniec gry! Twój wynik: ${score}`);
-            snake = [{x: 10, y: 10}]; score = 0; speed = 7;
-            scoreElement.textContent = score; placeFood(); draw();
+            clearInterval(gameInterval); ++round; isGameRunning=false; paused=false; ended=false; directionChanged=false;
+            snake=[{x:10,y:10}];score=0;speed=7;velocityX=1;velocityY=0;
+            scoreElement.textContent=0;document.getElementById('pause-game').textContent='Pauza';
+            statusElement.textContent='Strzałki rozpoczynają grę. P: pauza.';
+            placeFood();draw();
         }
-
+        function newGame() { resetGame(); startGame(); canvas.focus(); }
         function changeDirection(event) {
-            if(!isGameRunning) startGame();
-            const left = 37, up = 38, right = 39, down = 40;
-            const keyPressed = event.keyCode;
-            const goingUp = velocityY === -1, goingDown = velocityY === 1;
-            const goingRight = velocityX === 1, goingLeft = velocityX === -1;
-
-            if (keyPressed === left && !goingRight) { velocityX = -1; velocityY = 0; }
-            if (keyPressed === up && !goingDown) { velocityX = 0; velocityY = -1; }
-            if (keyPressed === right && !goingLeft) { velocityX = 1; velocityY = 0; }
-            if (keyPressed === down && !goingUp) { velocityX = 0; velocityY = 1; }
+            if (event.altKey || event.ctrlKey || event.metaKey || event.target?.closest?.('header,a,input,textarea,select')) return;
+            const key = event.keyCode || ({ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40})[event.key];
+            if (event.code === 'KeyP' || event.code === 'Escape') { event.preventDefault?.(); if (!event.repeat) setPaused(!paused); return; }
+            if (event.target?.closest?.('button') || ![37,38,39,40].includes(key)) return;
+            event.preventDefault?.();
+            if (paused) return;
+            if (!isGameRunning) startGame();
+            if (directionChanged) return;
+            const [x,y] = ({37:[-1,0],38:[0,-1],39:[1,0],40:[0,1]})[key];
+            if (snake.length > 1 && x === -velocityX && y === -velocityY) return;
+            velocityX=x;velocityY=y;directionChanged=true;
         }
-
-        document.addEventListener('keydown', changeDirection);
+        document.addEventListener('keydown',changeDirection);
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);});
         draw();
     </script>
 </body>
