@@ -31,3 +31,16 @@ check that respects those existing endings:
 ```sh
 git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol diff --check
 ```
+
+## Workshop refresh (2026-10-01)
+
+The suite now has 45 checks. New coverage includes both catalogs (35 tool links,
+query deep links, Polish diacritics, empty states, session restoration, unavailable
+storage, missing game artwork), theme resilience, all modified local links,
+home search, opt-in weather, request failures/timeouts and stale response races.
+Pong tests cover duplicate victory timers, manual restart/mode changes and scaled
+pointer coordinates. The unmodified Pong failed 8 of the 9 new cases.
+
+No build step or browser/runtime dependency was added to the site. The local cloud
+browser blocks localhost and file URLs; browser visual QA is performed against
+the authorized GitHub Pages deployment, separately from these DOM/unit checks.

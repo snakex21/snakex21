@@ -306,6 +306,8 @@
         let gameStarted = false;
         let scoringCooldown = false;
         let gameInterval = null;
+        let serveTimeout = null;
+        let matchRestartTimeout = null;
 
         // Paletki
         const paddleWidth = 30;
@@ -371,8 +373,11 @@
         // Kontrola myszą (tryb AI)
         canvas.addEventListener('mousemove', (evt) => {
             if (gameMode === 'ai' && gameStarted) {
-                let rect = canvas.getBoundingClientRect();
-                leftPaddle.y = evt.clientY - rect.top - leftPaddle.height / 2;
+                const rect = canvas.getBoundingClientRect();
+                if (rect.height <= 0) return;
+                const pointerY = (evt.clientY - rect.top) * canvas.height / rect.height;
+                leftPaddle.y = Math.max(0, Math.min(canvas.height - leftPaddle.height,
+                    pointerY - leftPaddle.height / 2));
             }
         });
 
@@ -394,8 +399,17 @@
                    b.y - b.radius < p.y + p.height;
         }
 
+        // Stare opóźnienia nie mogą zmieniać nowej gry ani ekranu startowego.
+        function clearPendingTimers() {
+            clearTimeout(serveTimeout);
+            clearTimeout(matchRestartTimeout);
+            serveTimeout = null;
+            matchRestartTimeout = null;
+        }
+
         // Reset piłki z cooldownem
         function resetBall() {
+            clearTimeout(serveTimeout);
             scoringCooldown = true;
             ball.velocityX = 0;
             ball.velocityY = 0;
@@ -404,7 +418,9 @@
             ball.speed = 10;
 
             // Pauza 2 sekundy przed następną rundą
-            setTimeout(() => {
+            serveTimeout = setTimeout(() => {
+                serveTimeout = null;
+                if (!gameStarted) return;
                 ball.velocityX = (Math.random() > 0.5 ? 1 : -1) * 5;
                 ball.velocityY = (Math.random() * 4) - 2;
                 scoringCooldown = false;
@@ -426,6 +442,7 @@
 
         // Restart gry
         function restartGame() {
+            clearPendingTimers();
             leftPaddle.score = 0;
             rightPaddle.score = 0;
             ball.speed = 10;
@@ -498,8 +515,11 @@
             }
 
             // Wygranie gry
-            if (leftPaddle.score >= 7 || rightPaddle.score >= 7) {
-                setTimeout(() => {
+            if ((leftPaddle.score >= 7 || rightPaddle.score >= 7) && matchRestartTimeout === null) {
+                clearTimeout(serveTimeout);
+                serveTimeout = null;
+                matchRestartTimeout = setTimeout(() => {
+                    matchRestartTimeout = null;
                     restartGame();
                 }, 2000);
             }
@@ -558,6 +578,7 @@
                 }
 
                 // Reset gry przy zmianie trybu
+                clearPendingTimers();
                 gameStarted = false;
                 if (gameInterval) {
                     clearInterval(gameInterval);
