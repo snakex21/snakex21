@@ -10,8 +10,6 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 // Synthetic-DOM and deterministic-network checks, not browser visual QA.
 function loadHome(options = {}) {
   const { document, Event } = parseHTML(read('index.html'));
-  const input = document.getElementById('home-search-input');
-  input.form = document.querySelector('.home-search');
   const weather = document.getElementById('weather-form');
   let submit;
   weather.addEventListener = (type, handler) => { if (type === 'submit') submit = handler; };
@@ -30,14 +28,14 @@ function loadHome(options = {}) {
     setTimeout(callback) { const id = nextTimer++; timers.set(id, callback); return id; },
     clearTimeout(id) { timers.delete(id); }
   });
-  for (const file of ['assets/workshop/shell.js', 'assets/workshop/tools-data.js', 'assets/js/games-data.js', 'assets/workshop/home.js']) {
+  for (const file of ['assets/workshop/shell.js', 'assets/workshop/home.js']) {
     vm.runInContext(read(file), context, { timeout: 1000 });
   }
   return {
     document, Event, storage, timers, context,
     submit(city) { document.getElementById('weather-city-input').value = city; return submit({ preventDefault() {} }); },
     status: () => document.getElementById('weather-status').textContent,
-    summary: () => document.getElementById('weather-summary').textContent
+    summary: () => document.getElementById('weather-city').textContent + ' · ' + document.getElementById('weather-temp').textContent
   };
 }
 const ok = value => ({ ok: true, json: async () => value });
@@ -60,25 +58,29 @@ test('Workshop: every local hub link, stylesheet and script resolves to a file',
   }
 });
 
-test('Workshop: homepage search uses all tool and game destinations, including accents', () => {
+test('Hub: the quiet home has clock, weather, offline quotes and six category destinations', () => {
   const p = loadHome();
-  const input = p.document.getElementById('home-search-input');
+  assert.equal(p.document.querySelectorAll('.category-grid a').length, 6);
+  for (const id of ['time', 'date', 'timezone']) assert.ok(p.document.getElementById(id).textContent);
+  assert.equal(p.document.querySelector('.hero'), null);
+  assert.equal(p.document.getElementById('home-search-input'), null);
+  assert.equal(p.document.querySelector('.project-grid'), null);
+  const quote = p.document.getElementById('quote-text');
+  const first = quote.textContent;
+  p.document.getElementById('quote-refresh').dispatchEvent(new p.Event('click'));
+  assert.notEqual(quote.textContent, first);
+  assert.match(p.document.getElementById('quote-author').textContent, /Kochanowski/);
+});
+
+test('Workshop: tool data still matches all tool catalogue destinations', () => {
+  const p = loadHome();
+  vm.runInContext(read('assets/workshop/tools-data.js'), p.context);
   const { document: tools } = parseHTML(read('Programy/programy.html'));
   assert.deepEqual([...p.context.window.toolsCatalog].map(item => item.url).sort(),
     [...tools.querySelectorAll('.tool-card')].map(card => 'Programy/' + card.getAttribute('href')).sort());
-  for (const [query, expected] of [['2048', 'gry/2048/2048.html'], ['rzutow', 'Programy/dice/dice.html'], ['JSON', 'Programy/json/json.html']]) {
-    input.value = query;
-    input.dispatchEvent(new p.Event('input'));
-    assert.ok([...p.document.querySelectorAll('#home-results a')].some(link => link.getAttribute('href') === expected));
-    assert.equal(p.document.getElementById('home-results').hidden, false);
-  }
-  input.value = 'zz-unfindable-example-zz'; input.dispatchEvent(new p.Event('input'));
-  assert.match(p.document.getElementById('home-search-status').textContent, /Brak wyników/);
-  input.value = ''; input.dispatchEvent(new p.Event('input'));
-  assert.equal(p.document.getElementById('home-results').hidden, true);
 });
 
-test('Workshop: unavailable storage does not break home search or theme toggling', () => {
+test('Workshop: unavailable storage does not break the home or theme toggling', () => {
   const p = loadHome({ blockStorage: true });
   const button = p.document.getElementById('theme-toggle');
   button.dispatchEvent(new p.Event('click'));
@@ -90,7 +92,7 @@ test('Workshop: unavailable storage does not break home search or theme toggling
   assert.equal(button.getAttribute('aria-pressed'), 'false');
 });
 
-test('Workshop: weather is opt-in, encodes the city, saves only success and clears its timeout', async () => {
+test('Workshop: first-visit weather is opt-in, encodes the city, saves success and clears its timeout', async () => {
   const calls = [];
   const p = loadHome({ fetch: async (url, options) => {
     calls.push({ url, options });
@@ -112,7 +114,8 @@ test('Workshop: missing city, HTTP failure and invalid forecast remain retryable
     [ok(geo('Warszawa')), { ok: false }],
     [ok(geo('Warszawa')), ok({})]
   ]) {
-    const p = loadHome({ storage: { weatherCity: 'Kraków' }, fetch: async () => responses.shift() });
+    const p = loadHome({ fetch: async () => responses.shift() });
+    p.storage.set('weatherCity', 'Kraków');
     await p.submit('Test');
     assert.match(p.status(), /Nie znaleziono miasta|niedostępna/);
     assert.equal(p.storage.get('weatherCity'), 'Kraków');
@@ -172,4 +175,51 @@ test('Workshop: weather timeout aborts the request and permits a clean retry', a
   await p.submit('Warszawa');
   assert.match(p.status(), /Warszawa · 5°C/);
   assert.equal(p.timers.size, 0);
+});
+
+const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
+test('Hub: the existing weatherCity key survives reload and automatically loads that city', async () => {
+  const calls = [];
+  const p = loadHome({ storage: { weatherCity: 'Łódź', weatherAuto: 'true', theme: 'dark' }, fetch: async url => {
+    calls.push(url);
+    return calls.length === 1 ? ok(geo('Łódź')) : ok({ current_weather: { temperature: 16, weathercode: 3 } });
+  }});
+  await flush();
+  assert.match(calls[0], /name=%C5%81%C3%B3d%C5%BA&/);
+  assert.equal(calls.length, 2);
+  assert.equal(p.document.getElementById('weather-city-input').value, 'Łódź');
+  assert.match(p.summary(), /Łódź · 16°C/);
+  assert.equal(p.document.getElementById('weather-desc').textContent, 'Pochmurno');
+  assert.equal(p.storage.get('weatherCity'), 'Łódź');
+  assert.equal(p.storage.get('weatherAuto'), 'true'); // No destructive migration.
+  assert.equal(p.document.documentElement.getAttribute('data-theme'), 'dark');
+});
+test('Hub: failed startup weather keeps the remembered city and can be retried', async () => {
+  let calls = 0;
+  const p = loadHome({ storage: { weatherCity: 'Kraków' }, fetch: async () => {
+    calls++;
+    if (calls === 1) throw Error('offline');
+    return calls === 2 ? ok(geo('Kraków')) : ok(forecast(7));
+  }});
+  await flush();
+  assert.match(p.status(), /niedostępna/);
+  assert.equal(p.storage.get('weatherCity'), 'Kraków');
+  await p.submit('Kraków');
+  assert.match(p.summary(), /Kraków · 7°C/);
+});
+test('Hub: successful weather still works when persistent storage is unavailable', async () => {
+  let calls = 0;
+  const p = loadHome({ blockStorage: true, fetch: async () => ++calls === 1 ? ok(geo('Warszawa')) : ok(forecast(11)) });
+  await p.submit('Warszawa');
+  assert.match(p.summary(), /Warszawa · 11°C/);
+  assert.match(p.status(), /tylko na czas tej wizyty/);
+});
+test('Hub: invalid numeric weather cannot produce NaN or Infinity in the widget', async () => {
+  for (const temperature of [NaN, Infinity, '10']) {
+    let calls = 0;
+    const p = loadHome({ fetch: async () => ++calls === 1 ? ok(geo('Warszawa')) : ok(forecast(temperature)) });
+    await p.submit('Warszawa');
+    assert.match(p.status(), /niedostępna/);
+    assert.equal(p.document.getElementById('weather-temp').textContent, '--°C');
+  }
 });
