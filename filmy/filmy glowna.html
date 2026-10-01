@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Filmy - Hub</title>
-    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz">
+    <link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
     <style>
         * {
             margin: 0;
@@ -206,22 +206,17 @@
             }
         }
     </style>
+<link rel="stylesheet" href="../assets/workshop/shell.css">
+<script src="../assets/workshop/shell.js" defer></script>
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="../index.html" class="logo">Hub</a>
-            <div class="nav-links">
-                <a href="../gry/gry.html">Gry</a>
-                <a href="../muzyka/muzyka.html">Muzyka</a>
-                <a href="filmy glowna.html" class="active">Filmy</a>
-                <a href="../Programy/programy.html">Narzędzia</a>
-            </div>
-            <button id="theme-toggle" aria-label="Przełącz tryb ciemny">🌙</button>
-        </nav>
-    </header>
+<body class="workshop legacy-page">
+    <a class="skip-link" href="#main-content">Przejdź do treści</a>
+<header class="site-header"><nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../index.html">Start</a><a href="../Programy/programy.html">Narzędzia</a><a href="../gry/gry.html">Gry</a><a href="../LinkHub/index.html">LinkHub</a><a href="../muzyka/muzyka.html">Muzyka</a><a href="../filmy/filmy glowna.html" aria-current="page">Filmy</a></div><button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav></header>
 
-    <main>
+    <main id="main-content">
         <div class="page-header">
             <h1>🎬 Filmy</h1>
             <p>Kolekcje filmów i seriali</p>
@@ -231,7 +226,7 @@
             <input
                 type="search"
                 class="search-input"
-                id="search"
+                id="search" aria-label="Szukaj kolekcji filmów"
                 placeholder="Szukaj kolekcji..."
                 autocomplete="off"
             >
@@ -295,20 +290,7 @@
         // Inicjalizacja
         renderCollections(collections);
 
-        // Tryb ciemny
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-theme', savedTheme);
-        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        });
     </script>
+<footer class="site-footer"><span>snakex21 · Zrobione z ciekawości.</span><a href="../zmiany.html">Dziennik zmian ↗</a><a href="https://github.com/snakex21/snakex21">Kod na GitHubie ↗</a></footer>
 </body>
 </html>
