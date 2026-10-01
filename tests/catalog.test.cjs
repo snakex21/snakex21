@@ -63,3 +63,11 @@ test('catalog:pagehide retains the clicked card when the browser has already blu
  const saved=JSON.parse(first.store.get('workshop-catalog:tools'));assert.equal(saved.focusHref,card.getAttribute('href'));
  const returned=catalog({storage:Object.fromEntries(first.store)});assert.equal(returned.focus.getAttribute('href'),card.getAttribute('href'));assert.equal(returned.scroll,350);
 });
+
+
+test('catalog: Connect4 and Wheel describe implemented modes accurately',()=>{
+ const p=catalog({games:true});const data=p.window.gamesCatalog;
+ const connect=data.find(g=>g.slug==='connect4');assert.deepEqual([...connect.modes],['Dwóch graczy']);assert.doesNotMatch(connect.description,/AI/);
+ const wheel=data.find(g=>g.slug==='wheel');assert.match(wheel.description,/wylosować/);assert.doesNotMatch(wheel.description,/odgadnij|hasło/);
+ assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261001-catalog-copy/);
+});
