@@ -26,6 +26,7 @@ function load(file, external, options = {}) {
     setTimeout(cb,delay){const id=next++;timers.set(id,{cb,delay});return id;},clearTimeout(id){timers.delete(id);}
   });
   const run = js => vm.runInContext(js,context,{timeout:1000});
+  if(external==='gry/wojna_er/script.js')run(read('gry/wojna_er/art.js'));
   if(external)run(read(external));else for(const m of read(file).matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))run(m[1]);
   return {document,Event,run,context,timers,frames,drawing,storage,events,
     frame(time){const queue=[...frames.values()];frames.clear();queue.forEach(cb=>cb(time));},
@@ -86,7 +87,7 @@ test('Wojna Er: fixed-time income and AI have the same economy at every refresh 
 test('Wojna Er: bases, ground and units use the same virtual canvas transform',()=>{
   const p=war();p.drawing.length=0;p.run('draw()');
   const scaleIndex=p.drawing.findIndex(c=>c[0]==='scale');
-  const baseIndex=p.drawing.findIndex(c=>c[0]==='fillRect'&&c[1]===1120&&c[2]===350);
+  const baseIndex=p.drawing.findIndex(c=>c[0]==='translate'&&c[1]===1152&&c[2]===450);
   assert.ok(scaleIndex>=0&&baseIndex>scaleIndex);
   assert.deepEqual(p.drawing[scaleIndex],['scale',0.5,0.5]);
   assert.ok(p.drawing.some(c=>c[0]==='fillRect'&&c[1]===0&&c[2]===450&&c[3]===1200));
@@ -104,7 +105,7 @@ test('Wojna Er: evolution preserves health damage and changes recruitment exactl
 });
 test('Wojna Er: a projectile hits only the first enemy and awards a kill once',()=>{
   const p=war();p.run("startGame();state.units=[new Unit(ERAS[0].units[0],'enemy'),new Unit(ERAS[0].units[0],'enemy')];state.units[0].x=150;state.units[0].hp=5;state.units[1].x=151;const shot=new Projectile(140,420,200,420,10,'player');shot.update();shot.update()");
-  assert.equal(p.run('state.xp'),60);assert.equal(p.run('state.units[1].hp'),60);
+  assert.equal(p.run('state.xp'),22);assert.equal(p.run('state.units[1].hp'),60);
 });
 test('Wojna Er: a missed distant shot never damages a base',()=>{
   const p=war();p.run("startGame();const shot=new Projectile(100,420,200,420,10,'player');for(let i=0;i<20;i++)shot.update()");assert.equal(p.run('state.enemyHP'),500);

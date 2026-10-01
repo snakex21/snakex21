@@ -11,6 +11,9 @@ let accumulator = 0;
 let incomeElapsed = 0;
 let enemyElapsed = 0;
 let uiElapsed = 0;
+const ARMY_LIMIT = 14;
+const TRAINING_MS = 1200;
+const ERA_INCOME = [7, 20, 65, 220];
 
 const ERAS = [
     {
@@ -55,8 +58,23 @@ const ERAS = [
     }
 ];
 
+// Roles describe actual damage rules, not just a label on the recruitment card.
+const UNIT_ROLES = {
+    clubman: ['guard', 'Osłona · odporny na ostrzał'], slinger: ['volley', 'Ostrzał · kontra szturm'], dino: ['pierce', 'Szturm · przełamuje osłonę'],
+    knight: ['guard', 'Osłona · odporny na ostrzał'], archer: ['volley', 'Ostrzał · kontra oblężenie'], catapult: ['pierce', 'Oblężenie · kontra osłona'],
+    marine: ['volley', 'Ostrzał · kontra snajper'], tank: ['guard', 'Pancerz · osłania piechotę'], sniper: ['pierce', 'Przebicie · kontra pancerz'],
+    mech: ['guard', 'Pancerz · osłania wsparcie'], hover: ['volley', 'Ostrzał · kontra drony'], drone: ['pierce', 'Przebicie · kontra mechy']
+};
+ERAS.forEach((era, index) => era.units.forEach(def => {
+    [def.role, def.roleLabel] = UNIT_ROLES[def.id]; def.era = index;
+}));
+// The future drone fires its visible laser, rather than dealing invisible melee damage at range.
+ERAS[3].units[2].type = 'ranged';
+
 // --- Game State ---
 let state = {
+    elapsed: 0,
+    training: {player: 0, enemy: 0},
     gold: 100,
     xp: 0,
     era: 0,
@@ -76,7 +94,7 @@ let state = {
     lastTime: null,
     turret: {
         level: 0, // 0 = none
-        cost: 500,
+        cost: 100,
         dmg: 20,
         range: 300,
         cooldown: 0,
@@ -105,6 +123,8 @@ class Unit {
         this.state = 'walk'; // walk, idle, attack
         this.target = null;
         this.attackAnim = 0; // 0 to 1 for bump animation
+        this.hitFlash = 0;
+        this.walkFrame = 0;
     }
 
     update() {
@@ -145,9 +165,15 @@ class Unit {
         } else {
             this.state = 'walk';
             const dir = this.team === 'player' ? 1 : -1;
-            this.x += this.def.speed * dir;
+            const ahead = state.units.filter(u => u !== this && u.team === this.team && u.hp > 0 && u.def.range <= this.def.range && (u.x - this.x) * dir > 0);
+            const room = ahead.reduce((space, u) => Math.min(space, (u.x - this.x) * dir - 26), Infinity);
+            const step = Math.max(0, Math.min(this.def.speed, room));
+            this.x += step * dir;
+            if (step > 0) this.walkFrame += step / 10;
+            else this.state = 'idle';
         }
 
+        if (this.hitFlash > 0) this.hitFlash--;
         if (this.cooldown > 0) this.cooldown--;
         if (this.attackAnim > 0) this.attackAnim -= 0.1; // Decay animation
     }
@@ -155,65 +181,30 @@ class Unit {
     attack() {
         if (this.def.type === 'melee') {
             if (this.target.type === 'base') {
-                if (this.team === 'player') state.enemyHP -= this.def.dmg;
-                else state.playerHP -= this.def.dmg;
-                addParticle(this.target.x, GROUND_Y - 50, '💥', 20);
+                damageBase(this.team, this.def.dmg, this.def);
+                addParticle(this.target.x, GROUND_Y - 50, 'impact', 20);
             } else {
-                this.target.hp -= this.def.dmg;
-                addParticle(this.target.x, this.target.y - 20, '💥', 10);
-                // XP for player if enemy hit
-                if (this.team === 'player') state.xp += 10;
-                else state.enemyXP += 10;
-
-                if (this.target.hp <= 0) {
-                    if (this.team === 'player') {
-                        state.xp += 50;
-                        addParticle(this.target.x, this.target.y - 40, '+50 XP', 30);
-                    } else {
-                        state.enemyXP += 50;
-                    }
-                }
+                damageUnit(this.target, this.def.dmg, this.team, this.def);
             }
         } else {
             // Ranged
             const targetX = this.target.x || (this.team === 'player' ? GAME_WIDTH - 50 : 50);
-            state.projectiles.push(new Projectile(this.x, this.y - 30, targetX, GROUND_Y - 30, this.def.dmg, this.team));
+            state.projectiles.push(new Projectile(this.x, this.y - 30, targetX, GROUND_Y - 30, this.def.dmg, this.team, this.def));
         }
     }
 
-    draw(ctx) {
-        ctx.fillStyle = this.def.color;
-        // Simple shape for now
-        const w = 20;
-        const h = 40;
+    draw(ctx) { drawUnitArt(ctx, this); }
 
-        // Attack bump offset
-        let xOff = 0;
-        if (this.attackAnim > 0) {
-            const dir = this.team === 'player' ? 1 : -1;
-            xOff = Math.sin(this.attackAnim * Math.PI) * 10 * dir;
-        }
-
-        ctx.fillRect(this.x - w / 2 + xOff, this.y - h, w, h);
-        ctx.strokeStyle = this.team === 'player' ? '#1263be' : '#b91825';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(this.x - w / 2 + xOff, this.y - h, w, h);
-
-        // HP Bar
-        ctx.fillStyle = 'red';
-        ctx.fillRect(this.x - 15 + xOff, this.y - h - 10, 30, 4);
-        ctx.fillStyle = '#0f0';
-        ctx.fillRect(this.x - 15 + xOff, this.y - h - 10, 30 * (this.hp / this.maxHp), 4);
-    }
 }
 
 class Projectile {
-    constructor(x, y, tx, ty, dmg, team) {
+    constructor(x, y, tx, ty, dmg, team, def = null) {
         this.x = x;
         this.y = y;
         this.tx = tx;
         this.ty = ty;
         this.dmg = dmg;
+        this.def = def;
         this.team = team;
         this.speed = 10;
         this.active = true;
@@ -243,29 +234,13 @@ class Projectile {
     hit(unit) {
         if (!this.active) return;
         this.active = false;
-        if (unit) {
-            unit.hp -= this.dmg;
-            if (this.team === 'player') state.xp += 10;
-            else state.enemyXP += 10;
-            if (unit.hp <= 0) {
-                if (this.team === 'player') {
-                    state.xp += 50;
-                    addParticle(unit.x, unit.y - 40, '+50 XP', 30);
-                } else state.enemyXP += 50;
-            }
-        } else {
-            if (this.team === 'player') state.enemyHP -= this.dmg;
-            else state.playerHP -= this.dmg;
-        }
-        addParticle(this.x, this.y, '✨', 5);
+        if (unit) damageUnit(unit, this.dmg, this.team, this.def);
+        else damageBase(this.team, this.dmg, this.def);
+        addParticle(this.x, this.y, 'impact', 14);
     }
 
-    draw(ctx) {
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
-        ctx.fill();
-    }
+    draw(ctx) { drawShotArt(ctx, this); }
+
 }
 
 class Particle {
@@ -277,16 +252,43 @@ class Particle {
         this.maxLife = life;
     }
     update() { this.life--; this.y -= 1; }
-    draw(ctx) {
-        ctx.globalAlpha = this.life / this.maxLife;
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText(this.text, this.x, this.y);
-        ctx.globalAlpha = 1;
-    }
+    draw(ctx) { drawImpactArt(ctx, this); }
+
 }
 
 // --- Functions ---
+
+function damageFor(amount, attacker, target) {
+    if (attacker?.role === 'pierce' && target.def.role === 'guard') return amount * 1.5;
+    if (attacker?.role === 'volley' && target.def.role === 'pierce') return amount * 1.5;
+    if (attacker?.role === 'volley' && target.def.role === 'guard') return amount * 0.65;
+    return amount;
+}
+function damageUnit(target, amount, team, def) {
+    if (target.hp <= 0) return;
+    target.hp -= damageFor(amount, def, target);
+    target.hitFlash = 8;
+    const xpKey = team === 'player' ? 'xp' : 'enemyXP';
+    const goldKey = team === 'player' ? 'gold' : 'enemyGold';
+    const experience = 1 + (def?.era || 0) * 2;
+    state[xpKey] += 2 * experience;
+    if (target.hp <= 0) {
+        state[xpKey] += 20 * experience;
+        state[goldKey] += Math.ceil(target.def.cost * 0.2);
+        if (team === 'player') addParticle(target.x, target.y - 65, `+${20 * experience} XP`, 45);
+    }
+    addParticle(target.x, target.y - 28, 'impact', 14);
+}
+function damageBase(team, amount, def) {
+    // Fortifications resist small arms. Siege units make a deliberate push worthwhile.
+    const siege = ['catapult', 'tank', 'hover'].includes(def?.id) ? 1.5 : 1;
+    state[team === 'player' ? 'enemyHP' : 'playerHP'] -= amount * 0.22 * siege;
+}
+function canRecruit(team) {
+    const units = state.units.filter(u => u.team === team && u.hp > 0);
+    const spawn = team === 'player' ? BASE_OFFSET : GAME_WIDTH - BASE_OFFSET;
+    return state.training[team] <= 0 && units.length < ARMY_LIMIT && !units.some(u => Math.abs(u.x - spawn) < 26);
+}
 
 function isRunning() { return state.started && !state.paused && !state.gameOver; }
 
@@ -339,7 +341,7 @@ function resize() {
 }
 
 function spawnUnit(unitId, team) {
-    if (!isRunning()) return;
+    if (!isRunning() || !canRecruit(team)) return;
     const era = team === 'player' ? state.era : state.enemyEra;
     const unitDef = ERAS[era].units.find(u => u.id === unitId);
 
@@ -349,12 +351,14 @@ function spawnUnit(unitId, team) {
         if (state.gold >= unitDef.cost) {
             state.gold -= unitDef.cost;
             state.units.push(new Unit(unitDef, 'player'));
+            state.training.player = TRAINING_MS;
             updateUI();
         }
     } else {
         if (state.enemyGold >= unitDef.cost) {
             state.enemyGold -= unitDef.cost;
             state.units.push(new Unit(unitDef, 'enemy'));
+            state.training.enemy = TRAINING_MS;
         }
     }
 }
@@ -374,7 +378,7 @@ function evolve() {
 
 function buyTurret() {
     if (!isRunning()) return;
-    if (state.gold >= state.turret.cost) {
+    if (state.turret.level < 3 && state.gold >= state.turret.cost) {
         state.gold -= state.turret.cost;
         state.turret.level++;
         state.turret.cost = Math.floor(state.turret.cost * 1.5);
@@ -409,7 +413,7 @@ function updateTurret() {
 
     if (target) {
         // Shoot
-        state.projectiles.push(new Projectile(BASE_OFFSET, GROUND_Y - 120, target.x, target.y - 20, state.turret.dmg, 'player'));
+        state.projectiles.push(new Projectile(BASE_OFFSET, GROUND_Y - 120, target.x, target.y - 20, state.turret.dmg * (state.era + 1), 'player'));
         state.turret.cooldown = state.turret.maxCooldown;
     }
 }
@@ -419,7 +423,7 @@ function enemyAI() {
 
     // Evolve Logic
     const nextEra = ERAS[state.enemyEra + 1];
-    const enemyEvolveCost = Math.floor(ERAS[state.enemyEra].evolveCost * 1.5); // 50% more expensive for AI
+    const enemyEvolveCost = ERAS[state.enemyEra].evolveCost; // Both sides pay the same XP cost
 
     if (nextEra && state.enemyXP >= enemyEvolveCost) {
         state.enemyXP -= enemyEvolveCost;
@@ -428,23 +432,37 @@ function enemyAI() {
         state.enemyHP += 500;
     }
 
-    const era = state.enemyEra;
-    const units = ERAS[era].units;
-    const unitToSpawn = units[Math.floor(Math.random() * units.length)];
-
-    if (state.enemyGold >= unitToSpawn.cost) {
-        spawnUnit(unitToSpawn.id, 'enemy');
+    const own = state.units.filter(u => u.team === 'enemy' && u.hp > 0);
+    const opposition = state.units.filter(u => u.team === 'player' && u.hp > 0);
+    const counts = role => opposition.filter(u => u.def.role === role).length;
+    const needGuard = !own.some(u => u.def.role === 'guard');
+    const threat = ['guard', 'volley', 'pierce'].sort((a, b) => counts(b) - counts(a))[0];
+    const desired = needGuard ? 'guard' : {guard: 'pierce', volley: 'guard', pierce: 'volley'}[threat];
+    const choices = [...ERAS[state.enemyEra].units].sort((a, b) =>
+        (b.role === desired) - (a.role === desired) || a.cost - b.cost);
+    // Save for the needed counter briefly; under pressure always choose an affordable defender.
+    const danger = opposition.some(u => u.x > GAME_WIDTH - 360);
+    const preferred = choices[0];
+    const affordable = choices.filter(u => u.cost <= state.enemyGold);
+    if (affordable.length && (danger || preferred.cost <= state.enemyGold || own.length < 2)) {
+        let choice = preferred.cost <= state.enemyGold ? preferred : affordable[0];
+        if (!needGuard && !danger && affordable.length > 1 && Math.random() < 0.2) {
+            choice = affordable[Math.floor(Math.random() * affordable.length)];
+        }
+        spawnUnit(choice.id, 'enemy');
     }
 }
 function update(dt = STEP_MS) {
     if (!isRunning()) return;
+    state.elapsed += dt;
+    for (const team of ['player', 'enemy']) state.training[team] = Math.max(0, state.training[team] - dt);
     incomeElapsed += dt;
     enemyElapsed += dt;
     uiElapsed += dt;
     if (incomeElapsed + 0.001 >= 1000) {
         incomeElapsed -= 1000;
-        state.gold += 7 + state.era * 2;
-        state.enemyGold += 6 + state.enemyEra * 2;
+        state.gold += ERA_INCOME[state.era];
+        state.enemyGold += ERA_INCOME[state.enemyEra];
     }
     if (enemyElapsed + 0.001 >= 1600) { enemyElapsed -= 1600; enemyAI(); }
 
@@ -476,7 +494,7 @@ function update(dt = STEP_MS) {
 }
 
 function addParticle(x, y, text, life) {
-    state.particles.push(new Particle(x, y, text, life));
+    if (state.particles.length < 140) state.particles.push(new Particle(x, y, text, life));
 }
 
 function draw() {
@@ -486,18 +504,9 @@ function draw() {
     ctx.save();
     ctx.translate((canvas.width - GAME_WIDTH * scale) / 2, (canvas.height - GAME_HEIGHT * scale) / 2);
     ctx.scale(scale, scale);
-    ctx.fillStyle = ['#87CEEB', '#7c8baf', '#a1b5bd', '#25284e'][state.era];
-    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-    ctx.fillStyle = ['#4caf50', '#426c46', '#5c7361', '#493c66'][state.era];
-    ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
-    ctx.fillStyle = '#235da8';
-    ctx.fillRect(0, GROUND_Y - 100, 80, 100);
-    if (state.turret.level > 0) {
-        ctx.fillStyle = '#555'; ctx.fillRect(20, GROUND_Y - 130, 40, 30);
-        ctx.fillStyle = '#222'; ctx.fillRect(30, GROUND_Y - 140, 10, 10);
-    }
-    ctx.fillStyle = '#bd3737';
-    ctx.fillRect(GAME_WIDTH - 80, GROUND_Y - 100, 80, 100);
+    drawBattlefieldArt(ctx, state.era, state.elapsed);
+    drawBaseArt(ctx, 'player', state.era, state.playerHP / state.maxHP, state.turret.level);
+    drawBaseArt(ctx, 'enemy', state.enemyEra, state.enemyHP / state.enemyMaxHP, 0);
     state.units.forEach(u => u.draw(ctx));
     state.projectiles.forEach(p => p.draw(ctx));
     state.particles.forEach(p => p.draw(ctx));
@@ -545,13 +554,27 @@ function updateUI() {
         ERAS[state.era].units.forEach((u, index) => {
             const btn = document.createElement('button');
             btn.className = 'unit-btn';
-            btn.innerHTML = `<span>${index + 1}. ${u.name}</span><span class="unit-cost">${u.cost} złota</span>`;
-            btn.title = `${u.hp} HP · ${u.dmg} obrażeń · zasięg ${u.range}`;
+            btn.innerHTML = `<span class="unit-info"><span class="unit-name">${index + 1}. ${u.name}</span><span class="unit-role">${u.roleLabel}</span><span class="unit-cost">${u.cost} złota</span></span>`;
+            const portrait = document.createElement('canvas');
+            portrait.width = 96; portrait.height = 104; portrait.className = 'unit-portrait';
+            portrait.setAttribute('aria-hidden', 'true');
+            const painter = portrait.getContext?.('2d');
+            if (painter) {
+                const sample = new Unit(u, 'player'); sample.x = 48; sample.y = 96;
+                drawUnitArt(painter, sample); btn.prepend(portrait);
+            }
+            btn.title = `${u.roleLabel} · ${u.hp} HP · ${u.dmg} obrażeń · zasięg ${u.range}`;
             btn.addEventListener('click', () => spawnUnit(u.id, 'player'));
             unitPanel.appendChild(btn);
         });
     }
-    [...unitPanel.children].forEach((btn, index) => { btn.disabled = !isRunning() || state.gold < ERAS[state.era].units[index].cost; });
+    [...unitPanel.children].forEach((btn, index) => { btn.disabled = !isRunning() || !canRecruit('player') || state.gold < ERAS[state.era].units[index].cost; });
+    document.getElementById('army-display').textContent = `${state.units.filter(u => u.team === 'player' && u.hp > 0).length}/${ARMY_LIMIT}`;
+    document.getElementById('income-display').textContent = `+${ERA_INCOME[state.era]}/s`;
+    document.getElementById('battle-time').textContent = `${Math.floor(state.elapsed / 60000)}:${String(Math.floor(state.elapsed / 1000) % 60).padStart(2, '0')}`;
+    document.getElementById('training-status').textContent = state.training.player > 0 ? 'Mobilizacja…' : canRecruit('player') ? 'Oddział gotowy do wymarszu' : 'Poczekaj na miejsce w szyku';
+    document.getElementById('evolution-progress').style.width = `${Number.isFinite(ERAS[state.era].evolveCost) ? Math.min(100, state.xp / ERAS[state.era].evolveCost * 100) : 100}%`;
+    document.getElementById('enemy-era-display').textContent = ERAS[state.enemyEra].name;
     document.getElementById('pause-btn').disabled = !state.started || state.gameOver;
 
     // Turret Button
@@ -559,7 +582,8 @@ function updateUI() {
     if (turretBtn) {
         const tCost = state.turret.cost;
         turretBtn.innerHTML = state.turret.level === 0 ? `Wieżyczka (${tCost}g)` : `Ulepsz Wieżę (${tCost}g)`;
-        turretBtn.disabled = !isRunning() || state.gold < tCost;
+        if (state.turret.level >= 3) turretBtn.textContent = 'Wieża: poziom maks.';
+        turretBtn.disabled = !isRunning() || state.turret.level >= 3 || state.gold < tCost;
     }
 
     // Evolve Button
