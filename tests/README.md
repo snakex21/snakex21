@@ -65,7 +65,7 @@ reported separately from the tests. No localhost/proxy workaround is used.
 
 ## Wojna Er: illustrated battles and tactical pacing (2026-10-01)
 
-Run `npm test` for all 89 checks. The nine new battle checks exercise recruitment
+Run `npm test` for all 90 checks. The ten new battle checks exercise recruitment
 limits, formation passing, role counters, both teams' fortification damage,
 affordable AI decisions, scaled economy, pause behavior, one-time bounties,
 bounded particles, and deterministic seeded strategy comparisons. Canvas artwork
@@ -120,3 +120,7 @@ four scenes; that tooling is outside the repository and the production page.
 Public browser gameplay and responsive rendering must be checked separately
 after the reviewed GitHub Pages deployment. Synthetic bots do not establish
 human enjoyment, input comfort or browser rendering quality.
+
+Live browser review also caught decorative clouds drawing into the aspect-ratio
+gutters. A regression failed on the published first pass; clipping the drawing
+to its transformed virtual battlefield fixes it without changing the simulation.
