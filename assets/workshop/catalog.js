@@ -19,11 +19,12 @@
     clear.hidden = !input.value; empty.hidden = count !== 0;
     counter.textContent = `Wyświetlono ${count} z ${cards.length} ${isTools ? 'narzędzi' : 'gier'}`;
   }
+  let lastFocusedHref = typeof saved.focusHref === 'string' ? saved.focusHref : '';
   function save(resume = false, focusHref = '') {
     try { sessionStorage.setItem(key, JSON.stringify({ query: input.value, scroll: window.scrollY, resume, focusHref })); } catch (_) {}
   }
   function change() {
-    search(); saved = {};
+    search(); saved = {}; lastFocusedHref = '';
     const url = new URL(location.href); if (input.value) url.searchParams.set('q', input.value); else url.searchParams.delete('q');
     try { history.replaceState(null, '', url); } catch (_) {}
     save();
@@ -34,10 +35,13 @@
   input.addEventListener('keydown', event => {
     if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); const first = cards.find(card => !card.hidden); if (first) first.focus(); }
   });
-  for (const card of cards) card.addEventListener('click', () => save(true, card.getAttribute('href')));
+  for (const card of cards) card.addEventListener('click', () => {
+    lastFocusedHref = card.getAttribute('href');
+    save(true, lastFocusedHref);
+  });
   window.addEventListener('pagehide', () => {
     const active = document.activeElement;
-    save(true, cards.includes(active) ? active.getAttribute('href') : '');
+    save(true, cards.includes(active) ? active.getAttribute('href') : lastFocusedHref);
   });
   search();
   // Explicit catalog links and Back both restore the query and prior list position.
