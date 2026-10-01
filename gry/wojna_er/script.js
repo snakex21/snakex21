@@ -14,6 +14,8 @@ let uiElapsed = 0;
 const ARMY_LIMIT = 14;
 const TRAINING_MS = 1200;
 const ERA_INCOME = [7, 20, 65, 220];
+// Target the fortress front, where defenders emerge, rather than its centre.
+function opposingBaseFront(team) { return team === 'player' ? GAME_WIDTH - BASE_OFFSET : BASE_OFFSET; }
 
 const ERAS = [
     {
@@ -147,7 +149,7 @@ class Unit {
 
         // Look for base if no unit
         if (!this.target) {
-            const baseX = this.team === 'player' ? GAME_WIDTH - 50 : 50;
+            const baseX = opposingBaseFront(this.team);
             const distToBase = Math.abs(baseX - this.x);
             if (distToBase < this.def.range) {
                 this.target = { type: 'base', x: baseX };
@@ -165,7 +167,9 @@ class Unit {
         } else {
             this.state = 'walk';
             const dir = this.team === 'player' ? 1 : -1;
-            const ahead = state.units.filter(u => u !== this && u.team === this.team && u.hp > 0 && u.def.range <= this.def.range && (u.x - this.x) * dir > 0);
+            // Each weapon range has its own firing line. A shorter-range queue
+            // must not strand siege/support units outside their attack range.
+            const ahead = state.units.filter(u => u !== this && u.team === this.team && u.hp > 0 && u.def.range === this.def.range && (u.x - this.x) * dir > 0);
             const room = ahead.reduce((space, u) => Math.min(space, (u.x - this.x) * dir - 26), Infinity);
             const step = Math.max(0, Math.min(this.def.speed, room));
             this.x += step * dir;
@@ -188,7 +192,7 @@ class Unit {
             }
         } else {
             // Ranged
-            const targetX = this.target.x || (this.team === 'player' ? GAME_WIDTH - 50 : 50);
+            const targetX = this.target.x;
             state.projectiles.push(new Projectile(this.x, this.y - 30, targetX, GROUND_Y - 30, this.def.dmg, this.team, this.def));
         }
     }
@@ -225,8 +229,9 @@ class Projectile {
             u.x >= Math.min(previousX, this.x) - 10 && u.x <= Math.max(previousX, this.x) + 10);
         targets.sort((a, b) => Math.abs(a.x - previousX) - Math.abs(b.x - previousX));
         if (targets.length) { this.hit(targets[0]); return; }
-        if ((this.team === 'player' && this.x >= GAME_WIDTH - 50) ||
-            (this.team === 'enemy' && this.x <= 50)) { this.hit(); return; }
+        const baseX = opposingBaseFront(this.team);
+        if ((this.team === 'player' && this.x >= baseX) ||
+            (this.team === 'enemy' && this.x <= baseX)) { this.hit(); return; }
         // A missed shot expires at its aim point; it does not damage a remote base.
         if ((this.vx >= 0 && this.x >= this.tx) || (this.vx < 0 && this.x <= this.tx)) this.active = false;
     }

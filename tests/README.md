@@ -65,7 +65,7 @@ reported separately from the tests. No localhost/proxy workaround is used.
 
 ## Wojna Er: illustrated battles and tactical pacing (2026-10-01)
 
-Run `npm test` for all 90 checks. The ten new battle checks exercise recruitment
+The initial illustrated-battle pass added ten checks exercising recruitment
 limits, formation passing, role counters, both teams' fortification damage,
 affordable AI decisions, scaled economy, pause behavior, one-time bounties,
 bounded particles, and deterministic seeded strategy comparisons. Canvas artwork
@@ -124,3 +124,32 @@ human enjoyment, input comfort or browser rendering quality.
 Live browser review also caught decorative clouds drawing into the aspect-ratio
 gutters. A regression failed on the published first pass; clipping the drawing
 to its transformed virtual battlefield fixes it without changing the simulation.
+
+### Crowded firing lines after evolution
+
+Run `npm test` for all 94 checks. A user screenshot exposed a mixed-era army
+camping near the enemy spawn while its siege/support units remained too far
+back to fire. Short-range ally queues blocked every longer-range ally, and base
+targeting aimed 50 pixels behind the visible fortress front. Evolution correctly
+left existing units' definitions intact, so it did not clear those old queues.
+
+Spacing is now 26 pixels within each equal-range firing line. Different weapon
+ranges can pass allied queues to reach their own attack position. They still
+stop for enemies, defenders still intercept projectiles, and all attacks use the
+same fortress-front coordinate (100 or 1100) for both target selection and impact.
+No unit stats, evolution rules, income or AI choices were changed.
+
+Three new regressions fail on `4377963`: a blocked same-era rear unit, a full
+mixed-era army unable to finish a stone base within 60 seconds despite recurring
+real AI defenders, and melee/projectile range measured to the wrong base point.
+A fourth passing control protects defender interception and enemy contact.
+The mixed-era fixture runs with seeds 1, 7 and 42, checks siege participation,
+and verifies that old units keep their definitions.
+
+The correction also helps the AI. For the existing seeds 1, 7, 42 and 77, mixed
+armies now win two of four battles (previously three); both repeated-unit probes
+still lose all four. Mixed battles last 130–148 seconds with first evolution at
+54–62 seconds. The aggregate assertion now requires at least two mixed wins and
+more wins than either repeated-unit probe, rather than tuning stats to preserve
+the old seeds' outcomes. Additional mixed seed 2026 needs 451 seconds to finish
+with a full army of old catapults/snipers; the fix is not a maximum-match timer.
