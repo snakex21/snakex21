@@ -167,7 +167,7 @@ test('Flappy and Tower: narrow layouts retain the visible games catalogue backli
     const source=read(file);const {document}=parseHTML(source);
     assert.equal(document.querySelector('.site-context a').getAttribute('href'),'../../gry/gry.html');
     assert.equal(document.querySelector('.site-links a[aria-current="location"]').textContent,'Gry');
-    assert.ok(document.querySelector('link[href="../../assets/workshop/shell.css"]'));
+    assert.ok(document.querySelector('link[href="../../assets/workshop/shell.css?v=20261001-overhaul2"]'));
     assert.doesNotMatch(read('assets/workshop/shell.css'),/\.site-(?:links|context)\s*\{[^}]*display:\s*none/);
   }
 });
