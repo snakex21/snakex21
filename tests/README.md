@@ -44,3 +44,21 @@ pointer coordinates. The unmodified Pong failed 8 of the 9 new cases.
 No build step or browser/runtime dependency was added to the site. The local cloud
 browser blocks localhost and file URLs; browser visual QA is performed against
 the authorized GitHub Pages deployment, separately from these DOM/unit checks.
+
+## Calm home and game lifecycle checks (2026-10-01)
+
+The homepage keeps the original `weatherCity` key, restores the saved city on
+reload and handles offline/invalid responses without losing the saved choice.
+Quotes are bundled public-domain excerpts and need no API. The six category
+links are intentionally simple; search and filters remain in the catalogues.
+
+The game suite reproduces seven bugs in the previous Wojna Er, Tower and Flappy
+implementations before the fixes. It covers fixed-time movement/economy,
+start/pause/visibility/game-over guards, recruitment focus identity, shared
+battlefield coordinates, projectile impacts, duplicate loops, stale timers,
+keyboard/pointer controls and unavailable/corrupt local storage. Unit stats and
+costs in Wojna Er are unchanged. Combat runs at the original 60 Hz baseline.
+
+These synthetic checks do not certify real-device touch or mobile rendering.
+Public GitHub Pages browser checks, including actual play and reloads, are
+reported separately from the tests. No localhost/proxy workaround is used.

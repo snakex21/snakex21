@@ -86,9 +86,8 @@
         }
 
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
+            .nav-links { display: flex; flex: 1; justify-content: flex-end; gap: 0; }
+            .nav-links a:not(.active) { display: none; }
         }
 
         .game-container {
@@ -205,6 +204,10 @@
                 transform: translate(-50%, -70%) scale(1);
             }
         }
+        .game-wrapper { max-width: calc(100vw - 32px); }
+        canvas { max-width: 100%; height: auto; touch-action: manipulation; }
+        canvas:focus-visible { outline: 3px solid #fff; outline-offset: -4px; }
+        @media (max-width: 600px) { .nav-links { display: flex; flex: 1; justify-content: flex-end; gap: 0; } .nav-links a:not(.active) { display: none; } nav { padding: 12px 16px; } .msg { font-size: 1rem; max-width: 95%; text-align: center; } }
     </style>
 </head>
 
@@ -228,7 +231,7 @@
             <div class="score-label">Piętro</div>
         </div>
         <div class="game-wrapper">
-            <canvas id="game" width="400" height="500"></canvas>
+            <canvas id="game" width="400" height="500" tabindex="0" role="button" aria-label="Rozpocznij grę lub postaw blok. Spacja albo Enter."></canvas>
             <div class="perfect" id="perfect">PERFECT! ⭐</div>
         </div>
         <div class="msg" id="msg">Kliknij lub Spacja aby zacząć</div>
@@ -243,8 +246,10 @@
 
         let blocks = [], currentBlock = null, speed = 2, direction = 1, score = 0, gameOver = true, width = 140;
         let particles = [], perfectStreak = 0;
-        let highScore = parseInt(localStorage.getItem('towerHighScore') || '0');
-        highscoreEl.innerText = highScore;
+        let lastFrameTime = null;
+        let highScore = 0;
+        try { const saved = Number(localStorage.getItem('towerHighScore')); if (Number.isFinite(saved) && saved >= 0) highScore = Math.floor(saved); } catch (_) {}
+        highscoreEl.textContent = highScore;
 
         const colors = [
             ['#ff6b6b', '#ee5a5a'], ['#feca57', '#f7b928'], ['#48dbfb', '#0abde3'],
@@ -268,10 +273,10 @@
             blocks.push({ x: 130, y: 450, w: 140, h: 30, color: c[0], shadow: c[1] });
             spawnNext();
 
-            scoreEl.innerText = 0;
+            scoreEl.textContent = 0;
             msgEl.style.display = 'block';
-            msgEl.innerText = 'Kliknij lub Spacja aby postawić blok';
-            loop();
+            msgEl.textContent = 'Kliknij lub Spacja aby postawić blok';
+            lastFrameTime = null;
         }
 
         function spawnNext() {
@@ -306,8 +311,8 @@
 
             if (Math.abs(diff) >= curr.w) {
                 gameOver = true;
-                if (score > highScore) { highScore = score; localStorage.setItem('towerHighScore', highScore); highscoreEl.innerText = highScore; }
-                msgEl.innerText = "Game Over! Kliknij by zagrać";
+                if (score > highScore) { highScore = score; try { localStorage.setItem('towerHighScore', highScore); } catch (_) {} highscoreEl.textContent = highScore; }
+                msgEl.textContent = "Game Over! Kliknij by zagrać";
                 msgEl.style.display = 'block';
                 return;
             }
@@ -327,13 +332,14 @@
 
             blocks.push(curr);
             score++;
-            scoreEl.innerText = score;
+            scoreEl.textContent = score;
             speed = Math.min(speed + 0.06, 5);
             spawnNext();
         }
 
-        function loop() {
-            if (gameOver && blocks.length > 1) return;
+        function loop(timestamp) {
+            const frame = lastFrameTime === null || document.hidden ? 0 : Math.max(0, Math.min(timestamp - lastFrameTime, 50)) / (1000 / 60);
+            lastFrameTime = timestamp;
             requestAnimationFrame(loop);
 
             const grad = ctx.createLinearGradient(0, 0, 0, 500);
@@ -346,8 +352,9 @@
             for (let i = 0; i < 30; i++) { ctx.fillRect((i * 47) % 400, (i * 31) % 300, 2, 2); }
 
             if (currentBlock && !gameOver) {
-                currentBlock.x += speed * direction;
-                if (currentBlock.x + currentBlock.w > 400 || currentBlock.x < 0) direction *= -1;
+                currentBlock.x += speed * direction * frame;
+                if (currentBlock.x + currentBlock.w > 400) { currentBlock.x = 400 - currentBlock.w; direction = -1; }
+                if (currentBlock.x < 0) { currentBlock.x = 0; direction = 1; }
             }
 
             [...blocks, currentBlock].filter(Boolean).forEach(b => {
@@ -363,23 +370,30 @@
             });
 
             particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= 0.02;
+                p.x += p.vx * frame; p.y += p.vy * frame; p.vy += 0.3 * frame; p.life -= 0.02 * frame;
                 if (p.life > 0) { ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); ctx.globalAlpha = 1; }
             });
             particles = particles.filter(p => p.life > 0);
         }
 
-        document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); place(); } });
-        document.addEventListener('click', e => { if (!e.target.closest('header')) place(); });
+        document.addEventListener('keydown', e => {
+            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('button, a, input, textarea, select')) return;
+            if (e.code === 'Space' || (e.code === 'Enter' && e.target === canvas)) { e.preventDefault(); place(); }
+        });
+        document.querySelector('.game-container').addEventListener('click', () => place());
+        document.addEventListener('visibilitychange', () => { lastFrameTime = null; });
 
         const html = document.documentElement, themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        let savedTheme = 'dark';
+        try { savedTheme = localStorage.getItem('theme') || 'dark'; } catch (_) {}
         html.setAttribute('data-theme', savedTheme);
         themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('theme', next); themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
+        themeBtn.addEventListener('click', () => { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); try { localStorage.setItem('theme', next); } catch (_) {} themeBtn.textContent = next === 'dark' ? '☀️' : '🌙'; });
 
         init();
         gameOver = true;
+        msgEl.textContent = 'Kliknij lub Spacja aby zacząć';
+        requestAnimationFrame(loop);
     </script>
 </body>
 
