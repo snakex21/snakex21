@@ -6,6 +6,11 @@ const GAME_WIDTH = 1200; // Virtual width
 const GAME_HEIGHT = 600; // Virtual height
 const GROUND_Y = 450;
 const BASE_OFFSET = 100;
+const STEP_MS = 1000 / 60;
+let accumulator = 0;
+let incomeElapsed = 0;
+let enemyElapsed = 0;
+let uiElapsed = 0;
 
 const ERAS = [
     {
@@ -63,10 +68,12 @@ let state = {
     projectiles: [],
     particles: [],
     gameOver: false,
+    started: false,
+    paused: true,
     enemyGold: 100,
     enemyEra: 0,
     enemyXP: 0,
-    lastTime: 0,
+    lastTime: null,
     turret: {
         level: 0, // 0 = none
         cost: 500,
@@ -188,6 +195,9 @@ class Unit {
         }
 
         ctx.fillRect(this.x - w / 2 + xOff, this.y - h, w, h);
+        ctx.strokeStyle = this.team === 'player' ? '#1263be' : '#b91825';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(this.x - w / 2 + xOff, this.y - h, w, h);
 
         // HP Bar
         ctx.fillStyle = 'red';
@@ -214,41 +224,38 @@ class Projectile {
     }
 
     update() {
+        if (!this.active) return;
+        const previousX = this.x;
         this.x += this.vx;
         this.y += this.vy;
-
-        // Check collision (simple distance check to target X)
-        if (this.team === 'player' && this.x >= this.tx) this.hit();
-        if (this.team === 'enemy' && this.x <= this.tx) this.hit();
+        // Test the travelled segment, not the target's old position. Moving enemies
+        // must not become immune to slow/long-range shots.
+        const targets = state.units.filter(u => u.team !== this.team && u.hp > 0 &&
+            u.x >= Math.min(previousX, this.x) - 10 && u.x <= Math.max(previousX, this.x) + 10);
+        targets.sort((a, b) => Math.abs(a.x - previousX) - Math.abs(b.x - previousX));
+        if (targets.length) { this.hit(targets[0]); return; }
+        if ((this.team === 'player' && this.x >= GAME_WIDTH - 50) ||
+            (this.team === 'enemy' && this.x <= 50)) { this.hit(); return; }
+        // A missed shot expires at its aim point; it does not damage a remote base.
+        if ((this.vx >= 0 && this.x >= this.tx) || (this.vx < 0 && this.x <= this.tx)) this.active = false;
     }
 
-    hit() {
+    hit(unit) {
+        if (!this.active) return;
         this.active = false;
-
-        let hitSomething = false;
-        for (let u of state.units) {
-            if (u.team !== this.team && u.hp > 0 && Math.abs(u.x - this.x) < 30) {
-                u.hp -= this.dmg;
-                hitSomething = true;
-                if (this.team === 'player') state.xp += 10;
-                else state.enemyXP += 10;
-
-                if (u.hp <= 0) {
-                    if (this.team === 'player') {
-                        state.xp += 50;
-                        addParticle(u.x, u.y - 40, '+50 XP', 30);
-                    } else {
-                        state.enemyXP += 50;
-                    }
-                }
-                break; // Hit one unit
+        if (unit) {
+            unit.hp -= this.dmg;
+            if (this.team === 'player') state.xp += 10;
+            else state.enemyXP += 10;
+            if (unit.hp <= 0) {
+                if (this.team === 'player') {
+                    state.xp += 50;
+                    addParticle(unit.x, unit.y - 40, '+50 XP', 30);
+                } else state.enemyXP += 50;
             }
-        }
-
-        if (!hitSomething) {
-            // Check base
-            if (this.team === 'player' && this.x > GAME_WIDTH - 100) state.enemyHP -= this.dmg;
-            if (this.team === 'enemy' && this.x < 100) state.playerHP -= this.dmg;
+        } else {
+            if (this.team === 'player') state.enemyHP -= this.dmg;
+            else state.playerHP -= this.dmg;
         }
         addParticle(this.x, this.y, '✨', 5);
     }
@@ -281,30 +288,58 @@ class Particle {
 
 // --- Functions ---
 
+function isRunning() { return state.started && !state.paused && !state.gameOver; }
+
 function init() {
     resize();
     window.addEventListener('resize', resize);
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('pause-btn').addEventListener('click', togglePause);
+    document.getElementById('resume-btn').addEventListener('click', togglePause);
+    document.getElementById('turret-btn').addEventListener('click', buyTurret);
+    document.getElementById('evolve-btn').addEventListener('click', evolve);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isRunning()) setPaused(true);
+        state.lastTime = null; accumulator = 0;
+    });
+    document.addEventListener('keydown', event => {
+        if (event.repeat || event.altKey || event.ctrlKey || event.metaKey ||
+            event.target?.matches?.('input, textarea, select, [contenteditable="true"]')) return;
+        if (event.key?.toLowerCase() === 'p') { event.preventDefault(); togglePause(); }
+        const slot = ['1', '2', '3'].indexOf(event.key);
+        if (slot >= 0 && isRunning()) { event.preventDefault(); spawnUnit(ERAS[state.era].units[slot].id, 'player'); }
+    });
     updateUI();
     requestAnimationFrame(loop);
-
-    // Passive Income
-    setInterval(() => {
-        if (state.gameOver) return;
-        state.gold += 7 + (state.era * 2); // Player Reduced
-        state.enemyGold += 6 + (state.enemyEra * 2); // Enemy Reduced
-        updateUI();
-    }, 1000);
-
-    // Enemy AI
-    setInterval(enemyAI, 1600); // Medium speed spawns
 }
 
+function startGame() {
+    if (state.started) return;
+    state.started = true;
+    document.getElementById('start-screen').classList.add('hidden');
+    setPaused(false);
+    canvas.focus();
+}
+function setPaused(paused) {
+    if (!state.started || state.gameOver) return;
+    state.paused = paused;
+    state.lastTime = null; accumulator = 0;
+    document.getElementById('pause-screen').classList.toggle('hidden', !paused);
+    document.getElementById('pause-btn').textContent = paused ? 'Wznów (P)' : 'Pauza (P)';
+    updateUI();
+    if (paused) document.getElementById('resume-btn').focus();
+    else canvas.focus();
+}
+function togglePause() { setPaused(!state.paused); }
+
 function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const bounds = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.round(bounds.width));
+    canvas.height = Math.max(1, Math.round(bounds.height));
 }
 
 function spawnUnit(unitId, team) {
+    if (!isRunning()) return;
     const era = team === 'player' ? state.era : state.enemyEra;
     const unitDef = ERAS[era].units.find(u => u.id === unitId);
 
@@ -325,6 +360,7 @@ function spawnUnit(unitId, team) {
 }
 
 function evolve() {
+    if (!isRunning()) return;
     const nextEra = ERAS[state.era + 1];
     if (nextEra && state.xp >= ERAS[state.era].evolveCost) {
         state.xp -= ERAS[state.era].evolveCost;
@@ -337,6 +373,7 @@ function evolve() {
 }
 
 function buyTurret() {
+    if (!isRunning()) return;
     if (state.gold >= state.turret.cost) {
         state.gold -= state.turret.cost;
         state.turret.level++;
@@ -378,7 +415,7 @@ function updateTurret() {
 }
 
 function enemyAI() {
-    if (state.gameOver) return;
+    if (!isRunning()) return;
 
     // Evolve Logic
     const nextEra = ERAS[state.enemyEra + 1];
@@ -399,8 +436,17 @@ function enemyAI() {
         spawnUnit(unitToSpawn.id, 'enemy');
     }
 }
-function update(dt) {
-    if (state.gameOver) return;
+function update(dt = STEP_MS) {
+    if (!isRunning()) return;
+    incomeElapsed += dt;
+    enemyElapsed += dt;
+    uiElapsed += dt;
+    if (incomeElapsed + 0.001 >= 1000) {
+        incomeElapsed -= 1000;
+        state.gold += 7 + state.era * 2;
+        state.enemyGold += 6 + state.enemyEra * 2;
+    }
+    if (enemyElapsed + 0.001 >= 1600) { enemyElapsed -= 1600; enemyAI(); }
 
     // Update Units
     state.units = state.units.filter(u => u.hp > 0);
@@ -420,9 +466,13 @@ function update(dt) {
     // Check Game Over
     if (state.playerHP <= 0 || state.enemyHP <= 0) {
         state.gameOver = true;
+        state.playerHP = Math.max(0, state.playerHP);
+        state.enemyHP = Math.max(0, state.enemyHP);
         document.getElementById('game-over-screen').classList.remove('hidden');
         document.getElementById('game-over-title').textContent = state.playerHP <= 0 ? "Przegrana!" : "Zwycięstwo!";
-    }
+        updateUI();
+        document.getElementById("restart-btn").focus();
+    } else if (uiElapsed >= 100) { uiElapsed = 0; updateUI(); }
 }
 
 function addParticle(x, y, text, life) {
@@ -430,50 +480,41 @@ function addParticle(x, y, text, life) {
 }
 
 function draw() {
-    // Clear & Background
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#10232b';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#87CEEB'; // Default sky
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Ground
-    ctx.fillStyle = '#4caf50';
-    ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
-
-    // Bases
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(0, GROUND_Y - 100, 80, 100); // Player Base
-
-    // Turret
-    if (state.turret.level > 0) {
-        ctx.fillStyle = '#555';
-        ctx.fillRect(20, GROUND_Y - 130, 40, 30); // Base
-        ctx.fillStyle = '#222';
-        ctx.fillRect(30, GROUND_Y - 140, 10, 10); // Barrel
-    }
-
-    ctx.fillStyle = 'red';
-    ctx.fillRect(canvas.width - 80, GROUND_Y - 100, 80, 100); // Enemy Base
-
-    // Scale context to fit virtual width into real width
-    const scale = canvas.width / GAME_WIDTH;
+    const scale = Math.min(canvas.width / GAME_WIDTH, canvas.height / GAME_HEIGHT);
     ctx.save();
+    ctx.translate((canvas.width - GAME_WIDTH * scale) / 2, (canvas.height - GAME_HEIGHT * scale) / 2);
     ctx.scale(scale, scale);
-
-    // Draw Game Objects (scaled)
+    ctx.fillStyle = ['#87CEEB', '#7c8baf', '#a1b5bd', '#25284e'][state.era];
+    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    ctx.fillStyle = ['#4caf50', '#426c46', '#5c7361', '#493c66'][state.era];
+    ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
+    ctx.fillStyle = '#235da8';
+    ctx.fillRect(0, GROUND_Y - 100, 80, 100);
+    if (state.turret.level > 0) {
+        ctx.fillStyle = '#555'; ctx.fillRect(20, GROUND_Y - 130, 40, 30);
+        ctx.fillStyle = '#222'; ctx.fillRect(30, GROUND_Y - 140, 10, 10);
+    }
+    ctx.fillStyle = '#bd3737';
+    ctx.fillRect(GAME_WIDTH - 80, GROUND_Y - 100, 80, 100);
     state.units.forEach(u => u.draw(ctx));
     state.projectiles.forEach(p => p.draw(ctx));
     state.particles.forEach(p => p.draw(ctx));
-
     ctx.restore();
 }
 
 function loop(timestamp) {
-    const dt = timestamp - state.lastTime;
+    if (state.lastTime === null) state.lastTime = timestamp;
+    const dt = Math.max(0, Math.min(timestamp - state.lastTime, 250));
     state.lastTime = timestamp;
-
-    update(dt);
+    if (isRunning()) {
+        accumulator += dt;
+        while (accumulator + 0.001 >= STEP_MS && isRunning()) {
+            update(STEP_MS);
+            accumulator -= STEP_MS;
+        }
+    } else accumulator = 0;
     draw();
     requestAnimationFrame(loop);
 }
@@ -498,23 +539,27 @@ function updateUI() {
 
     // Buttons
     const unitPanel = document.getElementById('unit-buttons');
-    unitPanel.innerHTML = '';
-
-    ERAS[state.era].units.forEach(u => {
-        const btn = document.createElement('button');
-        btn.className = 'unit-btn';
-        btn.disabled = state.gold < u.cost;
-        btn.innerHTML = `<span>${u.name}</span><span class="unit-cost">${u.cost}g</span>`;
-        btn.onclick = () => spawnUnit(u.id, 'player');
-        unitPanel.appendChild(btn);
-    });
+    if (unitPanel.dataset.era !== String(state.era)) {
+        unitPanel.replaceChildren();
+        unitPanel.dataset.era = String(state.era);
+        ERAS[state.era].units.forEach((u, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'unit-btn';
+            btn.innerHTML = `<span>${index + 1}. ${u.name}</span><span class="unit-cost">${u.cost} złota</span>`;
+            btn.title = `${u.hp} HP · ${u.dmg} obrażeń · zasięg ${u.range}`;
+            btn.addEventListener('click', () => spawnUnit(u.id, 'player'));
+            unitPanel.appendChild(btn);
+        });
+    }
+    [...unitPanel.children].forEach((btn, index) => { btn.disabled = !isRunning() || state.gold < ERAS[state.era].units[index].cost; });
+    document.getElementById('pause-btn').disabled = !state.started || state.gameOver;
 
     // Turret Button
     const turretBtn = document.getElementById('turret-btn');
     if (turretBtn) {
         const tCost = state.turret.cost;
         turretBtn.innerHTML = state.turret.level === 0 ? `Wieżyczka (${tCost}g)` : `Ulepsz Wieżę (${tCost}g)`;
-        turretBtn.disabled = state.gold < tCost;
+        turretBtn.disabled = !isRunning() || state.gold < tCost;
     }
 
     // Evolve Button
@@ -522,10 +567,9 @@ function updateUI() {
     const nextEra = ERAS[state.era + 1];
     if (nextEra) {
         evolveBtn.innerHTML = `Ewolucja (${ERAS[state.era].evolveCost}xp)`;
-        evolveBtn.disabled = state.xp < ERAS[state.era].evolveCost;
-        evolveBtn.onclick = evolve; // Ensure click handler
+        evolveBtn.disabled = !isRunning() || state.xp < ERAS[state.era].evolveCost;
     } else {
-        evolveBtn.innerHTML = "Max Level";
+        evolveBtn.innerHTML = "Ostatnia epoka";
         evolveBtn.disabled = true;
     }
 }
