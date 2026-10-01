@@ -40,7 +40,7 @@ function loadGame(file, options = {}) {
   const run = js => vm.runInContext(js,context,{timeout:2000});
   for(const node of document.querySelectorAll('script')) {
     const src=node.getAttribute('src');
-    if(src) { if(!src.startsWith('../../') && !/^https?:/.test(src))run(fs.readFileSync(path.resolve(root,path.dirname(file),src),'utf8')); }
+    if(src) { if(!src.startsWith('../../') && !/^https?:/.test(src))run(fs.readFileSync(path.resolve(root,path.dirname(file),src.split(/[?#]/)[0]),'utf8')); }
     else if(node.textContent.trim())run(node.textContent);
   }
   if (options.onload && window.onload) window.onload();

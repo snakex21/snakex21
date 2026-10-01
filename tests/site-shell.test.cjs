@@ -52,8 +52,8 @@ test('Site shell: every HTML entry has the same six accessible, project-relative
     assert.equal(current.length, file === 'zmiany.html' ? 0 : 1, file);
     assert.equal(document.querySelectorAll('#theme-toggle').length, 1, file);
     assert.equal(document.getElementById('theme-toggle').getAttribute('type'), 'button', file);
-    assert.equal(document.querySelectorAll('script[src$="assets/workshop/shell.js"]').length, 1, file);
-    assert.equal(document.querySelectorAll('link[href$="assets/workshop/shell.css"]').length, 1, file);
+    assert.equal(document.querySelectorAll('script[src$="assets/workshop/shell.js?v=20261001-overhaul2"]').length, 1, file);
+    assert.equal(document.querySelectorAll('link[href$="assets/workshop/shell.css?v=20261001-overhaul2"]').length, 1, file);
     assert.equal(document.querySelectorAll('link[rel="icon"]').length, 1, file);
   }
 });
