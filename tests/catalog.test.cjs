@@ -57,3 +57,9 @@ test('workshop:local navigation, stylesheets and scripts resolve on every change
  assert.equal(document.querySelectorAll('nav[aria-label="Główna nawigacja"]').length,1);assert.equal(document.querySelectorAll('#theme-toggle').length,1);
  }
 });
+
+test('catalog:pagehide retains the clicked card when the browser has already blurred it',()=>{
+ const first=catalog({scrollY:350});type(first,'generator');const card=[...first.document.querySelectorAll('.tool-card')].find(c=>!c.hidden);card.dispatchEvent(new first.Event('click'));first.events.pagehide();
+ const saved=JSON.parse(first.store.get('workshop-catalog:tools'));assert.equal(saved.focusHref,card.getAttribute('href'));
+ const returned=catalog({storage:Object.fromEntries(first.store)});assert.equal(returned.focus.getAttribute('href'),card.getAttribute('href'));assert.equal(returned.scroll,350);
+});
