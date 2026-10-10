@@ -6,155 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z-Type - Hub</title>
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --text: #0f0;
-            --header-bg: #111;
-            --nav-text: #0a0;
-            --nav-hover: #0f0;
-            --border: #0a0;
-        }
-
-        [data-theme="light"] {
-            --bg: #f0f0f0;
-            --text: #333;
-            --header-bg: #fff;
-            --nav-text: #666;
-            --nav-hover: #000;
-            --border: #ddd;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 0.75rem 2rem;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--nav-text);
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--nav-hover);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-        }
-
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 900px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
         #game-area {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden; box-sizing: border-box; width: 100%;
+            height: min(62vh, 620px); min-height: 380px;
+            background: radial-gradient(ellipse at 50% 120%, #14263a 0%, #0a111c 60%); border: 2px solid var(--shell-border); border-radius: 12px;
+            font-family: var(--kit-mono); outline: none;
         }
-
-        .enemy {
-            position: absolute;
-            font-size: 1.5rem;
-            color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-        }
-
-        .enemy span {
-            transition: color 0.1s;
-        }
-
-        .enemy .matched {
-            color: #ff0;
-            text-shadow: 0 0 10px #ff0;
-        }
-
+        #game-area:focus-visible { border-color: var(--shell-accent); }
+        .enemy { position: absolute; font-size: 1.4rem; font-weight: 700; color: #8ef59b; text-shadow: 0 0 8px rgba(110, 255, 140, .55); white-space: nowrap; }
+        .enemy span { transition: color 0.1s; }
+        .enemy .matched { color: #ffd84a; text-shadow: 0 0 10px #ffb800; }
         .ship {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-bottom: 40px solid #0f0;
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 0; height: 0;
+            border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid #8ef59b;
+            filter: drop-shadow(0 0 8px rgba(110, 255, 140, .5));
         }
-
-        .laser {
-            position: absolute;
-            width: 2px;
-            height: 20px;
-            background: #0f0;
-        }
-
-        .score-box {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 2rem;
-        }
-
+        .laser { position: absolute; width: 2px; height: 20px; background: #ffd84a; }
         .game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            text-align: center;
-            display: none;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;
+            box-sizing: border-box; width: min(88%, 440px); padding: 20px 24px; border-radius: 12px;
+            background: rgba(10, 17, 28, .82); border: 1px solid rgba(255, 255, 255, .14);
+            color: #f2f5f0; font: 700 1.4rem/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-align: center;
         }
-        #game-area { min-height: 380px; height: min(65vh, 700px); flex: none; background: #0a111c; }
-        .game-over { color: #fff; font-size: 1.5rem; width: min(90%, 480px); }
-        .round-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; padding: 12px; }
-        .round-controls button, .round-controls input { min-height: 44px; padding: 8px 12px; max-width: 100%; }
+        .game-over small { display: block; margin-top: 6px; font-size: .95rem; font-weight: 500; color: #b8c4bd; }
+        .type-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: var(--game-width); margin: 12px auto 0; }
+        .type-row label { flex: none; font-size: 13px; font-weight: 650; color: var(--shell-muted); }
+        .type-row .kit-input { flex: 1; min-width: 0; width: auto; font-family: var(--kit-mono); text-transform: uppercase; letter-spacing: 1px; }
+        @media (max-width: 560px) { #game-area { height: 52vh; min-height: 320px; } .enemy { font-size: 1.15rem; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
@@ -170,11 +54,23 @@
 </header>
 
 
-    <div id="game-area" tabindex="-1" role="main">
-        <div class="ship" id="ship"></div>
-        <div class="game-over" id="go" role="status">Z-Type<br><small style="font-size:1rem">Wpisuj litery nadlatujących słów</small></div>
-    </div>
-    <div class="round-controls"><span>Wynik: <strong id="score">0</strong></span><button id="start-game" type="button" onclick="startGame()">Start / nowa gra</button><button id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button><label for="typing-input">Klawiatura: </label><input id="typing-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Pisz litery…" aria-label="Wpisuj litery słów"></div>
+    <main class="game-wrapper">
+        <div class="game-bar">
+            <div class="game-title"><h1>Z-Type</h1><p>Wpisuj litery nadlatujących słów, zanim dolecą do statku · Enter: start · Esc: pauza</p></div>
+            <div class="game-stats"><div class="game-stat"><span>Wynik</span><b id="score">0</b></div></div>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" id="start-game" type="button" onclick="startGame()">Start / nowa gra</button>
+                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
+            </div>
+        </div>
+        <div class="game-stage">
+            <div id="game-area" tabindex="-1" aria-label="Plansza Z-Type">
+                <div class="ship" id="ship"></div>
+                <div class="game-over" id="go" role="status">Z-Type<br><small>Naciśnij Start lub Enter, potem wpisuj litery nadlatujących słów</small></div>
+            </div>
+        </div>
+        <div class="type-row"><label for="typing-input">Klawiatura</label><input id="typing-input" class="kit-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Pisz litery…" aria-label="Wpisuj litery słów"></div>
+    </main>
 
     <script>
         const words = ["KOD", "JAVA", "HTML", "CSS", "NODE", "REACT", "DATA", "BIT", "BYTE", "PIXEL", "LINUX", "SERVER", "CLOUD", "WIFI", "MOUSE", "SCREEN", "LOGIC", "ARRAY", "LOOP", "INPUT", "OUTPUT", "FILE", "DISK", "ERROR", "DEBUG"];

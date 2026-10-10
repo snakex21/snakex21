@@ -20,6 +20,12 @@ let currentQuestionIndex = 0, score = 0, quizMode = 'single', answered = false;
 let activeQuestions = [], selectedAnswers = [];
 const quizPage = document.getElementById('quiz-page');
 const resultPage = document.getElementById('result-page');
+const progressStat = document.getElementById('quiz-progress-stat');
+const scoreStat = document.getElementById('quiz-score-stat');
+function updateStats() {
+    if (progressStat) progressStat.textContent = activeQuestions.length ? `${Math.min(currentQuestionIndex + (answered ? 0 : 1), activeQuestions.length)}/${activeQuestions.length}` : '–';
+    if (scoreStat) scoreStat.textContent = score;
+}
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -42,10 +48,12 @@ function displayNextQuestion() {
     if (currentQuestionIndex >= activeQuestions.length) { showResults(); return; }
     answered = false; quizPage.innerHTML = '';
     const question = activeQuestions[currentQuestionIndex];
-    const progress = document.createElement('p');
+    const progress = document.createElement('p'); progress.className = 'quiz-progress';
     progress.textContent = `Pytanie ${currentQuestionIndex + 1} z ${activeQuestions.length}`;
-    const title = document.createElement('h2'); title.textContent = question.question;
-    quizPage.append(progress, title);
+    const title = document.createElement('h2'); title.className = 'quiz-question'; title.textContent = question.question;
+    const answers = document.createElement('div'); answers.className = 'quiz-answers';
+    quizPage.append(progress, title, answers);
+    updateStats();
     const expectedIndex = currentQuestionIndex;
     shuffle(question.answers.map((text, index) => ({text, index}))).forEach(answer => {
         const button = document.createElement('button'); button.type = 'button';
@@ -53,7 +61,7 @@ function displayNextQuestion() {
         button.addEventListener('click', () => {
             if (expectedIndex === currentQuestionIndex) checkAnswerMultiple(answer.index);
         });
-        quizPage.appendChild(button);
+        answers.appendChild(button);
     });
 }
 function checkAnswerMultiple(selectedAnswer) {
@@ -67,24 +75,35 @@ function checkAnswerMultiple(selectedAnswer) {
         if (index === question.correct) button.classList.add('correct-answer');
         else if (index === selectedAnswer) button.classList.add('wrong-answer');
     });
-    currentQuestionIndex++;
-    const next = document.createElement('button'); next.type = 'button';
+    currentQuestionIndex++; updateStats();
+    const actions = document.createElement('div'); actions.className = 'quiz-actions';
+    const next = document.createElement('button'); next.type = 'button'; next.className = 'kit-btn primary';
     next.textContent = currentQuestionIndex === activeQuestions.length ? 'Pokaż wynik' : 'Następne pytanie';
-    next.addEventListener('click', displayNextQuestion); quizPage.appendChild(next);
+    next.addEventListener('click', displayNextQuestion); actions.appendChild(next); quizPage.appendChild(actions);
     if (currentQuestionIndex === activeQuestions.length) showResults();
 }
 function showResults() {
     quizPage.classList.add('hidden'); resultPage.classList.remove('hidden'); resultPage.innerHTML = '';
-    const title = document.createElement('h1'); title.textContent = `Twój wynik: ${score} z ${activeQuestions.length}`; resultPage.appendChild(title);
+    const kicker = document.createElement('p'); kicker.className = 'quiz-kicker'; kicker.textContent = 'Podsumowanie';
+    const title = document.createElement('h2'); title.className = 'quiz-result'; title.textContent = `Twój wynik: ${score} z ${activeQuestions.length}`;
+    const ratio = activeQuestions.length ? score / activeQuestions.length : 0;
+    const note = document.createElement('p'); note.className = 'quiz-result-note';
+    note.textContent = ratio === 1 ? 'Bezbłędnie!' : ratio >= 0.7 ? 'Bardzo dobrze.' : ratio >= 0.4 ? 'Nieźle – spróbuj jeszcze raz.' : 'Warto powtórzyć podstawy.';
+    const reviewList = document.createElement('ul'); reviewList.className = 'quiz-review';
+    resultPage.append(kicker, title, note, reviewList);
     activeQuestions.forEach((question, index) => {
-        const review = document.createElement('p');
+        const review = document.createElement('li');
         const selected = selectedAnswers[index];
-        review.textContent = `${question.question} — Twoja odpowiedź: ${selected === undefined ? 'brak' : question.answers[selected]}. Poprawna: ${question.answers[question.correct]}`;
-        resultPage.appendChild(review);
+        review.className = selected === question.correct ? 'ok' : 'bad';
+        const asked = document.createElement('b'); asked.textContent = question.question;
+        const detail = document.createElement('span');
+        detail.textContent = `Twoja odpowiedź: ${selected === undefined ? 'brak' : question.answers[selected]} · Poprawna: ${question.answers[question.correct]}`;
+        review.append(asked, detail); reviewList.appendChild(review);
     });
-    for (const [label, action] of [['Zagraj ponownie', restartQuiz], ['Powrót do wyboru trybu', returnToStart]]) {
-        const button = document.createElement('button'); button.type = 'button'; button.textContent = label;
-        button.addEventListener('click', action); resultPage.appendChild(button);
+    const actions = document.createElement('div'); actions.className = 'quiz-actions'; resultPage.appendChild(actions);
+    for (const [label, action, kind] of [['Zagraj ponownie', restartQuiz, 'kit-btn primary'], ['Powrót do wyboru trybu', returnToStart, 'kit-btn']]) {
+        const button = document.createElement('button'); button.type = 'button'; button.className = kind; button.textContent = label;
+        button.addEventListener('click', action); actions.appendChild(button);
     }
 }
 function returnToStart() {

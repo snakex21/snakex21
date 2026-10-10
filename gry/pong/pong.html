@@ -5,243 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pong - Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        html {
-            background: var(--bg);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .game-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .mode-selection {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .mode-btn {
-            padding: 1rem 2rem;
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-
-        .mode-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--shadow);
-            border-color: #3b82f6;
-        }
-
-        .mode-btn.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-
-        .game-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 900px; }
+        .game-bar .kit-tabs { flex: 0 0 auto; }
         #pong-canvas {
-            border-radius: 8px;
-            box-shadow: 0 4px 12px var(--shadow);
-            max-width: 100%;
-            height: auto;
-            background: #ff3f34;
+            display: block; width: 100%; max-width: 900px; height: auto;
+            background: #14322a; border: 2px solid var(--shell-border); border-radius: 12px;
+            touch-action: none;
         }
-
-        .controls {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .controls strong {
-            color: var(--text);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .restart-btn, .start-btn {
-            padding: 0.75rem 1.5rem;
-            background: #3b82f6;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-
-        .restart-btn:hover, .start-btn:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        .start-btn {
-            background: #10b981;
-            font-size: 1.2rem;
-            padding: 1rem 2rem;
-        }
-
-        .start-btn:hover {
-            background: #059669;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            nav {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .game-container {
-                padding: 1.5rem;
-            }
-
-            .mode-selection {
-                flex-direction: column;
-            }
-        }
-        #pong-canvas { touch-action: none; }
+        #pong-canvas:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 3px; }
+        #round-status:not(:empty)::before { content: " · "; }
+        #round-status { color: var(--shell-text); font-weight: 650; }
+        .hidden { display: none !important; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -256,28 +35,24 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="game-header">
-            <h1>🏓 Pong</h1>
-            <p>Klasyczna gra w ping-ponga</p>
-        </div>
-
-        <div class="mode-selection">
-            <button class="mode-btn active" data-mode="ai">🤖 vs AI</button>
-            <button class="mode-btn" data-mode="coop">👥 vs Gracz</button>
-        </div>
-
-        <div class="game-container">
-            <canvas tabindex="0" id="pong-canvas" width="900" height="600"></canvas>
-            <div class="controls" id="controls-text">
-                <strong>Sterowanie:</strong> <span id="control-info">Ruch myszą w pionie porusza paletką</span>
+    <main class="game-wrapper" id="main-content" tabindex="-1">
+        <div class="game-bar">
+            <div class="game-title"><h1>Pong</h1><p>Odbijaj piłkę paletką — kto pierwszy zdobędzie 7 punktów, wygrywa</p></div>
+            <div class="kit-tabs mode-selection" role="group" aria-label="Tryb gry">
+                <button class="kit-tab mode-btn active" type="button" data-mode="ai">vs AI</button>
+                <button class="kit-tab mode-btn" type="button" data-mode="coop">vs Gracz</button>
             </div>
-            <div class="btn-group">
-                <button class="start-btn" id="start-btn" onclick="startGame()">▶ START</button>
-                <button type="button" id="pause-game" class="restart-btn" onclick="setPaused(!paused)">Pauza</button><span id="round-status" role="status"></span>
-                <button class="restart-btn hidden" id="restart-btn" onclick="restartGame()">Zagraj ponownie</button>
+            <div class="game-buttons">
+                <button class="kit-btn small primary start-btn" type="button" id="start-btn" onclick="startGame()">Start</button>
+                <button class="kit-btn small primary restart-btn hidden" type="button" id="restart-btn" onclick="restartGame()">Nowy mecz</button>
+                <button type="button" id="pause-game" class="kit-btn small" onclick="setPaused(!paused)">Pauza</button>
             </div>
         </div>
+
+        <div class="game-stage">
+            <canvas tabindex="0" id="pong-canvas" width="900" height="600" aria-label="Plansza Pong"></canvas>
+        </div>
+        <p class="game-status controls" id="controls-text"><span id="control-info">Mysz, dotyk lub ↑/↓ porusza lewą paletką · P: pauza</span><span id="round-status" role="status"></span></p>
     </main>
 
     <script>
@@ -308,7 +83,7 @@
             y: canvas.height / 2 - paddleHeight / 2,
             width: paddleWidth,
             height: paddleHeight,
-            color: '#ffd32a',
+            color: '#f1ede2',
             score: 0,
             dy: 0
         };
@@ -318,7 +93,7 @@
             y: canvas.height / 2 - paddleHeight / 2,
             width: paddleWidth,
             height: paddleHeight,
-            color: '#ffd32a',
+            color: '#f1ede2',
             score: 0,
             dy: 0
         };
@@ -331,7 +106,7 @@
             speed: 10,
             velocityX: 0,
             velocityY: 0,
-            color: 'white'
+            color: '#f0a04b'
         };
 
         // Rysowanie
@@ -349,15 +124,16 @@
 
         function drawNet() {
             for (let i = 0; i <= canvas.height; i += 35) {
-                drawRect(canvas.width / 2 - 3, i, 6, 25, 'white');
+                drawRect(canvas.width / 2 - 2, i, 4, 22, 'rgba(255,255,255,0.28)');
             }
         }
 
         function drawText(text, x, y) {
-            ctx.fillStyle = 'white';
-            ctx.font = '7em fantasy';
-            ctx.strokeText(text, x, y);
-            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'rgba(255,255,255,0.32)';
+            ctx.font = '700 96px Inter, system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, x, y);
+            ctx.textAlign = 'left';
         }
 
         // Kontrola myszą (tryb AI)
@@ -552,7 +328,10 @@
         // Render
         function render() {
             // Tło
-            drawRect(0, 0, canvas.width, canvas.height, '#ff3f34');
+            drawRect(0, 0, canvas.width, canvas.height, '#14322a');
+            // Linie boisk
+            drawRect(0, 0, canvas.width, 4, 'rgba(255,255,255,0.18)');
+            drawRect(0, canvas.height - 4, canvas.width, 4, 'rgba(255,255,255,0.18)');
 
             // Siatka
             drawNet();
@@ -570,10 +349,14 @@
 
             // Tekst START jeśli gra nie wystartowała
             if (!gameStarted) {
-                ctx.fillStyle = 'white';
-                ctx.font = '3em fantasy';
+                drawRect(canvas.width / 2 - 330, canvas.height / 2 - 70, 660, 140, 'rgba(8,20,16,0.78)');
+                ctx.fillStyle = '#f1ede2';
+                ctx.font = '700 40px Inter, system-ui, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('Kliknij START aby rozpocząć', canvas.width / 2, canvas.height / 2);
+                ctx.fillText('Naciśnij Start, aby zagrać', canvas.width / 2, canvas.height / 2 - 6);
+                ctx.fillStyle = 'rgba(241,237,226,0.7)';
+                ctx.font = '500 22px Inter, system-ui, sans-serif';
+                ctx.fillText(gameMode === 'ai' ? 'Grasz lewą paletką przeciwko komputerowi' : 'Lewy gracz: W/S · prawy gracz: ↑/↓', canvas.width / 2, canvas.height / 2 + 36);
                 ctx.textAlign = 'left';
             }
         }
@@ -596,9 +379,9 @@
                 btn.classList.add('active');
 
                 if (gameMode === 'ai') {
-                    controlInfo.textContent = 'Ruch myszą w pionie porusza paletką';
+                    controlInfo.textContent = 'Mysz, dotyk lub ↑/↓ porusza lewą paletką · P: pauza';
                 } else {
-                    controlInfo.textContent = 'W/S - lewa paletka · ↑/↓ - prawa paletka';
+                    controlInfo.textContent = 'W/S: lewa paletka · ↑/↓: prawa paletka · dotyk: połowa planszy · P: pauza';
                 }
 
                 // Reset gry przy zmianie trybu

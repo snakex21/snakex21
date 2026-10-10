@@ -5,293 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kółko i krzyżyk - Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper {
+            flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 540px;
+            --mark-x: var(--shell-accent); --mark-o: #d0612b;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent-x: #38bdf8;
-            --accent-o: #f472b6;
+        [data-theme="dark"] .game-wrapper { --mark-o: #f0a04b; }
+        .game-stat { transition: border-color .15s, box-shadow .15s; }
+        .game-stat.is-active { border-color: var(--shell-accent); box-shadow: 0 0 0 2px var(--shell-soft); }
+        .ttt-toolbar {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
+            width: 100%; max-width: var(--game-width); margin: 0 auto 16px;
         }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        html {
-            background: var(--bg);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .game-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 1rem;
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            min-width: 120px;
-            transition: all 0.2s;
-        }
-
-        .stat.is-active {
-            border-color: var(--accent-x);
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-        }
-
-        .stat span {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat strong {
-            font-size: 1.5rem;
-            color: var(--text);
-        }
-
-        .game-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
-        .turn-display {
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
+        .turn-display { margin: 0 auto 12px; text-align: center; font-size: 16px; font-weight: 650; color: var(--shell-text); }
         .game-board {
-            width: min(420px, 100%);
-            aspect-ratio: 1 / 1;
-            margin: 0 auto 1.5rem;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
+            width: min(420px, 100%); aspect-ratio: 1 / 1; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
         }
-
         .cell {
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 3rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; min-width: 0;
+            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
+            color: var(--shell-text); font: 700 clamp(40px, 12vw, 64px)/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            cursor: pointer; transition: background .15s, border-color .15s;
         }
-
-        .cell:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--shadow);
-            border-color: var(--accent-x);
-        }
-
-        .cell:disabled {
-            cursor: default;
-            opacity: 0.9;
-        }
-
-        .cell.is-x {
-            color: var(--accent-x);
-        }
-
-        .cell.is-o {
-            color: var(--accent-o);
-        }
-
-        .cell.is-winning {
-            background: #22c55e;
-            border-color: #16a34a;
-            color: #fff;
-        }
-
-        .game-status {
-            text-align: center;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        .game-actions {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .game-actions button {
-            padding: 0.75rem 1.5rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .game-actions button:hover {
-            background: var(--border);
-            transform: translateY(-1px);
-        }
-
+        .cell:hover:not(:disabled) { background: var(--shell-hover); border-color: var(--shell-muted); }
+        .cell:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 2px; }
+        .cell:disabled { cursor: default; }
+        .cell.is-x { color: var(--mark-x); }
+        .cell.is-o { color: var(--mark-o); }
+        .cell.is-winning { background: var(--shell-soft); border-color: var(--shell-accent); }
         .history {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            width: 100%; max-width: var(--game-width); margin: 24px auto 0; padding: 18px 20px;
+            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 12px; box-sizing: border-box;
         }
-
-        .history h2 {
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .history ol {
-            padding-left: 1.25rem;
-            display: grid;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .history-empty {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            nav {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .game-board {
-                gap: 0.5rem;
-            }
-
-            .cell {
-                font-size: 2.5rem;
-            }
-        }
+        .history h2 { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--shell-muted); }
+        .history ol { margin: 0; padding-left: 1.25rem; display: grid; gap: 6px; color: var(--shell-text); font-size: 14px; }
+        .history-empty { margin: 0; color: var(--shell-muted); font-size: 14px; }
+        @media (max-width: 560px) { .game-board { gap: 8px; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -306,36 +61,31 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="game-header">
-            <h1>🎮 Kółko i krzyżyk</h1>
-            <p>Graj z przyjacielem lub przeciwko AI</p>
-        </div>
-
-        <div class="game-actions" style="justify-content: center; margin-bottom: 2rem;">
-            <button type="button" data-mode="human" style="padding: 0.75rem 1.5rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-weight: 600; cursor: pointer;">👥 2 Graczy</button>
-            <button type="button" data-mode="ai" style="padding: 0.75rem 1.5rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-weight: 600; cursor: pointer;">🤖 vs AI</button>
-        </div>
-
-        <div class="stats">
-            <div class="stat" data-player="x">
-                <span>Wygrane X</span>
-                <strong data-score-x>0</strong>
-            </div>
-            <div class="stat" data-player="o">
-                <span>Wygrane O</span>
-                <strong data-score-o>0</strong>
-            </div>
-            <div class="stat">
-                <span>Remisy</span>
-                <strong data-score-draws>0</strong>
+    <main class="game-wrapper" id="main-content" tabindex="-1">
+        <div class="game-bar">
+            <div class="game-title"><h1>Kółko i krzyżyk</h1><p>Trzy symbole w linii wygrywają</p></div>
+            <div class="game-stats">
+                <div class="game-stat" data-player="x"><span>Wygrane X</span><b data-score-x>0</b></div>
+                <div class="game-stat" data-player="o"><span>Wygrane O</span><b data-score-o>0</b></div>
+                <div class="game-stat"><span>Remisy</span><b data-score-draws>0</b></div>
             </div>
         </div>
 
-        <div class="game-container">
-            <div class="turn-display" data-turn-display>Runda 1 · Tura gracza X</div>
+        <div class="ttt-toolbar">
+            <div class="kit-tabs" role="group" aria-label="Tryb gry">
+                <button type="button" class="kit-tab active" data-mode="human" aria-pressed="true">2 graczy</button>
+                <button type="button" class="kit-tab" data-mode="ai" aria-pressed="false">vs AI</button>
+            </div>
+            <div class="game-buttons">
+                <button type="button" class="kit-btn small primary" data-action="next">Nowa runda</button>
+                <button type="button" class="kit-btn small danger" data-action="reset">Wyzeruj mecz</button>
+            </div>
+        </div>
 
-            <div class="game-board">
+        <div class="turn-display" data-turn-display>Runda 1 · Tura gracza X</div>
+
+        <div class="game-stage">
+            <div class="game-board" aria-label="Plansza 3 na 3">
                 <button type="button" class="cell" data-cell data-index="0"></button>
                 <button type="button" class="cell" data-cell data-index="1"></button>
                 <button type="button" class="cell" data-cell data-index="2"></button>
@@ -346,20 +96,15 @@
                 <button type="button" class="cell" data-cell data-index="7"></button>
                 <button type="button" class="cell" data-cell data-index="8"></button>
             </div>
-
-            <p class="game-status" data-status>Rozpocznij rundę i doprowadź do trzech swoich symboli w linii</p>
-
-            <div class="game-actions">
-                <button type="button" data-action="next">Nowa runda</button>
-                <button type="button" data-action="reset">Wyzeruj mecz</button>
-            </div>
-
-            <div class="history">
-                <h2>Historia partii</h2>
-                <p class="history-empty" data-history-empty>Jeszcze nie rozegrano żadnej partii</p>
-                <ol data-history></ol>
-            </div>
         </div>
+
+        <p class="game-status" data-status role="status">Rozpocznij rundę i doprowadź do trzech swoich symboli w linii</p>
+
+        <section class="history">
+            <h2>Historia partii</h2>
+            <p class="history-empty" data-history-empty>Jeszcze nie rozegrano żadnej partii</p>
+            <ol data-history></ol>
+        </section>
     </main>
 
     <script>
@@ -414,14 +159,13 @@
             modeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     state.mode = btn.dataset.mode;
-                    modeButtons.forEach(b => b.style.background = 'var(--card-bg)');
-                    btn.style.background = '#3b82f6';
-                    btn.style.color = '#fff';
+                    modeButtons.forEach(b => {
+                        b.classList.toggle('active', b === btn);
+                        b.setAttribute('aria-pressed', String(b === btn));
+                    });
                     newRound(true);
                 });
             });
-            modeButtons[0].style.background = '#3b82f6';
-            modeButtons[0].style.color = '#fff';
 
             function updateTurnDisplay() {
                 if (state.finished) {

@@ -5,73 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saper - Hub</title>
     <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
         :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --header-bg: #ffffff;
-            --nav-text: #666;
-            --nav-hover: #000;
-            --border: #e0e0e0;
-            --game-bg: #f0f0f0;
-            --cell-bg: #e0e0e0;
-            --cell-border-light: #fff;
-            --cell-border-dark: #aaa;
-            --cell-revealed: #d0d0d0;
+            --cell-bg: #dfe3dc;
+            --cell-border-light: #f7f9f5;
+            --cell-border-dark: #a3aaa0;
+            --cell-revealed: #f2f3ef;
+            --grid-bg: #b9bfb5;
         }
-
         [data-theme="dark"] {
-            --bg: #121212;
-            --text: #e0e0e0;
-            --header-bg: #1a1a1a;
-            --nav-text: #aaa;
-            --nav-hover: #fff;
-            --border: #333;
-            --game-bg: #2a2a2a;
-            --cell-bg: #c0c0c0;
-            --cell-border-light: #ffffff;
-            --cell-border-dark: #888;
-            --cell-revealed: #b0b0b0;
+            --cell-bg: #4a524d;
+            --cell-border-light: #626b65;
+            --cell-border-dark: #2e3430;
+            --cell-revealed: #242927;
+            --grid-bg: #1b1f1d;
         }
-
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; min-height: 100vh; margin: 0; transition: background 0.3s; }
-        
-        /* HEADER */
-        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; transition: background 0.3s; }
-        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
-        .nav-links { display: flex; gap: 2rem; flex: 1; }
-        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; }
-        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); }
-        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
-        @media (max-width: 768px) { .nav-links { display: none; } }
-
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        .header { display: flex; justify-content: space-between; width: 300px; margin-bottom: 10px; background: var(--game-bg); padding: 10px; border-radius: 5px; border: 1px solid var(--border); }
-        .stat { font-size: 1.5rem; font-family: monospace; color: #ff5555; }
-        .reset-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-
-        .grid { display: grid; grid-template-columns: repeat(10, 30px); grid-template-rows: repeat(10, 30px); gap: 2px; background: #444; padding: 5px; border-radius: 5px; }
-        .cell { 
-            width: 30px; height: 30px; 
-            background: var(--cell-bg); 
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; padding: 24px 16px; --game-width: 460px; }
+        .difficulty-select {
+            min-height: 34px; padding: 0 30px 0 12px; border: 1px solid var(--shell-border); border-radius: 8px;
+            background: var(--shell-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 11px center;
+            color: var(--shell-text); font: 650 13px/1.2 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            appearance: none; -webkit-appearance: none; cursor: pointer;
+        }
+        .difficulty-select:focus-visible { outline: none; border-color: var(--shell-accent); box-shadow: 0 0 0 3px var(--shell-soft); }
+        .reset-btn { font-size: 18px; min-width: 40px; padding: 0 8px; }
+        #flag-mode[aria-pressed="true"] { background: var(--shell-accent); border-color: var(--shell-accent); color: var(--shell-bg); }
+        .board-scroll { max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
+        .grid { display: grid; grid-template-columns: repeat(10, 30px); grid-template-rows: repeat(10, 30px); gap: 2px; width: max-content; background: var(--grid-bg); padding: 6px; border: 1px solid var(--shell-border); border-radius: 10px; }
+        .cell {
+            width: 30px; height: 30px; padding: 0;
+            background: var(--cell-bg);
             border-top: 2px solid var(--cell-border-light); border-left: 2px solid var(--cell-border-light);
             border-bottom: 2px solid var(--cell-border-dark); border-right: 2px solid var(--cell-border-dark);
-            display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; user-select: none; font-family: sans-serif; font-size: 18px; color: #000; 
+            border-radius: 3px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none;
+            font: 700 17px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--shell-text);
         }
         .cell:active { border: 2px inset var(--cell-border-dark); }
-        .cell.revealed { background: var(--cell-revealed); border: 1px solid #999; }
-        .cell.bomb { background: #ff5555; }
-        .cell[data-num="1"] { color: blue; } .cell[data-num="2"] { color: green; } .cell[data-num="3"] { color: red; }
-        .game-wrapper { min-width: 0; max-width: 100%; padding: 12px; }
-        .game-wrapper > div[style] { width: max-content; max-width: 100%; }
-        .grid { width: max-content; }
-        .header { max-width: 100%; gap: 8px; flex-wrap: wrap; }
-        .cell { padding: 0; color: inherit; font: inherit; }
-        .cell:focus-visible { outline: 3px solid #2563eb; outline-offset: -3px; }
+        .cell.revealed { background: var(--cell-revealed); border: 1px solid var(--cell-border-dark); cursor: default; }
+        .cell.bomb { background: #e5534b; }
+        .cell[data-num="1"] { color: #2563eb; } .cell[data-num="2"] { color: #15803d; } .cell[data-num="3"] { color: #dc2626; }
+        .cell[data-num="4"] { color: #6d28d9; } .cell[data-num="5"] { color: #b45309; } .cell[data-num="6"] { color: #0e7490; }
+        [data-theme="dark"] .cell[data-num="1"] { color: #7aa7ff; } [data-theme="dark"] .cell[data-num="2"] { color: #6fd08c; } [data-theme="dark"] .cell[data-num="3"] { color: #ff7b72; }
+        [data-theme="dark"] .cell[data-num="4"] { color: #c4a5ff; } [data-theme="dark"] .cell[data-num="5"] { color: #f0b860; } [data-theme="dark"] .cell[data-num="6"] { color: #5fd3e0; }
+        .cell:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: -3px; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -87,20 +68,26 @@
 
 
     <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
-        <h1>Saper</h1>
-        <div class="header">
-            <select class="difficulty-select" id="difficulty-select">
-                <option value="easy">Łatwy (10x10)</option>
-                <option value="medium">Średni (16x16)</option>
-                <option value="hard">Trudny (30x16)</option>
-            </select>
-            <div class="stat" id="bomb-count">010</div>
-            <button class="reset-btn" id="reset-btn">🙂</button>
-            <div class="stat" id="timer">000</div>
+        <div class="game-bar">
+            <div class="game-title"><h1>Saper</h1><p>Odkryj wszystkie pola bez min. Flaga: prawy przycisk, F lub tryb flagi.</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Miny</span><b class="stat" id="bomb-count">010</b></div>
+                <div class="game-stat"><span>Czas</span><b class="stat" id="timer">000</b></div>
+            </div>
+            <div class="game-buttons">
+                <select class="difficulty-select" id="difficulty-select" aria-label="Poziom trudności">
+                    <option value="easy">Łatwy (10x10)</option>
+                    <option value="medium">Średni (16x16)</option>
+                    <option value="hard">Trudny (30x16)</option>
+                </select>
+                <button class="kit-btn small reset-btn" type="button" id="reset-btn" aria-label="Nowa gra" title="Nowa gra">🙂</button>
+                <button class="kit-btn small" type="button" id="flag-mode" aria-pressed="false">🚩 Tryb flagi: wyłączony</button>
+            </div>
         </div>
-        <button type="button" id="flag-mode" aria-pressed="false">🚩 Tryb flagi: wyłączony</button>
-        <p>Kliknij pole, aby odkryć. Flaga: prawy przycisk, klawisz F lub tryb flagi.</p>
-        <div style="max-width:100%;overflow-x:auto"><div class="grid" id="grid"></div></div>
+        <div class="game-stage">
+            <div class="board-scroll"><div class="grid" id="grid"></div></div>
+        </div>
+        <p class="game-status" id="saper-status" role="status">Kliknij pole, aby odkryć. Pierwsze pole jest zawsze bezpieczne.</p>
     </div>
 
     <script>
@@ -113,6 +100,8 @@
         const timerEl = document.getElementById('timer');
         const resetBtn = document.getElementById('reset-btn');
         const diffSelect = document.getElementById('difficulty-select');
+        const statusEl = document.getElementById('saper-status');
+        const setStatus = text => { if (statusEl) statusEl.textContent = text; };
         
         let width = 10, height = 10, bombAmount = 10, flags = 0;
         let squares = [], isGameOver = false, timer = 0, timerId = null, started = false, flagMode = false;
@@ -149,7 +138,9 @@
             timerEl.textContent = '000';
             grid.style.gridTemplateColumns = `repeat(${width}, 30px)`;
             grid.style.gridTemplateRows = `repeat(${height}, 30px)`;
+            grid.closest('.game-wrapper')?.style.setProperty?.('--game-width', `${Math.max(460, width * 32 + 16)}px`);
             bombCountEl.textContent = String(bombAmount).padStart(3, '0'); resetBtn.textContent = '🙂';
+            setStatus('Kliknij pole, aby odkryć. Pierwsze pole jest zawsze bezpieczne.');
             const gameArray = Array(width * height).fill('valid');
             for (let i = 0; i < bombAmount; i++) gameArray[i] = 'bomb';
             for (let i = gameArray.length - 1; i > 0; i--) {
@@ -204,13 +195,14 @@
         }
         function gameOver() {
             isGameOver = true; resetBtn.textContent = '😵'; clearInterval(timerId);
+            setStatus('Boom! Trafiłeś na minę. Kliknij 🙂, aby zagrać ponownie.');
             squares.forEach(sq => { if (sq.dataset.type === 'bomb') { sq.textContent = '💣'; sq.classList.remove('flag'); sq.classList.add('revealed', 'bomb'); sq.setAttribute('aria-label', 'Mina'); } });
         }
         function checkForWin() {
             if (isGameOver) return;
             const allSafeRevealed = squares.every(s => s.dataset.type === 'bomb' || s.classList.contains('revealed'));
             const allMinesFlagged = squares.filter(s => s.classList.contains('flag') && s.dataset.type === 'bomb').length === bombAmount;
-            if (allSafeRevealed || allMinesFlagged) { isGameOver = true; resetBtn.textContent = '😎'; clearInterval(timerId); }
+            if (allSafeRevealed || allMinesFlagged) { isGameOver = true; resetBtn.textContent = '😎'; clearInterval(timerId); setStatus(`Wygrana! Czas: ${timer} s.`); }
         }
 
         resetBtn.addEventListener('click', createBoard); 

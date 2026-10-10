@@ -4,6 +4,7 @@
     const input = document.querySelector('.joiner'), list = document.querySelector('.participants');
     const spinButton = document.querySelector('.spin-trigger'), addButton = document.querySelector('.add');
     const winner = document.querySelector('.winner'), resetButton = document.querySelector('.reset');
+    const count = document.getElementById('wheel-count');
     const colors = ['#2563eb', '#7c3aed', '#db2777', '#d97706', '#059669', '#0891b2'];
     let participants = [], angle = 0, timer = null, spinning = false;
     winner.setAttribute('aria-live', 'polite');
@@ -13,6 +14,7 @@
     function controls() {
         spinButton.disabled = spinning || !participants.length;
         addButton.disabled = spinning; input.disabled = spinning;
+        if (count) count.textContent = participants.length;
     }
     function draw() {
         ctx.clearRect(0, 0, 500, 500);

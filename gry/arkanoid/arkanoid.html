@@ -6,163 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arkanoid - Hub</title>
     <style>
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --header-bg: #ffffff;
-            --nav-text: #666;
-            --nav-hover: #000;
-            --border: #e0e0e0;
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 804px; }
+        .board { position: relative; width: 100%; max-width: 804px; }
+        #gameCanvas {
+            display: block; width: 100%; height: auto; background: #101a16;
+            border: 2px solid var(--shell-border); border-radius: 12px; touch-action: none;
         }
-
-        [data-theme="dark"] {
-            --bg: #121212;
-            --text: #ffffff;
-            --header-bg: #1a1a1a;
-            --nav-text: #aaa;
-            --nav-hover: #fff;
-            --border: #333;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: background 0.3s;
-        }
-
-        /* HEADER */
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            width: 100%;
-            z-index: 100;
-            transition: background 0.3s;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--nav-text);
-            text-decoration: none;
-            transition: 0.2s;
-            font-size: 1rem;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--nav-hover);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-        }
-
-        /* GAME */
-        .game-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        canvas {
-            background: #000;
-            border: 2px solid #333;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-            display: block;
-        }
-
-        .info {
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-            color: #aaa;
-            display: flex;
-            gap: 20px;
-        }
-
         .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10;
-            flex-direction: column;
-            color: #fff;
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            padding: 16px; border-radius: 12px; text-align: center;
+            background: rgba(10, 18, 14, 0.62); color: #eef2e7;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-
-        .btn {
-            background: #00bcd4;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1.2rem;
-            color: #000;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-weight: bold;
+        .overlay h2 { margin: 0; font-size: clamp(24px, 5vw, 42px); font-weight: 750; letter-spacing: -.5px; }
+        .overlay p { margin: 0; font-size: clamp(13px, 2vw, 16px); color: #c9d4c6; }
+        .overlay .kit-btn { margin-top: 12px; min-width: 140px; }
+        .hidden { display: none; }
+        .game-status { min-height: 21px; }
+        @media (max-width: 560px) {
+            .game-wrapper { padding: 16px; }
+            .overlay { gap: 2px; }
+            .overlay .kit-btn { margin-top: 8px; min-height: 38px; }
         }
-
-        .btn:hover {
-            background: #00acc1;
-        }
-
-        .hidden {
-            display: none;
-        }
-        #gameCanvas { max-width: 100%; height: auto; touch-action: none; }
-        .round-controls { text-align: center; padding: 12px; }
-        .round-controls button { padding: 10px 16px; border-radius: 8px; cursor: pointer; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
@@ -178,32 +49,41 @@
 </header>
 
 
-    <div class="game-container" id="main-content" tabindex="-1" role="main">
-        <div class="round-controls"><button id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button> <button type="button" onclick="resetGame()">Nowa gra</button> <span id="game-status" role="status"></span></div>
-        <div class="info">
-            <span>Poziom: <span id="level">1</span></span>
-            <span>Wynik: <span id="score">0</span></span>
-            <span>Życia: <span id="lives">3</span></span>
-        </div>
-        <div style="position: relative;">
-            <canvas tabindex="0" aria-label="Arkanoid. Strzałki lub przeciągnięcie: ruch. P: pauza." id="gameCanvas" width="800" height="550"></canvas>
-            <div id="start-screen" class="overlay">
-                <h1>Arkanoid</h1>
-                <p>Sterowanie: Strzałki lub Myszka</p>
-                <button class="btn" onclick="startGame()">START</button>
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
+        <div class="game-bar">
+            <div class="game-title"><h1>Arkanoid</h1><p>Strzałki, mysz lub przeciągnięcie: paletka · P: pauza</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Poziom</span><b id="level">1</b></div>
+                <div class="game-stat"><span>Wynik</span><b id="score">0</b></div>
+                <div class="game-stat"><span>Życia</span><b id="lives">3</b></div>
             </div>
-            <div id="level-screen" class="overlay hidden">
-                <h1>Poziom <span id="level-display">1</span></h1>
-                <p>Przygotuj się!</p>
-                <button class="btn" onclick="continueGame()">KONTYNUUJ</button>
-            </div>
-            <div id="game-over-screen" class="overlay hidden">
-                <h1 id="end-msg">Koniec Gry</h1>
-                <p>Wynik: <span id="final-score">0</span></p>
-                <p>Osiągnięty poziom: <span id="final-level">1</span></p>
-                <button class="btn" onclick="resetGame()">Zagraj ponownie</button>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" type="button" onclick="resetGame()">Nowa gra</button>
+                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
             </div>
         </div>
+        <div class="game-stage">
+            <div class="board">
+                <canvas tabindex="0" aria-label="Arkanoid. Strzałki lub przeciągnięcie: ruch. P: pauza." id="gameCanvas" width="800" height="550"></canvas>
+                <div id="start-screen" class="overlay">
+                    <h2>Arkanoid</h2>
+                    <p>Odbijaj piłkę paletką i rozbij wszystkie cegły</p>
+                    <button class="kit-btn primary" type="button" onclick="startGame()">Start</button>
+                </div>
+                <div id="level-screen" class="overlay hidden">
+                    <h2>Poziom <span id="level-display">1</span></h2>
+                    <p>Przygotuj się!</p>
+                    <button class="kit-btn primary" type="button" onclick="continueGame()">Kontynuuj</button>
+                </div>
+                <div id="game-over-screen" class="overlay hidden">
+                    <h2 id="end-msg">Koniec Gry</h2>
+                    <p>Wynik: <span id="final-score">0</span></p>
+                    <p>Osiągnięty poziom: <span id="final-level">1</span></p>
+                    <button class="kit-btn primary" type="button" onclick="resetGame()">Zagraj ponownie</button>
+                </div>
+            </div>
+        </div>
+        <p class="game-status" id="game-status" role="status"></p>
     </div>
 
     <script>

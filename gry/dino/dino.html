@@ -6,141 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dino Run - Hub</title>
     <style>
-        :root {
-            --bg: #f7f7f7;
-            --text: #535353;
-            --header-bg: #fff;
-            --nav-text: #666;
-            --nav-hover: #333;
-            --border: #ddd;
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 32px 16px 24px; --game-width: 804px; }
+        #game {
+            display: block; width: 100%; max-width: 804px; height: auto; background: #fff;
+            border: 2px solid var(--shell-border); border-radius: 12px; touch-action: manipulation; cursor: pointer;
         }
-
-        [data-theme="dark"] {
-            --bg: #202124;
-            --text: #fff;
-            --header-bg: #1a1a1a;
-            --nav-text: #aaa;
-            --nav-hover: #fff;
-            --border: #333;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 0.75rem 2rem;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--nav-text);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--nav-hover);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-        }
-
-        .game-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
-        }
-
-        [data-theme="dark"] .game-container {
-            background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 100%);
-        }
-
-        .score {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            background: rgba(0, 0, 0, 0.1);
-            padding: 10px 30px;
-            border-radius: 10px;
-        }
-
-        .game-wrapper {
-            position: relative;
-        }
-
-        canvas {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .msg {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            padding: 15px 30px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-
-        .highscore {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 0.9rem;
-            color: #888;
-        }
-        canvas { max-width: 100%; height: auto; touch-action: manipulation; }
-        .round-controls button { padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+        .game-status { min-height: 21px; }
+        .dino-jump { display: none; width: 100%; max-width: 360px; min-height: 64px; margin: 16px auto 0; font-size: 18px; touch-action: manipulation; }
+        @media (hover: none), (max-width: 700px) { .dino-jump { display: flex; } }
+        .game-stat > b { min-width: 5ch; text-align: center; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
@@ -155,14 +34,24 @@
 <div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
 </header>
 
-    <div class="game-container" id="main-content" tabindex="-1" role="main">
-        <div class="score">🦖 <span id="score">00000</span></div>
-        <div class="game-wrapper">
-            <div class="highscore">HI: <span id="highscore">00000</span></div>
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
+        <div class="game-bar">
+            <div class="game-title"><h1>Dino Run</h1><p>Spacja, ↑ lub dotknięcie: skok · P: pauza</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Wynik</span><b id="score">00000</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="highscore">00000</b></div>
+            </div>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" type="button" onclick="jump()">Start / skok</button>
+                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
+                <button class="kit-btn small" type="button" onclick="running=false;start()">Nowa gra</button>
+            </div>
+        </div>
+        <div class="game-stage">
             <canvas id="game" width="800" height="250" tabindex="0" aria-label="Dino. Spacja lub dotknięcie: skok. P: pauza."></canvas>
         </div>
-        <div class="msg" id="msg" role="status">Spacja lub kliknij aby skoczyć</div>
-        <div class="round-controls"><button type="button" onclick="jump()">Start / skok</button> <button id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button> <button type="button" onclick="running=false;start()">Nowa gra</button></div>
+        <p class="game-status msg" id="msg" role="status">Spacja lub kliknij planszę, aby zacząć</p>
+        <button class="kit-btn primary dino-jump" type="button" onclick="jump()">Skok</button>
     </div>
     <script>
         const cvs = document.getElementById('game');
