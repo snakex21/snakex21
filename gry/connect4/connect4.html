@@ -6,177 +6,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Czwórki - Hub</title>
     <style>
-        :root {
-            --bg: #121212;
-            --text: #fff;
-            --header-bg: #1a1a1a;
-            --nav-text: #aaa;
-            --nav-hover: #fff;
-            --border: #333;
-        }
-
-        [data-theme="light"] {
-            --bg: #f0f0f0;
-            --text: #333;
-            --header-bg: #fff;
-            --nav-text: #666;
-            --nav-hover: #000;
-            --border: #ddd;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 0.75rem 2rem;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--nav-text);
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--nav-hover);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-        }
-
-        .game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-area { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 520px; }
         .status {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 16px; font-size: 16px; font-weight: 650; color: var(--shell-text);
         }
-
         .turn-indicator {
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
+            display: inline-block; width: 22px; height: 22px; border-radius: 50%;
+            box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .18);
         }
-
         .board {
-            background: #0055aa;
-            padding: 10px;
-            border-radius: 10px;
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            box-sizing: border-box; width: min(100%, 500px); padding: 10px;
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+            background: #1d4f91; border-radius: 14px;
+            box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .18);
         }
-
         .col {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 5px;
-            transition: background 0.2s;
+            display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 3px;
+            border-radius: 8px; cursor: pointer; transition: background .2s;
         }
-
-        .col:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
+        .col:hover { background: rgba(255, 255, 255, .12); }
+        .col:focus-visible { outline: 3px solid #fff; outline-offset: -1px; }
         .slot {
-            width: 50px;
-            height: 50px;
-            background: #121212;
-            border-radius: 50%;
-            border: 2px solid #004488;
-            transition: background 0.3s;
+            width: 100%; aspect-ratio: 1; border-radius: 50%;
+            background: var(--shell-bg); border: 2px solid #163d70;
+            box-sizing: border-box; transition: background .3s;
         }
-
-        .red {
-            background: #ff4444 !important;
-        }
-
-        .yellow {
-            background: #ffbb00 !important;
-        }
-
-        .reset-btn {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background: #333;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .reset-btn:hover {
-            background: #444;
-        }
-        .game-area { padding: clamp(8px, 3vw, 32px); }
-        .board { width: min(100%, 500px); gap: 4px; }
-        .col { min-width: 0; padding: 3px; gap: 4px; }
-        .col:focus-visible { outline: 3px solid #fff; }
-        .slot { width: 100%; height: auto; aspect-ratio: 1; }
-        .status { flex-wrap: wrap; }
+        .red { background: #e5483f !important; }
+        .yellow { background: #f5b82e !important; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
@@ -193,9 +55,16 @@
 
 
     <div class="game-area" id="main-content" tabindex="-1" role="main">
-        <div class="status">Tura gracza: <span id="turn-color" class="turn-indicator red"></span></div>
-        <div class="board" id="board"></div>
-        <button class="reset-btn" onclick="resetGame()">Restart</button>
+        <div class="game-bar">
+            <div class="game-title"><h1>Czwórki</h1><p>Wrzucajcie pionki na zmianę — cztery w linii wygrywają</p></div>
+            <div class="game-buttons">
+                <button class="kit-btn small primary reset-btn" type="button" onclick="resetGame()">Nowa gra</button>
+            </div>
+        </div>
+        <div class="game-stage">
+            <div class="board" id="board" aria-label="Plansza Czwórek"></div>
+        </div>
+        <p class="game-status status" role="status">Tura gracza: <span id="turn-color" class="turn-indicator red"></span></p>
     </div>
 
     <script>

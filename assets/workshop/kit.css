@@ -73,6 +73,8 @@ body {
   text-decoration: none; cursor: pointer; white-space: nowrap;
   transition: background .15s, border-color .15s, color .15s;
 }
+/* display:inline-flex must not defeat the hidden attribute. */
+.kit-btn[hidden], .kit-tab[hidden], .game-stat[hidden] { display: none; }
 .kit-btn:hover { background: var(--shell-hover); border-color: var(--shell-muted); }
 .kit-btn:disabled { opacity: .5; cursor: not-allowed; }
 .kit-btn.primary { background: var(--shell-accent); border-color: var(--shell-accent); color: var(--shell-bg); }

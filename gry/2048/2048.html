@@ -5,171 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>2048 - Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 500px; }
+        .game-stage { flex-direction: column; align-items: center; }
 
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        html {
-            background: var(--bg);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        main {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .game-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .game-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .score-display {
-            text-align: center;
-        }
-
-        .score-display span {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .score-display strong {
-            font-size: 2rem;
-            color: var(--text);
-        }
-
-        .restart-btn {
-            padding: 0.75rem 1.5rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .restart-btn:hover {
-            background: var(--border);
-        }
-
-        .game-board-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
+        [data-game-root], [data-game-root] * { box-sizing: border-box; }
         [data-game-root] {
             touch-action: none;
             position: relative;
             width: min(500px, 100%);
             aspect-ratio: 1 / 1;
             padding: 12px;
-            border-radius: 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 12px var(--shadow);
+            border-radius: 14px;
+            background: var(--shell-soft);
+            border: 1px solid var(--shell-border);
         }
 
         .grid {
@@ -190,8 +39,8 @@
         .grid_cell {
             position: relative;
             border-radius: 8px;
-            background: var(--bg);
-            border: 1px solid var(--border);
+            background: var(--shell-card);
+            border: 1px solid var(--shell-border);
             overflow: hidden;
         }
 
@@ -203,8 +52,10 @@
             width: 100%;
             height: 100%;
             border-radius: 8px;
-            font-weight: 700;
-            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-weight: 750;
+            font-size: clamp(1.5rem, 7vw, 2.2rem);
+            font-variant-numeric: tabular-nums;
             color: #1a1a1a;
             transform: scale(0.9);
             opacity: 0;
@@ -217,58 +68,30 @@
             transform: scale(1);
         }
 
-
         .tile[data-value="2"] { background: #fef3c7; }
         .tile[data-value="4"] { background: #fde68a; }
         .tile[data-value="8"] { background: #fbbf24; }
         .tile[data-value="16"] { background: #fb923c; }
         .tile[data-value="32"] { background: #f97316; }
-        .tile[data-value="64"] { background: #ef4444; }
+        .tile[data-value="64"] { background: #ef4444; color: #fff; }
         .tile[data-value="128"] { background: #f472b6; }
         .tile[data-value="256"] { background: #c084fc; }
         .tile[data-value="512"] { background: #38bdf8; }
-        .tile[data-value="1024"] { background: #22d3ee; font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
-        .tile[data-value="2048"] { background: #2dd4bf; font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
-        .tile[data-value="4096"] { background: #a855f7; color: #fff; font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
+        .tile[data-value="1024"] { background: #22d3ee; font-size: clamp(1.1rem, 5vw, 1.8rem); }
+        .tile[data-value="2048"] { background: #2dd4bf; font-size: clamp(1.1rem, 5vw, 1.8rem); }
+        .tile[data-value="4096"] { background: #a855f7; color: #fff; font-size: clamp(1.1rem, 5vw, 1.8rem); }
 
-        .game-status {
-            text-align: center;
-            padding: 1rem;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            min-height: 3rem;
-        }
-
-        .game-status p {
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            nav {
-                padding: 1rem;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .game-controls {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            [data-game-root] {
-                width: 100%;
-            }
+        #status { min-height: 1.5em; }
+        #status p { margin: 0; color: var(--shell-text); font-weight: 650; }
+        @media (max-width: 560px) {
+            .game-wrapper { padding: 16px 16px 24px; }
+            [data-game-root], .grid, .grid_row { gap: 8px; }
+            [data-game-root] { padding: 8px; }
         }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -283,25 +106,22 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="game-header">
-            <h1>🎮 2048</h1>
-            <p>Przesuwaj kafelki strzałkami lub gestem na planszy, łącz te same liczby i osiągnij 2048!</p>
-        </div>
-
-        <div class="game-controls">
-            <div class="score-display">
-                <span>Wynik</span>
-                <strong id="value">0</strong>
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
+        <div class="game-bar">
+            <div class="game-title"><h1>2048</h1><p>Strzałki lub gest · łącz równe liczby aż do 2048</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Wynik</span><b id="value">0</b></div>
             </div>
-            <button class="restart-btn" type="button" id="repeat">🔄 Restart</button>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" type="button" id="repeat">Nowa gra</button>
+            </div>
         </div>
 
-        <div class="game-board-wrapper">
-            <div data-game-root></div>
-            <div class="game-status" id="status"></div>
+        <div class="game-stage">
+            <div data-game-root aria-label="Plansza 2048"></div>
         </div>
-    </main>
+        <div class="game-status" id="status" role="status"></div>
+    </div>
 
     <script>
         // Motyw ciemny

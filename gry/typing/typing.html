@@ -6,277 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tester Szybkości Pisania - Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #f5f5f5;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #ddd;
-            --card-bg: #ffffff;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #eab308;
-            --correct: #22c55e;
-            --error: #ef4444;
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --accent: #facc15;
-        }
-
-        body {
-            font-family: 'Roboto Mono', monospace;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-
-        nav {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stats-bar {
-            display: flex;
-            gap: 3rem;
-            margin-bottom: 2rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            display: block;
-            margin-bottom: 0.2rem;
-        }
-
-        .stat-value {
-            color: var(--accent);
-        }
-
+        :root { --correct: #15803d; --error: #c2410c; }
+        [data-theme="dark"] { --correct: #6fd08c; --error: #ff8f86; }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        main { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 820px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .game-stage { flex-direction: column; align-items: center; gap: 16px; }
+        .time-options { padding: 3px; }
+        .time-options .kit-tab { min-height: 28px; padding: 0 10px; font-size: 13px; }
+        .stat-item { text-align: center; }
+        .stat-label { display: block; font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--shell-muted); }
+        .stat-value { display: block; font-size: 1.6rem; font-weight: 750; color: var(--shell-accent); font-variant-numeric: tabular-nums; }
         .word-display {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            font-size: 1.5rem;
-            line-height: 2;
-            margin-bottom: 2rem;
-            width: 100%;
-            height: 160px;
-            overflow: hidden;
-            position: relative;
-            user-select: none;
-            box-shadow: 0 4px 20px var(--shadow);
-            /* Enable smooth scrolling */
-            scroll-behavior: smooth;
-            display: flex;
-            flex-wrap: wrap;
-            align-content: flex-start;
+            box-sizing: border-box; position: relative; width: 100%; height: 168px; overflow: hidden;
+            display: flex; flex-wrap: wrap; align-content: flex-start;
+            padding: 20px 24px; background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
+            font: 500 1.4rem/2 var(--kit-mono); user-select: none; scroll-behavior: smooth;
         }
-
-        .word {
-            margin-right: 0.5em;
-            padding: 0.1em 0.3em;
-            border-radius: 4px;
-            scroll-margin-top: 60px;
-            /* Offset for scrolling */
+        .word { margin-right: 0.4em; padding: 0 0.3em; border-radius: 6px; }
+        .word.current { background: var(--shell-soft); box-shadow: inset 0 -2px 0 var(--shell-accent); }
+        .word.correct { color: var(--correct); }
+        .word.error { color: var(--error); text-decoration: line-through; }
+        .input-area { width: 100%; max-width: 520px; }
+        #input-field {
+            box-sizing: border-box; width: 100%; min-height: 56px; padding: 0 16px;
+            border: 2px solid var(--shell-border); border-radius: 12px; background: var(--shell-card); color: var(--shell-text);
+            font: 500 1.2rem var(--kit-mono); text-align: center; outline: none; transition: border-color .15s, box-shadow .15s;
         }
-
-        .word.current {
-            background: rgba(234, 179, 8, 0.2);
-            border-bottom: 2px solid var(--accent);
-        }
-
-        .word.correct {
-            color: var(--correct);
-        }
-
-        .word.error {
-            color: var(--error);
-            text-decoration: line-through;
-        }
-
-        .input-area {
-            width: 100%;
-            max-width: 500px;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.2rem;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            background: var(--card-bg);
-            color: var(--text);
-            text-align: center;
-            font-family: 'Roboto Mono', monospace;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--accent);
-        }
-
-        .controls {
-            margin-top: 2rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            transition: all 0.2s;
-        }
-
-        .btn-restart {
-            background: var(--text);
-            color: var(--bg);
-        }
-
-        .btn-restart:hover {
-            opacity: 0.9;
-        }
-
-        .time-options {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .time-btn {
-            padding: 0.4rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            background: var(--card-bg);
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .time-btn.active {
-            color: var(--accent);
-            border-color: var(--accent);
-            font-weight: 700;
-        }
-
-        /* Result Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
+        #input-field:focus { border-color: var(--shell-accent); box-shadow: 0 0 0 3px var(--shell-soft); }
+        #input-field:disabled { opacity: .6; }
+        .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
         .modal-content {
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
+            box-sizing: border-box; width: 100%; max-width: 440px; padding: 32px 28px; text-align: center;
+            background: var(--shell-card); color: var(--shell-text); border: 1px solid var(--shell-border); border-radius: 18px;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-
-        .result-wpm {
-            font-size: 4rem;
-            font-weight: 800;
-            color: var(--accent);
-            margin: 1rem 0;
-        }
-
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+        .modal-content h2 { margin: 0; font-size: 1.4rem; }
+        .modal-content p { margin: 0 0 20px; color: var(--shell-muted); font-size: 14px; }
+        .result-wpm { font-size: 4rem; line-height: 1.1; font-weight: 800; color: var(--shell-accent); margin: 16px 0 4px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .result-grid .stat-item { padding: 10px; border: 1px solid var(--shell-border); border-radius: 10px; }
+        .result-grid .stat-value { font-size: 1.3rem; }
+        @media (max-width: 560px) { .word-display { height: 152px; padding: 14px 16px; font-size: 1.15rem; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
@@ -292,42 +66,35 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="time-options">
-            <button class="time-btn" data-time="15">15s</button>
-            <button class="time-btn" data-time="30">30s</button>
-            <button class="time-btn active" data-time="60">60s</button>
-        </div>
-
-        <div class="stats-bar">
-            <div class="stat-item">
-                <span class="stat-label">Czas</span>
-                <span class="stat-value" id="timer">60</span>
+    <main class="game-wrapper" id="main-content" tabindex="-1">
+        <div class="game-bar">
+            <div class="game-title"><h1>Test pisania</h1><p>Przepisuj słowa, spacja zatwierdza. Czas rusza z pierwszą literą.</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Czas</span><b id="timer">60</b></div>
+                <div class="game-stat"><span>WPM</span><b id="wpm">0</b></div>
+                <div class="game-stat"><span>Celność</span><b id="accuracy">100%</b></div>
             </div>
-            <div class="stat-item">
-                <span class="stat-label">WPM</span>
-                <span class="stat-value" id="wpm">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Dokładność</span>
-                <span class="stat-value" id="accuracy">100%</span>
+            <div class="game-buttons">
+                <div class="time-options kit-tabs" role="group" aria-label="Czas testu">
+                    <button class="time-btn kit-tab" type="button" data-time="15">15s</button>
+                    <button class="time-btn kit-tab" type="button" data-time="30">30s</button>
+                    <button class="time-btn kit-tab active" type="button" data-time="60">60s</button>
+                </div>
+                <button class="kit-btn small primary" type="button" id="btn-restart">↻ Restart</button>
             </div>
         </div>
 
-        <div class="word-display" id="word-display"></div>
-
-        <div class="input-area">
-            <input type="text" id="input-field" placeholder="Zacznij pisać..." autocomplete="off">
-        </div>
-
-        <div class="controls">
-            <button class="btn btn-restart" id="btn-restart">↻ Restart</button>
+        <div class="game-stage">
+            <div class="word-display" id="word-display" aria-label="Słowa do przepisania"></div>
+            <div class="input-area">
+                <input type="text" id="input-field" class="kit-input" placeholder="Zacznij pisać..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Wpisz bieżące słowo">
+            </div>
         </div>
     </main>
 
-    <div class="modal" id="result-modal">
+    <div class="modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
         <div class="modal-content">
-            <h2>Koniec czasu! 🏁</h2>
+            <h2 id="result-title">Koniec czasu!</h2>
             <div class="result-wpm" id="final-wpm">0</div>
             <p>Słów na minutę (WPM)</p>
 
@@ -350,7 +117,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-restart" onclick="resetGame()">Spróbuj ponownie</button>
+            <button class="kit-btn primary block" type="button" onclick="resetGame()">Spróbuj ponownie</button>
         </div>
     </div>
 
@@ -506,7 +273,10 @@
 
                     // If word is in the bottom half or below, scroll it to center
                     if (wordRect.bottom > containerRect.bottom - 40) {
-                        nextWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Scroll only the word box (scrollIntoView also jumped the whole page).
+                        const top = nextWord.offsetTop - wordDisplay.clientHeight / 2;
+                        if (wordDisplay.scrollTo) wordDisplay.scrollTo({ top, behavior: 'smooth' });
+                        else wordDisplay.scrollTop = top;
                     }
                 }
 

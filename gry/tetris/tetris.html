@@ -5,180 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tetris - Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --panel-bg: #f8f9fa;
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --panel-bg: #2a2a2a;
-        }
-
-        html {
-            background: var(--bg);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .game-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat span {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat strong {
-            font-size: 1.5rem;
-            color: var(--text);
-        }
-
-        .stat.is-record strong {
-            color: #22c55e;
-        }
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 680px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .game-stat.is-record b { color: #16a34a; }
+        [data-theme="dark"] .game-stat.is-record b { color: #4ade80; }
 
         .tetris-app {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
-            gap: 2rem;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 20px;
             align-items: start;
-            max-width: 900px;
-            margin: 0 auto;
+            justify-content: center;
+            width: 100%;
         }
+
+        .tetris-board-col { display: flex; flex-direction: column; align-items: center; min-width: 0; }
 
         .tetris-playfield {
             position: relative;
-            width: 100%;
-            max-width: 440px;
-            margin: 0 auto;
-            padding: 1.5rem;
-            border-radius: 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 12px var(--shadow);
+            padding: 10px;
+            border-radius: 14px;
+            background: var(--shell-card);
+            border: 1px solid var(--shell-border);
         }
 
         .tetris-playfield canvas {
             display: block;
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            background: var(--bg);
+            height: min(640px, calc(100vh - 240px), calc((100vw - 54px) * 2));
+            min-height: 320px;
+            width: auto;
+            max-width: 100%;
+            aspect-ratio: 1 / 2;
+            border-radius: 8px;
+            background: var(--shell-soft);
+            outline: none;
         }
+        .tetris-playfield canvas:focus-visible { box-shadow: 0 0 0 3px var(--shell-accent); }
 
         .tetris-overlay {
             position: absolute;
-            inset: 1.5rem;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(6px);
+            inset: 10px;
+            border-radius: 8px;
+            background: rgba(23, 35, 30, 0.82);
+            backdrop-filter: blur(4px);
             display: grid;
             place-items: center;
             opacity: 0;
@@ -198,119 +67,94 @@
         }
 
         .tetris-overlay__panel {
+            padding: 0 16px;
             text-align: center;
             color: #fff;
         }
 
         .tetris-overlay__panel h2 {
-            margin: 0 0 0.5rem;
-            font-size: 1.8rem;
+            margin: 0 0 6px;
+            font-size: 1.6rem;
+            font-weight: 750;
         }
 
         .tetris-overlay__panel p {
             margin: 0;
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.78);
         }
 
         .tetris-sidebar {
             display: grid;
-            gap: 1.5rem;
+            gap: 12px;
         }
 
         .tetris-panel {
-            background: var(--panel-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px var(--shadow);
+            background: var(--shell-card);
+            border-radius: 12px;
+            border: 1px solid var(--shell-border);
+            padding: 16px 18px;
         }
 
         .tetris-panel h2 {
-            margin: 0 0 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
+            margin: 0 0 10px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--shell-muted);
         }
 
         .tetris-next canvas {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            background: var(--bg);
-        }
-
-        .tetris-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .tetris-actions button {
-            flex: 1;
-            padding: 0.75rem 1rem;
+            display: block;
+            width: 112px;
+            height: 112px;
+            margin: 0 auto;
             border-radius: 8px;
-            border: 1px solid var(--border);
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tetris-actions button[data-action="toggle"] {
-            background: #3b82f6;
-            color: #fff;
-            border-color: #3b82f6;
-        }
-
-        .tetris-actions button[data-action="toggle"]:hover {
-            background: #2563eb;
-            border-color: #2563eb;
-        }
-
-        .tetris-actions button[data-action="restart"] {
-            background: var(--card-bg);
-            color: var(--text);
-        }
-
-        .tetris-actions button[data-action="restart"]:hover {
-            background: var(--border);
+            background: var(--shell-soft);
         }
 
         .tetris-help {
             margin: 0;
-            padding-left: 1.25rem;
+            padding: 0;
+            list-style: none;
             display: grid;
-            gap: 0.4rem;
-            font-size: 0.9rem;
+            gap: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--shell-muted);
         }
+        .tetris-help strong { color: var(--shell-text); font-weight: 650; white-space: nowrap; }
+        .tetris-keys { grid-template-columns: max-content minmax(0, 1fr); column-gap: 14px; }
+        .tetris-keys li { display: contents; }
+        .tetris-tips li { padding-left: 14px; position: relative; }
+        .tetris-tips li::before { content: ""; position: absolute; left: 0; top: .55em; width: 5px; height: 5px; border-radius: 50%; background: var(--shell-accent); }
 
-        .game-status {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+        .touch-controls { display: none; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+        .touch-controls button {
+            min-width: 54px; min-height: 52px; padding: 0;
+            border: 1px solid var(--shell-border); border-radius: 10px;
+            background: var(--shell-card); color: var(--shell-text);
+            font: inherit; font-size: 1.35rem; font-weight: 650; cursor: pointer;
+            touch-action: manipulation;
         }
+        .touch-controls button:active { background: var(--shell-hover); }
+        @media (hover: none), (max-width: 700px) { .touch-controls { display: flex; } }
 
-        @media (max-width: 960px) {
-            .tetris-app {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            nav {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
+        @media (max-width: 700px) {
+            .game-wrapper { padding: 16px 16px 24px; }
+            .tetris-app { grid-template-columns: minmax(0, 1fr); }
+            .tetris-sidebar { max-width: 360px; width: 100%; margin: 0 auto; }
+            .tetris-next { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
+            .tetris-next h2 { margin: 0; }
+            .tetris-next canvas { width: 72px; height: 72px; margin: 0; }
+            .tetris-tips, .tetris-keys-panel { display: none; }
+            .tetris-playfield canvas { height: min(640px, calc(100vh - 350px), calc((100vw - 54px) * 2)); }
         }
-        .touch-controls { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin:12px 0; }
-        .touch-controls button { min-width:48px; min-height:48px; border-radius:10px; font-size:1.3rem; cursor:pointer; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -325,76 +169,67 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="game-header">
-            <h1>🎮 Tetris</h1>
-            <p>Układaj spadające klocki, czyść linie i bij swój rekord</p>
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <span>Wynik</span>
-                <strong data-tetris-score>0</strong>
+    <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
+        <div class="game-bar">
+            <div class="game-title"><h1>Tetris</h1><p>Układaj klocki, czyść linie i bij swój rekord</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Wynik</span><b data-tetris-score>0</b></div>
+                <div class="game-stat"><span>Linie</span><b data-tetris-lines>0</b></div>
+                <div class="game-stat"><span>Poziom</span><b data-tetris-level>1</b></div>
+                <div class="game-stat" data-score-best><span>Rekord</span><b data-tetris-best>0</b></div>
             </div>
-            <div class="stat">
-                <span>Linie</span>
-                <strong data-tetris-lines>0</strong>
-            </div>
-            <div class="stat">
-                <span>Poziom</span>
-                <strong data-tetris-level>1</strong>
-            </div>
-            <div class="stat" data-score-best>
-                <span>Najlepszy</span>
-                <strong data-tetris-best>0</strong>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" type="button" data-action="toggle">Start</button>
+                <button class="kit-btn small" type="button" data-action="restart">Reset</button>
             </div>
         </div>
 
-        <div class="tetris-app">
-            <div class="tetris-playfield">
-                <canvas data-tetris-board width="320" height="640"></canvas>
-                <div class="tetris-overlay" data-tetris-overlay hidden>
-                    <div class="tetris-overlay__panel">
-                        <h2 data-overlay-title>Pauza</h2>
-                        <p data-overlay-subtitle>Wciśnij Spację, aby wrócić do gry</p>
+        <div class="game-stage">
+            <div class="tetris-app">
+                <div class="tetris-board-col">
+                    <div class="tetris-playfield">
+                        <canvas data-tetris-board width="320" height="640" tabindex="0" aria-label="Plansza Tetris"></canvas>
+                        <div class="tetris-overlay is-visible" data-tetris-overlay>
+                            <div class="tetris-overlay__panel">
+                                <h2 data-overlay-title>Gotowy?</h2>
+                                <p data-overlay-subtitle>Naciśnij „Start”, aby rozpocząć</p>
+                            </div>
+                        </div>
                     </div>
+                    <div data-touch-slot></div>
                 </div>
+
+                <aside class="tetris-sidebar">
+                    <section class="tetris-panel tetris-next">
+                        <h2>Następny</h2>
+                        <canvas data-tetris-preview width="144" height="144"></canvas>
+                    </section>
+
+                    <section class="tetris-panel tetris-keys-panel">
+                        <h2>Sterowanie</h2>
+                        <ul class="tetris-help tetris-keys">
+                            <li><strong>← →</strong> <span>przesuwanie</span></li>
+                            <li><strong>↑ / X</strong> <span>obrót w prawo</span></li>
+                            <li><strong>Z</strong> <span>obrót w lewo</span></li>
+                            <li><strong>↓</strong> <span>szybszy spadek</span></li>
+                            <li><strong>Spacja</strong> <span>pauza / wznów</span></li>
+                            <li><strong>Shift + Spacja</strong> <span>zrzut</span></li>
+                        </ul>
+                    </section>
+
+                    <section class="tetris-panel tetris-tips">
+                        <h2>Wskazówki</h2>
+                        <ul class="tetris-help">
+                            <li>Kasuj kilka linii naraz dla mnożnika punktów</li>
+                            <li>Co 10 linii gra przyspiesza o poziom</li>
+                            <li>Rekord zapisuje się lokalnie</li>
+                        </ul>
+                    </section>
+                </aside>
             </div>
-
-            <aside class="tetris-sidebar">
-                <section class="tetris-panel tetris-next">
-                    <h2>Następny klocek</h2>
-                    <canvas data-tetris-preview width="144" height="144"></canvas>
-                </section>
-
-                <section class="tetris-panel">
-                    <h2>Sterowanie</h2>
-                    <div class="tetris-actions">
-                        <button type="button" data-action="toggle">Start</button>
-                        <button type="button" data-action="restart">Reset</button>
-                    </div>
-                    <ul class="tetris-help">
-                        <li><strong>← →</strong> – przesuwaj klocek</li>
-                        <li><strong>↑ / X</strong> – obrót w prawo</li>
-                        <li><strong>Z</strong> – obrót w lewo</li>
-                        <li><strong>↓</strong> – szybszy spadek</li>
-                        <li><strong>Spacja</strong> – pauza/wznów</li>
-                        <li><strong>Shift + Spacja</strong> – zrzut</li>
-                    </ul>
-                    <p class="game-status" data-status>Naciśnij „Start", aby rozpocząć</p>
-                </section>
-
-                <section class="tetris-panel">
-                    <h2>Wskazówki</h2>
-                    <ul class="tetris-help">
-                        <li>Kasuj kilka linii naraz dla mnożnika punktów</li>
-                        <li>Co 10 wierszy gra przyspiesza o poziom</li>
-                        <li>Twój rekord jest zapisywany lokalnie</li>
-                    </ul>
-                </section>
-            </aside>
         </div>
-    </main>
+        <p class="game-status" data-status role="status">Naciśnij „Start”, aby rozpocząć</p>
+    </div>
 
     <script>
         // Motyw ciemny
@@ -967,7 +802,7 @@
             touchControls.className='touch-controls';touchControls.setAttribute('aria-label','Sterowanie dotykowe');
             const moves=[['←','W lewo',()=>playerMove(-1)],['↻','Obróć',()=>playerRotate(1)],['→','W prawo',()=>playerMove(1)],['↓','Opuść',()=>playerDrop()],['⤓','Zrzuć',()=>hardDrop()]];
             for(const[label,title,action]of moves){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-label',title);button.addEventListener('click',()=>{if(!isPaused&&!isGameOver)action();});touchControls.appendChild(button);}
-            restartButton.parentElement.insertAdjacentElement('afterend',touchControls);
+            (document.querySelector('[data-touch-slot]')||restartButton.parentElement).insertAdjacentElement('afterend',touchControls);
             document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();lastTime=0;});
             document.addEventListener('keydown', handleKeydown);
 

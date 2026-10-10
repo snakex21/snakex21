@@ -674,7 +674,7 @@ function drawIntoCanvas(width, height, drawFunc) {
 
 function fillText(text, x, y, color, fontSize) {
   if (typeof color !== 'undefined') ctx.fillStyle = color;
-  if (typeof fontSize !== 'undefined') ctx.font = fontSize + 'px Play';
+  if (typeof fontSize !== 'undefined') ctx.font = fontSize + 'px Play, Inter, "Segoe UI", sans-serif';
   ctx.fillText(text, x, y);
 }
 

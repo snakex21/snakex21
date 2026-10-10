@@ -6,171 +6,21 @@
     <title>Space Invaders - Hub</title>
     <link rel="stylesheet" href="spaceinvaders.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        html {
-            background: var(--bg);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .game-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .game-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: min(644px, max(324px, calc(100vh - 286px))); }
         #game-canvas {
-            border-radius: 8px;
-            box-shadow: 0 4px 12px var(--shadow);
-            max-width: 100%;
-            height: auto;
+            display: block; width: 100%; max-width: min(640px, max(320px, calc(100vh - 290px))) !important; height: auto; background: #000;
+            border: 2px solid var(--shell-border); border-radius: 12px; image-rendering: pixelated; touch-action: none;
         }
-
-        .controls {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .controls strong {
-            color: var(--text);
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            nav {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .game-container {
-                padding: 1.5rem;
-            }
-        }
-        .round-controls { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
-        .round-controls button { min-width:48px; min-height:44px; padding:8px 14px; touch-action:none; cursor:pointer; }
+        .game-status { min-height: 21px; }
+        .si-pad { display: none; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; width: 100%; max-width: 360px; margin: 12px auto 0; }
+        .si-pad .kit-btn { min-height: 56px; font-size: 18px; touch-action: none; user-select: none; -webkit-user-select: none; }
+        @media (hover: none), (max-width: 700px) { .si-pad { display: grid; } }
     </style>
-    <script defer src="spaceinvaders.js?v=20261001-overhaul2"></script>
+    <script defer src="spaceinvaders.js?v=20261010-kit"></script>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -185,18 +35,22 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="game-header">
-            <h1>👾 Space Invaders</h1>
-            <p>Zestrzel kolejne fale najeźdźców i broń planety</p>
-        </div>
-
-        <div class="game-container">
-            <canvas tabindex="0" aria-label="Space Invaders. Strzałki: ruch. Spacja lub X: strzał. P: pauza." id="game-canvas" width="640" height="640"></canvas>
-            <div class="round-controls"><button type="button" id="start-game">Start / nowa gra</button><button type="button" id="pause-game">Pauza</button><button type="button" data-game-key="37" aria-label="W lewo">←</button><button type="button" data-game-key="32">Strzał</button><button type="button" data-game-key="39" aria-label="W prawo">→</button></div><p id="game-status" role="status"></p>
-            <div class="controls">
-                <strong>Sterowanie:</strong> ← → poruszają statkiem · Spacja wystrzeliwuje laser
+    <main class="game-wrapper" id="main-content" tabindex="-1">
+        <div class="game-bar">
+            <div class="game-title"><h1>Space Invaders</h1><p>← →: ruch · Spacja lub X: strzał · P: pauza</p></div>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" type="button" id="start-game">Nowa gra</button>
+                <button class="kit-btn small" type="button" id="pause-game">Pauza</button>
             </div>
+        </div>
+        <div class="game-stage">
+            <canvas tabindex="0" aria-label="Space Invaders. Strzałki: ruch. Spacja lub X: strzał. P: pauza." id="game-canvas" width="640" height="640"></canvas>
+        </div>
+        <p class="game-status" id="game-status" role="status"></p>
+        <div class="si-pad" aria-label="Sterowanie dotykowe">
+            <button class="kit-btn" type="button" data-game-key="37" aria-label="W lewo">◀</button>
+            <button class="kit-btn primary" type="button" data-game-key="32">Strzał</button>
+            <button class="kit-btn" type="button" data-game-key="39" aria-label="W prawo">▶</button>
         </div>
     </main>
 

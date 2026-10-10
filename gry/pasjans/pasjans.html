@@ -6,191 +6,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pasjans - Hub</title>
     <style>
-        :root {
-            --bg: #121212;
-            --card-bg: #fff;
-            --text: #fff;
-            --green: #2a5a3b;
-            --header-bg: #1a1a1a;
-            --border: #333;
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-area { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 620px; }
+        .felt {
+            --card-width: min(80px, calc((100vw - 96px) / 7));
+            --card-gap: 6px;
+            box-sizing: border-box; width: 100%; max-width: var(--game-width); margin: 0 auto; padding: 12px;
+            background: radial-gradient(ellipse at 50% 0%, #377a51, #2a5f3e 70%);
+            border: 1px solid var(--shell-border); border-radius: 14px;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, .18);
         }
-
-        [data-theme="light"] {
-            --bg: #f0f0f0;
-            --text: #333;
-            --green: #3a7a4b;
-            --header-bg: #fff;
-            --border: #ddd;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 0.75rem 2rem;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: #aaa;
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-        }
-
-        .game-area {
-            flex: 1;
-            background: var(--green);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .top-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            height: 140px;
-        }
-
-        .deck-area,
-        .foundations {
-            display: flex;
-            gap: 20px;
-        }
-
+        .top-row { display: flex; justify-content: space-between; margin-bottom: 16px; }
+        .deck-area, .foundations { display: flex; gap: var(--card-gap); }
         .tableau {
-            display: flex;
-            justify-content: space-between;
-            flex: 1;
+            display: flex; justify-content: space-between; gap: var(--card-gap);
+            min-height: calc(var(--card-width) * 1.5 + 150px);
         }
-
-        .card-placeholder {
-            width: 80px;
-            height: 120px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-        }
-
-        .card {
-            width: 80px;
-            height: 120px;
-            background: var(--card-bg);
-            border-radius: 5px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            padding: 5px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.1s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            z-index: 100 !important;
-        }
-
-        .card.red {
-            color: #d00;
-        }
-
-        .card.black {
-            color: #000;
-        }
-
-        .card.back {
-            background: repeating-linear-gradient(45deg, #1d4e89, #1d4e89 10px, #fff 10px, #fff 11px);
-            color: transparent;
-        }
-
-        .pile {
-            position: relative;
-            width: 80px;
-        }
-
-        .selected {
-            box-shadow: 0 0 10px 3px yellow;
-        }
-
-        .controls {
-            margin-top: 10px;
-        }
-
-        .controls button {
-            padding: 10px 20px;
-            background: #333;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .game-area { --card-width: min(80px, calc((100vw - 52px) / 7)); padding: 8px; }
         .card-placeholder, .card, .pile { width: var(--card-width); }
-        .card-placeholder, .card { height: calc(var(--card-width) * 1.5); }
-        .card-placeholder { position: relative; }
-        .card:not(.back) { background: #fff; }
-        .card { font-size: clamp(.75rem, 2.5vw, 1.2rem); padding: 3px; }
-        .deck-area, .foundations { gap: 6px; }
-        .top-row { height: calc(var(--card-width) * 1.5 + 10px); }
-        .tableau { min-height: 420px; gap: 6px; }
+        .card-placeholder, .card { height: calc(var(--card-width) * 1.5); box-sizing: border-box; }
+        .card-placeholder {
+            position: relative; flex: 0 0 auto;
+            border: 2px dashed rgba(255, 255, 255, .3); border-radius: 6px; cursor: pointer;
+        }
+        .card {
+            position: absolute; display: flex; flex-direction: column; padding: 3px 4px;
+            background: #fff; border-radius: 6px; box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+            font: 700 clamp(.75rem, 2.5vw, 1.15rem)/1.15 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            cursor: pointer; user-select: none; transition: transform .1s;
+        }
+        .card-placeholder > .card { top: -2px; left: -2px; }
+        .card:hover { transform: translateY(-4px); z-index: 100 !important; }
+        .card:focus-visible { outline: 3px solid #ffd54a; outline-offset: 1px; }
+        .card.red { color: #c62828; }
+        .card.black { color: #1a1a1a; }
+        .card.back {
+            background: repeating-linear-gradient(45deg, #1d4e89, #1d4e89 8px, #2a5f9e 8px, #2a5f9e 10px);
+            border: 2px solid #fff; color: transparent;
+        }
+        .pile { position: relative; flex: 0 0 auto; }
+        .selected { box-shadow: 0 0 0 3px #ffd54a, 0 0 14px 2px rgba(255, 213, 74, .7); }
+        @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
@@ -206,20 +65,26 @@
 </header>
 
     <div class="game-area" id="main-content" tabindex="-1" role="main">
-        <div class="top-row">
-            <div class="deck-area">
-                <div class="card-placeholder" id="stock" onclick="drawCard()"></div>
-                <div class="card-placeholder" id="waste"></div>
-            </div>
-            <div class="foundations">
-                <div class="card-placeholder" id="f0" onclick="clickFoundation(0)"></div>
-                <div class="card-placeholder" id="f1" onclick="clickFoundation(1)"></div>
-                <div class="card-placeholder" id="f2" onclick="clickFoundation(2)"></div>
-                <div class="card-placeholder" id="f3" onclick="clickFoundation(3)"></div>
-            </div>
+        <div class="game-bar">
+            <div class="game-title"><h1>Pasjans</h1><p>Ułóż karty od asa do króla na czterech stosach końcowych</p></div>
+            <div class="game-buttons controls"><button class="kit-btn small primary" type="button" onclick="initGame()">Nowa gra</button></div>
         </div>
-        <div class="tableau" id="tableau"></div>
-        <div class="controls"><button onclick="initGame()">Nowa Gra</button></div>
+        <div class="felt">
+            <div class="top-row">
+                <div class="deck-area">
+                    <div class="card-placeholder" id="stock" onclick="drawCard()"></div>
+                    <div class="card-placeholder" id="waste"></div>
+                </div>
+                <div class="foundations">
+                    <div class="card-placeholder" id="f0" onclick="clickFoundation(0)"></div>
+                    <div class="card-placeholder" id="f1" onclick="clickFoundation(1)"></div>
+                    <div class="card-placeholder" id="f2" onclick="clickFoundation(2)"></div>
+                    <div class="card-placeholder" id="f3" onclick="clickFoundation(3)"></div>
+                </div>
+            </div>
+            <div class="tableau" id="tableau"></div>
+        </div>
+        <p class="game-status">Kliknij kartę, potem miejsce docelowe · talia w rogu dobiera kartę · pustą kolumnę zajmie tylko król</p>
     </div>
     <script>
         const suits = ['♠', '♥', '♣', '♦'];
@@ -280,6 +145,7 @@
             piles.forEach((pile, i) => {
                 const pileDiv = document.createElement('div');
                 pileDiv.className = 'pile';
+                pileDiv.style.minHeight = `calc(var(--card-width) * 1.5 + ${Math.max(0, pile.length - 1) * 25}px)`;
                 pileDiv.onclick = (e) => clickPile(i);
                 pileDiv.tabIndex = 0; pileDiv.setAttribute('role', 'button'); pileDiv.setAttribute('aria-label', `Kolumna ${i + 1}`);
                 pileDiv.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); clickPile(i); } });

@@ -5,62 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sudoku - Hub</title>
     <style>
-        :root {
-            --bg: #f0f2f5;
-            --text: #333;
-            --header-bg: #ffffff;
-            --nav-text: #666;
-            --nav-hover: #1a1a1a;
-            --border: #e0e0e0;
-            --board-border: #333;
-            --cell-bg: #fff;
-            --cell-fixed: #f8f9fa;
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .container { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 460px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .sudoku-board, .sudoku-board * { box-sizing: border-box; }
+
+        :root { --sudoku-line: #97a39a; --sudoku-error: #b93832; --sudoku-error-bg: #fbe3e1; }
+        :root[data-theme="dark"] { --sudoku-line: #688070; --sudoku-error: #ff8f86; --sudoku-error-bg: #4a2724; }
+
+        /* All lines are the board background showing through: 1px gaps, 3px between boxes. */
+        .sudoku-board {
+            --cell-size: min(46px, calc((100vw - 32px - 26px) / 9));
+            display: grid;
+            grid-template-columns: repeat(9, var(--cell-size));
+            grid-template-rows: repeat(9, var(--cell-size));
+            gap: 1px;
+            padding: 0;
+            background: var(--sudoku-line);
+            border: 3px solid var(--sudoku-line);
+            border-radius: 6px;
+            overflow: hidden;
         }
-
-        [data-theme="dark"] {
-            --bg: #121212;
-            --text: #ffffff;
-            --header-bg: #1a1a1a;
-            --nav-text: #aaa;
-            --nav-hover: #fff;
-            --border: #333;
-            --board-border: #888;
-            --cell-bg: #2a2a2a;
-            --cell-fixed: #444;
+        .cell {
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: var(--shell-card);
+            color: var(--shell-accent);
+            font: 600 clamp(17px, 5vw, 22px)/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            text-align: center;
+            caret-color: transparent;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
         }
-
-        * { box-sizing: border-box; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
-        
-        /* HEADER */
-        header { background: var(--header-bg); border-bottom: 1px solid var(--border); width: 100%; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background 0.3s; }
-        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; align-items: center; gap: 2rem; }
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
-        .nav-links { display: flex; gap: 2rem; flex: 1; }
-        .nav-links a { color: var(--nav-text); text-decoration: none; transition: 0.2s; font-size: 1rem; }
-        .nav-links a:hover, .nav-links a.active { color: var(--nav-hover); font-weight: 500; }
-        #theme-toggle { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.5rem; }
-        @media (max-width: 768px) { .nav-links { display: none; } }
-
-        .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        
-        .sudoku-board { display: grid; grid-template-columns: repeat(9, 40px); grid-template-rows: repeat(9, 40px); gap: 1px; background: var(--board-border); border: 2px solid var(--board-border); margin-bottom: 20px; }
-        .cell { width: 40px; height: 40px; background: var(--cell-bg); border: none; text-align: center; font-size: 1.2rem; color: var(--text); }
-        .cell:focus { background: #e8f0fe; outline: none; }
-        .cell.fixed { background: var(--cell-fixed); font-weight: bold; cursor: default; }
-        .cell.error { color: red; background: #ffe6e6; }
-        .cell:nth-child(3n) { border-right: 2px solid var(--board-border); }
-        .cell:nth-child(9n) { border-right: none; }
-        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--board-border); }
-        .controls { display: flex; gap: 10px; }
-        .btn { padding: 10px 20px; border: none; background: #1db954; color: white; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-        .btn:hover { background: #1ed760; } .btn.secondary { background: #666; }
-        @media (max-width: 500px) { .sudoku-board { grid-template-columns: repeat(9, 32px); grid-template-rows: repeat(9, 32px); } .cell { width: 32px; height: 32px; font-size: 1rem; } }
-        .sudoku-board { --cell-size: min(40px, calc((100vw - 52px) / 9)); grid-template-columns: repeat(9, var(--cell-size)); grid-template-rows: repeat(9, var(--cell-size)); }
-        .sudoku-board .cell { width: var(--cell-size); height: var(--cell-size); min-width: 0; }
+        .cell:nth-child(9n+4), .cell:nth-child(9n+7) { margin-left: 2px; width: calc(100% - 2px); }
+        .cell:nth-child(n+28):nth-child(-n+36), .cell:nth-child(n+55):nth-child(-n+63) { margin-top: 2px; height: calc(100% - 2px); }
+        .cell:hover { background: var(--shell-hover); }
+        .cell:focus { outline: none; background: var(--shell-soft); box-shadow: inset 0 0 0 2px var(--shell-accent); }
+        .cell.fixed { background: var(--shell-hover); color: var(--shell-text); font-weight: 750; cursor: default; }
+        .cell.fixed:focus { box-shadow: inset 0 0 0 2px var(--shell-muted); }
+        .cell.error { color: var(--sudoku-error); background: var(--sudoku-error-bg); }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -76,12 +68,17 @@
 
 
     <div class="container" id="main-content" tabindex="-1" role="main">
-        <h1 style="margin-bottom: 20px;">Sudoku</h1>
-        <div class="sudoku-board" id="board"></div>
-        <div class="controls">
-            <button class="btn" onclick="newGame()">Nowa Gra</button>
-            <button class="btn secondary" onclick="check()">Sprawdź</button>
+        <div class="game-bar">
+            <div class="game-title"><h1>Sudoku</h1><p>Cyfry 1–9 bez powtórzeń w wierszu, kolumnie i kwadracie</p></div>
+            <div class="game-buttons">
+                <button class="kit-btn small primary" type="button" onclick="newGame()">Nowa gra</button>
+                <button class="kit-btn small" type="button" onclick="check()">Sprawdź</button>
+            </div>
         </div>
+        <div class="game-stage">
+            <div class="sudoku-board" id="board" role="group" aria-label="Plansza Sudoku"></div>
+        </div>
+        <p class="game-status">Kliknij puste pole i wpisz cyfrę. „Sprawdź” zaznaczy błędy na czerwono.</p>
     </div>
 
     <script>

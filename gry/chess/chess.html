@@ -5,169 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Szachy - Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
+        .game-wrapper {
+            flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 560px;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        html {
-            background: var(--bg);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .game-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .game-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .game-info {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 1rem;
-        }
-
+        .game-info { display: flex; gap: 8px; }
         .player-turn {
-            padding: 1rem 2rem;
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1.1rem;
+            display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px;
+            border: 1px solid var(--shell-border); border-radius: 10px; background: var(--shell-card);
+            color: var(--shell-muted); font-size: 14px; font-weight: 650;
+            transition: border-color .15s, box-shadow .15s, color .15s;
         }
+        .player-turn::before {
+            content: ""; width: 14px; height: 14px; border-radius: 50%;
+            background: #f4f1ea; border: 1.5px solid #3a3a3a; box-sizing: border-box;
+        }
+        #black-turn::before { background: #2b2b2b; border-color: #8a8a8a; }
+        .player-turn.active { color: var(--shell-text); border-color: var(--shell-accent); box-shadow: 0 0 0 2px var(--shell-soft); }
 
-        .player-turn.active {
-            border-color: #10b981;
-            background: #ecfdf5;
-            color: #059669;
+        .chess-options {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
+            width: 100%; max-width: var(--game-width); margin: 0 auto 16px;
         }
-
-        [data-theme="dark"] .player-turn.active {
-            background: #064e3b;
-            color: #6ee7b7;
-        }
+        .chess-options .color-selection, .chess-options .difficulty-selection { display: none; align-items: center; }
+        .chess-options .color-selection.show, .chess-options .difficulty-selection.show { display: inline-flex; }
+        .option-label { padding: 0 6px 0 8px; color: var(--shell-muted); font-size: 13px; font-weight: 600; align-self: center; }
 
         #chess-board {
+            --square-size: min(66px, calc((100vw - 40px) / 8));
             display: grid;
-            grid-template-columns: repeat(8, 70px);
-            grid-template-rows: repeat(8, 70px);
-            border: 3px solid var(--text);
-            border-radius: 8px;
-            overflow: hidden;
+            grid-template-columns: repeat(8, var(--square-size));
+            grid-template-rows: repeat(8, var(--square-size));
+            border: 4px solid #7a5a3e; border-radius: 10px; overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .14);
         }
-
         .square {
-            width: 70px;
-            height: 70px;
+            width: var(--square-size);
+            height: var(--square-size);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: calc(var(--square-size) * .66);
             cursor: pointer;
             transition: all 0.2s;
             user-select: none;
@@ -228,298 +107,50 @@
             50% { opacity: 0.7; }
         }
 
-        .square:hover {
-            opacity: 0.8;
-        }
+        .square:hover { filter: brightness(1.06); }
+        #chess-board .square:focus-visible { outline: 3px solid #2563eb; outline-offset: -3px; }
+
+        .controls { line-height: 1.6; }
+        .controls strong { color: var(--shell-text); }
 
         .game-over-message {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--card-bg);
-            border: 3px solid #3b82f6;
-            border-radius: 16px;
-            padding: 2rem 3rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            z-index: 1000;
-            text-align: center;
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: min(380px, calc(100vw - 32px)); box-sizing: border-box; padding: 28px 24px;
+            background: var(--shell-card); color: var(--shell-text);
+            border: 1px solid var(--shell-border); border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .35); z-index: 1000; text-align: center;
         }
-
-        .game-over-message.show {
-            display: block;
-        }
-
-        .game-over-message h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        .game-over-message p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        .difficulty-selection {
-            display: none;
-            gap: 0.5rem;
-            padding: 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .difficulty-selection.show {
-            display: flex;
-        }
-
-        .difficulty-btn {
-            padding: 0.5rem 1rem;
-            background: var(--card-bg);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-
-        .difficulty-btn:hover {
-            background: var(--bg);
-        }
-
-        .difficulty-btn.active {
-            background: #f59e0b;
-            color: #fff;
-            border-color: #f59e0b;
-        }
-
-        .controls {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            max-width: 600px;
-        }
-
-        .controls strong {
-            color: var(--text);
-        }
+        .game-over-message.show { display: block; }
+        .game-over-message h2 { margin: 0 0 8px; font-size: 24px; font-weight: 750; }
+        .game-over-message p { margin: 0 0 20px; color: var(--shell-muted); font-size: 15px; }
 
         .promotion-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; inset: 0; z-index: 999;
+            background: rgba(0, 0, 0, .55); align-items: center; justify-content: center; padding: 16px;
         }
-
-        .promotion-overlay.show {
-            display: flex;
-        }
-
+        .promotion-overlay.show { display: flex; }
         .promotion-modal {
-            background: var(--card-bg);
-            border: 3px solid #3b82f6;
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
+            background: var(--shell-card); color: var(--shell-text);
+            border: 1px solid var(--shell-border); border-radius: 16px; padding: 24px; text-align: center;
         }
-
-        .promotion-modal h3 {
-            color: var(--text);
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-        }
-
-        .promotion-choices {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
+        .promotion-modal h3 { margin: 0 0 16px; font-size: 18px; }
+        .promotion-choices { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .promotion-btn {
-            width: 80px;
-            height: 80px;
-            font-size: 3rem;
-            background: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
+            width: 72px; height: 72px; font-size: 44px; line-height: 1;
+            background: #f0d9b5; color: #1a1a1a; border: 1px solid var(--shell-border); border-radius: 12px;
+            cursor: pointer; transition: border-color .15s, transform .15s;
         }
-
-        .promotion-btn:hover {
-            background: var(--card-bg);
-            border-color: #3b82f6;
-            transform: scale(1.1);
+        .promotion-btn:hover { border-color: var(--shell-accent); transform: translateY(-2px); }
+        @media (max-width: 560px) {
+            .player-turn { min-height: 40px; padding: 0 10px; }
+            .promotion-btn { width: 60px; height: 60px; font-size: 36px; }
         }
-
-        .restart-btn {
-            padding: 0.75rem 1.5rem;
-            background: #3b82f6;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .restart-btn:hover {
-            background: #2563eb;
-        }
-
-        .mode-selection {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .mode-btn {
-            padding: 0.75rem 1.5rem;
-            background: var(--card-bg);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-        }
-
-        .mode-btn:hover {
-            background: var(--bg);
-        }
-
-        .mode-btn.active {
-            background: #3b82f6;
-            color: #fff;
-            border-color: #3b82f6;
-        }
-
-        .color-selection {
-            display: none;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .color-selection.show {
-            display: flex;
-        }
-
-        .color-btn {
-            padding: 0.5rem 1rem;
-            background: var(--card-bg);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .color-btn:hover {
-            background: var(--bg);
-        }
-
-        .color-btn.active {
-            background: #10b981;
-            color: #fff;
-            border-color: #10b981;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            nav {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            #chess-board {
-                grid-template-columns: repeat(8, 45px);
-                grid-template-rows: repeat(8, 45px);
-            }
-
-            .square {
-                width: 45px;
-                height: 45px;
-                font-size: 2rem;
-            }
-
-            .game-info {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .mode-selection {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .mode-btn {
-                width: 100%;
-            }
-
-            .color-selection {
-                flex-direction: column;
-            }
-
-            .color-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .difficulty-selection {
-                flex-direction: row;
-            }
-
-            .difficulty-btn {
-                flex: 1;
-                min-width: 80px;
-            }
-        }
-        main { width: 100%; padding: 2rem clamp(8px, 3vw, 32px); }
-        .game-container { padding: clamp(8px, 2vw, 32px); min-width: 0; }
-        #chess-board { --square-size: min(60px, calc((100vw - 58px) / 8)); grid-template-columns: repeat(8, var(--square-size)); grid-template-rows: repeat(8, var(--square-size)); }
-        #chess-board .square { width: var(--square-size); height: var(--square-size); font-size: clamp(1.5rem, 6vw, 2.8rem); }
-        #chess-board .square:focus-visible { outline: 3px solid #2563eb; outline-offset: -3px; }
+        @media (prefers-reduced-motion: reduce) { .square.in-check { animation: none; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 <body class="site-shell game-shell">
@@ -534,52 +165,52 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="game-header">
-            <h1>♟️ Szachy</h1>
-            <p>Szachy dla dwóch graczy lub przeciw komputerowi</p>
-            <p>Wersja uproszczona: bez bicia w przelocie oraz automatycznych remisów za powtórzenia, 50 posunięć i niewystarczający materiał.</p>
+    <main class="game-wrapper" id="main-content" tabindex="-1">
+        <div class="game-bar">
+            <div class="game-title"><h1>Szachy</h1><p>Wersja uproszczona: bez bicia w przelocie i automatycznych remisów</p></div>
+            <div class="game-stats game-info">
+                <div class="player-turn active" id="white-turn">Białe</div>
+                <div class="player-turn" id="black-turn">Czarne</div>
+            </div>
+            <div class="game-buttons">
+                <button class="kit-btn small primary restart-btn" type="button" onclick="resetGame()">Nowa gra</button>
+            </div>
         </div>
 
-        <div class="game-container">
-            <div class="mode-selection">
-                <button class="mode-btn active" onclick="setMode('pvp')">👥 2 Graczy</button>
-                <button class="mode-btn" onclick="setMode('ai')">🤖 vs AI</button>
-                <button class="mode-btn" onclick="setMode('auto')">⚡ AI vs AI</button>
+        <div class="chess-options">
+            <div class="kit-tabs mode-selection" role="group" aria-label="Tryb gry">
+                <button class="kit-tab mode-btn active" type="button" onclick="setMode('pvp')">2 graczy</button>
+                <button class="kit-tab mode-btn" type="button" onclick="setMode('ai')">vs AI</button>
+                <button class="kit-tab mode-btn" type="button" onclick="setMode('auto')">AI vs AI</button>
             </div>
 
-            <div class="color-selection" id="color-selection">
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">Grasz jako:</span>
-                <button class="color-btn active" onclick="setPlayerColor('white')">⚪ Białe (zaczynam)</button>
-                <button class="color-btn" onclick="setPlayerColor('black')">⚫ Czarne (AI zaczyna)</button>
+            <div class="kit-tabs color-selection" id="color-selection" role="group" aria-label="Kolor gracza">
+                <span class="option-label">Grasz:</span>
+                <button class="kit-tab color-btn active" type="button" onclick="setPlayerColor('white')">Białe</button>
+                <button class="kit-tab color-btn" type="button" onclick="setPlayerColor('black')">Czarne</button>
             </div>
 
-            <div class="difficulty-selection" id="difficulty-selection">
-                <span style="color: var(--text-secondary); font-size: 0.9rem;">Poziom AI:</span>
-                <button class="difficulty-btn" onclick="setDifficulty('easy')">😊 Łatwy</button>
-                <button class="difficulty-btn active" onclick="setDifficulty('medium')">🤔 Średni</button>
-                <button class="difficulty-btn" onclick="setDifficulty('hard')">😤 Trudny</button>
+            <div class="kit-tabs difficulty-selection" id="difficulty-selection" role="group" aria-label="Poziom AI">
+                <span class="option-label">AI:</span>
+                <button class="kit-tab difficulty-btn" type="button" onclick="setDifficulty('easy')">Łatwy</button>
+                <button class="kit-tab difficulty-btn active" type="button" onclick="setDifficulty('medium')">Średni</button>
+                <button class="kit-tab difficulty-btn" type="button" onclick="setDifficulty('hard')">Trudny</button>
             </div>
+        </div>
 
-            <div class="game-info">
-                <div class="player-turn active" id="white-turn">⚪ Białe</div>
-                <div class="player-turn" id="black-turn">⚫ Czarne</div>
-            </div>
-
+        <div class="game-stage">
             <div id="chess-board"></div>
-
-            <div class="controls" id="controls-text">
-                <strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>
-                Gra dla dwóch graczy - na zmianę białe i czarne.
-            </div>
-
-            <button class="restart-btn" onclick="resetGame()">Nowa gra</button>
         </div>
+
+        <p class="game-status controls" id="controls-text">
+            <strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>
+            Gra dla dwóch graczy - na zmianę białe i czarne.
+        </p>
 
         <div class="game-over-message" id="game-over-message">
             <h2 id="game-over-title"></h2>
             <p id="game-over-text"></p>
-            <button class="restart-btn" onclick="resetGame()">Zagraj ponownie</button>
+            <button class="kit-btn primary restart-btn" type="button" onclick="resetGame()">Zagraj ponownie</button>
         </div>
 
         <div class="promotion-overlay" id="promotion-overlay">
