@@ -13,10 +13,12 @@ function catalog(options={}) {
  for(const e of document.querySelectorAll('*')) e.focus=()=>{focusTarget=e;};
  const window={document,scrollY:options.scrollY||0,addEventListener:(event,fn)=>{events[event]=fn;},scrollTo:(x,y)=>{scrollTo=y;}};
  const location=new URL('https://example.test/'+(games?'gry/gry.html':'Programy/programy.html')+(options.query||''));
- const context=vm.createContext({document,window,location,URL,URLSearchParams,history:{replaceState:(_,__,url)=>{location.href=url.href;}},sessionStorage:{getItem:k=>{if(options.blocked)throw Error('blocked');return store.get(k)||null;},setItem:(k,v)=>{if(options.blocked)throw Error('blocked');store.set(k,v);}},requestAnimationFrame:fn=>fn()});
- if(games){vm.runInContext(fs.readFileSync(path.join(root,'assets/js/games-data.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'assets/workshop/games.js'),'utf8'),context);for(const e of document.querySelectorAll('a'))e.focus=()=>{focusTarget=e;};}
+ const localStore=new Map(Object.entries(options.local||{}));
+ window.localStorage={getItem:k=>{if(options.localBlocked)throw Error('blocked');return localStore.get(k)??null;},setItem:(k,v)=>{if(options.localBlocked)throw Error('blocked');localStore.set(k,String(v));}};
+ const context=vm.createContext({document,window,location,URL,URLSearchParams,localStorage:window.localStorage,history:{replaceState:(_,__,url)=>{location.href=url.href;}},sessionStorage:{getItem:k=>{if(options.blocked)throw Error('blocked');return store.get(k)||null;},setItem:(k,v)=>{if(options.blocked)throw Error('blocked');store.set(k,v);}},requestAnimationFrame:fn=>fn()});
+ if(games){vm.runInContext(fs.readFileSync(path.join(root,'assets/js/games-data.js'),'utf8'),context);if(options.before)options.before(context);vm.runInContext(fs.readFileSync(path.join(root,'assets/workshop/games.js'),'utf8'),context);for(const e of document.querySelectorAll('a'))e.focus=()=>{focusTarget=e;};}
  vm.runInContext(fs.readFileSync(path.join(root,'assets/workshop/catalog.js'),'utf8'),context);
- return {document,Event,store,events,location,window,get scroll(){return scrollTo;},get focus(){return focusTarget;}};
+ return {document,Event,store,localStore,events,location,window,get scroll(){return scrollTo;},get focus(){return focusTarget;}};
 }
 function type(p,text){const input=p.document.getElementById('search-input');input.value=text;input.dispatchEvent(new p.Event('input'));}
 test('catalog:35 real tools match the shared homepage index and every target exists',()=>{
@@ -69,5 +71,48 @@ test('catalog: Connect4 and Wheel describe implemented modes accurately',()=>{
  const p=catalog({games:true});const data=p.window.gamesCatalog;
  const connect=data.find(g=>g.slug==='connect4');assert.deepEqual([...connect.modes],['Dwóch graczy']);assert.doesNotMatch(connect.description,/AI/);
  const wheel=data.find(g=>g.slug==='wheel');assert.match(wheel.description,/wylosować/);assert.doesNotMatch(wheel.description,/odgadnij|hasło/);
- assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261001-catalog-copy/);
+ assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261010-art/);
+});
+
+function gamesWithArt(options = {}) {
+ const p = catalog({ games: true, ...options, before: ctx => vm.runInContext(fs.readFileSync(path.join(root, 'assets/workshop/game-art.js'), 'utf8'), ctx) });
+ return p;
+}
+test('catalog: every game has bundled cover art and no hot-linked images', () => {
+ const ctx = { window: {} }; vm.runInNewContext(fs.readFileSync(path.join(root, 'assets/workshop/game-art.js'), 'utf8'), ctx);
+ const data = { window: {} }; vm.runInNewContext(fs.readFileSync(path.join(root, 'assets/js/games-data.js'), 'utf8') + ';window.gamesCatalog=gamesCatalog', data);
+ for (const game of data.window.gamesCatalog) {
+  assert.match(ctx.window.gameArt[game.slug] || '', /^<svg [^>]*viewBox="0 0 160 90"[\s\S]*<\/svg>$/, game.slug);
+  assert.doesNotMatch(game.cover || '', /^https?:/, game.slug);
+ }
+ const p = gamesWithArt();
+ const cards = [...p.document.querySelectorAll('.game-card')];
+ assert.ok(cards.every(card => card.querySelector('svg.game-art') && !card.querySelector('img')));
+});
+test('catalog: filter chips narrow games, combine with search and are remembered', () => {
+ const p = gamesWithArt();
+ const chip = [...p.document.querySelectorAll('.filter-chip')].find(c => c.textContent === 'We dwoje i więcej');
+ chip.dispatchEvent(new p.Event('click'));
+ const visible = () => [...p.document.querySelectorAll('.game-card')].filter(c => !c.hidden).map(c => c.dataset.slug);
+ assert.deepEqual(visible().sort(), ['connect4', 'hardware-quiz', 'pong', 'tic-tac-toe', 'wheel']);
+ assert.equal(chip.getAttribute('aria-pressed'), 'true');
+ type(p, 'pong'); assert.deepEqual(visible(), ['pong']);
+ const saved = JSON.parse(p.store.get('workshop-catalog:games'));
+ assert.equal(saved.filter, 'Dwóch graczy|Wspólna gra');
+ const again = gamesWithArt({ storage: Object.fromEntries(p.store), query: '?q=' });
+ assert.equal([...again.document.querySelectorAll('.filter-chip')].find(c => c.getAttribute('aria-pressed') === 'true').textContent, 'We dwoje i więcej');
+});
+test('catalog: recently played games appear and bad storage is ignored', () => {
+ const p = gamesWithArt({ local: { 'workshop-games:recent': JSON.stringify(['snake', 'missing', '2048']) } });
+ const box = p.document.getElementById('recent-games');
+ assert.equal(box.hidden, false);
+ assert.deepEqual([...box.querySelectorAll('.recent-chip span')].map(s => s.textContent), ['Snake', '2048']);
+ for (const local of [{ 'workshop-games:recent': '{oops' }, null]) {
+  const q = gamesWithArt({ local, localBlocked: local === null });
+  assert.equal(q.document.getElementById('recent-games').hidden, true);
+ }
+ const r = gamesWithArt({ local: {} });
+ const card = [...r.document.querySelectorAll('.game-card')].find(c => c.dataset.slug === 'tetris');
+ card.dispatchEvent(new r.Event('click'));
+ assert.deepEqual(JSON.parse(r.localStore.get('workshop-games:recent')), ['tetris']);
 });
