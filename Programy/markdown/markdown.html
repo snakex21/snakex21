@@ -13,28 +13,14 @@
         }
 
         :root {
-            --bg: #f5f5f5;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #ddd;
-            --card-bg: #ffffff;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #3b82f6;
+
             --code-bg: #f1f5f9;
-        }
+        }
 
         [data-theme="dark"] {
-            --bg: #0f172a;
-            --text: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --border: #334155;
-            --card-bg: #1e293b;
-            --header-bg: #1e293b;
-            --shadow: rgba(0, 0, 0, 0.4);
-            --accent: #60a5fa;
+
             --code-bg: #334155;
-        }
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -43,46 +29,6 @@
             line-height: 1.6;
             height: 100vh;
             overflow: hidden;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-        }
-
-        nav {
-            padding: 0.8rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
         }
 
         .toolbar {
@@ -108,13 +54,6 @@
             background: var(--accent);
             color: var(--accent-contrast);
             border-color: var(--accent);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            cursor: pointer;
         }
 
         /* Editor Container */
@@ -299,10 +238,6 @@
             .editor-container {
                 grid-template-columns: 1fr;
                 grid-template-rows: 1fr 1fr;
-            }
-
-            .nav-links {
-                display: none;
             }
 
             .toolbar {

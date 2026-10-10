@@ -12,34 +12,22 @@
         }
 
         :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --card-hover: #e9ecef;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #84cc16; /* Lime */
+
             --key-bg: #e5e5e5;
+
             --key-active: #84cc16;
+
             --key-pressed-history: #d9f99d;
-        }
+        }
 
         [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --card-hover: #3a3a3a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --accent: #a3e635;
+
             --key-bg: #444;
+
             --key-active: #a3e635;
+
             --key-pressed-history: #3f6212;
-        }
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -52,29 +40,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-            flex-shrink: 0;
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--text); text-decoration: none; }
-        .nav-links { display: flex; gap: 2rem; flex: 1; }
-        .nav-links a { color: var(--text-secondary); text-decoration: none; transition: 0.2s; }
-        .nav-links a:hover, .nav-links a.active { color: var(--text); }
-        #theme-toggle { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem; }
 
         main {
             flex: 1;
@@ -238,7 +203,6 @@
         .k-space { grid-column: span 13; }
 
         @media (max-width: 768px) {
-            .nav-links { display: none; }
             .keyboard-wrapper { padding: 1rem; }
             .key { font-size: 0.7rem; height: 40px; }
         }

@@ -13,28 +13,14 @@
         }
 
         :root {
-            --bg: #f0fdf4;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #ddd;
-            --card-bg: #ffffff;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #16a34a;
+
             --accent-hover: #15803d;
-        }
+        }
 
         [data-theme="dark"] {
-            --bg: #052e16;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #14532d;
-            --card-bg: #064e3b;
-            --header-bg: #064e3b;
-            --shadow: rgba(0, 0, 0, 0.4);
-            --accent: #22c55e;
+
             --accent-hover: #4ade80;
-        }
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -42,50 +28,6 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-        }
-
-        nav {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
         }
 
         main {
