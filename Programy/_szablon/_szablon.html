@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- SZABLON NOWEGO NARZĘDZIA
+         1. Skopiuj ten folder do Programy/<nazwa>/ i zmień nazwę pliku.
+         2. Zmień tytuł, ikonę, nagłówek i treść w <main>.
+         3. Dodaj wpis w assets/workshop/tools-data.js oraz kartę w Programy/programy.html.
+         Komponenty (kit.css): kit-card, kit-grid, kit-stack, kit-row, kit-actions,
+         kit-stats/kit-stat, kit-btn (primary/danger/ghost/small/block), kit-field,
+         kit-input, kit-options/kit-option, kit-output, kit-tabs/kit-tab, kit-note, kit-space.
+         Pomocniki (kit.js): Kit.copy(tekst, przycisk), Kit.toast(tekst),
+         Kit.download(nazwa, treść, typ), Kit.store(klucz).get/set/remove, Kit.randomInt(n).
+         Własny <style> tylko na to, czego naprawdę nie ma w kit.css. -->
+    <title>Nowe narzędzie - Hub</title>
+<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
+<script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
+<script src="../../assets/workshop/kit.js?v=20261010-kit" defer></script>
+</head>
+<body class="site-shell content-shell kit-page">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+    <header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html" aria-current="location">Narzędzia</a><a href="../../gry/gry.html">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+<div class="site-context"><a href="../../Programy/programy.html">← Wszystkie narzędzia</a></div>
+</header>
+
+    <!-- main: domyślnie 960px; class="kit-narrow" (640px) albo "kit-wide" (1184px) -->
+    <main id="main-content" tabindex="-1">
+        <div class="kit-head">
+            <span class="kit-head-icon" aria-hidden="true">🧰</span>
+            <div>
+                <h1>Nowe narzędzie</h1>
+                <p>Jedno zdanie o tym, co robi</p>
+            </div>
+        </div>
+
+        <div class="kit-grid">
+            <div class="kit-card">
+                <h2>Wejście</h2>
+                <div class="kit-field">
+                    <label for="input">Tekst</label>
+                    <textarea class="kit-input" id="input" placeholder="Wpisz coś..."></textarea>
+                </div>
+            </div>
+            <div class="kit-card">
+                <h2>Wynik</h2>
+                <div class="kit-output">
+                    <label class="sr-only" for="output">Wynik</label>
+                    <input class="kit-input" id="output" readonly>
+                    <button class="kit-btn primary" id="copy" type="button">Kopiuj</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        input.addEventListener('input', () => { output.value = input.value.toUpperCase(); });
+        document.getElementById('copy').addEventListener('click', event => Kit.copy(output.value, event.currentTarget));
+    </script>
+</body>
+</html>
