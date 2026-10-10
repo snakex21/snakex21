@@ -13,15 +13,25 @@
   try { const value = JSON.parse(sessionStorage.getItem(key)); if (value && typeof value === 'object') saved = value; } catch (_) {}
   const params = new URLSearchParams(location.search);
   input.value = params.has('q') ? params.get('q') : typeof saved.query === 'string' ? saved.query : '';
+  // Optional filter chips (games page): a chip's data-filter lists values joined by "|",
+  // and a card matches when any of them is among its data-filters.
+  const chips = [...document.querySelectorAll('.filter-chip[data-filter]')];
+  let filter = typeof saved.filter === 'string' && chips.some(chip => chip.dataset.filter === saved.filter) ? saved.filter : '';
+  function matchesFilter(card) {
+    if (!filter) return true;
+    const own = (card.dataset.filters || '').split('|');
+    return filter.split('|').some(value => own.includes(value));
+  }
   function search() {
     const query = normalize(input.value); let count = 0;
-    for (const card of cards) { card.hidden = !normalize(card.dataset.search || card.textContent).includes(query); if (!card.hidden) count++; }
+    for (const chip of chips) chip.setAttribute('aria-pressed', String(chip.dataset.filter === filter));
+    for (const card of cards) { card.hidden = !matchesFilter(card) || !normalize(card.dataset.search || card.textContent).includes(query); if (!card.hidden) count++; }
     clear.hidden = !input.value; empty.hidden = count !== 0;
     counter.textContent = `Wyświetlono ${count} z ${cards.length} ${isTools ? 'narzędzi' : 'gier'}`;
   }
   let lastFocusedHref = typeof saved.focusHref === 'string' ? saved.focusHref : '';
   function save(resume = false, focusHref = '') {
-    try { sessionStorage.setItem(key, JSON.stringify({ query: input.value, scroll: window.scrollY, resume, focusHref })); } catch (_) {}
+    try { sessionStorage.setItem(key, JSON.stringify({ query: input.value, filter, scroll: window.scrollY, resume, focusHref })); } catch (_) {}
   }
   function change() {
     search(); saved = {}; lastFocusedHref = '';
@@ -30,6 +40,7 @@
     save();
   }
   input.addEventListener('input', change);
+  for (const chip of chips) chip.addEventListener('click', () => { filter = chip.dataset.filter; change(); });
   clear.addEventListener('click', () => { input.value = ''; change(); input.focus(); });
   // Enter moves keyboard focus to results without unexpectedly opening a tool.
   input.addEventListener('keydown', event => {
@@ -46,7 +57,7 @@
   search();
   // Explicit catalog links and Back both restore the query and prior list position.
   // A different query supplied by the homepage must start at the top instead.
-  if (saved.resume && saved.query === input.value && Number.isFinite(saved.scroll) && saved.scroll >= 0) {
+  if (saved.resume && saved.query === input.value && (saved.filter || '') === filter && Number.isFinite(saved.scroll) && saved.scroll >= 0) {
     requestAnimationFrame(() => {
       const target = cards.find(card => card.getAttribute('href') === saved.focusHref && !card.hidden);
       if (target) target.focus({ preventScroll: true });

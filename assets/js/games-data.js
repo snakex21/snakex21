@@ -74,7 +74,6 @@ const gamesCatalog = [
     title: "Szachy",
     description:
       "Rozegraj partię z komputerem i doszlifuj strategię openings, końcówek oraz taktyki. Każdy ruch ma znaczenie.",
-    cover: "https://zegaryszachowe.pl/userdata/public/gfx/9560/Szachy-Turniejowe-4.jpg",
     coverAlt: "Zbliżenie na figury szachowe ustawione na drewnianej planszy",
     url: "chess/chess.html",
     genres: ["Strategia", "Klasyk"],
@@ -90,7 +89,6 @@ const gamesCatalog = [
     title: "Wisielec",
     description:
       "Odgadnij ukryte słowo, zanim bohater trafi na szubienicę. Szybkie rundy w klimacie rodzinnej zgadywanki.",
-    cover: "https://play-lh.googleusercontent.com/j3fSpmOuYo8M43ZldLXybNIEc6B9xQ25jy_OlIqx0loPB_lomyQlkXdwBFhYWi7-GA=w240-h480-rw",
     coverAlt: "Ekran startowy kolorowej gry Wisielec",
     url: "wisielec/wisielec.html",
     genres: ["Słowne", "Rodzinne"],
@@ -122,7 +120,6 @@ const gamesCatalog = [
     title: "Space Invaders",
     description:
       "Broń Ziemię przed falami kosmicznych najeźdźców. Zbieraj punkty i utrzymuj statek w jednym kawałku jak najdłużej.",
-    cover: "https://i.ytimg.com/vi/D1jZaIPeD5w/maxresdefault.jpg",
     coverAlt: "Statek kosmiczny walczący z falą przeciwników w Space Invaders",
     url: "spaceinvaders/spaceinvaders.html",
     genres: ["Retro", "Arcade"],
@@ -138,7 +135,6 @@ const gamesCatalog = [
     title: "Pong",
     description:
       "Kultowa gra arcade w dwóch trybach: zagraj solo przeciwko AI lub we dwóch przeciwko sobie. Odbijaj piłkę i zdobywaj punkty!",
-    cover: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Klasyczna gra Pong z paletkami i piłką",
     url: "pong/pong.html",
     genres: ["Arcade", "Retro"],
@@ -202,7 +198,6 @@ const gamesCatalog = [
     title: "Tester Szybkości Pisania",
     description:
       "Sprawdź jak szybko piszesz na klawiaturze. 60-sekundowy test na czas z polskimi słowami. Trenuj celność i prędkość (WPM).",
-    cover: "https://images.unsplash.com/photo-1587829741301-dc798b91add1?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Klawiatura mechaniczna z podświetleniem RGB",
     url: "typing/typing.html",
     genres: ["Edukacyjne", "Zręcznościowe"],
@@ -218,7 +213,6 @@ const gamesCatalog = [
     title: "Saper",
     description:
       "Absolutny klasyk biurowy w nowoczesnym, neonowym wydaniu. Odkrywaj pola, oznaczaj miny flagami i nie daj się wysadzić.",
-    cover: "https://images.unsplash.com/photo-1580234567406-03c233856108?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Siatka pól w grze Saper",
     url: "saper/saper.html",
     genres: ["Logiczna", "Klasyk"],
@@ -234,7 +228,6 @@ const gamesCatalog = [
     title: "Arkanoid",
     description:
       "Dynamiczna gra zręcznościowa. Odbijaj piłeczkę, niszcz kolorowe cegły i łap wypadające bonusy.",
-    cover: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Neonowe elementy gry zręcznościowej",
     url: "arkanoid/arkanoid.html",
     genres: ["Arcade", "Retro"],
@@ -250,7 +243,6 @@ const gamesCatalog = [
     title: "Flappy Bird",
     description:
       "Proste zasady, nieskończona irytacja. Klikaj, aby utrzymać ptaka w powietrzu i omijać przeszkody.",
-    cover: "https://images.unsplash.com/photo-1454789476662-bdd71606334f?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Ptak lecący przez niebo",
     url: "flappy/flappy.html",
     genres: ["Zręcznościowa", "Indie"],
@@ -266,7 +258,6 @@ const gamesCatalog = [
     title: "Snake",
     description:
       "Nieśmiertelny Wąż powraca. Zbieraj punkty, rośnij w siłę i unikaj zderzenia z własnym ogonem lub ścianą.",
-    cover: "https://images.unsplash.com/photo-1533422902779-aff35862e462?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Zielony wąż w stylu retro",
     url: "snakex21/snake.html",
     genres: ["Retro", "Zręcznościowa"],
@@ -282,7 +273,6 @@ const gamesCatalog = [
     title: "Hacker Tycoon",
     description:
       "Zostań hakerem w tej grze typu Idle Clicker. Klikaj, aby zarabiać bity, kupuj serwery i automatyzuj swój dochód.",
-    cover: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Kod binarny na ekranie monitora - klimat hakerski",
     url: "clicker/clicker.html",
     genres: ["Symulacja", "Idle"],
@@ -298,7 +288,6 @@ const gamesCatalog = [
     title: "Sudoku",
     description:
       "Japońska łamigłówka liczbowa. Wypełnij planszę 9x9 tak, aby cyfry nie powtarzały się w wierszach, kolumnach i kwadratach.",
-    cover: "https://images.unsplash.com/photo-1629814249159-e48020163346?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Wypełniona plansza Sudoku na papierze",
     url: "sudoku/sudoku.html",
     genres: ["Logiczna", "Puzzle"],
@@ -313,7 +302,6 @@ const gamesCatalog = [
     slug: "solitaire",
     title: "Pasjans (Solitaire)",
     description: "Absolutny klasyk. Układaj karty w odpowiedniej kolejności i kolorach. Idealny czasoumilacz w nowoczesnym wydaniu.",
-    cover: "https://images.unsplash.com/photo-1593085512500-bfd179324512?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Karty do gry na ciemnym stole",
     url: "pasjans/pasjans.html",
     genres: ["Karciana", "Logiczna"],
@@ -327,7 +315,6 @@ const gamesCatalog = [
     slug: "wordle",
     title: "Wordle (Słowotok)",
     description: "Masz 6 prób, aby zgadnąć 5-literowe słowo. Zielony kolor oznacza trafienie, żółty - złą pozycję.",
-    cover: "https://images.unsplash.com/photo-1632213702844-1e0615781374?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Kafelki z literami w grze słownej",
     url: "wordle/wordle.html",
     genres: ["Słowna", "Logiczna"],
@@ -341,7 +328,6 @@ const gamesCatalog = [
     slug: "connect4",
     title: "Czwórki (Connect 4)",
     description: "Strategiczna gra dla dwóch osób przy jednym ekranie. Wrzucajcie żetony na zmianę i ułóżcie cztery w jednej linii.",
-    cover: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Plansza do gry w czwórki",
     url: "connect4/connect4.html",
     genres: ["Strategia", "Logiczna"],
@@ -355,7 +341,6 @@ const gamesCatalog = [
     slug: "dino-run",
     title: "Dino Run",
     description: "Klon słynnej gry z brakiem internetu. Skacz T-Rexem nad kaktusami i biegnij w nieskończoność.",
-    cover: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Pikselowy dinozaur",
     url: "dino/dino.html",
     genres: ["Arcade", "Runner"],
@@ -369,7 +354,6 @@ const gamesCatalog = [
     slug: "tower-stack",
     title: "Tower Stack",
     description: "Buduj najwyższą wieżę z klocków. Klikaj precyzyjnie, bo każdy błąd zmniejsza podstawę wieży.",
-    cover: "https://images.unsplash.com/photo-1476082549609-dd234850755a?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Wysoka wieża w chmurach",
     url: "tower/tower.html",
     genres: ["Arcade", "Zręcznościowa"],
@@ -383,7 +367,6 @@ const gamesCatalog = [
     slug: "simon-says",
     title: "Simon Says",
     description: "Trenuj pamięć. Powtarzaj coraz dłuższe sekwencje kolorów i dźwięków, które dyktuje komputer.",
-    cover: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Kolorowe przyciski",
     url: "simon/simon.html",
     genres: ["Pamięć", "Muzyczna"],
@@ -397,7 +380,6 @@ const gamesCatalog = [
     slug: "z-type",
     title: "Z-Type (Spadające Słowa)",
     description: "Kosmiczna strzelanka sterowana klawiaturą. Wpisuj spadające słowa, aby je zniszczyć, zanim dotrą do Ciebie.",
-    cover: "https://images.unsplash.com/photo-1587829741301-dc798b91add1?auto=format&fit=crop&w=800&q=80",
     coverAlt: "Klawiatura w akcji",
     url: "ztype/ztype.html",
     genres: ["Pisanie", "Arcade"],

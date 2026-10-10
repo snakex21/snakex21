@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gry - Hub</title>
-    <link rel="stylesheet" href="../assets/workshop/catalog.css">
+    <link rel="stylesheet" href="../assets/workshop/catalog.css?v=20261010-art">
 <link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/workshop/shell.css?v=20261001-overhaul2">
 <script src="../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
@@ -36,6 +36,21 @@
 <button class="search-clear" id="search-clear" type="button" aria-label="Wyczyść wyszukiwanie" hidden>×</button>
         </div>
 
+        <div class="filter-chips" id="filter-chips" role="group" aria-label="Filtruj gry">
+            <button type="button" class="filter-chip" data-filter="" aria-pressed="true">Wszystkie</button>
+            <button type="button" class="filter-chip" data-filter="Solo" aria-pressed="false">Solo</button>
+            <button type="button" class="filter-chip" data-filter="Dwóch graczy|Wspólna gra" aria-pressed="false">We dwoje i więcej</button>
+            <button type="button" class="filter-chip" data-filter="Logiczna|Puzzle|Pamięć" aria-pressed="false">Logiczne</button>
+            <button type="button" class="filter-chip" data-filter="Arcade|Zręcznościowa|Zręcznościowe|Runner" aria-pressed="false">Zręcznościowe</button>
+            <button type="button" class="filter-chip" data-filter="Słowne|Słowna|Pisanie|Quiz" aria-pressed="false">Słowne i quizy</button>
+            <button type="button" class="filter-chip" data-filter="Strategia|Karciana|Symulacja" aria-pressed="false">Strategia i karty</button>
+        </div>
+
+        <section class="recent-games" id="recent-games" aria-label="Ostatnio grane" hidden>
+            <h2 class="recent-title">Ostatnio grane</h2>
+            <div class="recent-list"></div>
+        </section>
+
         <div id="results-counter" class="results-counter" role="status" aria-live="polite"></div>
 <div class="games-grid" id="games-grid"></div>
         <div class="no-results" id="no-results" hidden>
@@ -43,9 +58,10 @@
         </div>
     </main>
 
-    <script src="../assets/js/games-data.js?v=20261001-catalog-copy"></script>
-    <script src="../assets/workshop/games.js?v=20261001-overhaul2"></script>
-<script src="../assets/workshop/catalog.js"></script>
+    <script src="../assets/js/games-data.js?v=20261010-art"></script>
+    <script src="../assets/workshop/game-art.js?v=20261010-art"></script>
+    <script src="../assets/workshop/games.js?v=20261010-art"></script>
+<script src="../assets/workshop/catalog.js?v=20261010-art"></script>
 <footer class="site-footer"><span>snakex21 · Zrobione z ciekawości.</span><a href="../zmiany.html">Dziennik zmian →</a><a href="https://github.com/snakex21/snakex21">Kod na GitHubie →</a></footer>
 </body>
 </html>
