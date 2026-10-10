@@ -4,191 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Generator Haseł - Hub</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        main {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        /* Generator Styles */
-        .generator-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
-        .result-container {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        .password-display {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.5rem;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-            background: var(--input-bg);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-weight: bold;
-            letter-spacing: 1px;
-            word-break: break-all;
-        }
-
-        .copy-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--accent);
-            color: var(--accent-contrast);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-
-        .copy-btn:hover { opacity: 0.9; }
-
-        .settings {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .range-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .range-header {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: var(--border);
-            border-radius: 5px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--accent);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            background: var(--bg);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            transition: border-color 0.2s;
-        }
-
-        .checkbox-wrapper:hover {
-            border-color: var(--accent);
-        }
-
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent);
-            cursor: pointer;
-        }
-
-        .generate-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--text);
-            color: var(--bg);
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 1rem;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-
-        .generate-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .generate-btn:active {
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .options-grid { grid-template-columns: 1fr; }
-        }
-    </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
+<script src="../../assets/workshop/kit.js?v=20261010-kit" defer></script>
 </head>
-<body class="site-shell content-shell">
+<body class="site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -199,133 +21,107 @@
 <div class="site-context"><a href="../../Programy/programy.html">← Wszystkie narzędzia</a></div>
 </header>
 
-
-    <main id="main-content" tabindex="-1">
-        <div class="page-header">
-            <h1>🔐 Generator Haseł</h1>
-            <p>Stwórz silne i bezpieczne hasło jednym kliknięciem</p>
+    <main id="main-content" class="kit-narrow" tabindex="-1">
+        <div class="kit-head">
+            <span class="kit-head-icon" aria-hidden="true">🔐</span>
+            <div>
+                <h1>Generator haseł</h1>
+                <p>Silne hasło jednym kliknięciem, losowane w Twojej przeglądarce</p>
+            </div>
         </div>
 
-        <div class="generator-card">
-            <div class="result-container">
-                <input type="text" id="password-output" class="password-display" readonly value="Kliknij Generuj">
-                <button class="copy-btn" id="copy-btn">Kopiuj</button>
+        <div class="kit-card">
+            <div class="kit-output">
+                <label class="sr-only" for="password-output">Wygenerowane hasło</label>
+                <input type="text" id="password-output" class="kit-input" readonly value="">
+                <button class="kit-btn primary" id="copy-btn" type="button">Kopiuj</button>
             </div>
 
-            <div class="settings">
-                <div class="range-group">
-                    <div class="range-header">
-                        <label>Długość hasła</label>
-                        <span id="length-value">16</span>
-                    </div>
-                    <input type="range" id="length-range" min="4" max="32" value="16">
+            <div class="kit-field kit-space">
+                <div class="kit-label-row">
+                    <label class="kit-label" for="length-range">Długość hasła</label>
+                    <strong id="length-value">16</strong>
                 </div>
+                <input type="range" id="length-range" min="4" max="64" value="16">
+            </div>
 
-                <div class="options-grid">
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="uppercase" checked>
-                        <span>Wielkie litery (A-Z)</span>
-                    </label>
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="lowercase" checked>
-                        <span>Małe litery (a-z)</span>
-                    </label>
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="numbers" checked>
-                        <span>Cyfry (0-9)</span>
-                    </label>
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="symbols" checked>
-                        <span>Symbole (!@#)</span>
-                    </label>
-                </div>
+            <div class="kit-options kit-space">
+                <label class="kit-option"><input type="checkbox" id="uppercase" checked><span>Wielkie litery (A-Z)</span></label>
+                <label class="kit-option"><input type="checkbox" id="lowercase" checked><span>Małe litery (a-z)</span></label>
+                <label class="kit-option"><input type="checkbox" id="numbers" checked><span>Cyfry (0-9)</span></label>
+                <label class="kit-option"><input type="checkbox" id="symbols" checked><span>Symbole (!@#)</span></label>
+            </div>
 
-                <button class="generate-btn" id="generate-btn">Generuj nowe hasło</button>
+            <p class="kit-note" id="strength" aria-live="polite"></p>
+
+            <div class="kit-actions">
+                <button class="kit-btn block" id="generate-btn" type="button">Generuj nowe hasło</button>
             </div>
         </div>
     </main>
 
     <script>
-        // --- THEME ---
-        // Theme is handled by assets/workshop/shell.js.
-
-        // --- PASSWORD LOGIC ---
         const output = document.getElementById('password-output');
         const lengthRange = document.getElementById('length-range');
         const lengthValue = document.getElementById('length-value');
-        const btnCopy = document.getElementById('copy-btn');
-        const btnGenerate = document.getElementById('generate-btn');
+        const strength = document.getElementById('strength');
+        const copyBtn = document.getElementById('copy-btn');
 
-        const chars = {
-            upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-            lower: 'abcdefghijklmnopqrstuvwxyz',
-            number: '0123456789',
-            symbol: '!@#$%^&*()_+~`|}{[]:;?><,./-='
-        };
+        const sets = [
+            ['uppercase', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'],
+            ['lowercase', 'abcdefghijklmnopqrstuvwxyz'],
+            ['numbers', '0123456789'],
+            ['symbols', '!@#$%^&*()_+~`|}{[]:;?><,./-=']
+        ];
 
-        // Update slider value display
-        lengthRange.addEventListener('input', (e) => {
-            lengthValue.textContent = e.target.value;
-            generatePassword();
-        });
-
-        // Listen for checkbox changes
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', generatePassword);
-        });
-
-        btnGenerate.addEventListener('click', generatePassword);
+        // Prefer the CSPRNG from kit.js; fall back to the same algorithm inline
+        // when the page runs before (or without) the deferred helper.
+        function randomInt(max) {
+            if (window.Kit) return Kit.randomInt(max);
+            const buf = new Uint32Array(1);
+            const limit = Math.floor(0x100000000 / max) * max;
+            do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+            return buf[0] % max;
+        }
 
         function generatePassword() {
-            const length = lengthRange.value;
-            const hasUpper = document.getElementById('uppercase').checked;
-            const hasLower = document.getElementById('lowercase').checked;
-            const hasNumber = document.getElementById('numbers').checked;
-            const hasSymbol = document.getElementById('symbols').checked;
+            const length = Number(lengthRange.value);
+            const active = sets.filter(([id]) => document.getElementById(id).checked).map(([, chars]) => chars);
+            lengthValue.textContent = length;
 
-            let validChars = '';
-            if (hasUpper) validChars += chars.upper;
-            if (hasLower) validChars += chars.lower;
-            if (hasNumber) validChars += chars.number;
-            if (hasSymbol) validChars += chars.symbol;
-
-            if (validChars === '') {
-                output.value = 'Wybierz opcję!';
+            if (!active.length) {
+                output.value = '';
+                output.placeholder = 'Wybierz co najmniej jedną opcję';
+                strength.textContent = '';
+                copyBtn.disabled = true;
                 return;
             }
 
-            let password = '';
-            for (let i = 0; i < length; i++) {
-                const randomIndex = Math.floor(Math.random() * validChars.length);
-                password += validChars[randomIndex];
+            // One character from every selected set, then fill and shuffle,
+            // so a selected option is always represented.
+            const pool = active.join('');
+            const chars = active.map(set => set[randomInt(set.length)]);
+            while (chars.length < length) chars.push(pool[randomInt(pool.length)]);
+            for (let i = chars.length - 1; i > 0; i--) {
+                const j = randomInt(i + 1);
+                [chars[i], chars[j]] = [chars[j], chars[i]];
             }
+            output.value = chars.slice(0, length).join('');
+            copyBtn.disabled = false;
 
-            output.value = password;
+            const bits = Math.round(length * Math.log2(pool.length));
+            const label = bits >= 100 ? 'bardzo silne' : bits >= 70 ? 'silne' : bits >= 50 ? 'średnie' : 'słabe';
+            strength.textContent = `Siła: ${label} (ok. ${bits} bitów entropii)`;
         }
 
-        // Copy logic
-        btnCopy.addEventListener('click', () => {
-            if(output.value === 'Wybierz opcję!') return;
-            
-            output.select();
-            output.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(output.value).then(() => {
-                const originalText = btnCopy.innerText;
-                btnCopy.innerText = 'OK!';
-                btnCopy.style.background = 'var(--text)';
-                btnCopy.style.color = 'var(--bg)';
-                
-                setTimeout(() => {
-                    btnCopy.innerText = originalText;
-                    btnCopy.style.background = '';
-                    btnCopy.style.color = '';
-                }, 1500);
-            });
+        lengthRange.addEventListener('input', generatePassword);
+        document.querySelectorAll('.kit-option input').forEach(cb => cb.addEventListener('change', generatePassword));
+        document.getElementById('generate-btn').addEventListener('click', generatePassword);
+        copyBtn.addEventListener('click', () => {
+            if (output.value && window.Kit) Kit.copy(output.value, copyBtn);
         });
 
-        // Init
         generatePassword();
-
     </script>
 </body>
 </html>

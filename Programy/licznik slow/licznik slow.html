@@ -4,148 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Licznik Słów - Hub</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        /* Counter Styles */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 2px 8px var(--shadow);
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--accent);
-            display: block;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-container {
-            position: relative;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 400px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: var(--input-bg);
-            color: var(--text);
-            font-size: 1.1rem;
-            font-family: inherit;
-            line-height: 1.8;
-            resize: vertical;
-            box-shadow: 0 4px 12px var(--shadow);
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1.5rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--card-bg);
-            color: var(--text);
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--card-hover);
-            border-color: var(--text-secondary);
-        }
-
-        .btn-clear {
-            color: #ef4444;
-        }
-        
-        .btn-clear:hover {
-            background: #fef2f2;
-            border-color: #ef4444;
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
+<script src="../../assets/workshop/kit.js?v=20261010-kit" defer></script>
 </head>
-<body class="site-shell content-shell">
+<body class="site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -156,103 +21,81 @@
 <div class="site-context"><a href="../../Programy/programy.html">← Wszystkie narzędzia</a></div>
 </header>
 
-
     <main id="main-content" tabindex="-1">
-        <div class="page-header">
-            <h1>📊 Licznik Słów</h1>
-            <p>Analizuj tekst w czasie rzeczywistym</p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-number" id="word-count">0</span>
-                <span class="stat-label">Słowa</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="char-count">0</span>
-                <span class="stat-label">Znaki</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="char-no-space-count">0</span>
-                <span class="stat-label">Znaki (bez spacji)</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="para-count">0</span>
-                <span class="stat-label">Akapity</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-number" id="read-time">0m</span>
-                <span class="stat-label">Czas czytania</span>
+        <div class="kit-head">
+            <span class="kit-head-icon" aria-hidden="true">📊</span>
+            <div>
+                <h1>Licznik słów</h1>
+                <p>Analizuj tekst w czasie rzeczywistym</p>
             </div>
         </div>
 
-        <div class="input-container">
-            <textarea id="text-input" placeholder="Zacznij pisać lub wklej tekst tutaj..." spellcheck="false"></textarea>
-            
-            <div class="controls">
-                <button class="btn btn-clear" id="clear-btn">Wyczyść</button>
-                <button class="btn" id="copy-btn">Kopiuj tekst</button>
-            </div>
+        <div class="kit-stats" aria-live="polite">
+            <div class="kit-stat"><span class="kit-stat-value" id="word-count">0</span><span class="kit-stat-label">Słowa</span></div>
+            <div class="kit-stat"><span class="kit-stat-value" id="char-count">0</span><span class="kit-stat-label">Znaki</span></div>
+            <div class="kit-stat"><span class="kit-stat-value" id="char-no-space-count">0</span><span class="kit-stat-label">Bez spacji</span></div>
+            <div class="kit-stat"><span class="kit-stat-value" id="para-count">0</span><span class="kit-stat-label">Akapity</span></div>
+            <div class="kit-stat"><span class="kit-stat-value" id="read-time">0 min</span><span class="kit-stat-label">Czas czytania</span></div>
+        </div>
+
+        <label class="sr-only" for="text-input">Tekst do analizy</label>
+        <textarea class="kit-input" id="text-input" rows="14" placeholder="Zacznij pisać lub wklej tekst tutaj..." spellcheck="false"></textarea>
+
+        <div class="kit-actions">
+            <button class="kit-btn danger" id="clear-btn" type="button">Wyczyść</button>
+            <button class="kit-btn primary" id="copy-btn" type="button">Kopiuj tekst</button>
         </div>
     </main>
 
     <script>
-        // --- THEME ---
-        // Theme is handled by assets/workshop/shell.js.
-
-        // --- COUNTER LOGIC ---
         const textInput = document.getElementById('text-input');
         const wordCount = document.getElementById('word-count');
         const charCount = document.getElementById('char-count');
         const charNoSpaceCount = document.getElementById('char-no-space-count');
         const paraCount = document.getElementById('para-count');
         const readTime = document.getElementById('read-time');
-        const clearBtn = document.getElementById('clear-btn');
-        const copyBtn = document.getElementById('copy-btn');
+        // kit.js is deferred; this getter is only called after it has loaded.
+        const draft = () => window.Kit && Kit.store('wordCounterDraft');
 
         function analyzeText() {
             const text = textInput.value;
-
-            // Znaki
+            const words = text.trim().split(/\s+/).filter(Boolean);
             charCount.textContent = text.length;
-
-            // Znaki bez spacji
-            const noSpaces = text.replace(/\s/g, '').length;
-            charNoSpaceCount.textContent = noSpaces;
-
-            // Słowa (dzielimy po białych znakach, filtrujemy puste)
-            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            charNoSpaceCount.textContent = text.replace(/\s/g, '').length;
             wordCount.textContent = words.length;
-
-            // Akapity (dzielimy po nowej linii, filtrujemy puste)
-            const paras = text.split(/\n+/).filter(para => para.trim().length > 0);
-            paraCount.textContent = paras.length;
-
-            // Czas czytania (średnio 200 słów na minutę)
-            const time = Math.ceil(words.length / 200);
-            readTime.textContent = time < 1 ? '< 1m' : `~${time}m`;
+            paraCount.textContent = text.split(/\n+/).filter(para => para.trim()).length;
+            // About 200 words per minute.
+            readTime.textContent = words.length === 0 ? '0 min' : `~${Math.ceil(words.length / 200)} min`;
         }
 
-        textInput.addEventListener('input', analyzeText);
+        textInput.addEventListener('input', () => {
+            analyzeText();
+            const store = draft();
+            if (store) store.set(textInput.value);
+        });
 
-        // Buttons
-        clearBtn.addEventListener('click', () => {
-            if(confirm("Czy na pewno chcesz usunąć cały tekst?")) {
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            if (!textInput.value || confirm('Czy na pewno chcesz usunąć cały tekst?')) {
                 textInput.value = '';
                 analyzeText();
+                const store = draft();
+                if (store) store.remove();
+                textInput.focus();
             }
         });
 
-        copyBtn.addEventListener('click', () => {
-            textInput.select();
-            textInput.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(textInput.value).then(() => {
-                const original = copyBtn.textContent;
-                copyBtn.textContent = 'Skopiowano!';
-                setTimeout(() => copyBtn.textContent = original, 1500);
-            });
+        document.getElementById('copy-btn').addEventListener('click', event => {
+            if (window.Kit) Kit.copy(textInput.value, event.currentTarget);
         });
 
+        // The draft survives a reload, so pasted text is not lost by accident.
+        window.addEventListener('DOMContentLoaded', () => {
+            const store = draft();
+            const saved = store ? store.get('') : '';
+            if (typeof saved === 'string' && saved && !textInput.value) textInput.value = saved;
+            analyzeText();
+        });
+        analyzeText();
     </script>
 </body>
 </html>

@@ -7,150 +7,23 @@
     <!-- Biblioteka QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .qr-preview {
+            display: flex; flex-direction: column; align-items: center; gap: 16px;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
-        .qr-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
-        }
-
-        .controls-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--input-bg);
-            color: var(--text);
-            font-size: 1rem;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .color-pickers {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .color-group {
-            flex: 1;
-        }
-
-        input[type="color"] {
-            width: 100%;
-            height: 40px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--card-bg);
-            cursor: pointer;
-        }
-
-        .preview-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 400px;
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
         #qr-code {
-            padding: 1rem;
-            background: white; /* QR codes prefer white bg usually */
-            border-radius: 8px;
-            margin-bottom: 2rem;
+            display: grid; place-content: center;
+            width: 100%; max-width: 288px; aspect-ratio: 1;
+            padding: 16px; border-radius: 12px; background: #fff;
         }
-
-        #qr-code img {
-            display: block;
-        }
-
-        .btn {
-            background: var(--accent);
-            color: var(--accent-contrast);
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            font-size: 1rem;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .qr-container { grid-template-columns: 1fr; }
-        }
+        #qr-code img, #qr-code canvas { display: block; width: 100%; height: auto; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
+<script src="../../assets/workshop/kit.js?v=20261010-kit" defer></script>
 </head>
-<body class="site-shell content-shell">
+<body class="site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -161,101 +34,99 @@
 <div class="site-context"><a href="../../Programy/programy.html">← Wszystkie narzędzia</a></div>
 </header>
 
-
     <main id="main-content" tabindex="-1">
-        <div class="page-header">
-            <h1>📱 Generator QR</h1>
-            <p>Stwórz kod QR dla dowolnego linku lub tekstu</p>
+        <div class="kit-head">
+            <span class="kit-head-icon" aria-hidden="true">📱</span>
+            <div>
+                <h1>Generator QR</h1>
+                <p>Kod QR dla dowolnego linku lub tekstu</p>
+            </div>
         </div>
 
-        <div class="qr-container">
-            <div class="controls-card">
-                <div class="input-group">
-                    <label>Treść / Link</label>
-                    <input type="text" id="qr-text" placeholder="np. https://google.com lub hasło WiFi" value="https://google.com">
+        <div class="kit-grid">
+            <div class="kit-card">
+                <div class="kit-field">
+                    <label for="qr-text">Treść / link</label>
+                    <input type="text" class="kit-input" id="qr-text" placeholder="np. https://example.com lub hasło Wi-Fi" value="https://snakex21.github.io/snakex21/">
                 </div>
-
-                <div class="color-pickers">
-                    <div class="color-group">
-                        <label>Kolor kodu</label>
+                <div class="kit-grid kit-space">
+                    <div class="kit-field">
+                        <label for="color-dark">Kolor kodu</label>
                         <input type="color" id="color-dark" value="#000000">
                     </div>
-                    <div class="color-group">
-                        <label>Tło</label>
+                    <div class="kit-field">
+                        <label for="color-light">Tło</label>
                         <input type="color" id="color-light" value="#ffffff">
                     </div>
                 </div>
-                
-                <p style="margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
-                    💡 Wygenerowany kod możesz zeskanować aparatem w telefonie.
-                </p>
+                <p class="kit-note">💡 Zeskanuj gotowy kod aparatem w telefonie. Jasne tło i ciemny kod czytają się najpewniej.</p>
             </div>
 
-            <div class="preview-card">
-                <div id="qr-code"></div>
-                <button class="btn" id="download-btn">Pobierz PNG ⬇️</button>
+            <div class="kit-card qr-preview">
+                <div id="qr-code" role="img" aria-label="Podgląd kodu QR"></div>
+                <p class="kit-note" id="qr-status" role="status" hidden></p>
+                <button class="kit-btn primary" id="download-btn" type="button">Pobierz PNG</button>
             </div>
         </div>
     </main>
 
     <script>
-        // --- THEME ---
-        // Theme is handled by assets/workshop/shell.js.
-
-        // --- QR LOGIC ---
         const qrInput = document.getElementById('qr-text');
         const colorDarkInput = document.getElementById('color-dark');
         const colorLightInput = document.getElementById('color-light');
         const qrContainer = document.getElementById('qr-code');
+        const qrStatus = document.getElementById('qr-status');
         const downloadBtn = document.getElementById('download-btn');
 
-        let qrcode = new QRCode(qrContainer, {
-            text: "https://google.com",
-            width: 256,
-            height: 256,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        function showStatus(message) {
+            qrStatus.hidden = !message;
+            qrStatus.textContent = message;
+            downloadBtn.disabled = Boolean(message);
+        }
 
         function updateQR() {
             const text = qrInput.value;
-            const dark = colorDarkInput.value;
-            const light = colorLightInput.value;
-
-            if (!text) return;
-
-            // QRCode.js nie ma metody update kolorów, trzeba wyczyścić i stworzyć nowy
             qrContainer.innerHTML = '';
-            
-            qrcode = new QRCode(qrContainer, {
-                text: text,
+            qrContainer.style.background = colorLightInput.value;
+            if (typeof QRCode === 'undefined') {
+                showStatus('Nie udało się wczytać biblioteki QR. Sprawdź połączenie z internetem.');
+                return;
+            }
+            if (!text) {
+                showStatus('Wpisz treść, aby zobaczyć kod.');
+                return;
+            }
+            showStatus('');
+            // QRCode.js cannot recolor an existing code, so it is rebuilt.
+            new QRCode(qrContainer, {
+                text,
                 width: 256,
                 height: 256,
-                colorDark : dark,
-                colorLight : light,
-                correctLevel : QRCode.CorrectLevel.H
+                colorDark: colorDarkInput.value,
+                colorLight: colorLightInput.value,
+                correctLevel: QRCode.CorrectLevel.H
             });
         }
 
-        // Event Listeners
         qrInput.addEventListener('input', updateQR);
         colorDarkInput.addEventListener('input', updateQR);
         colorLightInput.addEventListener('input', updateQR);
 
-        // Download logic
         downloadBtn.addEventListener('click', () => {
+            // QRCode.js renders a canvas first and copies it into an <img> later.
+            const canvas = qrContainer.querySelector('canvas');
             const img = qrContainer.querySelector('img');
-            if (img && img.src) {
-                const link = document.createElement('a');
-                link.download = 'kod-qr.png';
-                link.href = img.src;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            const src = canvas ? canvas.toDataURL('image/png') : img && img.src;
+            if (!src) return;
+            const link = document.createElement('a');
+            link.download = 'kod-qr.png';
+            link.href = src;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
         });
 
+        updateQR();
     </script>
 </body>
 </html>
