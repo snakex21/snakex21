@@ -18,11 +18,15 @@
     try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.href : '#'; }
     catch (_) { return '#'; }
   };
-  const categoryInfo = item => categories[item.category] || {name:item.category || 'Pozostałe',color:'#65716a'};
-  function card(item) {
-    const info = categoryInfo(item);
-    const color = /^#[a-f\d]{3,8}$/i.test(info.color || '') ? info.color : '#65716a';
-    return `<a href="${escape(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer" class="${view === 'timeline' ? 'timeline-card' : 'link-card'}"><span class="link-tag" style="color:${color}">${escape(info.name)}</span><div class="link-title">${escape(item.name)}</div><div class="link-desc">${escape(item.description)}</div>${item.added ? `<div class="link-date">${escape(item.added)}</div>` : ''}</a>`;
+  // Category names in data.js start with an emoji; the UI shows plain words so chips and headings stay calm.
+  const plain = name => String(name ?? '').replace(/^[\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '') || String(name ?? '');
+  const categoryName = key => plain((categories[key] || {}).name || key || 'Pozostałe');
+  const host = value => { try { return new URL(value).hostname.replace(/^www\./, ''); } catch (_) { return ''; } };
+  const counts = links.reduce((map, item) => map.set(item.category, (map.get(item.category) || 0) + 1), new Map());
+  function card(item, showTag = true) {
+    const site = host(safeUrl(item.url));
+    const meta = (site ? `<span class="link-host">${escape(site)}</span>` : '') + (item.added ? `<span class="link-date">${escape(item.added)}</span>` : '');
+    return `<a href="${escape(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer" class="${view === 'timeline' ? 'timeline-card' : 'link-card'}">${showTag ? `<span class="link-tag">${escape(categoryName(item.category))}</span>` : ''}<div class="link-title">${escape(item.name)}</div>${item.description ? `<div class="link-desc">${escape(item.description)}</div>` : ''}${meta ? `<div class="link-meta">${meta}</div>` : ''}</a>`;
   }
   function render() {
     let selected = links.filter(item => (category === 'all' || item.category === category) &&
@@ -42,19 +46,28 @@
       const active = button.dataset.category === category;
       button.classList.toggle('active',active); button.setAttribute('aria-pressed',String(active));
     });
-    if (!selected.length) { container.textContent = query ? `Brak wyników dla „${query}”.` : 'Brak linków w tej kategorii.'; return; }
+    if (!selected.length) { container.innerHTML = `<p class="lh-empty">${escape(query ? `Brak wyników dla „${query}”. Spróbuj innego słowa albo wybierz „Wszystkie”.` : 'Brak linków w tej kategorii.')}</p>`; return; }
     if (view === 'categories' && category === 'all' && !query) {
       const groups = new Map();
       shown.forEach(item => { if(!groups.has(item.category)) groups.set(item.category,[]); groups.get(item.category).push(item); });
-      container.innerHTML = [...groups].map(([key,items]) => `<h2 class="section-header">${escape((categories[key] || {}).name || key)}</h2><div class="link-grid">${items.map(card).join('')}</div>`).join('');
+      container.innerHTML = [...groups].map(([key,items]) => `<h2 class="section-header"><span>${escape(categoryName(key))}</span><button type="button" data-jump="${escape(key)}">Pokaż wszystkie (${counts.get(key) || items.length})</button></h2><div class="link-grid">${items.map(item => card(item, false)).join('')}</div>`).join('');
     } else container.innerHTML = view === 'timeline'
       ? `<div class="timeline">${shown.map(item => `<div class="timeline-item">${card(item)}</div>`).join('')}</div>`
-      : `<div class="link-grid">${shown.map(card).join('')}</div>`;
+      : `<div class="link-grid">${shown.map(item => card(item, category === 'all')).join('')}</div>`;
   }
   [...new Set(links.map(item => item.category))].forEach(key => {
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'category-btn'; button.dataset.category = key;
-    button.textContent = (categories[key] || {}).name || key; nav.appendChild(button);
+    button.textContent = categoryName(key);
+    const count = document.createElement('span'); count.className = 'count'; count.textContent = String(counts.get(key) || 0);
+    button.appendChild(count); nav.appendChild(button);
+  });
+  // "Pokaż wszystkie" in a section heading selects that category.
+  container.addEventListener('click', event => {
+    const jump = event.target.closest?.('[data-jump]');
+    if (!jump) return;
+    category = jump.dataset.jump; limit = 60; render();
+    nav.querySelector('.category-btn.active')?.scrollIntoView?.({block:'nearest',inline:'nearest'});
   });
   nav.querySelectorAll('.category-btn').forEach(button => button.addEventListener('click', () => {category=button.dataset.category;limit=60;render();}));
   document.querySelectorAll('.view-tab').forEach(button => button.addEventListener('click', () => {view=button.dataset.view;limit=60;render();}));

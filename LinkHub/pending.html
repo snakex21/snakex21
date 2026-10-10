@@ -5,238 +5,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oczekujące Linki - LinkHub</title>
+<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/workshop/shell.css?v=20261010-prefs">
+<link rel="stylesheet" href="../assets/workshop/kit.css?v=20261010-kit">
+<script src="../assets/workshop/shell.js?v=20261010-prefs" defer></script>
+    <!-- Page styles come after kit.css so they can refine its components. -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* LinkHub: page header and messages on shell.css tokens; controls come from kit.css. */
+        .lh-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin: 0 0 24px; }
+        .lh-intro { flex: 1 1 320px; min-width: 0; }
+        .lh-intro .eyebrow { margin: 0 0 10px; font-size: 11px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; color: var(--shell-accent); }
+        .lh-intro h1 { margin: 0; font-size: clamp(30px, 4.5vw, 44px); line-height: 1.05; font-weight: 750; letter-spacing: -1.2px; }
+        .lh-intro p:not(.eyebrow) { margin: 8px 0 0; font-size: 15px; color: var(--shell-muted); }
+        .kit-card > h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+        .kit-note { overflow-wrap: anywhere; }
+        .kit-note a { color: var(--shell-accent); font-weight: 650; }
+        .status-msg, .status { display: none; margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--shell-border); border-radius: 8px; background: var(--shell-soft); color: var(--shell-text); font-size: 14px; overflow-wrap: anywhere; }
+        .status-success { display: block; }
+        .status-error { display: block; background: var(--shell-card); border-color: var(--kit-danger); color: var(--kit-danger); }
+        @media (max-width: 640px) {
+            .kit-page main { padding-top: 24px; }
+            .lh-top { margin-bottom: 18px; }
+            .lh-top > .kit-btn { flex: 1 1 100%; }
         }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #3b82f6;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --error: #ef4444;
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        h1 {
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .info-box {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid var(--warning);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            color: var(--warning);
-        }
-
-        /* Bulk Actions */
-        .bulk-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: var(--card-bg);
-            border-radius: 8px;
-            align-items: center;
-        }
-
-        .bulk-actions label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .bulk-actions input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .selected-count {
-            margin-left: auto;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .pending-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .pending-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-            display: flex;
-            gap: 15px;
-            align-items: flex-start;
-        }
-
-        .pending-card.selected {
-            border-color: var(--accent);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .pending-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .pending-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .pending-url {
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: var(--accent);
-            word-break: break-all;
-            margin-bottom: 0.3rem;
-        }
-
-        .pending-reason {
-            font-size: 0.8rem;
-            color: var(--error);
-            margin-bottom: 0.3rem;
-        }
-
-        .pending-date {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .pending-actions {
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .btn-sm {
-            padding: 4px 10px;
-            font-size: 0.8rem;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--accent-contrast);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--error);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-secondary);
-        }
-
-        .back-link {
-            display: block;
-            margin-top: 2rem;
-            text-align: center;
-            color: var(--accent);
-            text-decoration: none;
+        .info-box { margin: 0 0 16px; color: var(--shell-muted); font-size: 14px; }
+        .bulk-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 12px; padding: 10px 12px; }
+        .bulk-actions label { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; font-size: 14px; font-weight: 650; cursor: pointer; }
+        .bulk-actions input[type="checkbox"], .pending-checkbox { width: 18px; height: 18px; margin: 0; accent-color: var(--shell-accent); cursor: pointer; flex-shrink: 0; }
+        .selected-count { margin-left: auto; font-size: 13px; color: var(--shell-muted); font-variant-numeric: tabular-nums; }
+        .pending-list { display: flex; flex-direction: column; gap: 8px; }
+        .pending-card { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 14px; padding: 14px 16px; border: 1px solid var(--shell-border); border-radius: 12px; background: var(--shell-card); }
+        .pending-card.selected { border-color: var(--shell-accent); background: var(--shell-soft); }
+        .pending-checkbox { margin-top: 3px; }
+        .pending-content { flex: 1 1 240px; min-width: 0; }
+        .pending-url { font-family: var(--kit-mono); font-size: 14px; overflow-wrap: anywhere; }
+        .pending-reason, .pending-date { font-size: 13px; color: var(--shell-muted); }
+        .pending-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+        .empty-state { padding: 32px 24px; border: 1px dashed var(--shell-border); border-radius: 12px; text-align: center; color: var(--shell-muted); }
+        .empty-state a { color: var(--shell-accent); font-weight: 650; }
+        @media (max-width: 640px) {
+            .selected-count { margin-left: 0; flex-basis: 100%; }
+            .pending-actions { margin-left: 32px; }
         }
     </style>
-<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/workshop/shell.css?v=20261001-overhaul2">
-<script src="../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
-<body class="site-shell content-shell">
+<body class="site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -249,28 +63,31 @@
 
 
     <main id="main-content" tabindex="-1">
-        <h1>⏳ Oczekujące Linki</h1>
-        <p class="subtitle">Linki, które nie przeszły walidacji. Sprawdź je ręcznie.</p>
-
-        <div class="info-box" id="info-box">
-            ⚠️ Te linki nie zostały dodane, ponieważ strona była niedostępna.
+        <div class="lh-top">
+            <div class="lh-intro">
+                <p class="eyebrow">LinkHub · Oczekujące</p>
+                <h1>Oczekujące linki</h1>
+                <p>Linki, których strona nie odpowiadała przy dodawaniu. Dodaj je mimo to albo usuń z kolejki.</p>
+            </div>
         </div>
 
+        <p class="info-box" id="info-box">
+            Sprawdź link przyciskiem „Otwórz”. Jeśli strona działa, wybierz „Dodaj”; jeśli nie, „Usuń”.
+        </p>
+
         <!-- Bulk Actions -->
-        <div class="bulk-actions" id="bulk-actions" style="display:none;">
+        <div class="kit-card bulk-actions" id="bulk-actions" style="display:none;">
             <label>
                 <input type="checkbox" id="select-all"> Zaznacz wszystkie
             </label>
-            <button class="btn btn-success" id="accept-selected" disabled>✅ Dodaj zaznaczone</button>
-            <button class="btn btn-danger" id="delete-selected" disabled>🗑️ Usuń zaznaczone</button>
-            <span class="selected-count" id="selected-count">Wybrano: 0</span>
+            <button type="button" class="kit-btn small primary" id="accept-selected" disabled>Dodaj zaznaczone</button>
+            <button type="button" class="kit-btn small danger" id="delete-selected" disabled>Usuń zaznaczone</button>
+            <span class="selected-count" id="selected-count" role="status" aria-live="polite">Wybrano: 0</span>
         </div>
 
         <div id="pending-list" class="pending-list">
-            <div class="empty-state">Ładowanie...</div>
+            <div class="empty-state">Ładowanie…</div>
         </div>
-
-        <a href="index.html" class="back-link">← Wróć do LinkHub</a>
     </main>
 
     <script src="data.js"></script>
@@ -282,8 +99,15 @@
         let selectedItems = new Set();
 
         function getToken() {
-            return localStorage.getItem('gh_pat');
+            try { return localStorage.getItem('gh_pat'); } catch (_) { return null; }
         }
+
+        // Pending URLs come from outside; they are shown as text and only opened as http(s).
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+        const safeUrl = value => {
+            try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.href : '#'; }
+            catch (_) { return '#'; }
+        };
 
         async function dispatchEvent(eventType, payload) {
             const token = getToken();
@@ -323,7 +147,7 @@
             const bulkActions = document.getElementById('bulk-actions');
 
             if (typeof LINKHUB_PENDING === 'undefined' || LINKHUB_PENDING.length === 0) {
-                container.innerHTML = '<div class="empty-state">🎉 Brak oczekujących linków! Wszystko działa.</div>';
+                container.innerHTML = '<div class="empty-state">Nic nie czeka. Wszystkie wysłane linki zostały dodane. <a href="add.html">Dodaj nowy link</a></div>';
                 bulkActions.style.display = 'none';
                 document.getElementById('info-box').style.display = 'none';
                 return;
@@ -333,16 +157,16 @@
 
             container.innerHTML = LINKHUB_PENDING.map((item, index) => `
                 <div class="pending-card" data-index="${index}">
-                    <input type="checkbox" class="pending-checkbox" data-index="${index}" data-url="${item.url}">
+                    <input type="checkbox" class="pending-checkbox" data-index="${index}" data-url="${escapeHtml(item.url)}" aria-label="Zaznacz ${escapeHtml(item.url)}">
                     <div class="pending-content">
-                        <div class="pending-url">${item.url}</div>
-                        <div class="pending-reason">❌ ${item.reason || 'Strona niedostępna'}</div>
-                        <div class="pending-date">📅 ${item.attempted || 'nieznana data'}</div>
+                        <div class="pending-url">${escapeHtml(item.url)}</div>
+                        <div class="pending-reason">Powód: ${escapeHtml(item.reason || 'Strona niedostępna')}</div>
+                        <div class="pending-date">Próba: ${escapeHtml(item.attempted || 'nieznana data')}</div>
                     </div>
                     <div class="pending-actions">
-                        <button class="btn btn-sm btn-secondary" onclick="window.open('${item.url}', '_blank')">🔗</button>
-                        <button class="btn btn-sm btn-success single-accept" data-url="${item.url}" data-index="${index}">✅</button>
-                        <button class="btn btn-sm btn-danger single-delete" data-index="${index}">🗑️</button>
+                        <a class="kit-btn small" href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer">Otwórz</a>
+                        <button type="button" class="kit-btn small primary single-accept" data-url="${escapeHtml(item.url)}" data-index="${index}">Dodaj</button>
+                        <button type="button" class="kit-btn small danger single-delete" data-index="${index}">Usuń</button>
                     </div>
                 </div>
             `).join('');
@@ -368,14 +192,14 @@
             document.querySelectorAll('.single-accept').forEach(btn => {
                 btn.onclick = async () => {
                     btn.disabled = true;
-                    btn.textContent = '⏳';
+                    btn.textContent = 'Wysyłanie…';
                     if (await dispatchEvent('force_add_link', { link_url: btn.dataset.url })) {
                         await dispatchEvent('remove_pending', { index: parseInt(btn.dataset.index) });
-                        alert('✅ Link zostanie dodany!');
+                        alert('Link zostanie dodany.');
                         location.reload();
                     } else {
                         btn.disabled = false;
-                        btn.textContent = '✅';
+                        btn.textContent = 'Dodaj';
                     }
                 };
             });
@@ -383,11 +207,13 @@
             // Single delete
             document.querySelectorAll('.single-delete').forEach(btn => {
                 btn.onclick = async () => {
-                    if (!confirm('Usunąć?')) return;
+                    if (!confirm('Usunąć ten link z kolejki?')) return;
                     btn.disabled = true;
                     if (await dispatchEvent('remove_pending', { index: parseInt(btn.dataset.index) })) {
-                        alert('🗑️ Link usunięty z kolejki');
+                        alert('Link usunięty z kolejki.');
                         location.reload();
+                    } else {
+                        btn.disabled = false;
                     }
                 };
             });
@@ -417,7 +243,7 @@
 
             const btn = document.getElementById('accept-selected');
             btn.disabled = true;
-            btn.textContent = '⏳ Dodawanie...';
+            btn.textContent = 'Dodawanie…';
 
             let success = 0;
             for (const url of selectedItems) {
@@ -427,7 +253,7 @@
                 }
             }
 
-            alert(`✅ Wysłano ${success} linków do dodania!`);
+            alert(`Wysłano do dodania: ${success} z ${selectedItems.size}.`);
             location.reload();
         };
 
@@ -438,7 +264,7 @@
 
             const btn = document.getElementById('delete-selected');
             btn.disabled = true;
-            btn.textContent = '⏳ Usuwanie...';
+            btn.textContent = 'Usuwanie…';
 
             // Get indices of selected items
             const indices = [];
@@ -448,8 +274,11 @@
 
             // Send batch delete
             if (await dispatchEvent('remove_pending_batch', { indices: indices })) {
-                alert('🗑️ Linki usunięte z kolejki!');
+                alert('Linki usunięte z kolejki.');
                 location.reload();
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Usuń zaznaczone';
             }
         };
 

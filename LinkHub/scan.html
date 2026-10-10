@@ -5,293 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skanuj Linki - LinkHub</title>
+<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/workshop/shell.css?v=20261010-prefs">
+<link rel="stylesheet" href="../assets/workshop/kit.css?v=20261010-kit">
+<script src="../assets/workshop/shell.js?v=20261010-prefs" defer></script>
+    <!-- Page styles come after kit.css so they can refine its components. -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* LinkHub: page header and messages on shell.css tokens; controls come from kit.css. */
+        .lh-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin: 0 0 24px; }
+        .lh-intro { flex: 1 1 320px; min-width: 0; }
+        .lh-intro .eyebrow { margin: 0 0 10px; font-size: 11px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; color: var(--shell-accent); }
+        .lh-intro h1 { margin: 0; font-size: clamp(30px, 4.5vw, 44px); line-height: 1.05; font-weight: 750; letter-spacing: -1.2px; }
+        .lh-intro p:not(.eyebrow) { margin: 8px 0 0; font-size: 15px; color: var(--shell-muted); }
+        .kit-card > h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+        .kit-note { overflow-wrap: anywhere; }
+        .kit-note a { color: var(--shell-accent); font-weight: 650; }
+        .status-msg, .status { display: none; margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--shell-border); border-radius: 8px; background: var(--shell-soft); color: var(--shell-text); font-size: 14px; overflow-wrap: anywhere; }
+        .status-success { display: block; }
+        .status-error { display: block; background: var(--shell-card); border-color: var(--kit-danger); color: var(--kit-danger); }
+        @media (max-width: 640px) {
+            .kit-page main { padding-top: 24px; }
+            .lh-top { margin-bottom: 18px; }
+            .lh-top > .kit-btn { flex: 1 1 100%; }
         }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #3b82f6;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --error: #ef4444;
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        h1 {
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .scan-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--accent-contrast);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--error);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .progress-container {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: none;
-        }
-
-        .progress-bar {
-            height: 12px;
-            background: var(--border);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--success));
-            transition: width 0.3s;
-        }
-
-        .progress-stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            font-size: 0.9rem;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .stat-ok {
-            color: var(--success);
-        }
-
-        .stat-error {
-            color: var(--error);
-        }
-
-        .stat-pending {
-            color: var(--text-secondary);
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-
-        .filter-tab {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            background: var(--card-bg);
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: var(--text);
-        }
-
-        .filter-tab.active {
-            background: var(--text);
-            color: var(--bg);
-        }
-
-        .results-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .result-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .result-card.ok {
-            border-left: 4px solid var(--success);
-        }
-
-        .result-card.error {
-            border-left: 4px solid var(--error);
-        }
-
-        .result-card.pending {
-            border-left: 4px solid var(--border);
-        }
-
-        .result-status {
-            font-size: 1.2rem;
-            width: 30px;
-            text-align: center;
-        }
-
-        .result-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .result-name {
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .result-url {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            word-break: break-all;
-        }
-
-        .result-error {
-            font-size: 0.75rem;
-            color: var(--error);
-            margin-top: 4px;
-        }
-
-        .result-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-secondary);
-        }
-
-        .back-link {
-            display: block;
-            margin-top: 2rem;
-            text-align: center;
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .edit-input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 0.85rem;
-            margin-top: 8px;
+        .scan-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
+        .progress-container { display: none; margin: 0 0 16px; }
+        .progress-bar { height: 8px; margin: 0 0 12px; border-radius: 4px; overflow: hidden; background: var(--shell-soft); }
+        .progress-fill { height: 100%; background: var(--shell-accent); transition: width .3s; }
+        .progress-stats { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 14px; color: var(--shell-muted); font-variant-numeric: tabular-nums; }
+        .progress-stats b { color: var(--shell-text); }
+        .stat-error b { color: var(--kit-danger); }
+        .filter-tabs { margin: 0 0 12px; }
+        .results-list { display: flex; flex-direction: column; gap: 8px; }
+        .result-card { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 14px; padding: 12px 16px; border: 1px solid var(--shell-border); border-radius: 12px; background: var(--shell-card); }
+        .result-status { flex: 0 0 auto; min-width: 84px; padding: 2px 8px; border: 1px solid var(--shell-border); border-radius: 999px; font-size: 12px; font-weight: 700; text-align: center; color: var(--shell-muted); }
+        .result-card.ok .result-status { border-color: var(--shell-accent); color: var(--shell-accent); }
+        .result-card.error .result-status { border-color: var(--kit-danger); color: var(--kit-danger); }
+        .result-content { flex: 1 1 220px; min-width: 0; }
+        .result-name { font-weight: 700; overflow-wrap: anywhere; }
+        .result-url { font-size: 13px; color: var(--shell-muted); overflow-wrap: anywhere; }
+        .result-error { margin-top: 2px; font-size: 13px; color: var(--kit-danger); overflow-wrap: anywhere; }
+        .result-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+        .edit-input { margin-top: 8px; }
+        .edit-save { margin-top: 8px; }
+        .empty-state { padding: 32px 24px; border: 1px dashed var(--shell-border); border-radius: 12px; text-align: center; color: var(--shell-muted); }
+        .results-more { display: flex; justify-content: center; margin-top: 8px; }
+        @media (max-width: 640px) {
+            .scan-controls .kit-btn { flex: 1 1 auto; }
+            .result-actions { margin-left: 0; }
         }
     </style>
-<link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/workshop/shell.css?v=20261001-overhaul2">
-<script src="../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
 
-<body class="site-shell content-shell">
+<body class="site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -304,39 +70,43 @@
 
 
     <main id="main-content" tabindex="-1">
-        <h1>🔍 Skanuj Linki</h1>
-        <p class="subtitle">Sprawdź czy Twoje zapisane linki nadal działają</p>
-
-        <div class="scan-controls">
-            <button class="btn btn-primary" id="start-scan">▶️ Rozpocznij skanowanie</button>
-            <button class="btn btn-warning" id="pause-scan" style="display:none;">⏸️ Pauza</button>
-            <button class="btn btn-success" id="resume-scan" style="display:none;">▶️ Wznów</button>
-            <button class="btn btn-secondary" id="reset-scan" style="display:none;">🔄 Od nowa</button>
+        <div class="lh-top">
+            <div class="lh-intro">
+                <p class="eyebrow">LinkHub · Skanuj</p>
+                <h1>Sprawdź, czy linki działają</h1>
+                <p>Strona odwiedza po kolei wszystkie zapisane adresy i pokazuje te, które nie odpowiadają.</p>
+            </div>
         </div>
 
-        <div class="progress-container" id="progress-container">
+        <div class="scan-controls">
+            <button type="button" class="kit-btn primary" id="start-scan">Rozpocznij skanowanie</button>
+            <button type="button" class="kit-btn" id="pause-scan" style="display:none;">Wstrzymaj</button>
+            <button type="button" class="kit-btn primary" id="resume-scan" style="display:none;">Wznów</button>
+            <button type="button" class="kit-btn" id="reset-scan" style="display:none;">Zacznij od nowa</button>
+        </div>
+
+        <div class="kit-card progress-container" id="progress-container">
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
             </div>
-            <div class="progress-stats">
-                <span class="stat"><span id="scanned-count">0</span> / <span id="total-count">0</span> sprawdzono</span>
-                <span class="stat stat-ok">✅ <span id="ok-count">0</span> działa</span>
-                <span class="stat stat-error">❌ <span id="error-count">0</span> nie działa</span>
+            <div class="progress-stats" role="status" aria-live="polite">
+                <span class="stat"><b><span id="scanned-count">0</span> / <span id="total-count">0</span></b> sprawdzono</span>
+                <span class="stat stat-ok"><b id="ok-count">0</b> działa</span>
+                <span class="stat stat-error"><b id="error-count">0</b> nie działa</span>
             </div>
         </div>
 
-        <div class="filter-tabs" id="filter-tabs" style="display:none;">
-            <button class="filter-tab active" data-filter="all">Wszystko</button>
-            <button class="filter-tab" data-filter="ok">✅ Działające</button>
-            <button class="filter-tab" data-filter="error">❌ Niedziałające</button>
-            <button class="filter-tab" data-filter="pending">⏳ Oczekujące</button>
+        <div class="kit-tabs filter-tabs" id="filter-tabs" role="group" aria-label="Pokaż" style="display:none;">
+            <button type="button" class="kit-tab filter-tab active" data-filter="all" aria-pressed="true">Wszystkie</button>
+            <button type="button" class="kit-tab filter-tab" data-filter="error" aria-pressed="false">Nie działa</button>
+            <button type="button" class="kit-tab filter-tab" data-filter="ok" aria-pressed="false">Działa</button>
+            <button type="button" class="kit-tab filter-tab" data-filter="pending" aria-pressed="false">Jeszcze nie sprawdzone</button>
         </div>
 
         <div id="results-list" class="results-list">
-            <div class="empty-state">Kliknij "Rozpocznij skanowanie" aby sprawdzić linki</div>
+            <div class="empty-state">Kliknij „Rozpocznij skanowanie”. Postęp zapisuje się w tej przeglądarce, więc możesz przerwać i wrócić później.</div>
         </div>
-
-        <a href="index.html" class="back-link">← Wróć do LinkHub</a>
+        <p class="kit-note">Wynik jest przybliżony: przeglądarka widzi tylko, czy strona w ogóle odpowiada, a nie czy jej treść jest nadal dostępna. Edycja i usuwanie linku wymagają tokena z <a href="settings.html">Ustawień</a>.</p>
     </main>
 
     <script src="data.js"></script>
@@ -355,27 +125,28 @@
 
         // Load saved state
         function loadState() {
-            const saved = localStorage.getItem('linkhub_scan_state');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    // Check if it's for the same links
-                    if (parsed.totalLinks === LINKHUB_LINKS.length) {
-                        scanState = parsed;
-                        return true;
-                    }
-                } catch (e) { }
-            }
+            try {
+                const saved = localStorage.getItem('linkhub_scan_state');
+                const parsed = saved && JSON.parse(saved);
+                // Check if it's for the same links
+                if (parsed && Array.isArray(parsed.results) && parsed.totalLinks === LINKHUB_LINKS.length) {
+                    scanState = parsed;
+                    // A scan cannot survive a reload: a run that was in progress continues as paused.
+                    scanState.isPaused = scanState.isRunning || scanState.isPaused;
+                    scanState.isRunning = false;
+                    return true;
+                }
+            } catch (e) { }
             return false;
         }
 
         function saveState() {
             scanState.totalLinks = LINKHUB_LINKS.length;
-            localStorage.setItem('linkhub_scan_state', JSON.stringify(scanState));
+            try { localStorage.setItem('linkhub_scan_state', JSON.stringify(scanState)); } catch (e) { }
         }
 
         function clearState() {
-            localStorage.removeItem('linkhub_scan_state');
+            try { localStorage.removeItem('linkhub_scan_state'); } catch (e) { }
             scanState = {
                 results: [],
                 currentIndex: 0,
@@ -425,14 +196,26 @@
             const ok = scanState.results.filter(r => r.status === 'ok').length;
             const errors = scanState.results.filter(r => r.status === 'error').length;
 
-            document.getElementById('progress-fill').style.width = (scanned / total * 100) + '%';
+            document.getElementById('progress-fill').style.width = (total ? scanned / total * 100 : 0) + '%';
             document.getElementById('scanned-count').textContent = scanned;
             document.getElementById('total-count').textContent = total;
             document.getElementById('ok-count').textContent = ok;
             document.getElementById('error-count').textContent = errors;
         }
 
-        function renderResults(filter = 'all') {
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+        const safeUrl = value => {
+            try { const url = new URL(value); return ['http:', 'https:'].includes(url.protocol) ? url.href : '#'; }
+            catch (_) { return '#'; }
+        };
+        const STATUS_LABEL = { ok: 'Działa', error: 'Nie działa', pending: 'Czeka' };
+        // Thousands of cards would make every scan step slow; show them in pages.
+        const PAGE_SIZE = 200;
+        let renderLimit = PAGE_SIZE;
+        // Buttons carry the link index; after a delete it no longer equals the position in results.
+        const findResult = linkIndex => scanState.results.findIndex(r => r.index === linkIndex);
+
+        function renderResults(filter = currentFilter) {
             const container = document.getElementById('results-list');
             let filtered = scanState.results;
 
@@ -441,59 +224,64 @@
             }
 
             if (filtered.length === 0) {
-                container.innerHTML = '<div class="empty-state">Brak wyników dla tego filtra</div>';
+                container.innerHTML = '<div class="empty-state">Brak linków w tym widoku.</div>';
                 return;
             }
 
-            container.innerHTML = filtered.map(r => `
-                <div class="result-card ${r.status}" data-index="${r.index}">
-                    <div class="result-status">
-                        ${r.status === 'ok' ? '✅' : r.status === 'error' ? '❌' : '⏳'}
-                    </div>
+            container.innerHTML = filtered.slice(0, renderLimit).map(r => `
+                <div class="result-card ${escapeHtml(r.status)}" data-index="${r.index}">
+                    <div class="result-status">${STATUS_LABEL[r.status] || ''}</div>
                     <div class="result-content">
-                        <div class="result-name">${r.name}</div>
-                        <div class="result-url">${r.url}</div>
-                        ${r.status === 'error' ? `<div class="result-error">Błąd: ${r.error}</div>` : ''}
+                        <div class="result-name">${escapeHtml(r.name)}</div>
+                        <div class="result-url">${escapeHtml(r.url)}</div>
+                        ${r.status === 'error' ? `<div class="result-error">Błąd: ${escapeHtml(r.error)}</div>` : ''}
                     </div>
                     <div class="result-actions">
-                        <button class="btn btn-sm btn-secondary" onclick="window.open('${r.url}', '_blank')">🔗</button>
+                        <a class="kit-btn small" href="${escapeHtml(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">Otwórz</a>
                         ${r.status === 'error' ? `
-                            <button class="btn btn-sm btn-warning edit-btn" data-index="${r.index}">✏️</button>
-                            <button class="btn btn-sm btn-danger delete-btn" data-index="${r.index}">🗑️</button>
+                            <button type="button" class="kit-btn small edit-btn" data-index="${r.index}">Popraw adres</button>
+                            <button type="button" class="kit-btn small danger delete-btn" data-index="${r.index}">Usuń</button>
                         ` : ''}
                     </div>
                 </div>
-            `).join('');
+            `).join('') + (filtered.length > renderLimit
+                ? `<div class="results-more"><button type="button" class="kit-btn" id="results-more">Pokaż kolejne (${filtered.length - renderLimit} ukrytych)</button></div>`
+                : '');
+
+            const more = document.getElementById('results-more');
+            if (more) more.onclick = () => { renderLimit += PAGE_SIZE; renderResults(); };
 
             // Edit handlers
             document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.onclick = () => showEditForm(parseInt(btn.dataset.index));
+                btn.onclick = () => { const position = findResult(parseInt(btn.dataset.index)); if (position >= 0) showEditForm(position); };
             });
 
             // Delete handlers
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.onclick = () => deleteLink(parseInt(btn.dataset.index));
+                btn.onclick = () => { const position = findResult(parseInt(btn.dataset.index)); if (position >= 0) deleteLink(position); };
             });
         }
 
         function showEditForm(resultIndex) {
             const result = scanState.results[resultIndex];
-            const card = document.querySelector(`.result-card[data-index="${resultIndex}"]`);
+            const card = document.querySelector(`.result-card[data-index="${result.index}"]`);
+            if (!card) return;
             const content = card.querySelector('.result-content');
 
             // Check if already editing
             if (card.querySelector('.edit-input')) return;
 
             const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'edit-input';
+            input.type = 'url';
+            input.className = 'kit-input edit-input';
+            input.setAttribute('aria-label', 'Nowy adres');
             input.value = result.url;
             input.placeholder = 'Nowy URL...';
 
             const saveBtn = document.createElement('button');
-            saveBtn.className = 'btn btn-sm btn-success';
-            saveBtn.style.marginTop = '8px';
-            saveBtn.textContent = '💾 Zapisz';
+            saveBtn.type = 'button';
+            saveBtn.className = 'kit-btn small primary edit-save';
+            saveBtn.textContent = 'Zapisz adres';
             saveBtn.onclick = () => saveEditedUrl(resultIndex, input.value);
 
             content.appendChild(input);
@@ -507,7 +295,8 @@
                 return;
             }
 
-            const token = localStorage.getItem('gh_pat');
+            let token = null;
+            try { token = localStorage.getItem('gh_pat'); } catch (e) { }
             if (!token) {
                 alert('Ustaw token GitHub PAT w ustawieniach');
                 return;
@@ -533,11 +322,15 @@
                 });
 
                 if (response.ok) {
-                    alert('✅ URL zostanie zaktualizowany!');
+                    alert('Adres zostanie zaktualizowany.');
                     result.url = newUrl;
                     result.status = 'pending';
+                    result.error = '';
                     saveState();
+                    updateProgress();
                     renderResults();
+                } else {
+                    alert('Błąd API (' + response.status + ')');
                 }
             } catch (e) {
                 alert('Błąd: ' + e.message);
@@ -547,7 +340,8 @@
         async function deleteLink(resultIndex) {
             if (!confirm('Na pewno usunąć ten link?')) return;
 
-            const token = localStorage.getItem('gh_pat');
+            let token = null;
+            try { token = localStorage.getItem('gh_pat'); } catch (e) { }
             if (!token) {
                 alert('Ustaw token GitHub PAT w ustawieniach');
                 return;
@@ -570,10 +364,15 @@
                 });
 
                 if (response.ok) {
-                    alert('🗑️ Link zostanie usunięty!');
+                    alert('Link zostanie usunięty.');
                     scanState.results.splice(resultIndex, 1);
+                    // Keep the scan cursor on the same link after removing an earlier one.
+                    if (resultIndex < scanState.currentIndex) scanState.currentIndex--;
                     saveState();
+                    updateProgress();
                     renderResults();
+                } else {
+                    alert('Błąd API (' + response.status + ')');
                 }
             } catch (e) {
                 alert('Błąd: ' + e.message);
@@ -581,10 +380,14 @@
         }
 
         // Scan loop
+        // Pausing waits for the current check; resuming before it ends must not start a second loop.
+        let loopActive = false;
         async function runScan() {
             scanState.isRunning = true;
             scanState.isPaused = false;
             updateButtons();
+            if (loopActive) return;
+            loopActive = true;
 
             while (scanState.currentIndex < scanState.results.length && !scanState.isPaused) {
                 const result = scanState.results[scanState.currentIndex];
@@ -605,9 +408,11 @@
                 await new Promise(r => setTimeout(r, 200));
             }
 
+            loopActive = false;
             if (!scanState.isPaused) {
                 scanState.isRunning = false;
-                alert('✅ Skanowanie zakończone!');
+                saveState();
+                alert('Skanowanie zakończone.');
             }
             updateButtons();
         }
@@ -642,32 +447,34 @@
 
             if (scanState.isRunning) {
                 startBtn.style.display = 'none';
-                pauseBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'inline-flex';
                 resumeBtn.style.display = 'none';
                 resetBtn.style.display = 'none';
             } else if (scanState.isPaused || scanState.currentIndex > 0) {
                 startBtn.style.display = 'none';
                 pauseBtn.style.display = 'none';
-                resumeBtn.style.display = scanState.currentIndex < scanState.results.length ? 'inline-block' : 'none';
-                resetBtn.style.display = 'inline-block';
+                resumeBtn.style.display = scanState.currentIndex < scanState.results.length ? 'inline-flex' : 'none';
+                resetBtn.style.display = 'inline-flex';
             } else {
-                startBtn.style.display = 'inline-block';
+                startBtn.style.display = 'inline-flex';
                 pauseBtn.style.display = 'none';
                 resumeBtn.style.display = 'none';
                 resetBtn.style.display = 'none';
             }
 
             progressContainer.style.display = scanState.results.length > 0 ? 'block' : 'none';
-            filterTabs.style.display = scanState.results.length > 0 ? 'flex' : 'none';
+            filterTabs.style.display = scanState.results.length > 0 ? 'inline-flex' : 'none';
         }
 
         // Filter tabs
         let currentFilter = 'all';
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.onclick = () => {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.filter-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-pressed', 'false'); });
                 tab.classList.add('active');
+                tab.setAttribute('aria-pressed', 'true');
                 currentFilter = tab.dataset.filter;
+                renderLimit = PAGE_SIZE;
                 renderResults(currentFilter);
             };
         });

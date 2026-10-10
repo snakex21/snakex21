@@ -5,225 +5,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dodaj Linki - LinkHub</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #3b82f6;
-            --success: #22c55e;
-            --error: #ef4444;
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        main {
-            max-width: 700px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 2rem;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            background: var(--card-bg);
-            border: none;
-            color: var(--text);
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .tab.active {
-            background: var(--accent);
-            color: var(--accent-contrast);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-        }
-
-        input[type="url"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-        }
-
-        textarea {
-            min-height: 200px;
-            resize: vertical;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            color: var(--accent-contrast);
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .submit-btn:hover {
-            opacity: 0.9;
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .status-msg {
-            margin-top: 1rem;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-            text-align: center;
-        }
-
-        .status-success {
-            background: rgba(34, 197, 94, 0.2);
-            color: var(--success);
-            display: block;
-        }
-
-        .status-error {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--error);
-            display: block;
-        }
-
-        .back-link {
-            display: block;
-            margin-top: 2rem;
-            text-align: center;
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .hint {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-        }
-
-        .progress {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: var(--card-bg);
-            border-radius: 8px;
-            display: none;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            transition: width 0.3s;
-        }
-
-        .progress-text {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-    </style>
 <link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/workshop/shell.css?v=20261001-overhaul2">
-<script src="../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
+<link rel="stylesheet" href="../assets/workshop/shell.css?v=20261010-prefs">
+<link rel="stylesheet" href="../assets/workshop/kit.css?v=20261010-kit">
+<script src="../assets/workshop/shell.js?v=20261010-prefs" defer></script>
+    <!-- Page styles come after kit.css so they can refine its components. -->
+    <style>
+        /* LinkHub: page header and messages on shell.css tokens; controls come from kit.css. */
+        .lh-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin: 0 0 24px; }
+        .lh-intro { flex: 1 1 320px; min-width: 0; }
+        .lh-intro .eyebrow { margin: 0 0 10px; font-size: 11px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; color: var(--shell-accent); }
+        .lh-intro h1 { margin: 0; font-size: clamp(30px, 4.5vw, 44px); line-height: 1.05; font-weight: 750; letter-spacing: -1.2px; }
+        .lh-intro p:not(.eyebrow) { margin: 8px 0 0; font-size: 15px; color: var(--shell-muted); }
+        .kit-card > h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+        .kit-note { overflow-wrap: anywhere; }
+        .kit-note a { color: var(--shell-accent); font-weight: 650; }
+        .status-msg, .status { display: none; margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--shell-border); border-radius: 8px; background: var(--shell-soft); color: var(--shell-text); font-size: 14px; overflow-wrap: anywhere; }
+        .status-success { display: block; }
+        .status-error { display: block; background: var(--shell-card); border-color: var(--kit-danger); color: var(--kit-danger); }
+        @media (max-width: 640px) {
+            .kit-page main { padding-top: 24px; }
+            .lh-top { margin-bottom: 18px; }
+            .lh-top > .kit-btn { flex: 1 1 100%; }
+        }
+        .tabs { display: flex; margin: 0 0 20px; }
+        .tabs .kit-tab { flex: 1 1 0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .kit-field + .kit-btn { margin-top: 16px; }
+        .progress { display: none; margin: 14px 0 0; }
+        .progress-bar { height: 8px; border-radius: 4px; overflow: hidden; background: var(--shell-soft); }
+        .progress-fill { width: 0; height: 100%; background: var(--shell-accent); transition: width .3s; }
+        .progress-text { margin-top: 6px; font-size: 13px; color: var(--shell-muted); font-variant-numeric: tabular-nums; }
+        .lh-steps { margin: 0; padding-left: 20px; color: var(--shell-muted); font-size: 14px; }
+        .lh-steps li + li { margin-top: 4px; }
+        .lh-steps a { color: var(--shell-accent); font-weight: 650; }
+    </style>
 </head>
 
-<body class="site-shell content-shell">
+<body class="site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -235,49 +55,63 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <h1>🚀 Dodaj Linki</h1>
-        <p class="subtitle">AI automatycznie sklasyfikuje linki</p>
-
-        <div class="tabs">
-            <button class="tab active" data-tab="single">Pojedynczy link</button>
-            <button class="tab" data-tab="bulk">Wiele linków</button>
+    <main id="main-content" class="kit-narrow" tabindex="-1">
+        <div class="lh-top">
+            <div class="lh-intro">
+                <p class="eyebrow">LinkHub · Dodaj linki</p>
+                <h1>Dodaj linki</h1>
+                <p>Wklej adres strony. AI samo nada nazwę, opis i kategorię.</p>
+            </div>
         </div>
 
-        <!-- Single Link -->
-        <div class="tab-content active" id="single-tab">
-            <form id="single-form">
-                <div class="form-group">
-                    <label for="single-url">Adres URL</label>
-                    <input type="url" id="single-url" placeholder="https://example.com" required>
-                </div>
-                <button type="submit" class="submit-btn">Wyślij do AI</button>
-            </form>
-            <div id="single-status" class="status-msg"></div>
-        </div>
+        <section class="kit-card">
+            <div class="kit-tabs tabs" role="group" aria-label="Ile linków dodajesz">
+                <button type="button" class="kit-tab tab active" data-tab="single" aria-pressed="true">Jeden link</button>
+                <button type="button" class="kit-tab tab" data-tab="bulk" aria-pressed="false">Wiele naraz</button>
+            </div>
 
-        <!-- Bulk Links -->
-        <div class="tab-content" id="bulk-tab">
-            <form id="bulk-form">
-                <div class="form-group">
-                    <label for="bulk-urls">Adresy URL (jeden na linię)</label>
-                    <textarea id="bulk-urls" placeholder="https://example1.com
+            <!-- Single Link -->
+            <div class="tab-content active" id="single-tab">
+                <form id="single-form">
+                    <div class="kit-field">
+                        <label for="single-url">Adres strony</label>
+                        <input type="url" id="single-url" class="kit-input" placeholder="https://example.com" required>
+                    </div>
+                    <button type="submit" class="kit-btn primary block submit-btn">Dodaj link</button>
+                </form>
+                <div id="single-status" class="status-msg" role="status" aria-live="polite"></div>
+            </div>
+
+            <!-- Bulk Links -->
+            <div class="tab-content" id="bulk-tab">
+                <form id="bulk-form">
+                    <div class="kit-field">
+                        <label for="bulk-urls">Adresy stron, każdy w osobnej linii</label>
+                        <textarea id="bulk-urls" class="kit-input mono" placeholder="https://example1.com
 https://example2.com
 https://example3.com"></textarea>
-                    <p class="hint">Wklej wiele linków, każdy w nowej linii. AI przetworzy je po kolei.</p>
+                        <p class="kit-note hint">Linki są wysyłane po kolei, co około 2 sekundy.</p>
+                    </div>
+                    <button type="submit" class="kit-btn primary block submit-btn">Dodaj wszystkie</button>
+                </form>
+                <div class="progress" id="bulk-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text" role="status" aria-live="polite">0 / 0</div>
                 </div>
-                <button type="submit" class="submit-btn">Wyślij wszystkie do AI</button>
-            </form>
-            <div class="progress" id="bulk-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="progress-text" id="progress-text">0 / 0</div>
+                <div id="bulk-status" class="status-msg" role="status" aria-live="polite"></div>
             </div>
-            <div id="bulk-status" class="status-msg"></div>
-        </div>
+        </section>
 
-        <a href="index.html" class="back-link">← Wróć do przeglądania</a>
+        <section class="kit-card">
+            <h2>Co dalej</h2>
+            <ol class="lh-steps">
+                <li>Link trafia do kolejki na GitHubie (potrzebny token z <a href="settings.html">Ustawień</a>; przy pierwszym wysłaniu strona sama o niego zapyta).</li>
+                <li>Po około minucie pojawia się w <a href="index.html">Przeglądaj</a>.</li>
+                <li>Jeśli strona nie odpowiada, link czeka w <a href="pending.html">Oczekujących</a>.</li>
+            </ol>
+        </section>
     </main>
 
     <script>
@@ -286,9 +120,10 @@ https://example3.com"></textarea>
         // Tabs
         document.querySelectorAll('.tab').forEach(tab => {
             tab.onclick = () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-pressed', 'false'); });
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 tab.classList.add('active');
+                tab.setAttribute('aria-pressed', 'true');
                 document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
             };
         });
@@ -297,13 +132,23 @@ https://example3.com"></textarea>
         const owner = 'snakex21';
         const repo = 'snakex21';
 
+        // Storage can be blocked (private mode); the token then lives only for this page.
+        let sessionToken = '';
         function getToken() {
-            let token = localStorage.getItem('gh_pat');
+            let token = sessionToken;
+            try { token = token || localStorage.getItem('gh_pat') || ''; } catch (_) { }
             if (!token) {
-                token = prompt('Wprowadź GitHub Personal Access Token (PAT):');
-                if (token) localStorage.setItem('gh_pat', token);
+                token = (prompt('Wprowadź GitHub Personal Access Token (PAT):') || '').trim();
+                if (token) {
+                    sessionToken = token;
+                    try { localStorage.setItem('gh_pat', token); } catch (_) { }
+                }
             }
             return token;
+        }
+        function forgetToken() {
+            sessionToken = '';
+            try { localStorage.removeItem('gh_pat'); } catch (_) { }
         }
 
         async function sendLink(url) {
@@ -324,8 +169,8 @@ https://example3.com"></textarea>
             });
 
             if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Błąd API');
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.message || `Błąd API (${response.status})`);
             }
             return true;
         }
@@ -338,21 +183,21 @@ https://example3.com"></textarea>
             const btn = e.target.querySelector('button');
 
             btn.disabled = true;
-            btn.textContent = 'Wysyłanie...';
-            status.style.display = 'none';
+            btn.textContent = 'Wysyłanie…';
+            status.className = 'status-msg';
 
             try {
                 await sendLink(url);
-                status.textContent = '✅ Sukces! Link zostanie dodany za ~1 minutę.';
+                status.textContent = 'Wysłano. Link pojawi się w „Przeglądaj” za około minutę.';
                 status.className = 'status-msg status-success';
                 e.target.reset();
             } catch (err) {
-                status.textContent = '❌ ' + err.message;
+                status.textContent = 'Nie udało się: ' + err.message;
                 status.className = 'status-msg status-error';
-                if (err.message.includes('Bad credentials')) localStorage.removeItem('gh_pat');
+                if (err.message.includes('Bad credentials')) forgetToken();
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Wyślij do AI';
+                btn.textContent = 'Dodaj link';
             }
         };
 
@@ -375,8 +220,16 @@ https://example3.com"></textarea>
             const progressText = document.getElementById('progress-text');
             const btn = e.target.querySelector('button');
 
+            // Ask for the token once, not once per link.
+            if (!getToken()) {
+                status.textContent = 'Nie udało się: brak tokena GitHub. Zapisz go w Ustawieniach.';
+                status.className = 'status-msg status-error';
+                return;
+            }
+
             btn.disabled = true;
-            status.style.display = 'none';
+            btn.textContent = 'Wysyłanie…';
+            status.className = 'status-msg';
             progress.style.display = 'block';
 
             let success = 0;
@@ -394,13 +247,15 @@ https://example3.com"></textarea>
                 } catch (err) {
                     failed++;
                     console.error(`Failed: ${urls[i]}`, err);
+                    if (err.message.includes('Bad credentials')) forgetToken();
                 }
             }
 
-            status.textContent = `✅ Gotowe! Dodano: ${success}, Błędy: ${failed}`;
-            status.className = 'status-msg status-success';
+            status.textContent = `Gotowe. Wysłano: ${success}, błędy: ${failed}.`;
+            status.className = failed ? 'status-msg status-error' : 'status-msg status-success';
             btn.disabled = false;
-            e.target.reset();
+            btn.textContent = 'Dodaj wszystkie';
+            if (!failed) e.target.reset();
         };
     </script>
 </body>
