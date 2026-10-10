@@ -13,34 +13,26 @@
         }
 
         :root {
-            --bg: #f5f5f5;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #ddd;
-            --card-bg: #ffffff;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #8b5cf6;
+
             --added: #dcfce7;
+
             --removed: #fee2e2;
+
             --added-text: #166534;
+
             --removed-text: #991b1b;
-        }
+        }
 
         [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --accent: #a78bfa;
+
             --added: #14532d;
+
             --removed: #7f1d1d;
+
             --added-text: #86efac;
+
             --removed-text: #fca5a5;
-        }
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -48,53 +40,6 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        nav {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
         }
 
         main {

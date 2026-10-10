@@ -12,17 +12,6 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg: #1e293b;
-            --text: #ffffff;
-            --text-secondary: #94a3b8;
-            --border: #334155;
-            --card-bg: #0f172a;
-            --header-bg: #0f172a;
-            --shadow: rgba(0, 0, 0, 0.5);
-            --accent: #ef4444;
-        }
-
         [data-theme="light"] {
             --bg: #f8fafc;
             --text: #1e293b;
@@ -40,50 +29,6 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-        }
-
-        nav {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
         }
 
         main {

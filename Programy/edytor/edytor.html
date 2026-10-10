@@ -12,28 +12,6 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg: #f0f0f0;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #ddd;
-            --card-bg: #ffffff;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #ec4899;
-        }
-
-        [data-theme="dark"] {
-            --bg: #111;
-            --text: #fff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #1a1a1a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.4);
-            --accent: #f472b6;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
@@ -41,54 +19,6 @@
             line-height: 1.6;
             height: 100vh;
             overflow: hidden;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-        }
-
-        nav {
-            padding: 0.8rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            cursor: pointer;
-            margin-left: auto;
         }
 
         .app-container {

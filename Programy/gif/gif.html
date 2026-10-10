@@ -12,81 +12,12 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg: #f0f0f0;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #ddd;
-            --card-bg: #ffffff;
-            --header-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --accent: #10b981;
-        }
-
-        [data-theme="dark"] {
-            --bg: #111;
-            --text: #fff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #1a1a1a;
-            --header-bg: #1a1a1a;
-            --shadow: rgba(0, 0, 0, 0.4);
-            --accent: #34d399;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        nav {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
         }
 
         main {
