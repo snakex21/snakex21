@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>snakex21 · Osobisty warsztat</title><meta name="description" content="Zegar, pogoda, cytat i szybki dostęp do narzędzi, gier oraz ulubionych treści.">
-<link rel="stylesheet" href="assets/workshop/home.css">
-<script src="assets/workshop/home.js" defer></script><link rel="icon" href="assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/workshop/home.css?v=20261010-home">
+<script src="assets/workshop/home.js?v=20261010-home" defer></script><link rel="icon" href="assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/workshop/shell.css?v=20261001-overhaul2">
 <script src="assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
@@ -15,39 +15,53 @@
 </nav>
 </header>
 
-<main id="main-content" tabindex="-1">
-  <h1>Hub</h1>
-  <p class="home-intro">Szybki dostęp do wszystkiego</p>
-  <section class="clock" aria-label="Twój czas lokalny">
-    <div id="time">--:--:--</div>
-    <div id="date">Twój czas lokalny</div>
-    <div id="timezone"></div>
-  </section>
-  <section class="weather-widget" aria-label="Pogoda">
-    <div id="weather-temp">--°C</div>
-    <div id="weather-desc">Sprawdź pogodę dla swojego miasta</div>
-    <div id="weather-city">Warszawa</div>
-    <details id="weather-settings"><summary>Zmień miasto</summary>
-      <form id="weather-form">
-        <label for="weather-city-input">Miasto</label>
-        <div class="weather-fields"><input id="weather-city-input" name="city" value="Warszawa" required maxlength="100" autocomplete="off"><button type="submit">Zapisz i sprawdź</button></div>
-        <p class="weather-note">Miasto zapamiętamy w tej przeglądarce. Dane pogodowe: Open-Meteo.</p>
-      </form>
-    </details>
-    <p id="weather-status" role="status" aria-live="polite"></p>
-    <button id="weather-refresh" type="button">Sprawdź pogodę</button>
-  </section>
-  <section class="quote" aria-label="Cytat">
-    <blockquote id="quote-text">„Miej serce i patrzaj w serce!”</blockquote>
-    <p id="quote-author">Adam Mickiewicz</p>
-    <button id="quote-refresh" type="button">Inny cytat</button>
-  </section>
-  <nav class="category-grid" aria-label="Kategorie">
-    <a href="gry/gry.html">Gry</a>
-    <a href="Programy/programy.html">Narzędzia</a>
-    <a href="muzyka/muzyka.html">Muzyka</a>
-    <a href="filmy/filmy glowna.html">Filmy</a>
-    <a href="LinkHub/index.html">LinkHub</a>
-    <a href="zmiany.html">Dziennik zmian</a>
+<main id="main-content" class="home-main" tabindex="-1">
+  <div class="home-top">
+    <div>
+      <p class="home-greeting" id="greeting">Cześć!</p>
+      <h1>Co dziś robimy?</h1>
+    </div>
+    <section class="clock" aria-label="Twój czas lokalny">
+      <div id="time">--:--</div>
+      <div class="clock-meta"><span id="date">Twój czas lokalny</span> · <span id="timezone"></span></div>
+    </section>
+  </div>
+
+  <nav class="category-grid" aria-label="Działy">
+    <a href="Programy/programy.html"><span class="cat-icon" aria-hidden="true">🧰</span><span class="cat-text"><b>Narzędzia</b><small>35 małych programów: QR, hasła, JSON, notatki</small></span></a>
+    <a href="gry/gry.html"><span class="cat-icon" aria-hidden="true">🎮</span><span class="cat-text"><b>Gry</b><small>25 gier na przerwę, solo i we dwoje</small></span></a>
+    <a href="LinkHub/index.html"><span class="cat-icon" aria-hidden="true">🔗</span><span class="cat-text"><b>LinkHub</b><small>Twoje zapisane linki w kategoriach</small></span></a>
+    <a href="muzyka/muzyka.html"><span class="cat-icon" aria-hidden="true">🎵</span><span class="cat-text"><b>Muzyka</b><small>Odtwarzacz i lista utworów</small></span></a>
+    <a href="filmy/filmy glowna.html"><span class="cat-icon" aria-hidden="true">🎬</span><span class="cat-text"><b>Filmy</b><small>Kolekcje filmów i seriali</small></span></a>
+    <a href="ustawienia.html"><span class="cat-icon" aria-hidden="true">⚙</span><span class="cat-text"><b>Ustawienia</b><small>Motyw, kolor, eksport danych</small></span></a>
   </nav>
+
+  <section class="recent" id="home-recent" aria-labelledby="recent-heading" hidden>
+    <h2 class="home-section-title" id="recent-heading">Ostatnio używane</h2>
+    <div class="recent-grid" id="recent-grid"></div>
+  </section>
+
+  <div class="home-widgets">
+    <section class="weather-widget" aria-label="Pogoda">
+      <h2 class="home-section-title">Pogoda</h2>
+      <div class="weather-main"><div id="weather-temp">--°C</div><div><div id="weather-city">Warszawa</div><div id="weather-desc">Sprawdź pogodę dla swojego miasta</div></div></div>
+      <div class="weather-actions">
+        <button id="weather-refresh" type="button">Sprawdź pogodę</button>
+        <details id="weather-settings"><summary>Zmień miasto</summary>
+          <form id="weather-form">
+            <label for="weather-city-input">Miasto</label>
+            <div class="weather-fields"><input id="weather-city-input" name="city" value="Warszawa" required maxlength="100" autocomplete="off"><button type="submit">Zapisz</button></div>
+            <p class="weather-note">Miasto zapamiętamy w tej przeglądarce. Dane pogodowe: Open-Meteo.</p>
+          </form>
+        </details>
+      </div>
+      <p id="weather-status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="quote" aria-label="Cytat">
+      <h2 class="home-section-title">Na dziś</h2>
+      <blockquote id="quote-text">„Miej serce i patrzaj w serce!”</blockquote>
+      <p id="quote-author">Adam Mickiewicz</p>
+      <button id="quote-refresh" type="button">Inny cytat</button>
+    </section>
+  </div>
 </main><footer class="site-footer"><span>snakex21 · Zrobione z ciekawości.</span><a href="zmiany.html">Dziennik zmian →</a><a href="https://github.com/snakex21/snakex21">Kod na GitHubie →</a></footer></body></html>

@@ -1,11 +1,34 @@
 (() => {
   function clock() {
     const now = new Date();
-    document.getElementById('time').textContent = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('time').textContent = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+    const hour = now.getHours();
+    const greeting = document.getElementById('greeting');
+    if (greeting) greeting.textContent = hour < 5 ? 'Dobranoc!' : hour < 12 ? 'Dzień dobry!' : hour < 18 ? 'Cześć!' : 'Dobry wieczór!';
     document.getElementById('date').textContent = now.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
     document.getElementById('timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, ' ');
   }
-  clock(); setInterval(clock, 1000);
+  clock(); setInterval(clock, 10000);
+
+  // "Ostatnio używane": tools and games recorded by shell.js on their pages.
+  const recentBox = document.getElementById('home-recent');
+  const recentGrid = document.getElementById('recent-grid');
+  if (recentBox && recentGrid) {
+    let recent = [];
+    try { const value = JSON.parse(localStorage.getItem('workshop:recent') || '[]'); if (Array.isArray(value)) recent = value; } catch (_) {}
+    for (const item of recent.slice(0, 8)) {
+      if (!item || typeof item.path !== 'string' || !/^(Programy|gry)\/[^/]+\/[^/]+\.html$/.test(item.path)) continue;
+      const link = document.createElement('a');
+      link.href = item.path;
+      const icon = document.createElement('span'); icon.className = 'recent-kind'; icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = item.kind === 'game' ? '🎮' : '🧰';
+      const name = document.createElement('span'); name.className = 'recent-name';
+      name.textContent = String(item.title || item.path.split('/')[1]);
+      link.append(icon, name);
+      recentGrid.appendChild(link);
+    }
+    recentBox.hidden = recentGrid.children.length === 0;
+  }
 
   // Public-domain Polish quotations work offline, without a third-party request.
   const quotes = [

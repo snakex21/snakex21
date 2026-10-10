@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ustawienia - Hub</title>
+    <meta name="description" content="Motyw, kolor i Twoje dane zapisane w tej przeglądarce.">
+    <style>
+        .palette-grid { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .palette-option { position: relative; display: block; cursor: pointer; }
+        .palette-option input { position: absolute; opacity: 0; pointer-events: none; }
+        .palette-card {
+            display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 14px;
+            border: 2px solid var(--shell-border); border-radius: 12px; background: var(--shell-card);
+        }
+        .palette-option:hover .palette-card { border-color: var(--shell-muted); }
+        .palette-option input:checked + .palette-card { border-color: var(--shell-accent); box-shadow: 0 0 0 3px var(--shell-soft); }
+        .palette-option input:focus-visible + .palette-card { outline: 3px solid var(--shell-accent); outline-offset: 3px; }
+        .swatches { display: flex; gap: 6px; }
+        .swatches span { width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(0,0,0,.08); }
+        .palette-name { font-weight: 700; font-size: 15px; }
+        .palette-note { font-size: 12px; color: var(--shell-muted); margin-top: -6px; }
+        .data-summary { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0 0 4px; font-size: 14px; color: var(--shell-muted); }
+        .data-summary b { color: var(--shell-text); }
+        .settings-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+        .settings-row + .settings-row { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--shell-border); }
+        .settings-row h3 { margin: 0; font-size: 16px; }
+        .settings-row p { margin: 4px 0 0; font-size: 14px; color: var(--shell-muted); max-width: 46ch; }
+        @media (max-width: 760px) { .palette-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    </style>
+<link rel="icon" href="assets/workshop/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="assets/workshop/kit.css?v=20261010-kit">
+<script src="assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
+<script src="assets/workshop/kit.js?v=20261010-kit" defer></script>
+</head>
+<body class="site-shell content-shell kit-page">
+<a class="skip-link" href="#main-content">Przejdź do treści</a>
+<header class="site-header" data-site-shell>
+<nav class="site-nav" aria-label="Główna nawigacja">
+<a class="site-brand" href="index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
+<div class="site-links"><a href="index.html">Start</a><a href="Programy/programy.html">Narzędzia</a><a href="gry/gry.html">Gry</a><a href="LinkHub/index.html">LinkHub</a><a href="muzyka/muzyka.html">Muzyka</a><a href="filmy/filmy glowna.html">Filmy</a></div>
+<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
+</nav>
+</header>
+
+    <main id="main-content" class="kit-narrow" tabindex="-1" style="--kit-width: 760px">
+        <div class="kit-head">
+            <span class="kit-head-icon" aria-hidden="true">⚙</span>
+            <div>
+                <h1>Ustawienia</h1>
+                <p>Zapisują się tylko w tej przeglądarce</p>
+            </div>
+        </div>
+
+        <section class="kit-card" aria-labelledby="look-title">
+            <h2 id="look-title">Wygląd</h2>
+            <div class="settings-row">
+                <div><h3>Motyw</h3><p>„Systemowy” przełącza się razem z ustawieniem telefonu lub komputera.</p></div>
+                <div class="kit-tabs" role="radiogroup" aria-label="Motyw">
+                    <button class="kit-tab" type="button" role="radio" data-mode="light">Jasny</button>
+                    <button class="kit-tab" type="button" role="radio" data-mode="dark">Ciemny</button>
+                    <button class="kit-tab" type="button" role="radio" data-mode="system">Systemowy</button>
+                </div>
+            </div>
+            <div class="settings-row" style="display:block">
+                <h3 id="palette-title">Kolor</h3>
+                <p>Zmienia akcent i tło całej strony. Plansze gier zostają bez zmian.</p>
+                <div class="palette-grid kit-space" role="radiogroup" aria-labelledby="palette-title">
+                    <label class="palette-option"><input type="radio" name="palette" value="las"><span class="palette-card"><span class="swatches"><span style="background:#21654d"></span><span style="background:#e7ecdd"></span><span style="background:#f6f5ef"></span></span><span class="palette-name">Las</span><span class="palette-note">zieleń, domyślny</span></span></label>
+                    <label class="palette-option"><input type="radio" name="palette" value="ocean"><span class="palette-card"><span class="swatches"><span style="background:#2457a6"></span><span style="background:#e3ebf6"></span><span style="background:#f4f6f9"></span></span><span class="palette-name">Ocean</span><span class="palette-note">spokojny niebieski</span></span></label>
+                    <label class="palette-option"><input type="radio" name="palette" value="sliwka"><span class="palette-card"><span class="swatches"><span style="background:#7a3f8f"></span><span style="background:#efe3f2"></span><span style="background:#f7f4f7"></span></span><span class="palette-name">Śliwka</span><span class="palette-note">fiolet</span></span></label>
+                    <label class="palette-option"><input type="radio" name="palette" value="grafit"><span class="palette-card"><span class="swatches"><span style="background:#c2410c"></span><span style="background:#f5e6dc"></span><span style="background:#f5f5f4"></span></span><span class="palette-name">Grafit</span><span class="palette-note">szarość i pomarańcz</span></span></label>
+                </div>
+            </div>
+        </section>
+
+        <section class="kit-card" aria-labelledby="data-title">
+            <h2 id="data-title">Twoje dane</h2>
+            <p class="data-summary" id="data-summary" aria-live="polite"></p>
+            <div class="settings-row">
+                <div><h3>Zabierz dane ze sobą</h3><p>Plik z zadaniami, fiszkami, rekordami w grach i ustawieniami. Wczytaj go na innym komputerze.</p></div>
+                <div class="kit-row">
+                    <button class="kit-btn primary" id="export-data" type="button">Eksportuj</button>
+                    <label class="kit-btn" for="import-file">Importuj…</label>
+                    <input class="sr-only" id="import-file" type="file" accept="application/json,.json">
+                </div>
+            </div>
+            <div class="settings-row">
+                <div><h3>Wyczyść wszystko</h3><p>Usuwa wszystkie dane strony z tej przeglądarki. Tego nie da się cofnąć, więc najpierw zrób eksport.</p></div>
+                <button class="kit-btn danger" id="clear-data" type="button">Wyczyść dane</button>
+            </div>
+        </section>
+    </main>
+<footer class="site-footer"><span>snakex21 · Zrobione z ciekawości.</span><a href="zmiany.html">Dziennik zmian →</a><a href="https://github.com/snakex21/snakex21">Kod na GitHubie →</a></footer>
+
+    <script>
+        (() => {
+            const FORMAT = 'snakex21-hub';
+            const storage = {
+                keys() { try { return Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)).filter(k => k !== null); } catch (_) { return []; } },
+                get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
+                set(key, value) { try { localStorage.setItem(key, value); return true; } catch (_) { return false; } },
+                remove(key) { try { localStorage.removeItem(key); } catch (_) {} }
+            };
+            const notify = message => { if (window.Kit) Kit.toast(message); };
+            // shell.js listens for this to apply changes on this page at once.
+            const refreshShell = () => window.dispatchEvent(new Event('shell:prefs'));
+
+            function currentMode() {
+                if (storage.get('themeAuto') === '1') return 'system';
+                return storage.get('theme') === 'dark' ? 'dark' : 'light';
+            }
+            function renderLook() {
+                const mode = currentMode();
+                document.querySelectorAll('[data-mode]').forEach(tab => tab.setAttribute('aria-checked', String(tab.dataset.mode === mode)));
+                document.querySelectorAll('[data-mode]').forEach(tab => tab.classList.toggle('active', tab.dataset.mode === mode));
+                const palette = storage.get('palette') || 'las';
+                document.querySelectorAll('input[name="palette"]').forEach(input => { input.checked = input.value === palette; });
+            }
+            document.querySelectorAll('[data-mode]').forEach(tab => tab.addEventListener('click', () => {
+                const mode = tab.dataset.mode;
+                if (mode === 'system') {
+                    storage.set('themeAuto', '1');
+                } else {
+                    storage.remove('themeAuto');
+                    storage.set('theme', mode);
+                }
+                refreshShell(); renderLook();
+            }));
+            document.querySelectorAll('input[name="palette"]').forEach(input => input.addEventListener('change', () => {
+                if (input.value === 'las') storage.remove('palette'); else storage.set('palette', input.value);
+                refreshShell(); renderLook();
+            }));
+
+            function renderSummary() {
+                const keys = storage.keys();
+                const bytes = keys.reduce((sum, key) => sum + key.length + (storage.get(key) || '').length, 0) * 2;
+                const size = bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+                document.getElementById('data-summary').innerHTML = '';
+                const parts = [['Zapisanych pozycji', String(keys.length)], ['Rozmiar', size]];
+                for (const [label, value] of parts) {
+                    const span = document.createElement('span');
+                    span.append(label + ': ');
+                    const strong = document.createElement('b'); strong.textContent = value; span.appendChild(strong);
+                    document.getElementById('data-summary').appendChild(span);
+                }
+            }
+
+            document.getElementById('export-data').addEventListener('click', () => {
+                const data = {};
+                for (const key of storage.keys()) data[key] = storage.get(key);
+                const file = JSON.stringify({ format: FORMAT, version: 1, exportedAt: new Date().toISOString(), data }, null, 2);
+                const date = new Date().toISOString().slice(0, 10);
+                if (window.Kit) Kit.download(`snakex21-dane-${date}.json`, file, 'application/json');
+                notify(`Wyeksportowano ${Object.keys(data).length} pozycji`);
+            });
+
+            document.getElementById('import-file').addEventListener('change', async event => {
+                const file = event.target.files && event.target.files[0];
+                event.target.value = '';
+                if (!file) return;
+                let parsed;
+                try { parsed = JSON.parse(await file.text()); } catch (_) { notify('To nie jest poprawny plik z danymi'); return; }
+                if (!parsed || parsed.format !== FORMAT || typeof parsed.data !== 'object' || parsed.data === null) {
+                    notify('Ten plik nie pochodzi z eksportu tej strony'); return;
+                }
+                const entries = Object.entries(parsed.data).filter(([key, value]) => typeof key === 'string' && typeof value === 'string');
+                if (!confirm(`Wczytać ${entries.length} pozycji? Istniejące dane o tych samych nazwach zostaną zastąpione.`)) return;
+                let saved = 0;
+                for (const [key, value] of entries) if (storage.set(key, value)) saved++;
+                refreshShell(); renderLook(); renderSummary();
+                notify(saved === entries.length ? `Wczytano ${saved} pozycji` : `Wczytano ${saved} z ${entries.length} (brak miejsca)`);
+            });
+
+            document.getElementById('clear-data').addEventListener('click', () => {
+                if (!confirm('Usunąć wszystkie dane strony z tej przeglądarki?')) return;
+                try { localStorage.clear(); } catch (_) {}
+                refreshShell(); renderLook(); renderSummary();
+                notify('Dane wyczyszczone');
+            });
+
+            renderLook();
+            renderSummary();
+        })();
+    </script>
+</body>
+</html>

@@ -24,6 +24,32 @@
   color-scheme: dark;
 }
 :root[data-theme="light"] { color-scheme: light; }
+/* Accent palettes chosen in Ustawienia (data-palette on <html>, saved as "palette"). */
+:root[data-palette="ocean"] {
+  --shell-bg: #f4f6f9; --shell-text: #1d2733; --shell-muted: #5f6b7a; --shell-border: #d8dee6;
+  --shell-card: #fdfeff; --shell-hover: #eaf0f6; --shell-accent: #2457a6; --shell-soft: #e3ebf6;
+}
+:root[data-palette="ocean"][data-theme="dark"] {
+  --shell-bg: #131a24; --shell-text: #e8edf4; --shell-muted: #a9b4c2; --shell-border: #2f3b4c;
+  --shell-card: #1a2330; --shell-hover: #243042; --shell-accent: #8db4f2; --shell-soft: #263449;
+}
+:root[data-palette="sliwka"] {
+  --shell-bg: #f7f4f7; --shell-text: #2a2130; --shell-muted: #6c6274; --shell-border: #e0d8e3;
+  --shell-card: #fffdfe; --shell-hover: #f1eaf3; --shell-accent: #7a3f8f; --shell-soft: #efe3f2;
+}
+:root[data-palette="sliwka"][data-theme="dark"] {
+  --shell-bg: #1b1520; --shell-text: #efe8f2; --shell-muted: #b9adbf; --shell-border: #3e3245;
+  --shell-card: #241c2a; --shell-hover: #30263a; --shell-accent: #d5a6e6; --shell-soft: #3a2c44;
+}
+:root[data-palette="grafit"] {
+  --shell-bg: #f5f5f4; --shell-text: #222222; --shell-muted: #66625e; --shell-border: #dcdad6;
+  --shell-card: #ffffff; --shell-hover: #efeeec; --shell-accent: #c2410c; --shell-soft: #f5e6dc;
+}
+:root[data-palette="grafit"][data-theme="dark"] {
+  --shell-bg: #161616; --shell-text: #ededed; --shell-muted: #a8a5a1; --shell-border: #333333;
+  --shell-card: #1f1f1f; --shell-hover: #2a2a2a; --shell-accent: #fb923c; --shell-soft: #3a2a20;
+}
+
 .workshop:not(.home-page), .content-shell {
   --bg: var(--shell-bg);
   --text: var(--shell-text);
@@ -111,6 +137,12 @@
   cursor: pointer; margin: 0; padding: 0;
   box-shadow: none; transform: none; letter-spacing: 0;
 }
+.site-header .settings-link {
+  display: grid; place-content: center; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 50%;
+  color: var(--shell-muted); font-size: 21px; line-height: 1; text-decoration: none;
+}
+.site-header .settings-link:hover, .site-header .settings-link[aria-current] { background: var(--shell-soft); color: var(--shell-text); }
 .site-header #theme-toggle:hover { background: var(--shell-soft); }
 .site-header .site-context, .site-header .site-subnav {
   width: 100%; max-width: 1264px; margin: 0 auto; padding: 0 40px 10px;
@@ -145,7 +177,7 @@
   font-size: 12px; color: var(--shell-muted);
 }
 .site-footer span { margin-right: auto; }
-.site-footer a { text-underline-offset: 4px; text-decoration: none; }
+.site-footer a { color: inherit; text-underline-offset: 4px; text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
 .legacy-page main { padding-top: 3rem; }
 .legacy-page .site-footer { padding-left: 24px; padding-right: 24px; }
@@ -171,7 +203,7 @@
   .site-header .site-brand { font-size: 17px; }
   .site-header .site-links { order: 3; flex-basis: 100%; margin: 0; gap: 3px; }
   .site-header .site-links a { flex: 1 0 auto; padding: 9px; font-size: 13px; }
-  .site-header #theme-toggle { margin-left: auto; }
+  .site-header .settings-link { margin-left: auto; }
   .site-header .site-context, .site-header .site-subnav { padding: 0 20px 8px; }
   .site-footer { gap: 14px; margin-top: 40px; padding-top: 24px; }
   .site-footer span { flex-basis: 100%; }

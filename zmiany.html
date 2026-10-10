@@ -12,27 +12,16 @@
         }
 
         :root {
-            --bg: #ffffff;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e0e0e0;
-            --card-bg: #f8f9fa;
-            --header-bg: #ffffff;
-            --accent: #2563eb; /* Przyjemny niebieski */
+
             --accent-glow: rgba(37, 99, 235, 0.2);
+
             --success: #10b981;
-        }
+        }
 
         [data-theme="dark"] {
-            --bg: #1a1a1a;
-            --text: #ffffff;
-            --text-secondary: #aaa;
-            --border: #333;
-            --card-bg: #2a2a2a;
-            --header-bg: #1a1a1a;
-            --accent: #60a5fa;
+
             --accent-glow: rgba(96, 165, 250, 0.2);
-        }
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -40,56 +29,6 @@
             color: var(--text);
             line-height: 1.6;
             transition: background 0.3s, color 0.3s;
-        }
-
-        /* HEADER (Spójny z Index) */
-        header {
-            background: var(--header-bg);
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px var(--shadow);
-        }
-
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--text);
-        }
-
-        #theme-toggle {
-            background: none;
-            border: none;
-            font-size: 1.4rem;
-            cursor: pointer;
-            padding: 0.25rem;
         }
 
         /* MAIN CONTENT */
@@ -243,7 +182,6 @@
 
         /* Responsywność */
         @media (max-width: 768px) {
-            .nav-links { display: none; }
             .timeline { padding-left: 1.5rem; }
             .entry::before { left: -28px; }
             .timeline::before { left: 4px; }
@@ -256,9 +194,10 @@
     </style>
 <link rel="icon" href="assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/workshop/shell.css?v=20261001-overhaul2">
+<link rel="stylesheet" href="assets/workshop/kit.css?v=20261010-kit">
 <script src="assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
 </head>
-<body class="workshop legacy-page site-shell content-shell">
+<body class="workshop legacy-page site-shell content-shell kit-page">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
 <nav class="site-nav" aria-label="Główna nawigacja">
@@ -271,13 +210,25 @@
 
 
     <main id="main-content" tabindex="-1">
-        <div class="hero">
-            <h1>Dziennik Zmian</h1>
-            <p>Historia rozwoju i aktualizacji Hubu</p>
+        <div class="kit-head">
+            <span class="kit-head-icon" aria-hidden="true">📝</span>
+            <div>
+                <h1>Dziennik zmian</h1>
+                <p>Co i kiedy zmieniło się na stronie</p>
+            </div>
         </div>
 
         <div class="timeline">
             <article class="entry latest">
+                <div class="entry-header"><h2>Ustawienia, kolory i prostszy start</h2><div class="entry-meta"><span class="date-badge">10.10.2026</span></div></div>
+                <div class="entry-content"><p>Nowa strona Ustawienia (ikonka ⚙ w nagłówku): motyw jasny, ciemny lub systemowy i cztery kolory strony. Wybór zapisuje się w przeglądarce.</p>
+                <ul>
+                    <li>Eksport i import danych: zadania, fiszki, rekordy i ustawienia można przenieść na inny komputer jednym plikiem.</li>
+                    <li>Strona główna: sześć działów z krótkim opisem, „Ostatnio używane” narzędzia i gry, mniejszy zegar, pogoda i cytat obok siebie.</li>
+                    <li>Strona gier: zwarty nagłówek, „Losuj grę” i dwie kolumny na telefonie.</li>
+                </ul></div>
+            </article>
+            <article class="entry">
                 <div class="entry-header"><h2>Wspólne klocki dla narzędzi i gier</h2><div class="entry-meta"><span class="date-badge">10.10.2026</span></div></div>
                 <div class="entry-content"><p>Narzędzia i gry korzystają z jednego zestawu komponentów (kit.css i kit.js): nagłówek, karty, przyciski, pola, statystyki. Nowe narzędzie powstaje z szablonu Programy/_szablon.</p>
                 <ul>
