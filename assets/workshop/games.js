@@ -29,6 +29,8 @@
     for (const label of [...(game.modes || []), ...(game.genres || []).slice(0, 1)]) {
       const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = label; tags.appendChild(tag);
     }
+    const play = document.createElement('span'); play.className = 'game-play'; play.setAttribute('aria-hidden', 'true'); play.textContent = 'Graj ▶';
+    cover.appendChild(play);
     info.append(title, description, tags); card.append(cover, info); grid.appendChild(card);
     card.addEventListener('click', () => {
       try {
@@ -38,6 +40,13 @@
       } catch (_) { /* Recent games are a convenience only. */ }
     });
   }
+
+  // "Losuj grę" opens a random game among those the current search/filter shows.
+  const randomButton = document.getElementById('random-game');
+  if (randomButton) randomButton.addEventListener('click', () => {
+    const visible = [...grid.querySelectorAll('.game-card')].filter(card => !card.hidden);
+    if (visible.length) visible[Math.floor(Math.random() * visible.length)].click();
+  });
 
   // "Ostatnio grane": up to four shortcuts to games opened from this browser.
   const recentBox = document.getElementById('recent-games');

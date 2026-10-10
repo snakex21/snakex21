@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gry - Hub</title>
-    <link rel="stylesheet" href="../assets/workshop/catalog.css?v=20261010-art">
+    <link rel="stylesheet" href="../assets/workshop/catalog.css?v=20261010-games2">
 <link rel="icon" href="../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/workshop/shell.css?v=20261001-overhaul2">
 <script src="../assets/workshop/shell.js?v=20261001-overhaul2" defer></script>
@@ -20,20 +20,20 @@
 </header>
 
 
-    <main id="main-content" tabindex="-1">
-        <div class="page-header">
-            <p class="eyebrow">CZAS NA PRZERWĘ</p><h1>Jeszcze jedna<br>runda?</h1>
-            <p>Klasyki, łamigłówki i małe wyzwania. Wybierz coś dla siebie.</p>
-        </div>
-
-        <div class="search-container"><label class="sr-only" for="search-input">Szukaj gry</label><span class="search-icon" aria-hidden="true">⌕</span>
-            <input
-                type="search"
-                class="search-input"
-                id="search-input"
-                placeholder="Szukaj gry..."
-                autocomplete="off">
-<button class="search-clear" id="search-clear" type="button" aria-label="Wyczyść wyszukiwanie" hidden>×</button>
+    <main id="main-content" class="games-main" tabindex="-1">
+        <div class="games-top">
+            <div class="games-intro">
+                <p class="eyebrow">Czas na przerwę</p>
+                <h1>Gry</h1>
+                <p><span id="catalog-total">25</span> gier w przeglądarce, bez instalacji i bez logowania.</p>
+            </div>
+            <div class="games-actions">
+                <div class="search-container"><label class="sr-only" for="search-input">Szukaj gry</label><span class="search-icon" aria-hidden="true">⌕</span>
+                    <input type="search" class="search-input" id="search-input" placeholder="Szukaj gry..." autocomplete="off">
+                    <button class="search-clear" id="search-clear" type="button" aria-label="Wyczyść wyszukiwanie" hidden>×</button>
+                </div>
+                <button class="random-game" id="random-game" type="button">🎲 <span>Losuj grę</span></button>
+            </div>
         </div>
 
         <div class="filter-chips" id="filter-chips" role="group" aria-label="Filtruj gry">
@@ -46,22 +46,25 @@
             <button type="button" class="filter-chip" data-filter="Strategia|Karciana|Symulacja" aria-pressed="false">Strategia i karty</button>
         </div>
 
-        <section class="recent-games" id="recent-games" aria-label="Ostatnio grane" hidden>
-            <h2 class="recent-title">Ostatnio grane</h2>
+        <section class="recent-games" id="recent-games" aria-labelledby="recent-title" hidden>
+            <h2 class="section-title" id="recent-title">Ostatnio grane</h2>
             <div class="recent-list"></div>
         </section>
 
-        <div id="results-counter" class="results-counter" role="status" aria-live="polite"></div>
-<div class="games-grid" id="games-grid"></div>
+        <div class="grid-head">
+            <h2 class="section-title">Wszystkie gry</h2>
+            <div id="results-counter" class="results-counter" role="status" aria-live="polite"></div>
+        </div>
+        <div class="games-grid" id="games-grid"></div>
         <div class="no-results" id="no-results" hidden>
-            Nie znaleziono gier. Spróbuj innego wyszukiwania.
+            Nie znaleziono gier. Spróbuj innego wyszukiwania albo wybierz „Wszystkie”.
         </div>
     </main>
 
-    <script src="../assets/js/games-data.js?v=20261010-art"></script>
-    <script src="../assets/workshop/game-art.js?v=20261010-art"></script>
-    <script src="../assets/workshop/games.js?v=20261010-art"></script>
-<script src="../assets/workshop/catalog.js?v=20261010-art"></script>
+    <script src="../assets/js/games-data.js?v=20261010-games2"></script>
+    <script src="../assets/workshop/game-art.js?v=20261010-games2"></script>
+    <script src="../assets/workshop/games.js?v=20261010-games2"></script>
+<script src="../assets/workshop/catalog.js?v=20261010-games2"></script>
 <footer class="site-footer"><span>snakex21 · Zrobione z ciekawości.</span><a href="../zmiany.html">Dziennik zmian →</a><a href="https://github.com/snakex21/snakex21">Kod na GitHubie →</a></footer>
 </body>
 </html>

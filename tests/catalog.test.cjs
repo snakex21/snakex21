@@ -71,7 +71,7 @@ test('catalog: Connect4 and Wheel describe implemented modes accurately',()=>{
  const p=catalog({games:true});const data=p.window.gamesCatalog;
  const connect=data.find(g=>g.slug==='connect4');assert.deepEqual([...connect.modes],['Dwóch graczy']);assert.doesNotMatch(connect.description,/AI/);
  const wheel=data.find(g=>g.slug==='wheel');assert.match(wheel.description,/wylosować/);assert.doesNotMatch(wheel.description,/odgadnij|hasło/);
- assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261010-art/);
+ assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261010-games2/);
 });
 
 function gamesWithArt(options = {}) {
@@ -115,4 +115,15 @@ test('catalog: recently played games appear and bad storage is ignored', () => {
  const card = [...r.document.querySelectorAll('.game-card')].find(c => c.dataset.slug === 'tetris');
  card.dispatchEvent(new r.Event('click'));
  assert.deepEqual(JSON.parse(r.localStore.get('workshop-games:recent')), ['tetris']);
+});
+test('catalog: "Losuj grę" opens one of the currently visible games', () => {
+ const p = gamesWithArt({ local: {} });
+ const chip = [...p.document.querySelectorAll('.filter-chip')].find(c => c.textContent === 'We dwoje i więcej');
+ chip.dispatchEvent(new p.Event('click'));
+ const clicked = [];
+ for (const card of p.document.querySelectorAll('.game-card')) card.addEventListener('click', () => clicked.push(card));
+ for (let i = 0; i < 20; i++) p.document.getElementById('random-game').dispatchEvent(new p.Event('click'));
+ assert.equal(clicked.length, 20);
+ assert.ok(clicked.every(card => !card.hidden), 'only visible games are picked');
+ assert.ok(p.document.getElementById('catalog-total').textContent === '25');
 });
