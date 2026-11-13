@@ -7,7 +7,7 @@
     <title>Flappy Bird - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .flappy-page { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 488px; }
+        .flappy-page { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 720px; }
 
         .game-container {
             position: relative;
@@ -17,7 +17,7 @@
             overflow: hidden;
             border: 4px solid var(--shell-border);
             border-radius: 14px;
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: inherit;
         }
 
         .bird {
@@ -48,48 +48,33 @@
             z-index: 10;
         }
 
-        .overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 8px;
-            padding-bottom: 96px;
-            box-sizing: border-box;
-            background: rgba(12, 32, 40, 0.42);
-            color: #fff;
-            text-align: center;
-            z-index: 20;
-        }
-        .overlay h2 { margin: 0; font-size: 3.2rem; font-weight: 800; letter-spacing: -1px; text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45); }
-        .overlay p { margin: 0; font-size: 1.25rem; font-weight: 600; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45); }
-        .overlay .kit-btn { margin-top: 20px; min-width: 180px; min-height: 52px; font-size: 1.15rem; }
-        .overlay.hidden { display: none; }
-
         .score {
             position: absolute;
             top: 20px;
             width: 100%;
             text-align: center;
+            font-family: inherit;
             font-size: 4rem;
-            color: white;
+            line-height: 1;
             font-weight: 800;
+            color: white;
             text-shadow: 3px 3px 0 #000;
             z-index: 15;
+            pointer-events: none;
         }
 
-        #game { box-sizing: content-box; flex-shrink: 0; touch-action: manipulation; transform: scale(var(--game-scale, 1)); transform-origin: center center; }
+        .bird { will-change: transform, top; }
+        #game { box-sizing: content-box; flex-shrink: 0; touch-action: manipulation; }
         #game:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 4px; }
-        #pause-screen h2 { font-size: 2.5rem; }
-        .game-wrapper { box-sizing: content-box; flex: none; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: visible; }
+        /* Wąska (pionowa) plansza w niskim oknie: kafelki wyniku w nakładce GryKit mają min-width 92px. */
+        .gk-overlay.gk-compact .gk-score div { min-width: 0; flex: 1; padding: 5px 8px; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -106,159 +91,140 @@
 
     <div class="flappy-page" id="main-content" tabindex="-1" role="main">
         <div class="game-bar">
-            <div class="game-title"><h1>Flappy Bird</h1><p>Leć między rurami · Spacja lub dotknięcie: skok · P: pauza</p></div>
+            <div class="game-title"><h1>Flappy Bird</h1><p>Przelatuj między rurami · Spacja / dotknięcie: skok</p></div>
             <div class="game-buttons">
-                <button class="kit-btn small primary" type="button" onclick="resetGame()">Nowa gra</button>
-                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)" hidden>Pauza</button>
+                <button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button>
             </div>
         </div>
-        <div class="game-wrapper">
-        <div class="game-container" id="game" tabindex="0" aria-label="Flappy Bird. Dotknij planszy lub naciśnij Spację, aby skoczyć.">
-            <div class="overlay hidden" id="pause-screen"><h2>Pauza</h2><button class="kit-btn primary" type="button" onclick="setPaused(false)">Wznów</button></div>
-            <div class="score" id="score">0</div>
-            <div class="bird" id="bird"></div>
-            <div class="ground"></div>
-
-            <div class="overlay" id="start-screen">
-                <h2>Flappy Bird</h2>
-                <p>Kliknij lub Spacja, aby skakać</p>
-                <button class="kit-btn primary" type="button" onclick="startGame()">Start</button>
+        <div class="game-stage">
+            <div class="game-container" id="game" tabindex="0" aria-label="Flappy Bird. Dotknij planszy, kliknij lub naciśnij Spację, aby skoczyć. P lub Esc: pauza.">
+                <div class="score" id="board-score" aria-hidden="true">0</div>
+                <div class="bird" id="bird"></div>
+                <div class="ground"></div>
             </div>
-
-            <div class="overlay hidden" id="game-over-screen">
-                <h2>Koniec gry</h2>
-                <p>Wynik: <span id="final-score">0</span></p>
-                <button class="kit-btn primary" type="button" onclick="resetGame()">Zagraj ponownie</button>
-            </div>
-        </div>
         </div>
     </div>
 
     <script>
-        // Theme Logic
-        // Theme is handled by assets/workshop/shell.js.
-
-        // Game Logic
+    (() => {
+        // Plansza 480 × 640 (DOM). Fizyka w stałych krokach 20 ms (jak w pierwotnej wersji na setInterval),
+        // pętla na requestAnimationFrame stoi, gdy GryKit nie jest w stanie „playing” (menu / pauza / koniec).
+        const STEP = 20, FLOOR = 590, BIRD_X = 80, PIPE_W = 70, GAP = 180, SPAWN_MS = 1500;
         const game = document.getElementById('game');
         const bird = document.getElementById('bird');
-        const scoreEl = document.getElementById('score');
-        const startScreen = document.getElementById('start-screen');
-        const gameOverScreen = document.getElementById('game-over-screen');
-        const finalScoreEl = document.getElementById('final-score');
+        const boardScore = document.getElementById('board-score');
 
-        function resizeGame() {
-            const headerHeight = document.querySelector('[data-site-shell]')?.getBoundingClientRect().height || 93;
-            const barHeight = document.querySelector('.game-bar')?.getBoundingClientRect().height || 0;
-            const scale = Math.max(0.25, Math.min(1, (window.innerWidth - 32) / 488, (window.innerHeight - headerHeight - barHeight - 64) / 648));
-            game.style.setProperty('--game-scale', scale);
-            const wrapper = game.parentElement; wrapper.style.width = (488 * scale) + 'px'; wrapper.style.height = (648 * scale) + 'px';
+        let birdY, velocity, score, pipes, spawnAcc, acc, last = null;
+        const gravity = 0.5;
+
+        // Plansza jest skalowana przez CSS zoom (GryKit.fit); efekty GryKit liczą piksele bez zoomu.
+        function zoom() { return parseFloat(game.style.zoom) || 1; }
+
+        function reset() {
+            if (pipes) pipes.forEach(p => { p.top.remove(); p.bottom.remove(); });
+            pipes = [];
+            birdY = 280; velocity = 0; score = 0; spawnAcc = 0; acc = 0;
+            boardScore.textContent = '0';
+            GryKit.score(0);
+            render();
         }
-        resizeGame(); window.addEventListener('resize', resizeGame);
 
-        let birdY = 280, velocity = 0, gravity = 0.5, isGameRunning = false, score = 0, gameLoop, pipeInterval;
-        const pipeTimers = new Set();
-        let round = 0, paused = false;
-
-        function setPaused(value) {
-            if (!isGameRunning) return;
-            paused = !!value;
-            document.getElementById("pause-screen").classList.toggle("hidden", !paused);
-            document.getElementById("pause-game").textContent = paused ? "Wznów" : "Pauza";
-            if (!paused) game.focus();
-        }
-        document.addEventListener("visibilitychange", () => { if (document.hidden) setPaused(true); });
-
-        function jump() { if (!isGameRunning || paused) return; velocity = -7; }
-        document.addEventListener('keydown', (e) => {
-            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select')) return;
-            if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); setPaused(!paused); return; }
-            if (!e.target?.closest?.('button') && e.code === 'Space') { e.preventDefault(); handleInput(); }
-        });
-        game.addEventListener('pointerdown', (e) => {
-            if (!e.isPrimary || e.button !== 0 || e.target.closest('button, a')) return;
-            e.preventDefault(); handleInput();
-        });
-
-        function handleInput() {
-            if (paused) { setPaused(false); return; }
-            if (!isGameRunning && !gameOverScreen.classList.contains('hidden')) resetGame();
-            else if (!isGameRunning && startScreen.style.display !== 'none') startGame();
-            else jump();
+        function jump() {
+            if (!GryKit.playing) return;
+            velocity = -7;
+            GryKit.sfx.play('jump');
         }
 
         function createPipe() {
-            if (!isGameRunning || paused) return;
-            const pipeGap = 180;
-            const pipeLoc = Math.random() * 280 + 80; // Both pipes remain on the 590px playing field.
-            const pipeTop = document.createElement('div'); pipeTop.className = 'pipe'; pipeTop.style.left = '480px'; pipeTop.style.top = '0'; pipeTop.style.height = pipeLoc + 'px';
-            // Poprawka: canvas ma 640px wysokości, ground 50px, więc dostępne 590px
-            const pipeBottom = document.createElement('div'); pipeBottom.className = 'pipe'; pipeBottom.style.left = '480px'; pipeBottom.style.bottom = '50px'; pipeBottom.style.height = (590 - pipeLoc - pipeGap) + 'px';
-            game.appendChild(pipeTop); game.appendChild(pipeBottom);
+            const loc = Math.random() * 280 + 80; // obie rury mieszczą się na polu 590 px (640 − ziemia 50)
+            const top = document.createElement('div'); top.className = 'pipe';
+            top.style.top = '0'; top.style.height = loc + 'px'; top.style.left = '480px';
+            const bottom = document.createElement('div'); bottom.className = 'pipe';
+            bottom.style.bottom = '50px'; bottom.style.height = (FLOOR - loc - GAP) + 'px'; bottom.style.left = '480px';
+            game.appendChild(top); game.appendChild(bottom);
+            pipes.push({ x: 480, loc, top, bottom, scored: false });
+        }
 
-            let pipePos = 480;
-            let scored = false;
-            const createdRound = round;
-            const timer = setInterval(() => {
-                if (!isGameRunning || createdRound !== round) { clearInterval(timer); pipeTimers.delete(timer); return; }
-                if (paused || document.hidden) return;
-                pipePos -= 3; pipeTop.style.left = pipePos + 'px'; pipeBottom.style.left = pipePos + 'px';
-
-                // Punktacja
-                if (pipePos + 70 <= 80 && !scored) { score++; scoreEl.textContent = score; scored = true; }
-
-                // Usuwanie rur
-                if (pipePos < -80) { clearInterval(timer); pipeTimers.delete(timer); pipeTop.remove(); pipeBottom.remove(); return; }
-
-                // Kolizja (hitbox nieco mniejszy niż grafika dla lepszego "feelingu")
-                // Ptak: left 80px, width 50px. Rura: width 70px.
-                // X: Rura jest w strefie ptaka gdy pipePos < 130 (80+50) i pipePos > 10 (80-70)
-                // Y: Ptak uderza góra gdy birdY + buffer < pipeLoc
-                // Y: Ptak uderza dół gdy birdY + height - buffer > pipeLoc + pipeGap
-                if ((pipePos > 10 && pipePos < 130) &&
-                    (birdY + 10 < pipeLoc || birdY + 40 > pipeLoc + pipeGap)) {
-                    gameOver();
+        function step() {
+            velocity += gravity; birdY += velocity;
+            if (birdY + 40 >= FLOOR || birdY + 10 <= 0) { crash(birdY + 40 >= FLOOR ? 'Ptak spadł na ziemię.' : 'Ptak wyleciał za wysoko.'); return; }
+            spawnAcc += STEP;
+            if (spawnAcc >= SPAWN_MS) { spawnAcc -= SPAWN_MS; createPipe(); }
+            for (const p of pipes) {
+                p.x -= 3;
+                if (p.x + PIPE_W <= BIRD_X && !p.scored) {
+                    p.scored = true; score++;
+                    boardScore.textContent = score;
+                    GryKit.score(score);
+                    GryKit.sfx.play('score', { pitch: 1 + Math.min(0.4, score / 100) });
+                    const z = zoom();
+                    GryKit.fx.float((BIRD_X + 25) * z, (birdY - 10) * z, '+1', { on: game, color: '#fff' });
                 }
-            }, 20);
-            pipeTimers.add(timer);
+                // Kolizja (hitbox nieco mniejszy niż grafika): ptak left 80, szer. 50; rura szer. 70.
+                if (p.x > 10 && p.x < 130 && (birdY + 10 < p.loc || birdY + 40 > p.loc + GAP)) { crash('Ptak uderzył w rurę.'); return; }
+            }
+            pipes = pipes.filter(p => { if (p.x < -80) { p.top.remove(); p.bottom.remove(); return false; } return true; });
         }
 
-        function update() {
-            if (!isGameRunning || paused || document.hidden) return;
-            velocity += gravity; birdY += velocity; bird.style.top = birdY + 'px';
-            if (birdY + 40 >= 590 || birdY + 10 <= 0) gameOver();
+        function crash(text) {
+            render();
+            GryKit.fx.flash('#fff', { on: game, strength: 0.6 });
+            GryKit.fx.shake(game, 8, 320);
+            GryKit.sfx.play('hit');
+            // Opóźnienie: wciskana Spacja nie restartuje gry od razu po zderzeniu.
+            GryKit.over({ score, text, delay: 550 });
         }
 
-        function startGame() {
-            if (isGameRunning) return;
-            startScreen.style.display = 'none'; gameOverScreen.classList.add('hidden');
-            isGameRunning = true; paused = false;
-            document.getElementById("pause-game").hidden = false;
-            document.getElementById("pause-screen").classList.add("hidden");
-            document.getElementById("pause-game").textContent = "Pauza";
-            const startedRound = round;
-            gameLoop = setInterval(() => { if (startedRound === round) update(); }, 20);
-            pipeInterval = setInterval(() => { if (startedRound === round) createPipe(); }, 1500);
-            game.focus();
+        function render() {
+            bird.style.top = birdY + 'px';
+            const tilt = Math.max(-25, Math.min(70, velocity * 4));
+            bird.style.transform = 'rotate(' + tilt.toFixed(1) + 'deg)';
+            for (const p of pipes) { p.top.style.left = p.x + 'px'; p.bottom.style.left = p.x + 'px'; }
         }
-        function clearTimers() {
-            clearInterval(gameLoop); clearInterval(pipeInterval);
-            pipeTimers.forEach(timer => clearInterval(timer)); pipeTimers.clear();
-            round++;
+
+        function frame(t) {
+            requestAnimationFrame(frame);
+            if (last == null) last = t;
+            const dt = Math.min(100, t - last); last = t;
+            if (!GryKit.playing) { acc = 0; return; }
+            acc += dt;
+            while (acc >= STEP && GryKit.playing) { acc -= STEP; step(); }
+            if (GryKit.playing) render();
         }
-        function gameOver() {
-            if (!isGameRunning) return;
-            isGameRunning = false; paused = false; clearTimers();
-            document.getElementById("pause-game").hidden = true;
-            document.getElementById("pause-screen").classList.add("hidden");
-            gameOverScreen.classList.remove('hidden'); finalScoreEl.textContent = score;
-            gameOverScreen.querySelector('button').focus();
-        }
-        function resetGame() {
-            isGameRunning = false; clearTimers();
-            document.querySelectorAll('.pipe').forEach(p => p.remove());
-            birdY = 280; velocity = 0; score = 0; scoreEl.textContent = '0'; bird.style.top = '280px';
-            gameOverScreen.classList.add('hidden'); startGame();
-        }
+
+        /* ---------- sterowanie (P / Esc = pauza – obsługuje GryKit; Spacja zawsze = skok) ---------- */
+        document.addEventListener('keydown', e => {
+            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select,button')) return;
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                if (!GryKit.playing) return;
+                e.preventDefault(); jump();
+            }
+        });
+        game.addEventListener('pointerdown', e => {
+            if (!e.isPrimary || e.button !== 0 || e.target.closest('button, a, .gk-overlay')) return;
+            if (!GryKit.playing) return;
+            e.preventDefault(); jump();
+        });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
+
+        GryKit.init({
+            id: 'flappy',
+            title: 'Flappy Bird',
+            icon: '🐤',
+            howTo: ['Skacz i trzymaj ptaka w powietrzu.', 'Każda minięta para rur: +1.'],
+            controls: '<kbd>Spacja</kbd> / klik – skok · <kbd>P</kbd> pauza',
+            board: game,
+            overlayHost: '.game-stage',
+            focus: game,
+            hud: { score: true, best: true },
+            startKeys: ['ArrowUp'],
+            fit: { el: game, zoom: true, min: 0.3 },
+            onStart() { reset(); acc = 0; last = null; },
+            onMenu() { reset(); }
+        });
+        reset();
+        requestAnimationFrame(frame);
+    })();
     </script>
 </body>
 
