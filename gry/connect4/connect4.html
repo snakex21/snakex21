@@ -7,10 +7,11 @@
     <title>Czwórki - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-area { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 520px; }
+        .game-area { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 16px; --game-width: 520px; }
+        .game-area .game-status { margin-top: 10px; }
         .status {
             display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
-            margin-top: 16px; font-size: 16px; font-weight: 650; color: var(--shell-text);
+            font-size: 16px; font-weight: 650; color: var(--shell-text);
         }
         .turn-indicator {
             display: inline-block; width: 22px; height: 22px; border-radius: 50%;
@@ -29,18 +30,30 @@
         .col:hover { background: rgba(255, 255, 255, .12); }
         .col:focus-visible { outline: 3px solid #fff; outline-offset: -1px; }
         .slot {
-            width: 100%; aspect-ratio: 1; border-radius: 50%;
+            position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%;
             background: var(--shell-bg); border: 2px solid #163d70;
-            box-sizing: border-box; transition: background .3s;
+            box-sizing: border-box; box-shadow: inset 0 3px 6px rgba(0, 0, 0, .28);
         }
-        .red { background: #e5483f !important; }
-        .yellow { background: #f5b82e !important; }
+        /* Żeton to pseudo-element w otworze – spada animacją (WAAPI, pseudoElement ::after) */
+        .slot.red::after, .slot.yellow::after {
+            content: ""; position: absolute; inset: -2px; z-index: 2; border-radius: 50%;
+            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .2), inset 0 3px 0 rgba(255, 255, 255, .28);
+        }
+        .slot.red::after { background: radial-gradient(circle at 38% 32%, #ff7a6e, #e5483f 55%, #c23129); }
+        .slot.yellow::after { background: radial-gradient(circle at 38% 32%, #ffd970, #f5b82e 55%, #d99a12); }
+        .turn-indicator.red { background: #e5483f; }
+        .turn-indicator.yellow { background: #f5b82e; }
+        .slot.win::after { animation: c4-win .7s ease-in-out infinite alternate; }
+        .slot.win { box-shadow: 0 0 0 3px #fff, 0 0 16px 4px rgba(255, 255, 255, .7); z-index: 3; }
+        @keyframes c4-win { to { transform: scale(.82); } }
+        @media (prefers-reduced-motion: reduce) { .slot.win::after { animation: none; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -59,7 +72,7 @@
         <div class="game-bar">
             <div class="game-title"><h1>Czwórki</h1><p>Wrzucajcie pionki na zmianę — cztery w linii wygrywają</p></div>
             <div class="game-buttons">
-                <button class="kit-btn small primary reset-btn" type="button" onclick="resetGame()">Nowa gra</button>
+                <button class="kit-btn small primary reset-btn" type="button" onclick="GryKit.start()">Nowa gra</button>
             </div>
         </div>
         <div class="game-stage">
@@ -101,27 +114,57 @@
             updateStatus();
         }
 
+        // Animacja spadania żetonu: z góry kolumny do otworu, z małym odbiciem; dźwięk przy lądowaniu.
+        function animateDrop(slot, row) {
+            const fall = rows - row; // ile otworów (łącznie z wlotem) nad docelowym
+            const step = slot.offsetHeight + 4;
+            const ms = 160 + fall * 45;
+            if (slot.animate && !GryKit.reducedMotion) {
+                try {
+                    slot.animate([
+                        { transform: `translateY(${-fall * step}px)`, easing: 'cubic-bezier(.5,0,1,1)' },
+                        { transform: 'translateY(0)', offset: 0.78, easing: 'ease-out' },
+                        { transform: `translateY(${-Math.min(14, step * 0.22)}px)`, offset: 0.89, easing: 'ease-in' },
+                        { transform: 'translateY(0)' }
+                    ], { duration: ms, pseudoElement: '::after' });
+                } catch (e) { /* przeglądarka bez pseudoElement – bez animacji */ }
+            }
+            setTimeout(() => GryKit.sfx.play('tap', { pitch: 0.8 }), ms * 0.78);
+            return ms;
+        }
+
         function dropToken(col) {
-            if (gameOver) return;
+            if (gameOver || !GryKit.playing) return;
             const row = board[col].indexOf(0);
-            if (row === -1) return;
+            if (row === -1) { GryKit.sfx.play('wall'); return; }
 
             board[col][row] = currentPlayer;
             const slotReal = document.getElementById(`slot-${col}-${row}`);
             slotReal.classList.add(currentPlayer === 1 ? 'red' : 'yellow');
+            const fallMs = animateDrop(slotReal, row);
 
-            if (checkWin(col, row)) {
-                document.querySelector('.status').innerText = (currentPlayer === 1 ? "Czerwony" : "Żółty") + " Wygrywa!";
+            const line = checkWin(col, row);
+            if (line) {
                 gameOver = true;
+                const red = currentPlayer === 1;
+                setTimeout(() => {
+                    line.forEach(([c, r]) => document.getElementById(`slot-${c}-${r}`).classList.add('win'));
+                    GryKit.fx.burstAt(document.getElementById(`slot-${col}-${row}`), { count: 24, spread: 90, color: red ? ['#e5483f', '#ff9a8f', '#fff'] : ['#f5b82e', '#ffe08a', '#fff'] });
+                    GryKit.sfx.play('line');
+                }, fallMs);
+                document.querySelector('.status').textContent = (red ? 'Czerwone' : 'Żółte') + ' wygrywają!';
+                GryKit.over({ title: (red ? 'Czerwone' : 'Żółte') + ' wygrywają!', text: 'Cztery żetony w jednej linii.', icon: red ? '🔴' : '🟡', win: true, showScore: false, record: false, delay: fallMs + 1100 });
             } else if (board.every(column => column.every(Boolean))) {
                 document.querySelector('.status').textContent = 'Remis! Plansza jest pełna.';
                 gameOver = true;
+                GryKit.over({ title: 'Remis', text: 'Plansza jest pełna, nikt nie ułożył czwórki.', icon: '🤝', showScore: false, record: false, delay: fallMs + 500 });
             } else {
                 currentPlayer = currentPlayer === 1 ? 2 : 1;
                 updateStatus();
             }
         }
 
+        // Zwraca listę pól wygrywającej linii ([kolumna, wiersz]) albo null.
         function checkWin(c, r) {
             const player = board[c][r];
             return checkDir(c, r, 1, 0, player) ||
@@ -131,18 +174,19 @@
         }
 
         function checkDir(c, r, dx, dy, p) {
-            let count = 0;
+            let run = [];
+            let best = null;
             for (let i = -3; i <= 3; i++) {
                 const nc = c + i * dx;
                 const nr = r + i * dy;
                 if (nc >= 0 && nc < cols && nr >= 0 && nr < rows && board[nc][nr] === p) {
-                    count++;
-                    if (count === 4) return true;
+                    run.push([nc, nr]);
+                    if (run.length >= 4) best = run.slice();
                 } else {
-                    count = 0;
+                    run = [];
                 }
             }
-            return false;
+            return best;
         }
 
         function updateStatus() {
@@ -155,9 +199,21 @@
             init();
         }
 
-        // Theme Logic
-        // Theme is handled by assets/workshop/shell.js.
-
+        // Motyw: assets/workshop/shell.js. Ekran startu i końca: GryKit.
+        GryKit.init({
+            id: 'connect4',
+            title: 'Czwórki',
+            icon: '🔴',
+            howTo: ['Dwóch graczy na zmianę wrzuca żetony do kolumn.', 'Żeton spada na najniższe wolne pole.', 'Cztery w linii (poziomo, pionowo, ukośnie) wygrywają.'],
+            controls: 'Kliknij kolumnę albo <kbd>Tab</kbd> + <kbd>Enter</kbd>',
+            board: '#board',
+            overlayHost: '.game-stage',
+            pausable: false,
+            hud: false,
+            fit: { el: '#board', zoom: true, max: 1, min: 0.3 },
+            onStart() { resetGame(); },
+            onMenu() { resetGame(); }
+        });
         init();
     </script>
 </body>
