@@ -4,51 +4,103 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kółko i krzyżyk - Hub</title>
+    <meta name="description" content="Kółko i krzyżyk z komputerem (trzy poziomy trudności) albo we dwoje na jednym ekranie.">
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
         .game-wrapper {
-            flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 540px;
+            flex: 1; display: flex; flex-direction: column; padding: 20px 16px; --game-width: 780px;
             --mark-x: var(--shell-accent); --mark-o: #d0612b;
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
         [data-theme="dark"] .game-wrapper { --mark-o: #f0a04b; }
+        [data-palette="grafit"] .game-wrapper { --mark-o: #2563eb; }
+        [data-palette="grafit"][data-theme="dark"] .game-wrapper { --mark-o: #60a5fa; }
         .game-stat { transition: border-color .15s, box-shadow .15s; }
         .game-stat.is-active { border-color: var(--shell-accent); box-shadow: 0 0 0 2px var(--shell-soft); }
+
+        /* Ustawienia trybu z komputerem (nad planszą) */
+        .game-stage { flex-wrap: wrap; align-items: center; column-gap: 22px; }
         .ttt-toolbar {
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
-            width: 100%; max-width: var(--game-width); margin: 0 auto 16px;
+            display: none; flex: 0 0 100%; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px;
+            margin: 0 0 14px;
         }
-        .turn-display { margin: 0 auto 12px; text-align: center; font-size: 16px; font-weight: 650; color: var(--shell-text); }
-        .game-board {
-            width: min(420px, 100%); aspect-ratio: 1 / 1; margin: 0 auto;
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        .game-wrapper[data-mode="ai"] .ttt-toolbar { display: flex; }
+        .ttt-setting { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 650; color: var(--shell-muted); }
+        .ttt-setting .kit-tab { min-height: 32px; padding: 0 11px; font-size: 13px; }
+
+        /* Plansza */
+        .ttt-board {
+            position: relative; width: 440px; height: 440px; flex: none; box-sizing: border-box; padding: 16px;
+            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 22px;
+            box-shadow: 0 14px 34px var(--shell-shadow, rgba(28,49,36,.08)), 0 2px 0 var(--shell-border);
+            --strike: var(--mark-x);
+        }
+        .ttt-grid { position: relative; width: 100%; height: 100%; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); }
+        .ttt-lines, .ttt-strike { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+        .ttt-lines line { stroke: color-mix(in srgb, var(--shell-muted) 38%, transparent); stroke-width: 4; stroke-linecap: round; }
+        .ttt-strike { z-index: 2; }
+        .ttt-strike line {
+            stroke: var(--strike); stroke-width: 11; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
+            animation: ttt-draw .45s cubic-bezier(.3,.7,.4,1) .12s forwards;
         }
         .cell {
-            display: flex; align-items: center; justify-content: center; min-width: 0;
-            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
-            color: var(--shell-text); font: 700 clamp(40px, 12vw, 64px)/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            cursor: pointer; transition: background .15s, border-color .15s;
+            position: relative; margin: 7px; padding: 0; min-width: 0; border: 0; border-radius: 14px;
+            background: transparent; color: inherit; cursor: pointer; transition: background .15s, transform .15s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .cell:hover:not(:disabled) { background: var(--shell-hover); border-color: var(--shell-muted); }
-        .cell:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 2px; }
-        .cell:disabled { cursor: default; }
-        .cell.is-x { color: var(--mark-x); }
-        .cell.is-o { color: var(--mark-o); }
-        .cell.is-winning { background: var(--shell-soft); border-color: var(--shell-accent); }
-        .history {
-            width: 100%; max-width: var(--game-width); margin: 24px auto 0; padding: 18px 20px;
-            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 12px; box-sizing: border-box;
+        .cell:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 0; }
+        .ttt-board:not(.locked) .cell:not(.filled):hover,
+        .ttt-board:not(.locked) .cell:not(.filled):focus-visible { background: var(--shell-hover); }
+        .ttt-board:not(.locked) .cell:not(.filled):active { transform: scale(.96); }
+        .ttt-board.locked .cell { cursor: default; }
+        /* Podgląd znaku pod kursorem */
+        .cell::after {
+            content: ''; position: absolute; inset: 16%; opacity: 0; transition: opacity .12s;
+            background: var(--ghost, transparent);
+            -webkit-mask: var(--ghost-mask) center / contain no-repeat; mask: var(--ghost-mask) center / contain no-repeat;
         }
-        .history h2 { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--shell-muted); }
-        .history ol { margin: 0; padding-left: 1.25rem; display: grid; gap: 6px; color: var(--shell-text); font-size: 14px; }
-        .history-empty { margin: 0; color: var(--shell-muted); font-size: 14px; }
-        @media (max-width: 560px) { .game-board { gap: 8px; } }
+        .ttt-board[data-turn="X"] { --ghost: var(--mark-x); --ghost-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M22 22L78 78M78 22L22 78' stroke='black' stroke-width='12' stroke-linecap='round'/%3E%3C/svg%3E"); }
+        .ttt-board[data-turn="O"] { --ghost: var(--mark-o); --ghost-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='29' fill='none' stroke='black' stroke-width='12'/%3E%3C/svg%3E"); }
+        .ttt-board:not(.locked) .cell:not(.filled):hover::after,
+        .ttt-board:not(.locked) .cell:not(.filled):focus-visible::after { opacity: .2; }
+        @media (hover: none) { .ttt-board .cell:not(.filled):hover::after { opacity: 0 !important; } }
+
+        /* Znaki */
+        .mark { position: absolute; inset: 16%; width: 68%; height: 68%; overflow: visible; animation: ttt-pop .32s cubic-bezier(.3,1.5,.5,1); transition: opacity .4s .35s; }
+        .mark line, .mark circle { fill: none; stroke-width: 12; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: ttt-draw .22s ease-out forwards; }
+        .mark.x { stroke: var(--mark-x); }
+        .mark.o { stroke: var(--mark-o); }
+        .mark.x line + line { animation-delay: .13s; }
+        .mark.o circle { animation-duration: .36s; }
+        .ttt-board.done .cell:not(.win) .mark { opacity: .28; }
+        .cell.win .mark { animation: ttt-pop .32s cubic-bezier(.3,1.5,.5,1), ttt-beat .5s ease-in-out .5s 2; }
+        @keyframes ttt-draw { to { stroke-dashoffset: 0; } }
+        @keyframes ttt-pop { from { transform: scale(.55); } to { transform: scale(1); } }
+        @keyframes ttt-beat { 50% { transform: scale(1.12); } }
+        @media (prefers-reduced-motion: reduce) {
+            .mark, .cell.win .mark, .mark line, .mark circle, .ttt-strike line { animation: none; stroke-dashoffset: 0; }
+        }
+
+        .game-status { min-height: 21px; font-weight: 600; }
+        .game-status .dot { display: inline-block; width: .7em; height: .7em; margin-right: .4em; border-radius: 50%; vertical-align: -.02em; }
+        /* Niskie, szerokie okno: ustawienia obok planszy zamiast nad nią */
+        @media (min-width: 700px) and (max-height: 720px) {
+            .ttt-toolbar { flex: 0 0 auto; flex-direction: column; align-items: stretch; margin: 0; }
+            .ttt-setting { flex-direction: column; align-items: flex-start; gap: 4px; }
+        }
+        @media (max-width: 560px) {
+            .game-wrapper { padding: 16px 12px; }
+            .ttt-setting { font-size: 12px; }
+            .ttt-setting .kit-tab { padding: 0 9px; }
+        }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -64,342 +116,400 @@
 
     <main class="game-wrapper" id="main-content" tabindex="-1">
         <div class="game-bar">
-            <div class="game-title"><h1>Kółko i krzyżyk</h1><p>Trzy symbole w linii wygrywają</p></div>
+            <div class="game-title"><h1>Kółko i krzyżyk</h1><p>Z komputerem albo we dwoje</p></div>
             <div class="game-stats">
-                <div class="game-stat" data-player="x"><span>Wygrane X</span><b data-score-x>0</b></div>
-                <div class="game-stat" data-player="o"><span>Wygrane O</span><b data-score-o>0</b></div>
-                <div class="game-stat"><span>Remisy</span><b data-score-draws>0</b></div>
-            </div>
-        </div>
-
-        <div class="ttt-toolbar">
-            <div class="kit-tabs" role="group" aria-label="Tryb gry">
-                <button type="button" class="kit-tab active" data-mode="human" aria-pressed="true">2 graczy</button>
-                <button type="button" class="kit-tab" data-mode="ai" aria-pressed="false">vs AI</button>
+                <div class="game-stat" id="tile-a"><span id="label-a">Wygrane</span><b id="score-a">0</b></div>
+                <div class="game-stat" id="tile-d"><span>Remisy</span><b id="score-d">0</b></div>
+                <div class="game-stat" id="tile-b"><span id="label-b">Przegrane</span><b id="score-b">0</b></div>
             </div>
             <div class="game-buttons">
-                <button type="button" class="kit-btn small primary" data-action="next">Nowa runda</button>
-                <button type="button" class="kit-btn small danger" data-action="reset">Wyzeruj mecz</button>
+                <button type="button" class="kit-btn small primary" id="new-round">Nowa partia</button>
+                <button type="button" class="kit-btn small" id="reset-score" title="Wyzeruj licznik wygranych, remisów i przegranych">Zeruj</button>
             </div>
         </div>
-
-        <div class="turn-display" data-turn-display>Runda 1 · Tura gracza X</div>
 
         <div class="game-stage">
-            <div class="game-board" aria-label="Plansza 3 na 3">
-                <button type="button" class="cell" data-cell data-index="0"></button>
-                <button type="button" class="cell" data-cell data-index="1"></button>
-                <button type="button" class="cell" data-cell data-index="2"></button>
-                <button type="button" class="cell" data-cell data-index="3"></button>
-                <button type="button" class="cell" data-cell data-index="4"></button>
-                <button type="button" class="cell" data-cell data-index="5"></button>
-                <button type="button" class="cell" data-cell data-index="6"></button>
-                <button type="button" class="cell" data-cell data-index="7"></button>
-                <button type="button" class="cell" data-cell data-index="8"></button>
+            <div class="ttt-toolbar" aria-label="Ustawienia gry z komputerem">
+                <div class="ttt-setting"><span id="level-label">Poziom</span>
+                    <div class="kit-tabs" role="group" aria-labelledby="level-label">
+                        <button type="button" class="kit-tab" data-level="easy">Łatwy</button>
+                        <button type="button" class="kit-tab" data-level="medium">Średni</button>
+                        <button type="button" class="kit-tab" data-level="hard">Trudny</button>
+                    </div>
+                </div>
+                <div class="ttt-setting"><span id="starter-label">Zaczyna</span>
+                    <div class="kit-tabs" role="group" aria-labelledby="starter-label">
+                        <button type="button" class="kit-tab" data-starter="player">Ty</button>
+                        <button type="button" class="kit-tab" data-starter="ai">Komputer</button>
+                        <button type="button" class="kit-tab" data-starter="alt">Na zmianę</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ttt-board locked" id="board">
+                <div class="ttt-grid" role="group" aria-label="Plansza 3 na 3">
+                    <svg class="ttt-lines" viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true">
+                        <line x1="100" y1="6" x2="100" y2="294"/><line x1="200" y1="6" x2="200" y2="294"/>
+                        <line x1="6" y1="100" x2="294" y2="100"/><line x1="6" y1="200" x2="294" y2="200"/>
+                    </svg>
+                    <button type="button" class="cell" data-index="0"></button>
+                    <button type="button" class="cell" data-index="1"></button>
+                    <button type="button" class="cell" data-index="2"></button>
+                    <button type="button" class="cell" data-index="3"></button>
+                    <button type="button" class="cell" data-index="4"></button>
+                    <button type="button" class="cell" data-index="5"></button>
+                    <button type="button" class="cell" data-index="6"></button>
+                    <button type="button" class="cell" data-index="7"></button>
+                    <button type="button" class="cell" data-index="8"></button>
+                    <svg class="ttt-strike" viewBox="0 0 300 300" aria-hidden="true"></svg>
+                </div>
             </div>
         </div>
 
-        <p class="game-status" data-status role="status">Rozpocznij rundę i doprowadź do trzech swoich symboli w linii</p>
-
-        <section class="history">
-            <h2>Historia partii</h2>
-            <p class="history-empty" data-history-empty>Jeszcze nie rozegrano żadnej partii</p>
-            <ol data-history></ol>
-        </section>
+        <p class="game-status" id="status" role="status">Wybierz tryb gry</p>
     </main>
 
     <script>
-        // Motyw ciemny
-        // Theme is handled by assets/workshop/shell.js.
+    (() => {
+        const SVG = 'http://www.w3.org/2000/svg';
+        const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+        const LEVELS = { easy: 'łatwym', medium: 'średnim', hard: 'trudnym' }; // „na poziomie …”
+        const KEY = 'gry:tic-tac-toe:';
+        const store = GryKit.store;
 
-        // Tic-tac-toe game
-        (() => {
-            const cells = Array.from(document.querySelectorAll('[data-cell]'));
-            const turnDisplay = document.querySelector('[data-turn-display]');
-            const statusEl = document.querySelector('[data-status]');
-            const scoreXEl = document.querySelector('[data-score-x]');
-            const scoreOEl = document.querySelector('[data-score-o]');
-            const scoreDrawEl = document.querySelector('[data-score-draws]');
-            const historyList = document.querySelector('[data-history]');
-            const historyEmpty = document.querySelector('[data-history-empty]');
-            const nextButton = document.querySelector('[data-action="next"]');
-            const resetButton = document.querySelector('[data-action="reset"]');
-            const scoreCards = {
-                X: document.querySelector('[data-player="x"]'),
-                O: document.querySelector('[data-player="o"]'),
-            };
+        const wrapper = document.getElementById('main-content');
+        const boardEl = document.getElementById('board');
+        const cells = Array.from(boardEl.querySelectorAll('.cell'));
+        const strikeEl = boardEl.querySelector('.ttt-strike');
+        const statusEl = document.getElementById('status');
+        const tiles = { a: document.getElementById('tile-a'), d: document.getElementById('tile-d'), b: document.getElementById('tile-b') };
+        const scoreEls = { a: document.getElementById('score-a'), d: document.getElementById('score-d'), b: document.getElementById('score-b') };
+        const labelA = document.getElementById('label-a');
+        const labelB = document.getElementById('label-b');
+        const levelBtns = Array.from(document.querySelectorAll('[data-level]'));
+        const starterBtns = Array.from(document.querySelectorAll('[data-starter]'));
 
-            const winningCombos = [
-                [0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8],
-                [0, 3, 6],
-                [1, 4, 7],
-                [2, 5, 8],
-                [0, 4, 8],
-                [2, 4, 6],
-            ];
+        const settings = {
+            level: LEVELS[store.get(KEY + 'poziom')] ? store.get(KEY + 'poziom') : 'medium',
+            starter: ['player', 'ai', 'alt'].includes(store.get(KEY + 'zaczyna')) ? store.get(KEY + 'zaczyna') : 'player',
+        };
+        // Licznik W/R/P (z komputerem) albo X/R/O (dwóch graczy), zapamiętywany osobno dla trybu.
+        function loadTally(mode) {
+            try {
+                const t = JSON.parse(store.get(KEY + 'bilans:' + mode) || 'null');
+                if (t && [t.a, t.d, t.b].every(Number.isFinite)) return t;
+            } catch (e) { /* uszkodzony zapis */ }
+            return { a: 0, d: 0, b: 0 };
+        }
+        const tally = { ai: loadTally('ai'), '2p': loadTally('2p') };
 
-            const state = {
-                board: Array(9).fill(null),
-                current: 'X',
-                finished: false,
-                moves: 0,
-                round: 1,
-                scores: {
-                    X: 0,
-                    O: 0,
-                    draws: 0,
-                },
-                mode: 'human',
-                aiPlayer: 'O',
-                aiTimeout: null,
-            };
+        const st = {
+            mode: null, board: Array(9).fill(null), current: 'X', human: 'X', finished: true,
+            moves: 0, round: 0, aiTimer: null,
+        };
 
-            const modeButtons = document.querySelectorAll('[data-mode]');
-            modeButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    state.mode = btn.dataset.mode;
-                    modeButtons.forEach(b => {
-                        b.classList.toggle('active', b === btn);
-                        b.setAttribute('aria-pressed', String(b === btn));
-                    });
-                    newRound(true);
-                });
-            });
-
-            function updateTurnDisplay() {
-                if (state.finished) {
-                    return;
-                }
-                turnDisplay.textContent = `Runda ${state.round} · Tura gracza ${state.current}`;
-                scoreCards.X.classList.toggle('is-active', state.current === 'X');
-                scoreCards.O.classList.toggle('is-active', state.current === 'O');
+        /* ---------- widok ---------- */
+        function colorOf(sym) { return getComputedStyle(wrapper).getPropertyValue(sym === 'X' ? '--mark-x' : '--mark-o').trim() || GryKit.css('--shell-accent'); }
+        function cellLabel(i) { return `Pole ${i + 1}` + (st.board[i] ? `: ${st.board[i] === 'X' ? 'krzyżyk' : 'kółko'}` : ', puste'); }
+        function markSvg(sym) {
+            const svg = document.createElementNS(SVG, 'svg');
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('class', 'mark ' + sym.toLowerCase());
+            if (sym === 'X') {
+                svg.innerHTML = '<line x1="22" y1="22" x2="78" y2="78" pathLength="1"/><line x1="78" y1="22" x2="22" y2="78" pathLength="1"/>';
+            } else {
+                svg.innerHTML = '<circle cx="50" cy="50" r="29" pathLength="1" transform="rotate(-90 50 50)"/>';
             }
-
-            function setStatus(text) {
-                statusEl.textContent = text;
+            return svg;
+        }
+        function clearBoard() {
+            cells.forEach((c, i) => { c.textContent = ''; c.classList.remove('filled', 'win'); c.setAttribute('aria-label', cellLabel(i)); });
+            strikeEl.innerHTML = '';
+            boardEl.classList.remove('done');
+        }
+        function setStatus(text, sym) {
+            statusEl.textContent = '';
+            if (sym) {
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.style.background = colorOf(sym);
+                dot.setAttribute('aria-hidden', 'true');
+                statusEl.appendChild(dot);
             }
+            statusEl.appendChild(document.createTextNode(text));
+        }
+        function renderTally(changed) {
+            const mode = st.mode || 'ai';
+            const t = tally[mode];
+            labelA.textContent = mode === 'ai' ? 'Wygrane' : 'Wygrane X';
+            labelB.textContent = mode === 'ai' ? 'Przegrane' : 'Wygrane O';
+            scoreEls.a.textContent = t.a; scoreEls.d.textContent = t.d; scoreEls.b.textContent = t.b;
+            if (changed) GryKit.fx.pop(tiles[changed], 1.12);
+        }
+        function saveTally() { store.set(KEY + 'bilans:' + st.mode, JSON.stringify(tally[st.mode])); }
+        function syncSettings() {
+            levelBtns.forEach(b => { const on = b.dataset.level === settings.level; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+            starterBtns.forEach(b => { const on = b.dataset.starter === settings.starter; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+        }
+        function aiTurn() { return st.mode === 'ai' && st.current !== st.human; }
+        function updateTurn() {
+            const locked = st.finished || !GryKit.playing || aiTurn();
+            boardEl.classList.toggle('locked', locked);
+            boardEl.dataset.turn = locked ? '' : st.current;
+            tiles.a.classList.toggle('is-active', !st.finished && st.mode === '2p' && st.current === 'X');
+            tiles.b.classList.toggle('is-active', !st.finished && st.mode === '2p' && st.current === 'O');
+            if (st.finished) return;
+            const name = st.current === 'X' ? 'krzyżyk' : 'kółko';
+            if (st.mode === 'ai') setStatus(aiTurn() ? 'Komputer myśli…' : `Twój ruch – stawiasz ${name}`, st.current);
+            else setStatus(`Ruch gracza ${st.current} (${name})`, st.current);
+        }
+        function setMode(mode) {
+            st.mode = mode;
+            wrapper.dataset.mode = mode || '';
+            renderTally();
+            GryKit.refit();
+        }
 
-            function clearBoardUI() {
-                cells.forEach((cell) => {
-                    cell.textContent = '';
-                    cell.disabled = false;
-                    cell.classList.remove('is-x', 'is-o', 'is-winning');
-                });
+        /* ---------- logika ---------- */
+        function winnerOf(b) {
+            for (const line of LINES) {
+                const [x, y, z] = line;
+                if (b[x] && b[x] === b[y] && b[x] === b[z]) return { winner: b[x], line };
             }
+            return b.every(Boolean) ? { winner: null, line: null } : null;
+        }
+        function stopAi() { clearTimeout(st.aiTimer); st.aiTimer = null; }
 
-            function checkWinner(board = state.board) {
-                for (const combo of winningCombos) {
-                    const [a, b, c] = combo;
-                    const mark = board[a];
-                    if (mark && mark === board[b] && mark === board[c]) {
-                        return { winner: mark, combo };
-                    }
-                }
-                if (board.every(Boolean)) {
-                    return { winner: null, combo: [] };
-                }
-                return null;
+        function newRound() {
+            stopAi();
+            st.round += 1;
+            st.board.fill(null);
+            st.moves = 0;
+            st.finished = false;
+            if (st.mode === 'ai') {
+                const starter = settings.starter === 'alt' ? (st.round % 2 ? 'player' : 'ai') : settings.starter;
+                st.human = starter === 'player' ? 'X' : 'O';
             }
+            // X zawsze zaczyna; w trybie dwóch graczy zaczynający zmienia się co partię.
+            st.current = st.mode === '2p' && st.round % 2 === 0 ? 'O' : 'X';
+            clearBoard();
+            updateTurn();
+            if (aiTurn()) queueAi();
+        }
 
-            function highlightCombo(combo) {
-                combo.forEach((index) => {
-                    const cell = cells[index];
-                    if (cell) {
-                        cell.classList.add('is-winning');
-                    }
-                });
+        function play(i) {
+            if (!GryKit.playing || st.finished) return;
+            if (st.board[i] || aiTurn()) { GryKit.sfx.play('error'); GryKit.fx.shake(cells[i], 3, 200); return; }
+            place(i);
+        }
+        function place(i) {
+            const sym = st.current;
+            st.board[i] = sym;
+            st.moves += 1;
+            const cell = cells[i];
+            cell.appendChild(markSvg(sym));
+            cell.classList.add('filled');
+            cell.setAttribute('aria-label', cellLabel(i));
+            GryKit.sfx.play('tap', { pitch: sym === 'X' ? 1 : 0.8 });
+            const result = winnerOf(st.board);
+            if (result) { finish(result); return; }
+            st.current = sym === 'X' ? 'O' : 'X';
+            updateTurn();
+            if (aiTurn()) queueAi();
+        }
+
+        function drawStrike(line) {
+            // Środki pól w układzie 0–300 (siatka bez odstępów), przekreślenie lekko wychodzi poza skrajne pola.
+            const c = i => [50 + (i % 3) * 100, 50 + Math.floor(i / 3) * 100];
+            const [x1, y1] = c(line[0]), [x2, y2] = c(line[2]);
+            const dx = (x2 - x1) / 200 * 34, dy = (y2 - y1) / 200 * 34;
+            const ln = document.createElementNS(SVG, 'line');
+            ln.setAttribute('x1', x1 - dx); ln.setAttribute('y1', y1 - dy);
+            ln.setAttribute('x2', x2 + dx); ln.setAttribute('y2', y2 + dy);
+            ln.setAttribute('pathLength', '1');
+            strikeEl.appendChild(ln);
+        }
+
+        function finish(result) {
+            st.finished = true;
+            stopAi();
+            updateTurn();
+            const t = tally[st.mode];
+            let outcome; // 'a' | 'b' | 'd' – kafelek do podbicia
+            if (!result.winner) outcome = 'd';
+            else if (st.mode === 'ai') outcome = result.winner === st.human ? 'a' : 'b';
+            else outcome = result.winner === 'X' ? 'a' : 'b';
+            t[outcome] += 1;
+            saveTally();
+            renderTally(outcome);
+
+            const bilans = st.mode === 'ai' ? `Bilans: ${t.a} W · ${t.d} R · ${t.b} P` : `Bilans: X ${t.a} · remisy ${t.d} · O ${t.b}`;
+            const humanWon = result.winner && (st.mode === '2p' || result.winner === st.human);
+            if (result.winner) {
+                boardEl.classList.add('done');
+                boardEl.style.setProperty('--strike', colorOf(result.winner));
+                result.line.forEach(i => cells[i].classList.add('win'));
+                drawStrike(result.line);
             }
-
-            function finishRound(result) {
-                state.finished = true;
-                scoreCards.X.classList.remove('is-active');
-                scoreCards.O.classList.remove('is-active');
-                cells.forEach((cell) => (cell.disabled = true));
-
-                let message;
-                if (result.winner) {
-                    state.scores[result.winner] += 1;
-                    message = `Gracz ${result.winner} wygrywa rundę ${state.round}!`;
-                    setStatus(message);
-                    highlightCombo(result.combo);
-                    turnDisplay.textContent = message;
-                } else {
-                    state.scores.draws += 1;
-                    message = `Runda ${state.round} kończy się remisem`;
-                    setStatus(message);
-                    turnDisplay.textContent = message;
-                }
-
-                scoreXEl.textContent = state.scores.X;
-                scoreOEl.textContent = state.scores.O;
-                scoreDrawEl.textContent = state.scores.draws;
-                appendHistoryEntry(message);
+            let over;
+            if (!result.winner) {
+                setStatus('Remis – plansza pełna');
+                GryKit.sfx.play('score', { pitch: 0.8 });
+                GryKit.fx.shake(boardEl, 4, 260);
+                over = { title: 'Remis', icon: '🤝', text: `Nikt nie ułożył trzech w linii. ${bilans}`, win: false };
+            } else if (humanWon) {
+                const who = st.mode === 'ai' ? 'Wygrywasz!' : `Wygrywa ${result.winner}!`;
+                setStatus(who, result.winner);
+                GryKit.sfx.play('line');
+                setTimeout(() => {
+                    GryKit.sfx.play('win');
+                    const colors = [colorOf(result.winner), '#f2c14e', '#e8763d', '#b8d58e'];
+                    result.line.forEach((i, k) => setTimeout(() => GryKit.fx.burstAt(cells[i], { color: colors, count: 14, spread: 60 }), k * 90));
+                    GryKit.fx.burstAt(boardEl, { color: colors, count: 40, spread: 230, size: 9, duration: 1000, gravity: 70, square: true });
+                }, 420);
+                over = st.mode === 'ai'
+                    ? { title: 'Wygrana!', icon: '🏆', text: `Pokonujesz komputer na poziomie ${LEVELS[settings.level]}. ${bilans}`, win: true }
+                    : { title: `Wygrywa ${result.winner}!`, icon: result.winner === 'X' ? '❌' : '⭕', text: `Gracz ${result.winner} ułożył trzy w linii. ${bilans}`, win: true };
+            } else {
+                setStatus('Komputer ułożył trzy w linii', result.winner);
+                setTimeout(() => {
+                    GryKit.sfx.play('lose');
+                    GryKit.fx.shake(boardEl, 7, 320);
+                    GryKit.fx.flash('#d05c5c', { on: boardEl, strength: 0.25 });
+                }, 420);
+                over = { title: 'Przegrana', icon: '🤖', text: `Komputer ułożył trzy w linii. ${bilans}`, win: false };
             }
+            GryKit.over(Object.assign(over, { sound: false, showScore: false, record: false, delay: result.winner ? 1250 : 800 }));
+        }
 
-            function appendHistoryEntry(text) {
-                const entry = document.createElement('li');
-                entry.textContent = text;
-                historyList.prepend(entry);
-                historyEmpty.hidden = true;
-                const maxEntries = 8;
-                while (historyList.children.length > maxEntries) {
-                    historyList.removeChild(historyList.lastElementChild);
-                }
+        /* ---------- komputer ---------- */
+        function emptyCells(b) { const out = []; b.forEach((v, i) => { if (!v) out.push(i); }); return out; }
+        function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+        function finishingMove(b, sym) {
+            for (const i of emptyCells(b)) { b[i] = sym; const r = winnerOf(b); b[i] = null; if (r && r.winner === sym) return i; }
+            return -1;
+        }
+        function minimax(b, me, turn, depth) {
+            const r = winnerOf(b);
+            if (r) return r.winner === me ? 10 - depth : r.winner ? depth - 10 : 0;
+            const other = turn === 'X' ? 'O' : 'X';
+            let best = turn === me ? -Infinity : Infinity;
+            for (const i of emptyCells(b)) {
+                b[i] = turn;
+                const s = minimax(b, me, other, depth + 1);
+                b[i] = null;
+                best = turn === me ? Math.max(best, s) : Math.min(best, s);
             }
-
-            function minimax(board, depth, isMaximizing) {
-                const result = checkWinner(board);
-                if (result) {
-                    if (result.winner === state.aiPlayer) return 10 - depth;
-                    if (result.winner) return depth - 10;
-                    return 0;
-                }
-
-                if (isMaximizing) {
-                    let bestScore = -Infinity;
-                    for (let i = 0; i < board.length; i++) {
-                        if (!board[i]) {
-                            board[i] = state.aiPlayer;
-                            const score = minimax(board, depth + 1, false);
-                            board[i] = null;
-                            bestScore = Math.max(score, bestScore);
-                        }
-                    }
-                    return bestScore;
-                } else {
-                    let bestScore = Infinity;
-                    const humanPlayer = state.aiPlayer === 'X' ? 'O' : 'X';
-                    for (let i = 0; i < board.length; i++) {
-                        if (!board[i]) {
-                            board[i] = humanPlayer;
-                            const score = minimax(board, depth + 1, true);
-                            board[i] = null;
-                            bestScore = Math.min(score, bestScore);
-                        }
-                    }
-                    return bestScore;
-                }
+            return best;
+        }
+        function perfectMove(b, me) {
+            const other = me === 'X' ? 'O' : 'X';
+            let best = -Infinity, moves = [];
+            for (const i of emptyCells(b)) {
+                b[i] = me;
+                const s = minimax(b, me, other, 1);
+                b[i] = null;
+                if (s > best) { best = s; moves = [i]; } else if (s === best) moves.push(i);
             }
+            return pick(moves); // losowo spośród równie dobrych – partie nie są identyczne
+        }
+        function chooseMove() {
+            const b = st.board.slice(), me = st.current, foe = me === 'X' ? 'O' : 'X';
+            const free = emptyCells(b);
+            if (settings.level === 'hard') return perfectMove(b, me);
+            const win = finishingMove(b, me);
+            if (settings.level === 'easy') return win >= 0 && Math.random() < 0.5 ? win : pick(free);
+            // Średni: wygrywa i blokuje, poza tym gra w miarę rozsądnie, ale bywa omylny.
+            if (win >= 0) return win;
+            const block = finishingMove(b, foe);
+            if (block >= 0 && Math.random() < 0.85) return block;
+            if (Math.random() < 0.45) return perfectMove(b, me);
+            if (!b[4] && Math.random() < 0.5) return 4;
+            return pick(free);
+        }
+        function queueAi() {
+            stopAi();
+            st.aiTimer = setTimeout(() => {
+                st.aiTimer = null;
+                if (!GryKit.playing || st.finished || !aiTurn()) return;
+                place(chooseMove());
+            }, 420 + Math.random() * 260);
+        }
 
-            function aiMove() {
-                let bestScore = -Infinity;
-                let bestMove = -1;
-
-                for (let i = 0; i < state.board.length; i++) {
-                    if (!state.board[i]) {
-                        state.board[i] = state.aiPlayer;
-                        const score = minimax(state.board, 0, false);
-                        state.board[i] = null;
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMove = i;
-                        }
-                    }
-                }
-
-                if (bestMove !== -1) {
-                    clearTimeout(state.aiTimeout);
-                    state.aiTimeout = setTimeout(() => {
-                        state.aiTimeout = null;
-                        if (state.mode !== 'ai' || state.current !== state.aiPlayer || state.finished) return;
-                        makeMove(bestMove);
-                    }, 500);
-                }
+        /* ---------- sterowanie ---------- */
+        cells.forEach((cell, i) => cell.addEventListener('click', () => play(i)));
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey || e.ctrlKey || e.metaKey || !GryKit.playing) return;
+            if (/^[1-9]$/.test(e.key)) { e.preventDefault(); play(Number(e.key) - 1); cells[Number(e.key) - 1].focus({ preventScroll: true }); return; }
+            const idx = cells.indexOf(document.activeElement);
+            const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -3, ArrowDown: 3 }[e.key];
+            if (idx >= 0 && step) {
+                e.preventDefault();
+                const r = Math.floor(idx / 3), c = idx % 3;
+                const nr = (r + (Math.abs(step) === 3 ? Math.sign(step) : 0) + 3) % 3;
+                const nc = (c + (Math.abs(step) === 1 ? step : 0) + 3) % 3;
+                cells[nr * 3 + nc].focus();
             }
+        });
+        levelBtns.forEach(b => b.addEventListener('click', () => {
+            if (settings.level === b.dataset.level) return;
+            settings.level = b.dataset.level;
+            store.set(KEY + 'poziom', settings.level);
+            syncSettings();
+            GryKit.sfx.play('click');
+            if (st.mode === 'ai' && GryKit.playing && st.moves > 0) { st.round -= 1; newRound(); }
+        }));
+        starterBtns.forEach(b => b.addEventListener('click', () => {
+            if (settings.starter === b.dataset.starter) return;
+            settings.starter = b.dataset.starter;
+            store.set(KEY + 'zaczyna', settings.starter);
+            syncSettings();
+            GryKit.sfx.play('click');
+            if (st.mode === 'ai' && GryKit.playing) { st.round = 0; newRound(); }
+        }));
+        document.getElementById('new-round').addEventListener('click', () => GryKit.start(st.mode || 'ai'));
+        document.getElementById('reset-score').addEventListener('click', () => {
+            const mode = st.mode || 'ai';
+            tally[mode] = { a: 0, d: 0, b: 0 };
+            store.set(KEY + 'bilans:' + mode, null);
+            renderTally();
+            GryKit.sfx.play('click');
+        });
 
-            function makeMove(index) {
-                if (state.finished || state.board[index]) {
-                    return;
-                }
-
-                state.board[index] = state.current;
-                state.moves += 1;
-                const cell = cells[index];
-                cell.textContent = state.current;
-                cell.classList.add(state.current === 'X' ? 'is-x' : 'is-o');
-                cell.disabled = true;
-
-                const result = checkWinner();
-                if (result) {
-                    finishRound(result);
-                } else {
-                    state.current = state.current === 'X' ? 'O' : 'X';
-                    updateTurnDisplay();
-                    setStatus(`Twoim zadaniem jest ułożyć trzy symbole ${state.current} w linii`);
-
-                    if (state.mode === 'ai' && state.current === state.aiPlayer && !state.finished) {
-                        cells.forEach(c => c.disabled = true);
-                        aiMove();
-                    } else if (state.mode === 'ai') {
-                        // Odblokuj puste komórki po ruchu AI
-                        cells.forEach((c, i) => {
-                            if (!state.board[i]) {
-                                c.disabled = false;
-                            }
-                        });
-                    }
-                }
-            }
-
-            function handleCellClick(event) {
-                const cell = event.currentTarget;
-                const index = Number(cell.dataset.index);
-
-                if (state.mode === 'ai' && state.current === state.aiPlayer) {
-                    return;
-                }
-
-                makeMove(index);
-            }
-
-            function newRound(resetScore = false) {
-                clearTimeout(state.aiTimeout); state.aiTimeout = null;
-                state.board.fill(null);
-                state.moves = 0;
-                state.finished = false;
-                state.current = state.round % 2 === 0 ? 'O' : 'X';
-
-                if (resetScore) {
-                    state.scores.X = 0;
-                    state.scores.O = 0;
-                    state.scores.draws = 0;
-                    state.round = 1;
-                    state.current = 'X';
-                    historyList.innerHTML = '';
-                    historyEmpty.hidden = false;
-                }
-
-                clearBoardUI();
-                updateTurnDisplay();
-                setStatus('Rozpocznij rundę i doprowadź do trzech swoich symboli w linii');
-
-                scoreXEl.textContent = state.scores.X;
-                scoreOEl.textContent = state.scores.O;
-                scoreDrawEl.textContent = state.scores.draws;
-
-                if (state.mode === 'ai' && state.current === state.aiPlayer) {
-                    cells.forEach(c => c.disabled = true);
-                    aiMove();
-                }
-            }
-
-            cells.forEach((cell) => cell.addEventListener('click', handleCellClick));
-            nextButton.addEventListener('click', () => {
-                if (!state.finished && state.moves > 0) {
-                    appendHistoryEntry(`Runda ${state.round} została przerwana`);
-                }
-                state.round += 1;
+        GryKit.init({
+            id: 'tic-tac-toe',
+            title: 'Kółko i krzyżyk',
+            icon: '⭕',
+            howTo: ['Stawiajcie na zmianę krzyżyk i kółko', 'Trzy swoje znaki w rzędzie, kolumnie lub po skosie wygrywają', 'Z komputerem: poziom i to, kto zaczyna, zmienisz nad planszą'],
+            controls: 'Klik / dotyk · <kbd>1</kbd>–<kbd>9</kbd> pole · strzałki + <kbd>Enter</kbd>',
+            board: '#board',
+            overlayHost: '.game-stage',
+            hud: false,
+            pausable: false,
+            fit: { el: '#board', zoom: true, min: 0.5 },
+            modes: [
+                { id: 'ai', label: 'Z komputerem', desc: 'Trzy poziomy trudności' },
+                { id: '2p', label: '2 graczy', desc: 'Na zmianę przy jednym ekranie' },
+            ],
+            onStart(mode) {
+                if (mode !== st.mode) { st.round = 0; setMode(mode); }
                 newRound();
-            });
+            },
+            onMenu() {
+                stopAi();
+                st.finished = true;
+                updateTurn();
+                setStatus('Wybierz tryb gry');
+            },
+        });
 
-            resetButton.addEventListener('click', () => {
-                newRound(true);
-            });
-
-            newRound();
-        })();
+        syncSettings();
+        renderTally();
+        clearBoard();
+        const wanted = new URLSearchParams(location.search).get('tryb');
+        if (wanted === 'ai' || wanted === '2p') GryKit.start(wanted);
+    })();
     </script>
 </body>
 </html>
