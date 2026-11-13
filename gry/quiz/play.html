@@ -1,113 +1,16 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quiz - Hub</title>
-    <style>
-        body {
-            display: flex; flex-direction: column; min-height: 100vh; margin: 0;
-            background: var(--shell-bg); color: var(--shell-text);
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5;
-        }
-        #quiz-container { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 48px; --game-width: 720px; }
-        .hidden { display: none !important; }
-        .quiz-card {
-            width: 100%; box-sizing: border-box; padding: 28px;
-            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
-            box-shadow: 0 1px 2px var(--shell-shadow, transparent);
-        }
-        .quiz-kicker, .quiz-progress {
-            margin: 0 0 14px; font-size: 12px; font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; color: var(--shell-muted);
-        }
-        .quiz-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-        .quiz-mode, .quiz-answers button {
-            display: flex; flex-direction: column; justify-content: center; gap: 4px; box-sizing: border-box;
-            width: 100%; margin: 0; padding: 16px 18px; text-align: left; cursor: pointer;
-            background: var(--shell-bg); color: var(--shell-text);
-            border: 1px solid var(--shell-border); border-radius: 10px;
-            font: inherit; font-size: 15px; font-weight: 600; line-height: 1.35;
-            transition: border-color .15s, background .15s;
-        }
-        .quiz-mode { min-height: 96px; }
-        .quiz-mode b { font-size: 18px; font-weight: 750; }
-        .quiz-mode span { font-size: 14px; font-weight: 500; color: var(--shell-muted); }
-        .quiz-mode:hover, .quiz-answers button:hover:not(:disabled) { border-color: var(--shell-accent); background: var(--shell-hover); }
-        .quiz-mode:focus-visible, .quiz-answers button:focus-visible { outline: 3px solid var(--shell-soft); outline-offset: 1px; border-color: var(--shell-accent); }
-        .quiz-question { margin: 0 0 20px; font-size: clamp(19px, 2.6vw, 24px); line-height: 1.3; font-weight: 750; letter-spacing: -.3px; }
-        .quiz-answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-        .quiz-answers button { min-height: 60px; }
-        .quiz-answers button:disabled { cursor: default; }
-        .quiz-answers button:disabled:not(.correct-answer):not(.wrong-answer) { opacity: .6; }
-        .correct-answer { background: #2f8a57 !important; border-color: #2f8a57 !important; color: #fff !important; }
-        .wrong-answer, .incorrect-answer { background: #c2453d !important; border-color: #c2453d !important; color: #fff !important; }
-        .quiz-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-        .quiz-result { margin: 0 0 6px; font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; font-weight: 750; letter-spacing: -.5px; }
-        .quiz-result-note { margin: 0 0 18px; color: var(--shell-muted); }
-        .quiz-review { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--shell-border); }
-        .quiz-review li { position: relative; padding: 12px 0 12px 30px; border-bottom: 1px solid var(--shell-border); font-size: 14px; }
-        .quiz-review li::before { position: absolute; left: 4px; top: 12px; font-weight: 800; }
-        .quiz-review li.ok::before { content: '✓'; color: var(--shell-accent); }
-        .quiz-review li.bad::before { content: '✗'; color: var(--kit-danger); }
-        .quiz-review b { display: block; margin-bottom: 2px; }
-        .quiz-review span { color: var(--shell-muted); }
-        @media (max-width: 560px) {
-            .quiz-card { padding: 20px 16px; }
-            .quiz-modes, .quiz-answers { grid-template-columns: minmax(0, 1fr); }
-            .quiz-actions .kit-btn { flex: 1 1 auto; }
-        }
-    </style>
-<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
-<link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
-<script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
-<script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+    <title>Quiz o podzespołach – przekierowanie</title>
+    <meta name="robots" content="noindex">
+    <link rel="canonical" href="quiz.html">
+    <meta http-equiv="refresh" content="0; url=quiz.html">
+    <script>location.replace('quiz.html' + location.search + location.hash);</script>
+    <style>body { font: 16px/1.5 Inter, -apple-system, "Segoe UI", sans-serif; margin: 40px 16px; text-align: center; }</style>
 </head>
-<body class="site-shell game-shell">
-<a class="skip-link" href="#quiz-container">Przejdź do treści</a>
-    <header class="site-header" data-site-shell>
-<nav class="site-nav" aria-label="Główna nawigacja">
-<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
-<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
-<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
-</nav>
-<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
-</header>
-
-
-    <div id="quiz-container" tabindex="-1" role="main">
-        <div class="game-bar">
-            <div class="game-title"><h1>Quiz wiedzy</h1><p>Pytania o komputerach i internecie · kliknij odpowiedź</p></div>
-            <div class="game-stats">
-                <div class="game-stat"><span>Pytanie</span><b id="quiz-progress-stat">–</b></div>
-                <div class="game-stat"><span>Wynik</span><b id="quiz-score-stat">0</b></div>
-            </div>
-            <div class="game-buttons">
-                <button class="kit-btn small" type="button" onclick="returnToStart()">Zmień tryb</button>
-            </div>
-        </div>
-
-        <div class="game-stage">
-            <div id="start-page" class="quiz-card">
-                <h2 class="quiz-kicker">Wybierz tryb</h2>
-                <div class="quiz-modes">
-                    <button id="single-question" class="quiz-mode" type="button"><b>Jedno pytanie</b><span>Szybki test – jedno losowe pytanie</span></button>
-                    <button id="multiple-questions" class="quiz-mode" type="button"><b>Wiele pytań</b><span>Seria 10 pytań z podsumowaniem</span></button>
-                </div>
-            </div>
-            <div id="quiz-page" class="quiz-card hidden">
-                <!-- Tutaj będą pytania -->
-            </div>
-            <div id="result-page" class="quiz-card hidden">
-                <!-- Tutaj będą wyniki -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Theme is handled by assets/workshop/shell.js.
-    </script>
-    <script src="script.js?v=20261010-kit"></script>
+<body>
+    <p>Gra jest teraz pod nowym adresem: <a href="quiz.html">Quiz o podzespołach</a>.</p>
 </body>
 </html>

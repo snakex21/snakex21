@@ -3,29 +3,103 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quiz - Hub</title>
+    <title>Quiz o podzespołach - Hub</title>
     <style>
         body {
             display: flex; flex-direction: column; min-height: 100vh; margin: 0;
             background: var(--shell-bg); color: var(--shell-text);
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5;
         }
-        .game-wrapper { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 48px; --game-width: 720px; }
-        .intro-card {
-            width: 100%; box-sizing: border-box; padding: 28px;
-            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
+        .game-wrapper { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 24px; --game-width: 880px; }
+        .quiz-card {
+            position: relative; display: flex; flex-direction: column; gap: 14px;
+            width: 100%; min-height: 500px; box-sizing: border-box; padding: 20px 24px 22px;
+            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 16px;
+            box-shadow: 0 10px 28px var(--shell-shadow, rgba(0,0,0,.08));
         }
-        .intro-card h2 {
-            margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; color: var(--shell-muted);
+        .quiz-top { display: flex; flex-direction: column; gap: 8px; }
+        .quiz-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--shell-muted); }
+        .quiz-steps { display: flex; gap: 4px; height: 8px; }
+        .quiz-steps i { flex: 1 1 0; border-radius: 99px; background: var(--shell-soft); transition: background .2s; }
+        .quiz-steps i.now { background: var(--shell-accent); opacity: .45; }
+        .quiz-steps i.ok { background: #2f8a57; }
+        .quiz-steps i.bad { background: #c2453d; }
+        .quiz-timer { font-variant-numeric: tabular-nums; color: var(--shell-text); }
+        .quiz-timer.low { color: #c2453d; }
+        .quiz-timebar { height: 4px; border-radius: 99px; background: var(--shell-soft); overflow: hidden; }
+        .quiz-timebar i { display: block; height: 100%; width: 100%; background: var(--shell-accent); transform-origin: left; }
+        .quiz-timebar.low i { background: #c2453d; }
+        .quiz-question {
+            display: flex; align-items: center; min-height: 2.6em; margin: 0;
+            font-size: clamp(19px, 2.6vw, 24px); line-height: 1.3; font-weight: 750; letter-spacing: -.3px;
         }
-        .intro-card > p { margin: 0 0 16px; font-size: 16px; }
-        .intro-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 0 0 22px; padding: 0; list-style: none; }
-        .intro-list li { padding: 14px 16px; border: 1px solid var(--shell-border); border-radius: 10px; background: var(--shell-bg); font-size: 14px; color: var(--shell-muted); }
-        .intro-list b { display: block; margin-bottom: 2px; font-size: 15px; color: var(--shell-text); }
+        .quiz-answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .quiz-answers button {
+            display: flex; align-items: center; gap: 12px; box-sizing: border-box; width: 100%; min-height: 64px; margin: 0;
+            padding: 10px 14px; text-align: left; cursor: pointer;
+            background: var(--shell-bg); color: var(--shell-text);
+            border: 2px solid var(--shell-border); border-radius: 12px;
+            font: inherit; font-size: 15.5px; font-weight: 600; line-height: 1.3;
+            transition: border-color .15s, background .15s, transform .1s;
+        }
+        .quiz-answers button .key {
+            flex: 0 0 32px; height: 32px; display: grid; place-items: center; border-radius: 9px;
+            background: var(--shell-card); border: 1px solid var(--shell-border);
+            font-size: 14px; font-weight: 800; color: var(--shell-accent);
+        }
+        .quiz-answers button .txt { min-width: 0; overflow-wrap: anywhere; }
+        .quiz-answers button:hover:not(:disabled) { border-color: var(--shell-accent); background: var(--shell-hover); transform: translateY(-1px); }
+        .quiz-answers button:focus-visible { outline: 3px solid var(--shell-soft); outline-offset: 1px; border-color: var(--shell-accent); }
+        .quiz-answers button:disabled { cursor: default; }
+        .quiz-answers button:disabled:not(.correct):not(.wrong) { opacity: .55; }
+        .quiz-answers button.correct { background: #2f8a57; border-color: #2f8a57; color: #fff; }
+        .quiz-answers button.wrong { background: #c2453d; border-color: #c2453d; color: #fff; }
+        .quiz-answers button.correct .key, .quiz-answers button.wrong .key { background: rgba(255,255,255,.2); border-color: transparent; color: #fff; }
+        .quiz-bottom { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-top: auto; }
+        .quiz-feedback { flex: 1 1 auto; margin: 0; font-size: 14px; line-height: 1.4; color: var(--shell-muted); }
+        .quiz-feedback b { color: var(--shell-text); }
+        .quiz-feedback.ok b { color: #2f8a57; }
+        .quiz-feedback.bad b { color: #c2453d; }
+        [data-theme="dark"] .quiz-feedback.ok b { color: #8fd3a6; }
+        [data-theme="dark"] .quiz-feedback.bad b { color: #ff8f86; }
+        .quiz-bottom .kit-btn { flex: 0 0 auto; }
+        /* ekran końca (w nakładce GryKit) */
+        .quiz-summary { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 2px 0; }
+        .quiz-sum { text-align: left; font-size: 14px; line-height: 1.5; color: var(--shell-muted); }
+        .quiz-sum b { color: var(--shell-text); }
+        .quiz-ring {
+            --p: 0; flex: 0 0 auto; width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center;
+            background: conic-gradient(var(--shell-accent) calc(var(--p) * 1%), var(--shell-soft) 0);
+        }
+        .quiz-ring b { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: var(--shell-card); font-size: 19px; font-weight: 800; color: var(--shell-text); }
+        .quiz-wrong { max-height: 104px; overflow-y: auto; margin: 6px 0 0; padding: 0; list-style: none; text-align: left; border-top: 1px solid var(--shell-border); }
+        .quiz-wrong li { padding: 6px 0; border-bottom: 1px solid var(--shell-border); font-size: 12.5px; line-height: 1.35; }
+        .quiz-wrong b { display: block; color: var(--shell-text); }
+        .quiz-wrong span { color: var(--shell-muted); }
+        .quiz-wrong-title { margin: 2px 0 0; font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+        .gk-overlay.gk-compact .quiz-wrong { max-height: 58px; }
+        .gk-overlay.gk-compact .quiz-ring { width: 64px; height: 64px; }
+        .gk-overlay.gk-compact .quiz-ring b { width: 50px; height: 50px; font-size: 16px; }
+        /* niskie okno (np. 820×560): zwarty układ zamiast mocnego pomniejszania */
+        @media (max-height: 640px) and (min-width: 561px) {
+            .game-wrapper { padding-top: 10px; padding-bottom: 12px; }
+            .game-bar { margin-bottom: 8px; }
+            .game-title p { display: none; }
+            .quiz-card { min-height: 330px; padding: 14px 18px 14px; gap: 10px; }
+            .quiz-question { min-height: 0; font-size: 19px; }
+            .quiz-answers { gap: 8px; }
+            .quiz-answers button { min-height: 48px; padding: 6px 12px; font-size: 14.5px; }
+            .quiz-answers button .key { flex-basis: 28px; height: 28px; }
+            .quiz-bottom { min-height: 40px; }
+        }
         @media (max-width: 560px) {
-            .intro-card { padding: 20px 16px; }
-            .intro-card .kit-btn { width: 100%; }
+            .quiz-card { min-height: 430px; padding: 14px 12px 14px; gap: 10px; }
+            .quiz-question { min-height: 0; font-size: 18px; }
+            .quiz-answers { gap: 8px; }
+            .quiz-answers button { flex-direction: column; align-items: flex-start; gap: 6px; min-height: 76px; padding: 8px 10px; font-size: 14px; }
+            .quiz-answers button .key { flex: 0 0 auto; width: 24px; height: 24px; font-size: 12px; border-radius: 7px; }
+            .quiz-bottom { flex-wrap: wrap; gap: 8px; }
+            .quiz-bottom .kit-btn { width: 100%; }
         }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
@@ -33,6 +107,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -48,21 +123,34 @@
 
     <main class="game-wrapper" id="main-content" tabindex="-1">
         <div class="game-bar">
-            <div class="game-title"><h1>Quiz wiedzy</h1><p>Sprawdź swoją wiedzę o komputerach – wybierz tryb i odpowiadaj na pytania</p></div>
-            <div class="game-buttons"><a class="kit-btn small primary" href="play.html">Zagraj teraz</a></div>
+            <div class="game-title"><h1>Quiz o podzespołach</h1><p>Pytania o sprzęcie, komputerach i internecie</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Pytanie</span><b id="quiz-progress-stat">–</b></div>
+                <div class="game-stat"><span>Wynik</span><b id="quiz-score-stat">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="quiz-best">0</b></div>
+            </div>
+            <div class="game-buttons">
+                <button class="kit-btn small" type="button" id="quiz-menu">Zmień tryb</button>
+            </div>
         </div>
 
         <div class="game-stage">
-            <section class="intro-card" aria-labelledby="intro-title">
-                <h2 id="intro-title">O grze</h2>
-                <p>Losowe pytania, dwa tryby gry i natychmiastowa informacja zwrotna.</p>
-                <ul class="intro-list">
-                    <li><b>Jedno pytanie</b>szybki test wiedzy</li>
-                    <li><b>Wiele pytań</b>seria 10 pytań z wynikiem końcowym</li>
-                </ul>
-                <a class="kit-btn primary" href="play.html">Zagraj teraz →</a>
+            <section id="quiz-card" class="quiz-card" aria-label="Pytanie quizu">
+                <div class="quiz-top">
+                    <div class="quiz-meta"><span id="quiz-counter">Quiz</span><span id="quiz-timer" class="quiz-timer" hidden></span></div>
+                    <div class="quiz-steps" id="quiz-steps" aria-hidden="true"></div>
+                    <div class="quiz-timebar" id="quiz-timebar" hidden><i></i></div>
+                </div>
+                <h2 class="quiz-question" id="quiz-question">Ile wiesz o sprzęcie komputerowym?</h2>
+                <div class="quiz-answers" id="quiz-answers" role="group" aria-label="Odpowiedzi"></div>
+                <div class="quiz-bottom">
+                    <p class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></p>
+                    <button type="button" class="kit-btn primary" id="quiz-next" hidden>Dalej →</button>
+                </div>
             </section>
         </div>
     </main>
+
+    <script src="script.js?v=20261113-quiz"></script>
 </body>
 </html>
