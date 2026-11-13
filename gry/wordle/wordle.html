@@ -7,63 +7,111 @@
     <title>Wordle - Hub</title>
     <style>
         :root {
-            --tile-border: #d3d6da;
-            --tile-filled: #878a8c;
-            --key-bg: #d3d6da;
-            --key-text: #1a1a1b;
-            --w-correct: #6aaa64;
-            --w-present: #c9b458;
-            --w-absent: #787c7e;
+            --tile-border: #d6dbd0;
+            --tile-filled: #8a948d;
+            --key-bg: #e2e7da;
+            --key-text: #202b27;
+            --w-correct: #2f8a5b;
+            --w-present: #c8961e;
+            --w-absent: #7b857f;
+            --w-absent-text: #ffffff;
         }
         [data-theme="dark"] {
-            --tile-border: #3a3a3c;
-            --tile-filled: #6b6e70;
-            --key-bg: #818384;
-            --key-text: #ffffff;
-            --w-correct: #538d4e;
-            --w-present: #b59f3b;
-            --w-absent: #3a3a3c;
+            --tile-border: #3a4d40;
+            --tile-filled: #7d8c80;
+            --key-bg: #3a4d40;
+            --key-text: #eef2e7;
+            --w-correct: #3f9d68;
+            --w-present: #c99a2c;
+            --w-absent: #2a3a31;
+            --w-absent-text: #9fb0a3;
         }
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-container { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 520px; }
-        .game-stage { flex-direction: column; align-items: center; gap: 0; }
-        .board-container { display: grid; grid-template-rows: repeat(6, 1fr); gap: 6px; }
-        .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .game-container { flex: 1; display: flex; flex-direction: column; min-width: 0; padding: 24px 16px 20px; --game-width: 560px; }
+        .game-container .game-stage { position: relative; }
+        .w-play { display: flex; flex-direction: column; align-items: center; gap: 14px; width: max-content; }
+        .board-wrap { position: relative; }
+        .board-container { display: grid; grid-template-rows: repeat(6, 54px); gap: 6px; perspective: 600px; }
+        .row { display: grid; grid-template-columns: repeat(5, 54px); gap: 6px; }
         .tile {
-            box-sizing: border-box; width: min(62px, calc((100vw - 64px) / 5)); aspect-ratio: 1;
-            border: 2px solid var(--tile-border); border-radius: 6px; background: var(--shell-card);
+            box-sizing: border-box; width: 54px; height: 54px;
+            border: 2px solid var(--tile-border); border-radius: 7px; background: var(--shell-card);
             display: flex; align-items: center; justify-content: center;
-            font: 750 2rem/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-transform: uppercase; color: var(--shell-text);
+            font-family: inherit; font-size: 29px; font-weight: 800; line-height: 1; text-transform: uppercase; color: var(--shell-text);
+            user-select: none; -webkit-user-select: none;
         }
-        .tile.filled { border-color: var(--tile-filled); animation: pop 0.1s; }
-        .tile.correct { background: var(--w-correct); border-color: var(--w-correct); }
-        .tile.present { background: var(--w-present); border-color: var(--w-present); }
-        .tile.absent { background: var(--w-absent); border-color: var(--w-absent); }
-        .tile.correct, .tile.present, .tile.absent { color: #fff; }
-        #wordle-message { margin: 16px auto; min-height: 1.5em; color: var(--shell-text); font-weight: 600; }
-        .keyboard { display: flex; flex-direction: column; gap: 8px; align-items: center; width: min(100%, 520px); }
-        .key-row { display: flex; gap: 6px; width: 100%; justify-content: center; }
+        .tile.filled { border-color: var(--tile-filled); }
+        .tile.correct { background: var(--w-correct); border-color: var(--w-correct); color: #fff; }
+        .tile.present { background: var(--w-present); border-color: var(--w-present); color: #fff; }
+        .tile.absent { background: var(--w-absent); border-color: var(--w-absent); color: var(--w-absent-text); }
+        .tile.correct, .tile.present { text-shadow: 0 1px 0 rgba(0, 0, 0, .18); }
+        .row.current .tile:not(.filled) { border-color: color-mix(in srgb, var(--tile-border) 70%, var(--shell-accent)); }
+        .tile.pop { animation: w-pop .12s ease-out; }
+        .tile.flip { animation: w-flip var(--flip, 480ms) ease-in-out both; }
+        .tile.bounce { animation: w-bounce .6s ease-in-out both; animation-delay: var(--d, 0ms); }
+        .row.shake { animation: w-shake .42s ease-in-out; }
+        @keyframes w-pop { 0% { transform: scale(.86); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes w-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+        @keyframes w-bounce { 0%, 20% { transform: translateY(0); } 40% { transform: translateY(-26px); } 55% { transform: translateY(2px); } 70% { transform: translateY(-9px); } 85%, 100% { transform: translateY(0); } }
+        @keyframes w-shake { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); } 30%, 50%, 70% { transform: translateX(-7px); } 40%, 60% { transform: translateX(7px); } }
+
+        .w-toast {
+            position: absolute; left: 50%; top: 8px; z-index: 5; transform: translate(-50%, -6px);
+            padding: 9px 14px; border-radius: 9px; white-space: nowrap; pointer-events: none;
+            background: var(--shell-text); color: var(--shell-bg); font-size: 14px; font-weight: 700;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .25); opacity: 0; transition: opacity .16s, transform .16s;
+        }
+        .w-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        .keyboard { display: flex; flex-direction: column; gap: 6px; width: 484px; }
+        .key-row { display: flex; gap: 5px; width: 100%; justify-content: center; }
         .key {
-            flex: 1; min-width: 0; min-height: 52px; padding: 0; border: 0; border-radius: 6px;
+            flex: 1 1 0; min-width: 0; max-width: 44px; height: 46px; padding: 0; border: 0; border-radius: 7px;
             background: var(--key-bg); color: var(--key-text); cursor: pointer;
-            font: 700 15px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-align: center;
-            touch-action: manipulation;
+            font-family: inherit; font-size: 16px; font-weight: 750; line-height: 1; text-align: center;
+            touch-action: manipulation; transition: background .25s, color .25s, transform .08s;
         }
-        .key:hover { filter: brightness(.94); }
+        .key:hover { filter: brightness(.95); }
+        [data-theme="dark"] .key:hover { filter: brightness(1.15); }
+        .key:active { transform: scale(.94); }
         .key:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 2px; }
-        .key.big { flex: 1.6; padding: 0 2px; font-size: .75rem; }
+        .key.big { flex: 1.6 1 0; max-width: 72px; font-size: 12px; letter-spacing: .3px; }
+        .key.pl { background: color-mix(in srgb, var(--key-bg) 82%, var(--shell-accent)); }
+        .key.unused { opacity: .38; cursor: default; }
         .key.correct { background: var(--w-correct); color: #fff; }
         .key.present { background: var(--w-present); color: #fff; }
-        .key.absent { background: var(--w-absent); color: #fff; }
-        @media (max-width: 400px) { .key-row { gap: 4px; } .key { min-height: 48px; font-size: 14px; } }
-        @keyframes pop { 50% { transform: scale(1.1); } }
-        @media (prefers-reduced-motion: reduce) { .tile.filled { animation: none; } }
+        .key.absent { background: var(--w-absent); color: var(--w-absent-text); }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+        .game-container .game-stat { min-width: 62px; }
+        /* Statystyki w nakładce końcowej */
+        .w-dist { display: flex; justify-content: center; align-items: flex-end; gap: 6px; height: 64px; margin: 2px 0 0; }
+        .w-dist div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; width: 26px; height: 100%; font-size: 11px; color: var(--shell-muted); }
+        .w-dist i { display: block; width: 100%; min-height: 4px; border-radius: 4px 4px 2px 2px; background: var(--shell-soft); border: 1px solid var(--shell-border); box-sizing: border-box; }
+        .w-dist i.now { background: var(--w-correct); border-color: var(--w-correct); }
+        .w-dist b { font-size: 11px; color: var(--shell-text); }
+        .w-cap { margin: 0; font-size: 11.5px; color: var(--shell-muted); }
+        /* Szerokie i niskie okno: klawiatura obok planszy. */
+        @media (min-aspect-ratio: 5/4) and (max-height: 700px) {
+            .game-container { --game-width: 860px; }
+            .w-play { flex-direction: row; align-items: center; gap: 24px; }
+        }
+        @media (max-height: 640px) {
+            .game-shell .game-container { padding-top: 10px; padding-bottom: 6px; }
+            .game-container .game-title p { display: none; }
+            .game-container .game-bar { margin-bottom: 8px; }
+            .game-container .game-stat { min-height: 40px; }
+        }
+        @media (max-width: 560px) { .game-container .game-title p { display: none; } }
+        @media (prefers-reduced-motion: reduce) { .tile.pop, .tile.flip, .tile.bounce, .row.shake { animation: none; } .w-toast { transition: none; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="slowa.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -81,174 +129,276 @@
     <div class="game-container" id="main-content" tabindex="-1" role="main">
         <div class="game-bar">
             <div class="game-title"><h1>Wordle</h1><p>Zielone: dobra litera i miejsce · żółte: litera jest w słowie</p></div>
-            <div class="game-buttons"><button class="kit-btn small primary" type="button" onmousedown="event.preventDefault()" onclick="resetGame()">Nowa gra</button></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Gry</span><b id="st-played">0</b></div>
+                <div class="game-stat"><span>Wygrane</span><b id="st-wins">0%</b></div>
+                <div class="game-stat"><span>Seria</span><b id="st-streak">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="st-best">–</b></div>
+            </div>
+            <div class="game-buttons"><button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button></div>
         </div>
-        <div class="game-stage">
-            <div class="board-container" id="board"></div>
-            <p class="game-status" id="wordle-message" aria-live="polite">Odgadnij pięcioliterowe słowo. Masz 6 prób.</p>
-            <div class="keyboard" id="keyboard"></div>
+        <div class="game-stage" id="stage">
+            <div class="w-play" id="play">
+                <div class="board-wrap">
+                    <div class="board-container" id="board" role="group" aria-label="Plansza: 6 prób po 5 liter"></div>
+                    <div class="w-toast" id="toast" aria-hidden="true"></div>
+                </div>
+                <div class="keyboard" id="keyboard" aria-label="Klawiatura"></div>
+            </div>
         </div>
+        <p class="sr-only" id="wordle-message" role="status" aria-live="polite"></p>
     </div>
 
     <script>
-        const words = ["ALARM", "BAGNO", "DOMEK", "EKRAN", "FIRMA", "HALAS", "ISKRA", "KUBEK", "LAMPA", "NIGDY", "OBIAD", "PRACA", "RADIO", "SKLEP", "TRAWA", "ZEGAR"];
-        let secret = words[Math.floor(Math.random() * words.length)];
-        let grid = Array(6).fill().map(() => Array(5).fill(""));
-        let currentRow = 0;
-        let currentCol = 0;
-        let gameOver = false;
-        const revealTimers = new Set();
-        const message = document.getElementById('wordle-message');
-        function later(callback, delay) {
-            const id = setTimeout(() => { revealTimers.delete(id); callback(); }, delay);
-            revealTimers.add(id);
-        }
-        function resetGame() {
-            revealTimers.forEach(clearTimeout); revealTimers.clear();
-            secret = words[Math.floor(Math.random() * words.length)];
-            grid = Array.from({length:6}, () => Array(5).fill(''));
-            currentRow = currentCol = 0; gameOver = false; message.textContent = 'Odgadnij pięcioliterowe słowo. Masz 6 prób.';
-            init();
-        }
+    (() => {
+        const DATA = window.WORDLE_SLOWA || { hasla: ['KUBEK'], dozwolone: ['KUBEK'] };
+        const SECRETS = DATA.hasla;
+        const ALLOWED = new Set(DATA.dozwolone);
+        const ROWS = 6, COLS = 5;
+        const ROW_KEYS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM', 'ĄĆĘŁŃÓŚŹŻ'];
+        const UNUSED = new Set(['Q', 'V', 'X']);           // nie występują w polskich słowach
+        const PL = /^[ĄĆĘŁŃÓŚŹŻ]$/;
+        const RANK = { absent: 1, present: 2, correct: 3 };
+        const STATS_KEY = 'wordle:stats';
+        const LAST_KEY = 'wordle:ostatnie';
 
         const boardEl = document.getElementById('board');
         const keyboardEl = document.getElementById('keyboard');
-        // Keep focus off on-screen keys so a physical Enter submits instead of re-clicking the last key.
-        keyboardEl.addEventListener('mousedown', e => e.preventDefault());
+        const toastEl = document.getElementById('toast');
+        const message = document.getElementById('wordle-message');
 
-        function init() {
+        let secret = '', grid = [], row = 0, col = 0, done = true, busy = false;
+        const keyState = {};
+        const timers = new Set();
+        const later = (fn, ms) => { const id = setTimeout(() => { timers.delete(id); fn(); }, ms); timers.add(id); };
+        const tile = (r, c) => boardEl.children[r].children[c];
+
+        /* ---------- statystyki ---------- */
+        function loadStats() {
+            try { const s = JSON.parse(GryKit.store.get(STATS_KEY)); if (s && typeof s.played === 'number') return s; } catch (e) {}
+            return { played: 0, wins: 0, streak: 0, max: 0, dist: [0, 0, 0, 0, 0, 0] };
+        }
+        let stats = loadStats();
+        function saveStats() { GryKit.store.set(STATS_KEY, JSON.stringify(stats)); showStats(); }
+        function showStats() {
+            document.getElementById('st-played').textContent = stats.played;
+            document.getElementById('st-wins').textContent = (stats.played ? Math.round(stats.wins / stats.played * 100) : 0) + '%';
+            document.getElementById('st-streak').textContent = stats.streak;
+        }
+        function record(win, tries) {
+            stats.played++;
+            if (win) { stats.wins++; stats.streak++; stats.max = Math.max(stats.max, stats.streak); stats.dist[tries - 1]++; }
+            else stats.streak = 0;
+            saveStats();
+        }
+        function statsHtml(tries) {
+            const top = Math.max(1, ...stats.dist);
+            const bars = stats.dist.map((n, i) => `<div><b>${n}</b><i class="${i + 1 === tries ? 'now' : ''}" style="height:${Math.round(4 + n / top * 36)}px"></i>${i + 1}</div>`).join('');
+            return `<div class="w-dist" role="img" aria-label="Wygrane według liczby prób: ${stats.dist.join(', ')}">${bars}</div>` +
+                `<p class="w-cap">Wygrane wg liczby prób · najdłuższa seria: <b>${stats.max}</b></p>`;
+        }
+
+        /* ---------- plansza i klawiatura ---------- */
+        function buildBoard() {
             boardEl.innerHTML = '';
-            for (let r = 0; r < 6; r++) {
+            for (let r = 0; r < ROWS; r++) {
                 const rowEl = document.createElement('div');
                 rowEl.className = 'row';
-                for (let c = 0; c < 5; c++) {
-                    const tile = document.createElement('div');
-                    tile.id = `tile-${r}-${c}`;
-                    tile.className = 'tile';
-                    rowEl.appendChild(tile);
+                rowEl.setAttribute('aria-label', `Próba ${r + 1}`);
+                for (let c = 0; c < COLS; c++) {
+                    const t = document.createElement('div');
+                    t.className = 'tile';
+                    rowEl.appendChild(t);
                 }
                 boardEl.appendChild(rowEl);
             }
-            renderKeyboard();
         }
-
-        function renderKeyboard() {
-            const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+        function key(label, cls, onClick, aria) {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'key' + (cls ? ' ' + cls : ''); b.textContent = label;
+            if (aria) b.setAttribute('aria-label', aria);
+            b.addEventListener('click', onClick);
+            return b;
+        }
+        function buildKeyboard() {
             keyboardEl.innerHTML = '';
-
-            rows.forEach((rowStr, i) => {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'key-row';
-
-                if (i === 2) {
-                    const enter = document.createElement('button');
-                    enter.type = 'button';
-                    enter.className = 'key big';
-                    enter.innerText = 'ENTER';
-                    enter.onclick = submit;
-                    rowDiv.appendChild(enter);
+            ROW_KEYS.forEach((letters, i) => {
+                const r = document.createElement('div');
+                r.className = 'key-row';
+                if (i === 2) r.appendChild(key('ENTER', 'big', submit, 'Zatwierdź słowo'));
+                for (const ch of letters) {
+                    const b = key(ch, PL.test(ch) ? 'pl' : '', () => type(ch));
+                    b.dataset.key = ch;
+                    if (UNUSED.has(ch)) { b.classList.add('unused'); b.disabled = true; b.title = 'Ta litera nie występuje w polskich słowach'; }
+                    r.appendChild(b);
                 }
-
-                rowStr.split('').forEach(char => {
-                    const key = document.createElement('button');
-                    key.type = 'button';
-                    key.className = 'key';
-                    key.id = `key-${char}`;
-                    key.innerText = char;
-                    key.onclick = () => type(char);
-                    rowDiv.appendChild(key);
-                });
-
-                if (i === 2) {
-                    const back = document.createElement('button');
-                    back.type = 'button';
-                    back.className = 'key big';
-                    back.innerText = '⌫';
-                    back.onclick = backspace;
-                    rowDiv.appendChild(back);
-                }
-
-                keyboardEl.appendChild(rowDiv);
+                if (i === 2) r.appendChild(key('⌫', 'big', backspace, 'Usuń literę'));
+                keyboardEl.appendChild(r);
             });
         }
+        // Na ekranowych klawiszach fokus zostaje na stronie, by fizyczny Enter zatwierdzał słowo.
+        keyboardEl.addEventListener('mousedown', e => e.preventDefault());
 
-        function type(char) {
-            if (gameOver || currentCol > 4) return;
-            grid[currentRow][currentCol] = char;
-            const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
-            tile.innerText = char;
-            tile.classList.add('filled');
-            currentCol++;
+        function markRow() { [...boardEl.children].forEach((r, i) => r.classList.toggle('current', i === row && !done)); }
+        function toast(text, ms = 1400) {
+            toastEl.textContent = text;
+            // Pod bieżącym wierszem (albo nad planszą przy ostatnim), żeby nie zasłaniać wpisanych liter.
+            const r = boardEl.children[Math.min(row, ROWS - 1)];
+            toastEl.style.top = (row < ROWS - 1 ? r.offsetTop + r.offsetHeight + 4 : Math.max(0, r.offsetTop - 44)) + 'px';
+            toastEl.classList.add('show');
+            message.textContent = text;
+            clearTimeout(toast.t);
+            toast.t = setTimeout(() => toastEl.classList.remove('show'), ms);
+        }
+        function shake() {
+            const r = boardEl.children[row];
+            r.classList.remove('shake'); void r.offsetWidth; r.classList.add('shake');
+            GryKit.sfx.play('error');
         }
 
+        function newGame() {
+            // Porzucona rozpoczęta gra liczy się jak przegrana (seria nie przetrwa „Nowej gry”).
+            if (!done && row > 0) record(false, 0);
+            timers.forEach(clearTimeout); timers.clear();
+            let last = GryKit.store.get(LAST_KEY);
+            do { secret = SECRETS[Math.floor(Math.random() * SECRETS.length)]; } while (secret === last && SECRETS.length > 1);
+            GryKit.store.set(LAST_KEY, secret);
+            grid = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
+            row = 0; col = 0; done = false; busy = false;
+            for (const k in keyState) delete keyState[k];
+            buildBoard(); buildKeyboard(); markRow();
+            message.textContent = 'Nowa gra. Odgadnij pięcioliterowe słowo w 6 próbach.';
+        }
+
+        function type(ch) {
+            if (!GryKit.playing || done || busy || col >= COLS || UNUSED.has(ch)) return;
+            grid[row][col] = ch;
+            const t = tile(row, col);
+            t.textContent = ch;
+            t.classList.add('filled');
+            t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop');
+            GryKit.sfx.play('tick');
+            col++;
+        }
         function backspace() {
-            if (gameOver || currentCol === 0) return;
-            currentCol--;
-            grid[currentRow][currentCol] = "";
-            const tile = document.getElementById(`tile-${currentRow}-${currentCol}`);
-            tile.innerText = "";
-            tile.classList.remove('filled');
+            if (!GryKit.playing || done || busy || col === 0) return;
+            col--;
+            grid[row][col] = '';
+            const t = tile(row, col);
+            t.textContent = '';
+            t.classList.remove('filled', 'pop');
         }
+
+        function score(guess) {
+            const rest = secret.split('');
+            const status = Array(COLS).fill('absent');
+            for (let i = 0; i < COLS; i++) if (guess[i] === rest[i]) { status[i] = 'correct'; rest[i] = null; }
+            for (let i = 0; i < COLS; i++) {
+                if (status[i] === 'correct') continue;
+                const j = rest.indexOf(guess[i]);
+                if (j >= 0) { status[i] = 'present'; rest[j] = null; }
+            }
+            return status;
+        }
+        const WORDS = { correct: 'dobre miejsce', present: 'jest w słowie', absent: 'brak' };
+        const PRAISE = ['Geniusz!', 'Wspaniale!', 'Świetnie!', 'Brawo!', 'Nieźle!', 'Uff, w ostatniej chwili!'];
 
         function submit() {
-            if (gameOver || currentCol !== 5) return;
-            const guess = grid[currentRow].join("");
-
-            let secretArr = secret.split("");
-            const status = Array(5).fill('absent');
-
-            for (let i = 0; i < 5; i++) {
-                if (guess[i] === secretArr[i]) {
-                    status[i] = 'correct';
-                    secretArr[i] = null;
-                }
-            }
-
-            for (let i = 0; i < 5; i++) {
-                if (status[i] !== 'correct' && secretArr.includes(guess[i])) {
-                    status[i] = 'present';
-                    secretArr[secretArr.indexOf(guess[i])] = null;
-                }
-            }
-
-            for (let i = 0; i < 5; i++) {
-                const tile = document.getElementById(`tile-${currentRow}-${i}`);
-                const key = document.getElementById(`key-${guess[i]}`);
-
+            if (!GryKit.playing || done || busy) return;
+            if (col < COLS) { toast('Za mało liter'); shake(); return; }
+            const guess = grid[row].join('');
+            if (!ALLOWED.has(guess)) { toast('Nie ma takiego słowa w słowniku'); shake(); return; }
+            const status = score(guess);
+            const r = row, rowEl = boardEl.children[r];
+            busy = true;
+            const step = GryKit.reducedMotion ? 0 : 260;
+            const flip = GryKit.reducedMotion ? 0 : 480;
+            for (let i = 0; i < COLS; i++) {
+                const t = tile(r, i);
                 later(() => {
-                    tile.classList.add(status[i]);
-                    if (status[i] === 'correct') key.className = 'key correct';
-                    else if (status[i] === 'present' && !key.classList.contains('correct')) key.className = 'key present';
-                    else if (!key.classList.contains('correct') && !key.classList.contains('present')) key.className = 'key absent';
-                }, i * 200);
+                    t.style.setProperty('--flip', flip + 'ms');
+                    t.classList.remove('pop'); t.classList.add('flip');
+                    GryKit.sfx.play('tap', { pitch: status[i] === 'correct' ? 1.25 : status[i] === 'present' ? 1.05 : 0.8 });
+                }, i * step);
+                later(() => t.classList.add(status[i]), i * step + flip / 2);
             }
-
-            if (guess === secret) {
-                gameOver = true;
-                later(() => { message.textContent = 'Wygrałeś! Możesz zacząć nową grę.'; }, 1000);
-            } else if (currentRow === 5) {
-                gameOver = true;
-                const answer = secret;
-                later(() => { message.textContent = `Koniec! Słowo to: ${answer}`; }, 1000);
-            }
-
-            currentRow++;
-            currentCol = 0;
+            rowEl.setAttribute('aria-label', `Próba ${r + 1}: ${guess} – ` + status.map((s, i) => `${guess[i]} ${WORDS[s]}`).join(', '));
+            const total = (COLS - 1) * step + flip;
+            later(() => {
+                [...rowEl.children].forEach(t => t.classList.remove('flip'));
+                for (let i = 0; i < COLS; i++) {
+                    const ch = guess[i], prev = keyState[ch];
+                    if (!prev || RANK[status[i]] > RANK[prev]) keyState[ch] = status[i];
+                }
+                keyboardEl.querySelectorAll('[data-key]').forEach(b => {
+                    const s = keyState[b.dataset.key];
+                    b.classList.remove('correct', 'present', 'absent');
+                    if (s) b.classList.add(s);
+                });
+                message.textContent = rowEl.getAttribute('aria-label');
+                busy = false;
+                if (guess === secret) win(r);
+                else if (r === ROWS - 1) lose();
+                else { row++; col = 0; markRow(); }
+            }, total);
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.target?.matches?.('input, textarea, select, [contenteditable]')) return;
-            const key = e.key.toUpperCase();
-            if (key === 'ENTER' && e.target?.closest?.('button, a')) return;
-            if (key === 'ENTER') { e.preventDefault(); if (!e.repeat) submit(); }
-            else if (key === 'BACKSPACE') { e.preventDefault(); backspace(); }
-            else if (/^[A-Z]$/.test(key)) { e.preventDefault(); type(key); }
+        function win(r) {
+            done = true; markRow();
+            const tries = r + 1;
+            record(true, tries);
+            const tiles = [...boardEl.children[r].children];
+            tiles.forEach((t, i) => { t.style.setProperty('--d', i * 90 + 'ms'); t.classList.add('bounce'); });
+            tiles.forEach((t, i) => later(() => GryKit.fx.burstAt(t, { color: ['#3f9d68', '#c99a2c', '#b8d58e', '#ffffff'], count: 14, spread: 70, square: true }), 250 + i * 90));
+            toast(PRAISE[r], 1600);
+            GryKit.over({
+                score: tries, win: true, delay: 1500, icon: '🎉', title: PRAISE[r], scoreLabel: 'Próby',
+                text: `Hasło: ${secret}`, html: statsHtml(tries)
+            });
+        }
+        function lose() {
+            done = true; markRow();
+            record(false, 0);
+            GryKit.fx.shake(boardEl, 6, 320);
+            toast(secret, 2400);
+            GryKit.over({ score: 0, showScore: false, icon: '📖', title: 'Tym razem nie', delay: 1300, html: `<p style="margin:0 0 4px">Hasło to <b>${secret}</b>.</p>` + statsHtml(0) });
+        }
+
+        /* ---------- klawiatura fizyczna ---------- */
+        document.addEventListener('keydown', e => {
+            if (e.isComposing || e.target?.closest?.('input, textarea, select, [contenteditable]')) return;
+            const raw = e.key || '';
+            const up = raw.length === 1 ? raw.toLocaleUpperCase('pl') : raw;
+            // Polskie znaki przychodzą z AltGr (w Windows: Ctrl+Alt) – przyjmujemy je mimo modyfikatorów.
+            if (PL.test(up)) { e.preventDefault(); type(up); return; }
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            if (raw === 'Enter') {
+                if (e.target?.closest?.('button, a')) return;
+                e.preventDefault(); if (!e.repeat) submit();
+            } else if (raw === 'Backspace') { e.preventDefault(); backspace(); }
+            else if (/^[A-Z]$/.test(up)) { if (GryKit.playing) e.preventDefault(); type(up); }
         });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
 
-        // Theme Logic
-        // Theme is handled by assets/workshop/shell.js.
-
-        init();
+        GryKit.init({
+            id: 'wordle',
+            title: 'Wordle',
+            icon: '🟩',
+            howTo: ['Odgadnij polskie słowo z 5 liter w 6 próbach.',
+                '<b style="color:var(--w-correct)">Zielona</b> – dobra litera w dobrym miejscu, <b style="color:var(--w-present)">żółta</b> – litera jest w słowie gdzie indziej.',
+                'Każda próba musi być prawdziwym słowem.'],
+            controls: 'Pisz z klawiatury (<kbd>AltGr</kbd> + litera = ą, ę, ł…) · <kbd>Enter</kbd> sprawdź · <kbd>⌫</kbd> usuń',
+            board: '#stage',
+            hud: { best: '#st-best' },
+            scoreLabel: 'Próby',
+            bestLabel: 'Rekord',
+            lowerIsBetter: true,
+            pausable: false,
+            fit: { el: document.getElementById('play'), zoom: true, max: 1.15, min: 0.5, within: document.querySelector('.game-container') },
+            onStart() { newGame(); }
+        });
+        buildBoard(); buildKeyboard(); showStats();
+    })();
     </script>
 </body>
 
