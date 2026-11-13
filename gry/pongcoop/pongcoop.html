@@ -1,57 +1,22 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pong Coop – Max Playground</title>
-    <meta name="description" content="Współpracujcie przy jednym ekranie, aby utrzymać piłkę w grze. Dwóch graczy, dwie paletki i dużo emocji!" />
-    <link rel="stylesheet" href="../../assets/css/site.css" />
-    <link rel="stylesheet" href="../../assets/css/game-page.css" />
-    <link rel="stylesheet" href="pongcoop.css?v=20261001-overhaul2" />
-    <script defer src="../../assets/js/site.js?v=20261001-overhaul2"></script>
-    <script defer src="pongcoop.js?v=20261001-overhaul2"></script>
-<link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
-<script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
-<script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ping-pong – przekierowanie</title>
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url=../pong/pong.html?tryb=coop">
+<link rel="canonical" href="../pong/pong.html">
+<script>
+  // Dawny Pong Co-op jest teraz trybem gry Ping-pong. Zachowaj parametry (np. theme/variant z pulpitu) i hash.
+  (function () {
+    var q = new URLSearchParams(location.search);
+    if (!q.has('tryb')) q.set('tryb', 'coop');
+    location.replace('../pong/pong.html?' + q.toString() + location.hash);
+  })();
+</script>
 </head>
-<body class="game-page site-shell game-shell" data-root="../../">
-<a class="skip-link" href="#main-content">Przejdź do treści</a>
-    <header class="site-header" data-site-shell>
-<nav class="site-nav" aria-label="Główna nawigacja">
-<a class="site-brand" href="../../index.html" aria-label="snakex21, strona główna"><span class="brand-mark" aria-hidden="true">s<span>×</span></span><span>snakex21<span class="brand-note">osobisty warsztat</span></span></a>
-<div class="site-links"><a href="../../index.html">Start</a><a href="../../Programy/programy.html">Narzędzia</a><a href="../../gry/gry.html" aria-current="location">Gry</a><a href="../../LinkHub/index.html">LinkHub</a><a href="../../muzyka/muzyka.html">Muzyka</a><a href="../../filmy/filmy glowna.html">Filmy</a></div>
-<button class="theme-button" id="theme-toggle" type="button" aria-label="Włącz ciemny motyw" aria-pressed="false">◐</button>
-</nav>
-<div class="site-context"><a href="../../gry/gry.html">← Wszystkie gry</a></div>
-</header>
-
-    <main id="main-content" tabindex="-1">
-        <section class="game-stage game-stage--pongcoop">
-            <header class="game-stage__header">
-                <div>
-                    <span class="game-eyebrow">Kooperacyjny klasyk</span>
-                    <h1>Pong Coop</h1>
-                    <p>Współpracujcie przy jednej klawiaturze – plansza gry wypełnia całe okno, więc liczy się refleks i komunikacja.</p>
-                </div>
-            </header>
-            <div class="game-stage__board">
-                <div class="game-board">
-                    <div class="game-board__inner pongcoop-game">
-                        <div class="pongcoop-stage" role="application" aria-label="Plansza gry Pong Coop">
-                            <canvas tabindex="0" id="c" width="640" height="480"></canvas>
-                        </div>
-                        <p id="game-status" role="status">Start lub Enter rozpoczyna mecz do 7 punktów.</p>
-                        <div><button type="button" onclick="startGame()">Start / wznów</button> <button id="pause-game" type="button" onclick="setPaused(!state.paused)">Pauza</button> <button type="button" onclick="restartGame()">Nowy mecz</button></div>
-                        <ul class="pongcoop-controls">
-                            <li>Gracz 1: Q (góra) · A (dół)</li>
-                            <li>Gracz 2: ↑ (góra) · ↓ (dół)</li>
-                            <li>Esc lub P: pauza. Enter: rozpocznij wymianę. Na dotyku steruj paletkami na dwóch połowach planszy.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+<body>
+<p><a href="../pong/pong.html?tryb=coop">Przejdź do gry Ping-pong</a></p>
 </body>
 </html>

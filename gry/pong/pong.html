@@ -3,26 +3,34 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pong - Hub</title>
+    <title>Ping-pong - Hub</title>
+    <meta name="description" content="Ping-pong w trzech trybach: z komputerem, we dwóch na jednej klawiaturze albo we współpracy – utrzymajcie wymianę jak najdłużej.">
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 900px; }
-        .game-bar .kit-tabs { flex: 0 0 auto; }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 960px; }
+        .game-stage { position: relative; }
         #pong-canvas {
-            display: block; width: 100%; max-width: 900px; height: auto;
-            background: #14322a; border: 2px solid var(--shell-border); border-radius: 12px;
-            touch-action: none;
+            display: block; width: 900px; height: 540px; max-width: 100%;
+            background: #17456b; border: 2px solid var(--shell-border); border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(15, 35, 55, .22); touch-action: none; outline: none; cursor: none;
         }
-        #pong-canvas:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 3px; }
-        #round-status:not(:empty)::before { content: " · "; }
-        #round-status { color: var(--shell-text); font-weight: 650; }
-        .hidden { display: none !important; }
+        #pong-canvas:focus-visible { border-color: var(--shell-accent); }
+        .game-status { min-height: 21px; }
+        .game-stat .dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; vertical-align: 1px; }
+        .pong-diff { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: var(--shell-muted); }
+        .pong-diff .kit-tab { min-height: 30px; padding: 0 11px; font-size: 13px; }
+        /* mała plansza: zwarte menu, żeby wszystkie trzy tryby były widoczne bez przewijania nakładki */
+        .gk-compact .pong-diff > span { display: none; }
+        .gk-compact .gk-modes { gap: 6px; }
+        .gk-compact .gk-modes .kit-btn { min-height: 36px; }
+        .gk-compact .gk-modes .kit-btn small { display: none; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -38,373 +46,530 @@
 
     <main class="game-wrapper" id="main-content" tabindex="-1">
         <div class="game-bar">
-            <div class="game-title"><h1>Pong</h1><p>Odbijaj piłkę paletką — kto pierwszy zdobędzie 7 punktów, wygrywa</p></div>
-            <div class="kit-tabs mode-selection" role="group" aria-label="Tryb gry">
-                <button class="kit-tab mode-btn active" type="button" data-mode="ai">vs AI</button>
-                <button class="kit-tab mode-btn" type="button" data-mode="coop">vs Gracz</button>
+            <div class="game-title"><h1>Ping-pong</h1><p>Z komputerem, we dwóch albo razem – mecz do 7 punktów lub najdłuższa wymiana</p></div>
+            <div class="game-stats">
+                <div class="game-stat" id="tile-left"><span><i class="dot" style="background:#ff8352"></i><span id="label-left">Ty</span></span><b id="score-left">0</b></div>
+                <div class="game-stat" id="tile-right"><span><i class="dot" style="background:#ffd166"></i><span id="label-right">Komputer</span></span><b id="score-right">0</b></div>
+                <div class="game-stat" id="tile-rally" hidden><span>Wymiana</span><b id="rally">0</b></div>
+                <div class="game-stat" id="tile-best" hidden><span>Rekord</span><b id="best">0</b></div>
             </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary start-btn" type="button" id="start-btn" onclick="startGame()">Start</button>
-                <button class="kit-btn small primary restart-btn hidden" type="button" id="restart-btn" onclick="restartGame()">Nowy mecz</button>
-                <button type="button" id="pause-game" class="kit-btn small" onclick="setPaused(!paused)">Pauza</button>
+                <button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button>
             </div>
         </div>
 
         <div class="game-stage">
-            <canvas tabindex="0" id="pong-canvas" width="900" height="600" aria-label="Plansza Pong"></canvas>
+            <canvas id="pong-canvas" width="900" height="540" tabindex="0" aria-label="Stół do ping-ponga. Mysz, dotyk, W/S lub strzałki: ruch paletki, P lub Esc: pauza."></canvas>
         </div>
-        <p class="game-status controls" id="controls-text"><span id="control-info">Mysz, dotyk lub ↑/↓ porusza lewą paletką · P: pauza</span><span id="round-status" role="status"></span></p>
+        <p class="game-status" id="game-status" role="status">Wybierz tryb gry, aby zacząć.</p>
     </main>
 
     <script>
-        // Tryb ciemny
-        // Theme is handled by assets/workshop/shell.js.
+    (() => {
+        /* Ping-pong: trzy tryby w jednej grze.
+         *   ai   – lewa paletka gracza (mysz/dotyk/W,S/↑,↓) kontra komputer; mecz do 7 punktów.
+         *   2p   – dwóch graczy na jednej klawiaturze (W/S lub Q/A kontra ↑/↓), dotyk na połówkach stołu.
+         *   coop – obaj gracze wspólnie utrzymują wymianę; każde odbicie = +1, piłka przyspiesza, pierwszy błąd kończy grę.
+         * Fizyka w jednostkach logicznych (W × H) i sekundach, z podkrokami, żeby szybka piłka nie przelatywała przez paletkę. */
+        const W = 900, H = 540, WIN = 7;
+        const PAD_W = 16, PAD_H = 104, PAD_X = 30, BALL_R = 10, BORDER = 18;
+        const COLORS = { left: '#ff8352', right: '#ffd166' };
+        const MODES = {
+            ai: { label: 'Z komputerem', desc: 'Mecz do 7 punktów · mysz, dotyk albo W/S' },
+            '2p': { label: '2 graczy', desc: 'Jedna klawiatura: W/S kontra ↑/↓' },
+            coop: { label: 'Współpraca', desc: 'Razem utrzymajcie wymianę jak najdłużej' }
+        };
+        const ALIASES = { ai: 'ai', komputer: 'ai', solo: 'ai', '2p': '2p', pvp: '2p', vs: '2p', dwoch: '2p', coop: 'coop', wspolpraca: 'coop', 'co-op': 'coop' };
+        const DIFF = {
+            easy: { label: 'Łatwy', speed: 300, react: 0.22, error: 46, predict: false, serve: 380 },
+            normal: { label: 'Średni', speed: 470, react: 0.12, error: 26, predict: true, serve: 420 },
+            hard: { label: 'Trudny', speed: 700, react: 0.05, error: 12, predict: true, serve: 460 }
+        };
 
-        // Logika gry Pong
         const canvas = document.getElementById('pong-canvas');
         const ctx = canvas.getContext('2d');
-        const controlInfo = document.getElementById('control-info');
-        const startBtn = document.getElementById('start-btn');
-        const restartBtn = document.getElementById('restart-btn');
+        const statusEl = document.getElementById('game-status');
+        const el = id => document.getElementById(id);
+        const tiles = { left: el('tile-left'), right: el('tile-right'), rally: el('tile-rally'), best: el('tile-best') };
 
-        let gameMode = 'ai'; // 'ai' lub 'coop'
-        let gameStarted = false;
-        let scoringCooldown = false;
-        let gameInterval = null;
-        let serveTimeout = null;
-        let matchRestartTimeout = null;
-        let paused = false, pendingServe = false, pendingWin = false, timerGeneration = 0, serveGeneration = 0;
+        const store = GryKit.store;
+        let diff = DIFF[store.get('gry:pong:diff')] ? store.get('gry:pong:diff') : 'normal';
 
-        // Paletki
-        const paddleWidth = 30;
-        const paddleHeight = 180;
+        // ?tryb=ai|2p|coop – zaznacza tryb na ekranie startu (pierwszy przycisk, Enter go uruchamia).
+        const params = new URLSearchParams(location.search);
+        const wanted = ALIASES[(params.get('tryb') || params.get('mode') || '').toLowerCase()] || null;
+        const order = wanted ? [wanted, ...Object.keys(MODES).filter(m => m !== wanted)] : Object.keys(MODES);
 
-        const leftPaddle = {
-            x: 0,
-            y: canvas.height / 2 - paddleHeight / 2,
-            width: paddleWidth,
-            height: paddleHeight,
-            color: '#f1ede2',
-            score: 0,
-            dy: 0
-        };
+        let mode = wanted || 'ai';
+        let left, right, ball, trail, serveT, serveDir, rally, running, demo, last, netPulse, scoreFlash;
 
-        const rightPaddle = {
-            x: canvas.width - paddleWidth,
-            y: canvas.height / 2 - paddleHeight / 2,
-            width: paddleWidth,
-            height: paddleHeight,
-            color: '#f1ede2',
-            score: 0,
-            dy: 0
-        };
-
-        // Piłka
-        const ball = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 20,
-            speed: 10,
-            velocityX: 0,
-            velocityY: 0,
-            color: '#f0a04b'
-        };
-
-        // Rysowanie
-        function drawRect(x, y, w, h, color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y, w, h);
+        function paddle(side) {
+            return { side, x: side === 'left' ? PAD_X : W - PAD_X - PAD_W, y: H / 2 - PAD_H / 2, vy: 0, target: null, flash: 0, score: 0, aiErr: 0 };
+        }
+        function reset() {
+            left = paddle('left'); right = paddle('right');
+            ball = { x: W / 2, y: H / 2, vx: 0, vy: 0, speed: 0, spin: 0 };
+            trail = []; rally = 0; netPulse = 0; scoreFlash = { left: 0, right: 0 };
+            serve(Math.random() < 0.5 ? -1 : 1, 0.9);
+            syncHud();
+        }
+        function serve(dir, delay) {
+            ball.x = W / 2; ball.y = H / 2 + (Math.random() * 2 - 1) * 60;
+            ball.vx = ball.vy = 0; ball.spin = 0; trail = [];
+            serveDir = dir; serveT = delay;
+        }
+        function launch() {
+            const base = mode === 'coop' ? 380 : (mode === 'ai' ? DIFF[diff].serve : 420);
+            const a = (Math.random() * 2 - 1) * 0.42;
+            ball.speed = base;
+            ball.vx = Math.cos(a) * base * serveDir;
+            ball.vy = Math.sin(a) * base;
+            if (!demo) GryKit.sfx.play('tap');
         }
 
-        function drawCircle(x, y, r, color) {
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fill();
+        /* ---------- HUD ---------- */
+        function bestOf(m) { const v = parseFloat(store.get('gry:pong:best:' + m)); return isFinite(v) ? v : 0; }
+        function layoutHud() {
+            const coop = mode === 'coop';
+            tiles.left.hidden = tiles.right.hidden = coop;
+            tiles.rally.hidden = tiles.best.hidden = !coop;
+            el('label-left').textContent = mode === 'ai' ? 'Ty' : 'Lewy';
+            el('label-right').textContent = mode === 'ai' ? 'Komputer' : 'Prawy';
+            if (coop) el('best').textContent = bestOf('coop');
+            statusEl.textContent = mode === 'ai'
+                ? 'Mysz, dotyk, W/S lub ↑/↓: lewa paletka · P / Esc: pauza'
+                : 'Lewa paletka: W/S lub Q/A · prawa: ↑/↓ · dotyk: każda połowa stołu osobno · P / Esc: pauza';
+        }
+        function syncHud() {
+            el('score-left').textContent = left.score;
+            el('score-right').textContent = right.score;
         }
 
-        function drawNet() {
-            for (let i = 0; i <= canvas.height; i += 35) {
-                drawRect(canvas.width / 2 - 2, i, 4, 22, 'rgba(255,255,255,0.28)');
-            }
-        }
-
-        function drawText(text, x, y) {
-            ctx.fillStyle = 'rgba(255,255,255,0.32)';
-            ctx.font = '700 96px Inter, system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(text, x, y);
-            ctx.textAlign = 'left';
-        }
-
-        // Kontrola myszą (tryb AI)
-        function moveMouse(evt) {
-            if (gameMode === 'ai' && gameStarted && !paused) {
-                const rect = canvas.getBoundingClientRect();
-                if (rect.height <= 0) return;
-                const pointerY = (evt.clientY - rect.top) * canvas.height / rect.height;
-                leftPaddle.y = Math.max(0, Math.min(canvas.height - leftPaddle.height,
-                    pointerY - leftPaddle.height / 2));
-            }
-        }
-        canvas.addEventListener('mousemove', moveMouse);
-        canvas.addEventListener('pointerdown', e => { e.preventDefault();canvas.setPointerCapture?.(e.pointerId);movePointer(e); });
-        canvas.addEventListener('pointermove', e => { if(e.pointerType==='mouse'||e.buttons||e.pressure)movePointer(e); });
-        function movePointer(e) {
-            if(gameMode==='ai'){moveMouse(e);return;}
-            if(!gameStarted||paused)return;
-            const rect=canvas.getBoundingClientRect();if(!rect.height||!rect.width)return;
-            const paddle=e.clientX-rect.left<rect.width/2?leftPaddle:rightPaddle;
-            paddle.y=Math.max(0,Math.min(canvas.height-paddle.height,(e.clientY-rect.top)*canvas.height/rect.height-paddle.height/2));
-        }
-        function setPaused(value) {
-            if(!gameStarted)return;
-            const next=!!value;if(next===paused)return;paused=next;
-            if (!paused) canvas.focus();
-            Object.keys(keys).forEach(key=>keys[key]=false);
-            document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';
-            document.getElementById('round-status').textContent=paused?'Pauza':'';
-            if(paused){pendingWin=matchRestartTimeout!==null;pendingServe=serveTimeout!==null;clearTimeout(matchRestartTimeout);clearTimeout(serveTimeout);matchRestartTimeout=null;serveTimeout=null;++timerGeneration;++serveGeneration;}
-            else if(pendingWin){pendingWin=false;scheduleMatchRestart();}
-            else if(pendingServe){pendingServe=false;resetBall();}
-        }
-        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);});
-
-        // Kontrola klawiaturą (tryb Coop)
+        /* ---------- sterowanie ---------- */
         const keys = {};
-        document.addEventListener('keydown', (e) => {
-            if(e.altKey||e.ctrlKey||e.metaKey||e.target?.closest?.('header,a,input,textarea,select'))return;
-            if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){e.preventDefault();setPaused(!paused);return;}
-            if(!e.target?.closest?.('button')&&['ArrowUp','ArrowDown','w','W','s','S'].includes(e.key)){e.preventDefault();keys[e.key] = true;}
+        const LEFT_UP = ['KeyW', 'KeyQ'], LEFT_DOWN = ['KeyS', 'KeyA'];
+        document.addEventListener('keydown', e => {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.target.closest?.('input,textarea,select,header,a')) return;
+            if (!['KeyW', 'KeyS', 'KeyQ', 'KeyA', 'ArrowUp', 'ArrowDown'].includes(e.code)) return;
+            if (!GryKit.playing) return;
+            e.preventDefault();
+            keys[e.code] = true;
+            if (mode === 'ai') left.target = null;
         });
+        document.addEventListener('keyup', e => { keys[e.code] = false; });
+        window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
-        document.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
+        // Wskaźniki: w trybie z komputerem mysz/dotyk w dowolnym miejscu sterują lewą paletką,
+        // w trybach dwuosobowych każdy palec steruje paletką po swojej stronie stołu.
+        const pointers = new Map();
+        function pointerSide(e) {
+            if (mode === 'ai') return 'left';
+            return GryKit.pointer(canvas, e).x < W / 2 ? 'left' : 'right';
+        }
+        function aim(e, side) {
+            if (!GryKit.playing) return;
+            const p = side === 'left' ? left : right;
+            p.target = GryKit.pointer(canvas, e).y - PAD_H / 2;
+        }
+        canvas.addEventListener('pointerdown', e => {
+            if (!GryKit.playing) return;
+            e.preventDefault();
+            canvas.setPointerCapture?.(e.pointerId);
+            const side = pointerSide(e);
+            pointers.set(e.pointerId, side);
+            aim(e, side);
         });
+        canvas.addEventListener('pointermove', e => {
+            if (pointers.has(e.pointerId)) aim(e, pointers.get(e.pointerId));
+            else if (e.pointerType === 'mouse' && mode === 'ai') aim(e, 'left');
+        });
+        const release = e => pointers.delete(e.pointerId);
+        canvas.addEventListener('pointerup', release);
+        canvas.addEventListener('pointercancel', release);
+        canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+        el('new-game').addEventListener('click', () => GryKit.start(GryKit.mode || mode));
 
-        // Kolizja
-        function collision(b, p) {
-            return b.x + b.radius > p.x &&
-                   b.x - b.radius < p.x + p.width &&
-                   b.y + b.radius > p.y &&
-                   b.y - b.radius < p.y + p.height;
-        }
-
-        // Stare opóźnienia nie mogą zmieniać nowej gry ani ekranu startowego.
-        function clearPendingTimers() {
-            ++timerGeneration;++serveGeneration;pendingServe=false;pendingWin=false;
-            clearTimeout(serveTimeout);
-            clearTimeout(matchRestartTimeout);
-            serveTimeout = null;
-            matchRestartTimeout = null;
-        }
-
-        // Reset piłki z cooldownem
-        function resetBall() {
-            clearTimeout(serveTimeout);
-            scoringCooldown = true;
-            ball.velocityX = 0;
-            ball.velocityY = 0;
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            ball.speed = 10;
-
-            // Pauza 2 sekundy przed następną rundą
-            const version=timerGeneration, serve=++serveGeneration;
-            serveTimeout = setTimeout(() => {
-                if(version!==timerGeneration||serve!==serveGeneration||paused)return;
-                serveTimeout = null;
-                if (!gameStarted) return;
-                ball.velocityX = (Math.random() > 0.5 ? 1 : -1) * 5;
-                ball.velocityY = (Math.random() * 4) - 2;
-                scoringCooldown = false;
-            }, 2000);
-        }
-
-        // Start gry
-        function startGame() {
-            if(gameStarted)return;
-            gameStarted = true;paused=false;canvas.focus();
-            document.getElementById("pause-game").textContent="Pauza";
-            startBtn.classList.add('hidden');
-            restartBtn.classList.remove('hidden');
-            ball.velocityX = 5;
-            ball.velocityY = 3;
-
-            if (!gameInterval) {
-                gameInterval = setInterval(gameLoop, 1000 / 50);
-            }
-        }
-
-        // Restart gry
-        function restartGame() {
-            clearPendingTimers();paused=false;canvas.focus();
-            document.getElementById("pause-game").textContent="Pauza";document.getElementById("round-status").textContent="Nowa runda";
-            leftPaddle.score = 0;
-            rightPaddle.score = 0;
-            ball.speed = 10;
-            scoringCooldown = false;
-            resetBall();
-        }
-
-        function scheduleMatchRestart() {
-            const version=timerGeneration;
-            matchRestartTimeout=setTimeout(()=>{if(version!==timerGeneration||paused)return;matchRestartTimeout=null;restartGame();},2000);
-        }
-        // Update
-        function update() {
-            if (!gameStarted || paused || document.hidden) return;
-
-            // Ruch piłki tylko gdy nie ma cooldowna
-            if (!scoringCooldown) {
-                ball.x += ball.velocityX;
-                ball.y += ball.velocityY;
-            }
-
-            if (gameMode === 'ai') {
-                if(keys.ArrowUp||keys.w||keys.W)leftPaddle.y-=7;
-                if(keys.ArrowDown||keys.s||keys.S)leftPaddle.y+=7;
-                // AI dla prawej paletki
-                let AILevel = 0.1;
-                rightPaddle.y += (ball.y - (rightPaddle.y + rightPaddle.height / 2)) * AILevel;
+        /* ---------- logika ---------- */
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        function movePlayer(p, up, down, dt) {
+            const key = (down ? 1 : 0) - (up ? 1 : 0);
+            if (key) {
+                p.target = null;
+                p.vy = clamp(p.vy + key * 5200 * dt, -620, 620);
+            } else if (p.target != null) {
+                const t = clamp(p.target, 0, H - PAD_H);
+                const nv = (t - p.y) * 22;
+                p.vy = clamp(nv, -1800, 1800);
             } else {
-                // Kontrola klawiaturą
-                // Lewa paletka: W/S
-                if (keys['w'] || keys['W']) leftPaddle.dy = -5;
-                else if (keys['s'] || keys['S']) leftPaddle.dy = 5;
-                else leftPaddle.dy = 0;
-
-                // Prawa paletka: ↑/↓
-                if (keys['ArrowUp']) rightPaddle.dy = -5;
-                else if (keys['ArrowDown']) rightPaddle.dy = 5;
-                else rightPaddle.dy = 0;
-
-                leftPaddle.y += leftPaddle.dy;
-                rightPaddle.y += rightPaddle.dy;
+                p.vy *= Math.pow(0.0005, dt);
             }
+            p.y += p.vy * dt;
+            if (p.y < 0 || p.y > H - PAD_H) { p.y = clamp(p.y, 0, H - PAD_H); p.vy = 0; }
+        }
+        function predictY(p) {
+            // Gdzie piłka dotrze do linii paletki – z odbiciami od band.
+            if ((p.side === 'right') !== (ball.vx > 0) || !ball.vx) return H / 2;
+            const lineX = p.side === 'right' ? p.x - BALL_R : p.x + PAD_W + BALL_R;
+            const t = (lineX - ball.x) / ball.vx;
+            const lo = BORDER + BALL_R, span = H - 2 * (BORDER + BALL_R);
+            let y = ball.y + ball.vy * t - lo;
+            y = ((y % (2 * span)) + 2 * span) % (2 * span);
+            return lo + (y > span ? 2 * span - y : y);
+        }
+        function moveAI(p, dt, level) {
+            const L = DIFF[level];
+            const coming = (p.side === 'right') === (ball.vx > 0) && ball.vx !== 0;
+            let goal = H / 2;
+            if (coming) goal = (L.predict ? predictY(p) : ball.y) + p.aiErr;
+            // reakcja z opóźnieniem: cel zbliża się wykładniczo
+            p.aim = p.aim == null ? goal : p.aim + (goal - p.aim) * (1 - Math.pow(L.react, dt * 8));
+            const centre = p.y + PAD_H / 2;
+            const dz = p.aim - centre;
+            const step = clamp(dz * 9, -L.speed, L.speed) * (coming ? 1 : 0.55);
+            p.vy = step;
+            p.y = clamp(p.y + step * dt, 0, H - PAD_H);
+        }
 
-            // Ograniczenia palet
-            leftPaddle.y = Math.max(0, Math.min(canvas.height - leftPaddle.height, leftPaddle.y));
-            rightPaddle.y = Math.max(0, Math.min(canvas.height - rightPaddle.height, rightPaddle.y));
-
-            // Odbicie od góry i dołu
-            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
-                ball.velocityY = -ball.velocityY;
-            }
-
-            // Kolizja z paletkami
-            let player = (ball.x < canvas.width / 2) ? leftPaddle : rightPaddle;
-            if (collision(ball, player) && !scoringCooldown) {
-                ball.velocityX = -ball.velocityX;
-
-                let cp = ball.y - (player.y + player.height / 2);
-                cp = cp / (player.height / 2);
-                let angleRad = cp * Math.PI / 4;
-                let direction = (ball.x < canvas.width / 2 ? 1 : -1);
-                ball.velocityX = direction * ball.speed * Math.cos(angleRad);
-                ball.velocityY = ball.speed * Math.sin(angleRad);
-                ball.speed = Math.min(24, ball.speed + 0.5);
-            }
-
-            // Punkty - tylko gdy nie ma cooldowna
-            if (!scoringCooldown) {
-                if (ball.x - ball.radius < 0) {
-                    rightPaddle.score++;
-                    resetBall();
-                } else if (ball.x + ball.radius > canvas.width) {
-                    leftPaddle.score++;
-                    resetBall();
+        function hitPaddle(p) {
+            const rel = clamp((ball.y - (p.y + PAD_H / 2)) / (PAD_H / 2 + BALL_R), -1, 1);
+            const ang = rel * 1.0 + clamp(p.vy / 2400, -0.25, 0.25);
+            const up = mode === 'coop' ? 1.045 : 1.055;
+            ball.speed = Math.min(mode === 'coop' ? 1150 : 1050, ball.speed * up + 6);
+            const dir = p.side === 'left' ? 1 : -1;
+            ball.vx = Math.cos(ang) * ball.speed * dir;
+            ball.vy = Math.sin(ang) * ball.speed;
+            ball.spin = clamp(p.vy / 900, -1, 1);
+            ball.x = p.side === 'left' ? p.x + PAD_W + BALL_R : p.x - BALL_R;
+            p.flash = 1;
+            other(p).aiErr = (Math.random() * 2 - 1) * DIFF[diff].error;
+            if (demo) return;
+            rally++;
+            const px = p.side === 'left' ? p.x + PAD_W : p.x;
+            GryKit.sfx.play('hit', { pitch: 1 + Math.min(0.6, (ball.speed - 380) / 1400) });
+            GryKit.fx.burst(px, ball.y, { on: canvas, color: [COLORS[p.side], '#ffffff'], count: 7, spread: 30, size: 5, gravity: 0 });
+            if (mode === 'coop') {
+                GryKit.score(rally);
+                el('rally').textContent = rally;
+                GryKit.fx.float(px + dir * 26, ball.y - 18, '+1', { on: canvas, color: COLORS[p.side] });
+                if (rally % 10 === 0) {
+                    GryKit.sfx.play('coin');
+                    GryKit.fx.pop(tiles.rally, 1.2);
+                    GryKit.fx.flash('#ffffff', { on: canvas, strength: 0.18 });
+                    statusEl.textContent = `${rally} odbić z rzędu – tak trzymać!`;
                 }
+                if (rally > bestOf('coop')) el('best').textContent = rally;
             }
+        }
+        const other = p => (p === left ? right : left);
 
-            // Wygranie gry
-            if ((leftPaddle.score >= 7 || rightPaddle.score >= 7) && matchRestartTimeout === null) {
-                clearTimeout(serveTimeout);
-                serveTimeout = null;
-                document.getElementById("round-status").textContent=leftPaddle.score>=7?"Wygrywa lewy gracz!":"Wygrywa prawy gracz!";
-                scheduleMatchRestart();
+        function point(scorer, exitY) {
+            const loser = scorer === 'left' ? 'right' : 'left';
+            const ex = loser === 'left' ? 8 : W - 8;
+            const ey = clamp(exitY, BORDER, H - BORDER);
+            if (demo) { serve(scorer === 'left' ? 1 : -1, 0.6); return; }
+            GryKit.fx.burst(ex, ey, { on: canvas, color: [COLORS[loser], '#ffffff', '#9fd0ff'], count: 18, spread: 60 });
+            GryKit.fx.shake(canvas, 7, 300);
+            if (mode === 'coop') {
+                running = false;
+                GryKit.fx.flash('#d05c5c', { on: canvas, strength: 0.35 });
+                GryKit.sfx.play('boom');
+                const r = rally;
+                statusEl.textContent = `Koniec wymiany: ${r}.`;
+                GryKit.over({
+                    score: r, scoreLabel: 'Wymiana', delay: 600,
+                    title: r >= 30 ? 'Świetna współpraca!' : 'Piłka uciekła',
+                    icon: r >= 30 ? '🤝' : '🏓',
+                    text: r === 0 ? 'Piłka minęła paletkę, zanim padło pierwsze odbicie.'
+                        : `Wspólna wymiana trwała ${r} ${r === 1 ? 'odbicie' : (r % 10 >= 2 && r % 10 <= 4 && (r % 100 < 10 || r % 100 >= 20) ? 'odbicia' : 'odbić')}.`
+                });
+                return;
+            }
+            const p = scorer === 'left' ? left : right;
+            p.score++;
+            scoreFlash[scorer] = 1;
+            syncHud();
+            GryKit.fx.pop(scorer === 'left' ? tiles.left : tiles.right, 1.2);
+            GryKit.fx.float(scorer === 'left' ? W / 4 : W * 3 / 4, H / 2 - 20, '+1', { on: canvas, color: COLORS[scorer], size: 34, rise: 60 });
+            if (p.score >= WIN) {
+                running = false;
+                const ai = mode === 'ai';
+                const youWin = scorer === 'left';
+                const sc = `${left.score} : ${right.score}`;
+                statusEl.textContent = `Koniec meczu ${sc}. Zagraj ponownie albo wybierz inny tryb w menu.`;
+                GryKit.over({
+                    win: ai ? youWin : true, record: false, showScore: false, delay: 500,
+                    title: ai ? (youWin ? 'Wygrana!' : 'Przegrana') : (youWin ? 'Wygrywa lewy gracz!' : 'Wygrywa prawy gracz!'),
+                    icon: ai ? (youWin ? '🏆' : '🏓') : '🏆',
+                    html: `<p style="margin:0;font-size:30px;font-weight:800;letter-spacing:2px">${sc}</p>` +
+                        (ai ? `<p style="margin:4px 0 0">${youWin ? 'Pokonujesz komputer' : 'Tym razem wygrywa komputer'} – poziom: ${DIFF[diff].label.toLowerCase()}.</p>` : '')
+                });
+                return;
+            }
+            GryKit.sfx.play('score');
+            serve(scorer === 'left' ? 1 : -1, 1.0);
+            statusEl.textContent = mode === 'ai'
+                ? (scorer === 'left' ? 'Punkt dla Ciebie!' : 'Punkt dla komputera.') + ` ${left.score} : ${right.score}`
+                : `Punkt dla ${scorer === 'left' ? 'lewego' : 'prawego'} gracza. ${left.score} : ${right.score}`;
+        }
+
+        function step(dt) {
+            // paletki
+            if (demo) { moveAI(left, dt, 'normal'); moveAI(right, dt, 'normal'); }
+            else if (mode === 'ai') {
+                movePlayer(left, LEFT_UP.some(k => keys[k]) || keys.ArrowUp, LEFT_DOWN.some(k => keys[k]) || keys.ArrowDown, dt);
+                moveAI(right, dt, diff);
+            } else {
+                movePlayer(left, LEFT_UP.some(k => keys[k]), LEFT_DOWN.some(k => keys[k]), dt);
+                movePlayer(right, keys.ArrowUp, keys.ArrowDown, dt);
+            }
+            // serwis
+            if (serveT > 0) {
+                serveT -= dt;
+                if (serveT <= 0) launch();
+                return;
+            }
+            // piłka – podkroki
+            const n = Math.max(1, Math.ceil(ball.speed * dt / 6));
+            const h = dt / n;
+            for (let i = 0; i < n; i++) {
+                ball.vy += ball.spin * 160 * h;
+                ball.x += ball.vx * h; ball.y += ball.vy * h;
+                if (ball.y < BORDER + BALL_R) { ball.y = BORDER + BALL_R; ball.vy = Math.abs(ball.vy); wall(); }
+                if (ball.y > H - BORDER - BALL_R) { ball.y = H - BORDER - BALL_R; ball.vy = -Math.abs(ball.vy); wall(); }
+                for (const p of [left, right]) {
+                    const moving = p.side === 'left' ? ball.vx < 0 : ball.vx > 0;
+                    if (!moving) continue;
+                    const front = p.side === 'left' ? p.x + PAD_W : p.x;
+                    const inX = p.side === 'left' ? ball.x - BALL_R <= front && ball.x >= p.x - 4 : ball.x + BALL_R >= front && ball.x <= p.x + PAD_W + 4;
+                    if (inX && ball.y + BALL_R > p.y && ball.y - BALL_R < p.y + PAD_H) { hitPaddle(p); break; }
+                }
+                if (ball.x < -BALL_R * 2) { point('right', ball.y); return; }
+                if (ball.x > W + BALL_R * 2) { point('left', ball.y); return; }
+            }
+            ball.spin *= Math.pow(0.4, dt);
+        }
+        function wall() {
+            if (demo) return;
+            GryKit.sfx.play('bounce', { pitch: 1.2 });
+        }
+
+        /* ---------- rysowanie ---------- */
+        function roundRect(x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+        }
+        let tableCache = null;
+        function drawTable() {
+            if (!tableCache || tableCache.r !== GryKit.ratio(canvas)) {
+                // statyczne tło stołu rysowane raz do bufora
+                const r = GryKit.ratio(canvas);
+                const off = document.createElement('canvas');
+                off.width = Math.round(W * r); off.height = Math.round(H * r);
+                const c = off.getContext('2d');
+                c.scale(r, r);
+                const g = c.createLinearGradient(0, 0, 0, H);
+                g.addColorStop(0, '#1d5683'); g.addColorStop(1, '#143f63');
+                c.fillStyle = g; c.fillRect(0, 0, W, H);
+                // delikatne światło lampy nad środkiem stołu
+                const lamp = c.createRadialGradient(W / 2, H * 0.38, 20, W / 2, H * 0.45, W * 0.62);
+                lamp.addColorStop(0, 'rgba(255,255,255,.16)'); lamp.addColorStop(0.5, 'rgba(255,255,255,.05)'); lamp.addColorStop(1, 'rgba(0,0,0,.28)');
+                c.fillStyle = lamp; c.fillRect(0, 0, W, H);
+                // drobna faktura blatu
+                c.fillStyle = 'rgba(255,255,255,.025)';
+                for (let i = 0; i < 900; i++) c.fillRect((i * 97.13) % W, (i * 53.71 + (i % 7) * 13) % H, 1.2, 1.2);
+                // linie: obwód i linia środkowa (dzieli stół na pola serwisowe)
+                c.strokeStyle = 'rgba(255,255,255,.88)'; c.lineWidth = 4;
+                c.strokeRect(BORDER - 2, BORDER - 2, W - 2 * BORDER + 4, H - 2 * BORDER + 4);
+                c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 2;
+                c.beginPath(); c.moveTo(BORDER, H / 2); c.lineTo(W - BORDER, H / 2); c.stroke();
+                tableCache = { r, off };
+            }
+            ctx.drawImage(tableCache.off, 0, 0, W, H);
+        }
+        function drawScoresBg() {
+            if (mode === 'coop' && !demo) {
+                ctx.font = GryKit.font(170, 800);
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'rgba(255,255,255,.07)';
+                ctx.fillText(String(rally), W / 2, H / 2 + 6);
+                return;
+            }
+            if (demo) return;
+            ctx.font = GryKit.font(150, 800);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            for (const side of ['left', 'right']) {
+                const p = side === 'left' ? left : right;
+                const f = scoreFlash[side];
+                ctx.fillStyle = `rgba(255,255,255,${0.07 + f * 0.25})`;
+                ctx.fillText(String(p.score), side === 'left' ? W / 4 : W * 3 / 4, H / 2 + 6);
+            }
+        }
+        function drawNet() {
+            const x = W / 2;
+            // cień siatki na blacie
+            ctx.fillStyle = 'rgba(0,0,0,.22)';
+            ctx.fillRect(x + 3, 4, 7, H - 8);
+            // słupki
+            ctx.fillStyle = '#2b3238';
+            roundRect(x - 7, -2, 14, 10, 3); ctx.fill();
+            roundRect(x - 7, H - 8, 14, 10, 3); ctx.fill();
+            // siatka (oczka)
+            ctx.fillStyle = 'rgba(20,28,36,.55)';
+            ctx.fillRect(x - 4, 6, 8, H - 12);
+            ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let y = 8; y < H - 6; y += 6) { ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y); }
+            ctx.stroke();
+            // biała taśma
+            const glow = netPulse;
+            ctx.fillStyle = `rgba(255,255,255,${0.85 + glow * 0.15})`;
+            ctx.fillRect(x - 1.5, 6, 3, H - 12);
+        }
+        function drawPaddle(p, t) {
+            const col = COLORS[p.side];
+            const squash = 1 + p.flash * 0.18;
+            const w = PAD_W * squash, h = PAD_H * (1 - p.flash * 0.05);
+            const x = p.x + PAD_W / 2 - w / 2, y = p.y + (PAD_H - h) / 2;
+            // cień
+            ctx.fillStyle = 'rgba(0,0,0,.3)';
+            roundRect(x + 5, y + 7, w, h, 8); ctx.fill();
+            ctx.save();
+            if (p.flash > 0) { ctx.shadowColor = col; ctx.shadowBlur = 26 * p.flash; }
+            const g = ctx.createLinearGradient(x, 0, x + w, 0);
+            g.addColorStop(0, shade(col, -0.18)); g.addColorStop(0.45, col); g.addColorStop(1, shade(col, -0.3));
+            ctx.fillStyle = g;
+            roundRect(x, y, w, h, 8); ctx.fill();
+            ctx.restore();
+            // połysk okładziny
+            ctx.fillStyle = 'rgba(255,255,255,.35)';
+            roundRect(x + 3, y + 6, 3, h - 12, 2); ctx.fill();
+            // błysk przy odbiciu
+            if (p.flash > 0) {
+                ctx.fillStyle = `rgba(255,255,255,${p.flash * 0.7})`;
+                roundRect(x, y, w, h, 8); ctx.fill();
+            }
+        }
+        function shade(hex, k) {
+            const n = parseInt(hex.slice(1), 16);
+            const f = c => Math.round(k < 0 ? c * (1 + k) : c + (255 - c) * k);
+            return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+        }
+        function drawBall(t) {
+            // ślad
+            for (let i = 0; i < trail.length; i++) {
+                const p = trail[i], k = (i + 1) / trail.length;
+                ctx.fillStyle = `rgba(255,236,200,${k * 0.28})`;
+                ctx.beginPath(); ctx.arc(p.x, p.y, BALL_R * (0.35 + 0.6 * k), 0, Math.PI * 2); ctx.fill();
+            }
+            const serving = serveT > 0;
+            const pulse = serving ? 1 + Math.sin(t / 90) * 0.08 : 1;
+            const r = BALL_R * pulse;
+            // cień piłki
+            ctx.fillStyle = 'rgba(0,0,0,.3)';
+            ctx.beginPath(); ctx.ellipse(ball.x + 7, ball.y + 9, r * 1.05, r * 0.8, 0, 0, Math.PI * 2); ctx.fill();
+            const g = ctx.createRadialGradient(ball.x - r * 0.4, ball.y - r * 0.45, r * 0.1, ball.x, ball.y, r);
+            g.addColorStop(0, '#ffffff'); g.addColorStop(0.6, '#fff4e2'); g.addColorStop(1, '#e8c9a0');
+            ctx.fillStyle = g;
+            ctx.beginPath(); ctx.arc(ball.x, ball.y, r, 0, Math.PI * 2); ctx.fill();
+            // pierścień odliczania przed serwisem
+            if (serving && !demo) {
+                ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(ball.x, ball.y, r + 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(0, serveT) / 1.0); ctx.stroke();
+                // strzałka kierunku serwisu
+                ctx.fillStyle = 'rgba(255,255,255,.6)';
+                const ax = ball.x + serveDir * (r + 22);
+                ctx.beginPath(); ctx.moveTo(ax + serveDir * 8, ball.y); ctx.lineTo(ax - serveDir * 4, ball.y - 7); ctx.lineTo(ax - serveDir * 4, ball.y + 7); ctx.fill();
             }
         }
 
-        // Render
-        function render() {
-            // Tło
-            drawRect(0, 0, canvas.width, canvas.height, '#14322a');
-            // Linie boisk
-            drawRect(0, 0, canvas.width, 4, 'rgba(255,255,255,0.18)');
-            drawRect(0, canvas.height - 4, canvas.width, 4, 'rgba(255,255,255,0.18)');
-
-            // Siatka
+        function frame(t) {
+            requestAnimationFrame(frame);
+            if (last == null) last = t;
+            const dt = Math.min(0.05, (t - last) / 1000); last = t;
+            const live = running && GryKit.playing;
+            if (live || (demo && GryKit.state === 'menu')) {
+                const prevX = ball.x;
+                step(dt);
+                if (Math.sign(prevX - W / 2) !== Math.sign(ball.x - W / 2) && serveT <= 0) netPulse = 1;
+                trail.push({ x: ball.x, y: ball.y });
+                if (trail.length > 12) trail.shift();
+                if (serveT > 0) trail.length = 0;
+                for (const p of [left, right]) p.flash = Math.max(0, p.flash - dt * 4);
+                netPulse = Math.max(0, netPulse - dt * 3);
+                scoreFlash.left = Math.max(0, scoreFlash.left - dt * 1.5);
+                scoreFlash.right = Math.max(0, scoreFlash.right - dt * 1.5);
+            }
+            const r = GryKit.ratio(canvas);
+            ctx.setTransform(r, 0, 0, r, 0, 0);
+            drawTable();
+            drawScoresBg();
             drawNet();
-
-            // Wyniki
-            drawText(leftPaddle.score, canvas.width / 4, canvas.height / 5);
-            drawText(rightPaddle.score, 3 * canvas.width / 4, canvas.height / 5);
-
-            // Paletki
-            drawRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height, leftPaddle.color);
-            drawRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height, rightPaddle.color);
-
-            // Piłka
-            drawCircle(ball.x, ball.y, ball.radius, ball.color);
-
-            // Tekst START jeśli gra nie wystartowała
-            if (!gameStarted) {
-                drawRect(canvas.width / 2 - 330, canvas.height / 2 - 70, 660, 140, 'rgba(8,20,16,0.78)');
-                ctx.fillStyle = '#f1ede2';
-                ctx.font = '700 40px Inter, system-ui, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Naciśnij Start, aby zagrać', canvas.width / 2, canvas.height / 2 - 6);
-                ctx.fillStyle = 'rgba(241,237,226,0.7)';
-                ctx.font = '500 22px Inter, system-ui, sans-serif';
-                ctx.fillText(gameMode === 'ai' ? 'Grasz lewą paletką przeciwko komputerowi' : 'Lewy gracz: W/S · prawy gracz: ↑/↓', canvas.width / 2, canvas.height / 2 + 36);
-                ctx.textAlign = 'left';
-            }
+            drawPaddle(left, t);
+            drawPaddle(right, t);
+            drawBall(t);
         }
 
-        // Główna pętla gry
-        function gameLoop() {
-            update();
-            render();
-        }
-
-        // Początkowe renderowanie
-        render();
-
-        // Przełączanie trybu
-        const modeButtons = document.querySelectorAll('.mode-btn');
-        modeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                gameMode = btn.dataset.mode;
-                modeButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                if (gameMode === 'ai') {
-                    controlInfo.textContent = 'Mysz, dotyk lub ↑/↓ porusza lewą paletką · P: pauza';
-                } else {
-                    controlInfo.textContent = 'W/S: lewa paletka · ↑/↓: prawa paletka · dotyk: połowa planszy · P: pauza';
-                }
-
-                // Reset gry przy zmianie trybu
-                clearPendingTimers();
-                gameStarted = false;paused=false;
-                document.getElementById("pause-game").textContent="Pauza";document.getElementById("round-status").textContent="";
-                if (gameInterval) {
-                    clearInterval(gameInterval);
-                    gameInterval = null;
-                }
-                startBtn.classList.remove('hidden');
-                restartBtn.classList.add('hidden');
-                leftPaddle.score = 0;
-                rightPaddle.score = 0;
-                ball.x = canvas.width / 2;
-                ball.y = canvas.height / 2;
-                ball.velocityX = 0;
-                ball.velocityY = 0;
-                scoringCooldown = false;
-                render();
+        /* ---------- ekran startu (wybór poziomu komputera) ---------- */
+        const extra = document.createElement('div');
+        extra.className = 'pong-diff';
+        extra.innerHTML = '<span>Poziom komputera:</span>';
+        const tabs = document.createElement('div');
+        tabs.className = 'kit-tabs'; tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', 'Poziom komputera');
+        for (const id of Object.keys(DIFF)) {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'kit-tab'; b.textContent = DIFF[id].label; b.dataset.diff = id;
+            b.setAttribute('aria-pressed', String(id === diff));
+            if (id === diff) b.classList.add('active');
+            b.addEventListener('click', ev => {
+                ev.stopPropagation();
+                diff = id; store.set('gry:pong:diff', id);
+                tabs.querySelectorAll('.kit-tab').forEach(x => { const on = x.dataset.diff === id; x.classList.toggle('active', on); x.setAttribute('aria-pressed', String(on)); });
+                GryKit.sfx.play('click');
             });
+            tabs.appendChild(b);
+        }
+        extra.appendChild(tabs);
+
+        function startDemo() {
+            demo = true; running = false;
+            const m = mode; mode = 'ai';
+            reset(); mode = m;
+            left.score = right.score = 0;
+            syncHud(); layoutHud();
+        }
+
+        GryKit.init({
+            id: 'pong',
+            title: 'Ping-pong',
+            icon: '🏓',
+            howTo: [
+                'Mecz do 7 punktów z komputerem lub drugą osobą – albo <b>współpraca</b>: odbijajcie razem jak najdłużej.',
+                'Uderzenie końcem paletki lub w ruchu podkręca piłkę.'
+            ],
+            controls: 'Lewa paletka: <kbd>W</kbd>/<kbd>S</kbd> (lub <kbd>Q</kbd>/<kbd>A</kbd>), mysz, dotyk · prawa: <kbd>↑</kbd>/<kbd>↓</kbd> · <kbd>P</kbd> pauza',
+            board: canvas,
+            focus: canvas,
+            extra,
+            modes: order.map(id => ({ id, label: MODES[id].label, desc: MODES[id].desc })),
+            bestPerMode: true,
+            hud: { score: '#rally', best: '#best' },
+            fit: { el: canvas, width: W, height: H, max: 1.35, sharp: true },
+            onStart(m) {
+                mode = m; demo = false;
+                for (const k in keys) keys[k] = false;
+                pointers.clear();
+                reset();
+                layoutHud();
+                GryKit.score(0);
+                running = true;
+                canvas.focus({ preventScroll: true });
+            },
+            onMenu() { startDemo(); }
         });
+        startDemo();
+        requestAnimationFrame(frame);
+    })();
     </script>
 </body>
 </html>
