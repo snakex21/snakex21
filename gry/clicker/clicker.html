@@ -7,39 +7,29 @@
     <title>Hacker Tycoon - Hub</title>
     <style>
         /* Terminal palette for the board only; the page frame uses the shell tokens. */
+        /* Plansza = ekran terminala: zawsze ciemny, zielony monospace (celowy styl gry); reszta strony w tokenach shell. */
         body {
-            --text-main: #006400;
-            --terminal-bg: #f8faf6;
-            --terminal-border: #006400;
-            --btn-bg: #fff;
-            --btn-border: #006400;
-            --btn-text: #006400;
-            --btn-hover-shadow: #006400;
-            --upgrade-off: #7a857e;
+            --text-main: #5dff7a;
+            --text-dim: #3fbf58;
+            --terminal-bg: #06120a;
+            --terminal-border: #1f6b33;
+            --btn-bg: #081a0d;
+            --btn-border: #3ddc62;
+            --btn-text: #7dff97;
+            --btn-hover-shadow: #2fe05a;
+            --upgrade-off: #4d6654;
             display: flex; flex-direction: column; min-height: 100vh; margin: 0;
             background: var(--shell-bg); color: var(--shell-text);
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        [data-theme="dark"] body {
-            --text-main: #0f0;
-            --terminal-bg: #020b03;
-            --terminal-border: #0f0;
-            --btn-bg: #000;
-            --btn-border: #0f0;
-            --btn-text: #0f0;
-            --btn-hover-shadow: #0f0;
-            --upgrade-off: #5b6b5d;
-        }
-
-        .game-wrapper { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 48px; --game-width: 1040px; }
+        .game-wrapper { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 24px; --game-width: 1040px; }
         .game-bar .game-stat > b { min-width: 3ch; text-align: center; }
 
         .container {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             gap: 20px;
-            width: 100%;
+            width: min(1040px, calc(100vw - 32px));
             align-items: start;
         }
 
@@ -48,9 +38,13 @@
             border: 1px solid var(--terminal-border);
             padding: 1rem;
             border-radius: 10px;
-            background: var(--terminal-bg);
+            background:
+                repeating-linear-gradient(0deg, rgba(93, 255, 122, .035) 0 1px, transparent 1px 3px),
+                radial-gradient(ellipse at 50% 0%, #0b2414, var(--terminal-bg) 70%);
             color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace;
+            font-family: var(--kit-mono);
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, .55), 0 10px 26px rgba(10, 30, 16, .18);
+            text-shadow: 0 0 6px rgba(93, 255, 122, .35);
             display: flex;
             flex-direction: column;
             min-width: 0;
@@ -80,7 +74,7 @@
             cursor: pointer;
             width: 100%;
             border-radius: 6px;
-            transition: box-shadow 0.1s, background 0.1s, color 0.1s;
+            transition: box-shadow 0.1s, background 0.1s, color 0.1s, transform .06s;
             text-transform: uppercase;
             font-weight: bold;
             text-shadow: 0 0 8px var(--btn-hover-shadow);
@@ -90,6 +84,7 @@
         .hack-btn:active {
             background: var(--btn-border);
             color: var(--btn-bg);
+            transform: scale(.98);
         }
 
         .hack-btn:hover, .hack-btn:focus-visible {
@@ -110,10 +105,18 @@
             cursor: pointer;
             transition: 0.2s;
             user-select: none;
+            position: relative;
+            overflow: hidden;
         }
+        /* Pasek postępu do kolejnego zakupu */
+        .upgrade-item::before {
+            content: ""; position: absolute; left: 0; bottom: 0; height: 3px;
+            width: calc(var(--p, 0) * 100%); background: var(--text-dim); opacity: .7; transition: width .2s linear;
+        }
+        .upgrade-item:not(.disabled)::before { background: var(--text-main); opacity: 1; }
 
         .upgrade-item:hover:not(.disabled), .upgrade-item:focus-visible {
-            background: rgba(0, 160, 0, 0.14);
+            background: rgba(60, 220, 100, 0.14);
             outline: none;
         }
 
@@ -127,6 +130,8 @@
         .upgrade-info { min-width: 0; }
         .upgrade-info h4 { margin: 0 0 4px; font-size: 1rem; }
         .upgrade-info p { margin: 0; font-size: 0.8rem; opacity: 0.8; }
+        .upgrade-item.bought { animation: bought .4s ease-out; }
+        @keyframes bought { 0% { background: rgba(93, 255, 122, .45); } 100% { background: transparent; } }
         .upgrade-cost { flex: 0 0 auto; font-weight: bold; white-space: nowrap; }
 
         .log-area {
@@ -142,6 +147,7 @@
             gap: 2px;
         }
 
+        @media (max-height: 640px) { .game-wrapper { padding-top: 12px; padding-bottom: 12px; } .game-bar { margin-bottom: 10px; } }
         @media (max-width: 760px) {
             .container { grid-template-columns: minmax(0, 1fr); }
             .hack-btn { padding: 1.8rem 1rem; font-size: 1.35rem; }
@@ -153,6 +159,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -169,7 +176,7 @@
 
     <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <div class="game-bar">
-            <div class="game-title"><h1>Hacker Tycoon</h1><p>Klikaj HACK SYSTEM, kupuj ulepszenia i generuj bity automatycznie</p></div>
+            <div class="game-title"><h1>Hacker Tycoon</h1><p>Klikaj HAKUJ, kupuj ulepszenia i generuj bity automatycznie</p></div>
             <div class="game-stats">
                 <div class="game-stat"><span>Bity</span><b id="bits">0</b></div>
                 <div class="game-stat"><span>Bity / s</span><b id="gps">0</b></div>
@@ -182,14 +189,14 @@
         <div class="game-stage">
             <div class="container">
                 <div class="terminal">
-                    <div class="terminal-header">/// MAIN_PROCESS</div>
-                    <p class="per-sec">+1 BIT / klik · postęp zapisuje się automatycznie</p>
-                    <button class="hack-btn" id="hackBtn" type="button">HACK SYSTEM</button>
+                    <div class="terminal-header">/// PROCES_GŁÓWNY</div>
+                    <p class="per-sec">+1 bit / klik · postęp zapisuje się automatycznie</p>
+                    <button class="hack-btn" id="hackBtn" type="button">&gt; HAKUJ_</button>
                     <div class="log-area" id="log" aria-live="polite"></div>
                 </div>
 
                 <div class="terminal">
-                    <div class="terminal-header">/// UPGRADES_MODULE</div>
+                    <div class="terminal-header">/// MODUŁ_ULEPSZEŃ</div>
                     <div class="upgrade-list" id="upgradeList"></div>
                 </div>
             </div>
@@ -202,12 +209,12 @@
 
         // Game Logic
         const defaultUpgrades = [
-            { id: 'script', name: 'Simple Script', cost: 15, gps: 0.5, count: 0 },
-            { id: 'bot', name: 'IRC Bot', cost: 100, gps: 3, count: 0 },
-            { id: 'gpu', name: 'GPU Mining', cost: 500, gps: 10, count: 0 },
-            { id: 'server', name: 'Dedicated Server', cost: 2000, gps: 50, count: 0 },
-            { id: 'ai', name: 'AI Assistant', cost: 10000, gps: 250, count: 0 },
-            { id: 'quantum', name: 'Quantum Core', cost: 50000, gps: 1000, count: 0 }
+            { id: 'script', name: 'Prosty skrypt', cost: 15, gps: 0.5, count: 0 },
+            { id: 'bot', name: 'Bot IRC', cost: 100, gps: 3, count: 0 },
+            { id: 'gpu', name: 'Koparka GPU', cost: 500, gps: 10, count: 0 },
+            { id: 'server', name: 'Serwer dedykowany', cost: 2000, gps: 50, count: 0 },
+            { id: 'ai', name: 'Asystent AI', cost: 10000, gps: 250, count: 0 },
+            { id: 'quantum', name: 'Rdzeń kwantowy', cost: 50000, gps: 1000, count: 0 }
         ];
 
         const state = {
@@ -226,6 +233,8 @@
             log: document.getElementById('log')
         };
 
+        const fmt = n => Number(n).toLocaleString('pl-PL');
+
         function log(msg) {
             const div = document.createElement('div');
             div.textContent = `> ${msg}`;
@@ -234,8 +243,8 @@
         }
 
         function updateUI() {
-            els.bits.textContent = Math.floor(state.bits);
-            els.gps.textContent = state.gps.toFixed(1);
+            els.bits.textContent = fmt(Math.floor(state.bits));
+            els.gps.textContent = fmt(Math.round(state.gps * 10) / 10);
             renderUpgrades();
         }
 
@@ -246,9 +255,9 @@
                     <div class="upgrade-item" role="button" tabindex="0" data-index="${i}">
                         <div class="upgrade-info">
                             <h4>${u.name} [x<span class="count">${u.count}</span>]</h4>
-                            <p>+${u.gps} GPS</p>
+                            <p>+${fmt(u.gps)} bitów/s</p>
                         </div>
-                        <div class="upgrade-cost"><span class="cost">${Math.floor(u.cost)}</span> BITS</div>
+                        <div class="upgrade-cost"><span class="cost">${fmt(Math.floor(u.cost))}</span> b</div>
                     </div>
                 `).join('');
             }
@@ -269,7 +278,8 @@
                 item.setAttribute('aria-disabled', String(state.bits < u.cost));
                 // Aktualizacja tekstów
                 item.querySelector('.count').textContent = u.count;
-                item.querySelector('.cost').textContent = Math.floor(u.cost);
+                item.querySelector('.cost').textContent = fmt(Math.floor(u.cost));
+                item.style.setProperty('--p', Math.min(1, state.bits / u.cost).toFixed(3));
             }
         }
 
@@ -281,8 +291,14 @@
                 state.gps += u.gps;
                 u.count++;
                 u.cost *= 1.15;
-                log(`Installed ${u.name}`);
+                log(`Zainstalowano: ${u.name}`);
                 updateUI();
+                const item = els.list.children[index];
+                if (item) {
+                    item.classList.remove('bought'); void item.offsetWidth; item.classList.add('bought');
+                    GryKit.fx.burstAt(item, { color: ['#5dff7a', '#b8ffc6', '#2fe05a'], count: 14, square: true });
+                }
+                GryKit.sfx.play('coin');
             }
         }
 
@@ -294,7 +310,7 @@
                 state.clickValue = 1;
                 state.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
                 els.log.innerHTML = '';
-                log('SYSTEM RESET - All progress wiped!');
+                log('Reset systemu – postęp usunięty.');
                 updateUI();
             }
         }
@@ -312,9 +328,15 @@
             const item=e.target.closest('.upgrade-item');if(!item)return;e.preventDefault();buy(Number(item.dataset.index));
         });
 
-        els.hackBtn.addEventListener('click', () => {
+        els.hackBtn.addEventListener('click', e => {
             state.bits += state.clickValue;
             updateUI();
+            // Unoszące się „+N” w miejscu kliknięcia (z klawiatury: na środku przycisku).
+            const r = els.hackBtn.getBoundingClientRect();
+            const x = e.clientX ? e.clientX - r.left : r.width / 2;
+            const y = e.clientY ? e.clientY - r.top : r.height / 2;
+            GryKit.fx.float(x + (Math.random() * 16 - 8), y - 6, '+' + fmt(state.clickValue), { on: els.hackBtn, color: '#7dff97' });
+            GryKit.sfx.play('click', { pitch: 0.9 + Math.random() * 0.25 });
         });
 
         els.resetBtn.addEventListener('click', resetProgress);
@@ -339,13 +361,25 @@
                     return {...base,count,cost:base.cost*Math.pow(1.15,count)};
                 });
                 state.gps=state.upgrades.reduce((sum,u)=>sum+u.gps*u.count,0);
-                log('System Restored...');
+                log('Przywrócono zapisany postęp.');
             }
         } catch (_) { log('Zapis niedostępny. Możesz grać bez zapisywania.'); }
         setInterval(() => { try { localStorage.setItem('hacker_save', JSON.stringify(state)); } catch (_) {} }, 5000);
 
         updateUI();
-        log('System Initialized.');
+        log('System uruchomiony.');
+
+        // Gra bez końca: bez ekranu startu i bez pauzy; GryKit daje przycisk dźwięku, efekty i dopasowanie do okna.
+        GryKit.init({
+            id: 'clicker',
+            title: 'Hacker Tycoon',
+            board: '.container',
+            startScreen: false,
+            pausable: false,
+            hud: false,
+            // Na telefonie (jedna kolumna) zwykłe przewijanie listy ulepszeń; na szerszych ekranach plansza mieści się w oknie.
+            fit: matchMedia('(min-width: 761px)').matches ? { el: '.container', zoom: true, min: 0.55 } : false
+        });
     </script>
 </body>
 
