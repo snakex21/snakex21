@@ -8,10 +8,12 @@
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
         .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 32px 16px 24px; --game-width: 804px; }
+        .game-stage { position: relative; }
         #game {
-            display: block; width: 100%; max-width: 804px; height: auto; background: #fff;
+            display: block; width: 800px; height: 250px; max-width: 100%; background: #fff;
             border: 2px solid var(--shell-border); border-radius: 12px; touch-action: manipulation; cursor: pointer;
         }
+        #game:focus-visible { border-color: var(--shell-accent); outline: none; }
         .game-status { min-height: 21px; }
         .dino-jump { display: none; width: 100%; max-width: 360px; min-height: 64px; margin: 16px auto 0; font-size: 18px; touch-action: manipulation; }
         @media (hover: none), (max-width: 700px) { .dino-jump { display: flex; } }
@@ -22,6 +24,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -37,55 +40,60 @@
 
     <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <div class="game-bar">
-            <div class="game-title"><h1>Dino Run</h1><p>Spacja, ↑ lub dotknięcie: skok · P: pauza</p></div>
+            <div class="game-title"><h1>Dino Run</h1><p>Przeskakuj kaktusy · Spacja, ↑ lub dotknięcie: skok · P / Esc: pauza</p></div>
             <div class="game-stats">
-                <div class="game-stat"><span>Wynik</span><b id="score">00000</b></div>
-                <div class="game-stat"><span>Rekord</span><b id="highscore">00000</b></div>
+                <div class="game-stat"><span>Wynik</span><b id="score">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="highscore">0</b></div>
             </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary" type="button" onclick="jump()">Start / skok</button>
-                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
-                <button class="kit-btn small" type="button" onclick="running=false;start()">Nowa gra</button>
+                <button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button>
             </div>
         </div>
         <div class="game-stage">
-            <canvas id="game" width="800" height="250" tabindex="0" aria-label="Dino. Spacja lub dotknięcie: skok. P: pauza."></canvas>
+            <canvas id="game" width="800" height="250" tabindex="0" aria-label="Plansza Dino Run. Spacja, strzałka w górę lub dotknięcie: skok. P lub Esc: pauza."></canvas>
         </div>
-        <p class="game-status msg" id="msg" role="status">Spacja lub kliknij planszę, aby zacząć</p>
-        <button class="kit-btn primary dino-jump" type="button" onclick="jump()">Skok</button>
+        <p class="game-status" id="msg" role="status">Spacja / ↑ / klik albo dotknięcie planszy: skok · P / Esc: pauza</p>
+        <button class="kit-btn primary dino-jump" type="button" id="jump-btn">Skok</button>
     </div>
     <script>
+    (() => {
+        // Logika w jednostkach 800 × 250 (ziemia na y = 227). Na telefonie plansza jest wyższa (800 × 400, ok. 2:1):
+        // cała scena jest przesunięta w dół o OY, nad nią jest więcej nieba – fizyka i kolizje bez zmian.
+        const W = 800, BASE_H = 250;
+        const H = window.innerWidth < 700 ? 400 : BASE_H;
+        const OY = H - BASE_H;
         const cvs = document.getElementById('game');
         const ctx = cvs.getContext('2d');
+        const jumpBtn = document.getElementById('jump-btn');
 
-        let dino = { x: 60, y: 180, w: 44, h: 47, dy: 0, jumpPower: -14, grounded: true, frame: 0 };
-        let obstacles = [], clouds = [], frame = 0, score = 0, speed = 7, running = false, gravity = 0.7;
-        let highScore = 0;
-        try { highScore = Math.max(0, parseInt(localStorage.getItem('dinoHighScore'), 10) || 0); } catch (_) {}
-        let paused = false, lastTime = null, accumulator = 0;
-        const stepMs = 1000 / 60;
-        document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0');
+        const dino = { x: 60, y: 180, w: 44, h: 47, dy: 0, jumpPower: -14, grounded: true };
+        const gravity = 0.7, stepMs = 1000 / 60;
+        let obstacles = [], clouds = [], frame = 0, score = 0, speed = 5, alive = false, lastTime = null, accumulator = 0;
 
-        // Dino sprite drawing
-        function drawDino(x, y, frame) {
+        function reset() {
+            dino.y = 180; dino.grounded = true; dino.dy = 0;
+            obstacles = []; clouds = []; score = 0; speed = 5; frame = 0; accumulator = 0; lastTime = null;
+            for (let i = 0; i < 3; i++) clouds.push(newCloud(200 + i * 300));
+            GryKit.score(0);
+        }
+        function newCloud(x) {
+            // Chmury w całym dostępnym niebie (na wyższej planszy także nad sceną bazową).
+            return { x, y: 30 - OY * 0.8 + Math.random() * (40 + OY * 0.6), size: 15 + Math.random() * 10 };
+        }
+
+        /* ---------- rysowanie ---------- */
+        function drawDino(x, y) {
             ctx.fillStyle = '#535353';
-            // Body
-            ctx.fillRect(x + 15, y + 5, 25, 30);
-            // Head
-            ctx.fillRect(x + 25, y, 19, 20);
-            // Eye
+            ctx.fillRect(x + 15, y + 5, 25, 30);   // tułów
+            ctx.fillRect(x + 25, y, 19, 20);       // głowa
             ctx.fillStyle = '#fff';
-            ctx.fillRect(x + 36, y + 5, 4, 4);
+            ctx.fillRect(x + 36, y + 5, 4, 4);     // oko
             ctx.fillStyle = '#535353';
-            // Tail
-            ctx.fillRect(x, y + 10, 18, 12);
+            ctx.fillRect(x, y + 10, 18, 12);       // ogon
             ctx.fillRect(x - 5, y + 15, 8, 7);
-            // Mouth
-            ctx.fillRect(x + 35, y + 12, 9, 3);
-            // Arms
-            ctx.fillRect(x + 28, y + 25, 6, 10);
-            // Legs animation
-            if (dino.grounded && running) {
+            ctx.fillRect(x + 35, y + 12, 9, 3);    // pysk
+            ctx.fillRect(x + 28, y + 25, 6, 10);   // łapki
+            if (dino.grounded && alive && GryKit.playing) {
                 if (Math.floor(frame / 5) % 2 === 0) {
                     ctx.fillRect(x + 18, y + 35, 6, 12);
                     ctx.fillRect(x + 30, y + 35, 6, 10);
@@ -98,28 +106,22 @@
                 ctx.fillRect(x + 30, y + 35, 6, 12);
             }
         }
-
-        // Cactus drawing
         function drawCactus(x, h) {
             ctx.fillStyle = '#2d5a27';
             const baseW = 18;
             ctx.fillRect(x, 227 - h, baseW, h);
-            // Arms
             if (h > 35) {
                 ctx.fillRect(x - 10, 227 - h + 15, 12, 8);
                 ctx.fillRect(x - 10, 227 - h + 8, 5, 15);
                 ctx.fillRect(x + baseW - 2, 227 - h + 20, 12, 8);
                 ctx.fillRect(x + baseW + 5, 227 - h + 13, 5, 15);
             }
-            // Spikes
             ctx.fillStyle = '#1a3d17';
             for (let i = 0; i < h; i += 8) {
                 ctx.fillRect(x - 2, 227 - h + i, 2, 3);
                 ctx.fillRect(x + baseW, 227 - h + i, 2, 3);
             }
         }
-
-        // Cloud drawing
         function drawCloud(x, y, size) {
             ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
             ctx.beginPath();
@@ -128,106 +130,121 @@
             ctx.arc(x + size * 1.8, y, size * 0.9, 0, Math.PI * 2);
             ctx.fill();
         }
-
-        function start() {
-            if (running) return;
-            running = true; paused = false; lastTime = null; accumulator = 0;
-            document.getElementById("pause-game").textContent = "Pauza";
-            document.getElementById('msg').innerText = '';
-            dino.y = 180; dino.grounded = true; dino.dy = 0;
-            obstacles = []; clouds = []; score = 0; speed = 5; frame = 0;
-            // Initial clouds
-            for (let i = 0; i < 3; i++) clouds.push({ x: 200 + i * 300, y: 30 + Math.random() * 40, size: 15 + Math.random() * 10 });
-            document.getElementById("score").innerText = "00000";
-            cvs.focus();
+        function draw() {
+            const r = GryKit.ratio(cvs);
+            ctx.setTransform(r, 0, 0, r, 0, 0);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, W, H);
+            ctx.translate(0, OY);
+            clouds.forEach(c => drawCloud(c.x, c.y, c.size));
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(0, 227, W, 2);
+            for (let i = 0; i < W; i += 20) {
+                if ((i + frame * speed) % 40 < 20) ctx.fillRect(i - (frame * speed) % W, 232, 8, 2);
+            }
+            obstacles.forEach(o => drawCactus(o.x, o.h));
+            drawDino(dino.x, dino.y);
         }
 
+        /* ---------- logika (krok 1/60 s) ---------- */
         function step() {
-            if (!running || paused) return;
             frame++;
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, 800, 250);
-
-            // Draw clouds
-            clouds.forEach(c => { drawCloud(c.x, c.y, c.size); c.x -= speed * 0.3; });
+            clouds.forEach(c => { c.x -= speed * 0.3; });
             clouds = clouds.filter(c => c.x > -50);
-            if (frame % 150 === 0) clouds.push({ x: 820, y: 30 + Math.random() * 40, size: 15 + Math.random() * 10 });
+            if (frame % 150 === 0) clouds.push(newCloud(820));
 
-            // Ground
-            ctx.fillStyle = '#535353';
-            ctx.fillRect(0, 227, 800, 2);
-            // Ground texture
-            for (let i = 0; i < 800; i += 20) {
-                if ((i + frame * speed) % 40 < 20) {
-                    ctx.fillRect(i - (frame * speed) % 800, 232, 8, 2);
-                }
-            }
-
-            // Dino Physics
             if (!dino.grounded) {
                 dino.dy += gravity;
                 dino.y += dino.dy;
                 if (dino.y >= 180) { dino.y = 180; dino.dy = 0; dino.grounded = true; }
             }
-            drawDino(dino.x, dino.y, frame);
 
-            // Spawn obstacles
             if (frame % Math.floor(100 / (speed / 5)) === 0 && Math.random() > 0.4) {
                 obstacles.push({ x: 820, h: 35 + Math.random() * 25 });
             }
-
-            // Move and draw obstacles
-            obstacles.forEach((obs) => {
+            for (const obs of obstacles) {
                 obs.x -= speed;
-                drawCactus(obs.x, obs.h);
-                // Collision (with smaller hitbox)
-                if (dino.x + 20 < obs.x + 14 && dino.x + 40 > obs.x + 4 && dino.y + 47 > 227 - obs.h) {
-                    running = false;
-                    if (score > highScore) { highScore = score; try { localStorage.setItem('dinoHighScore', highScore); } catch (_) {} document.getElementById('highscore').innerText = highScore.toString().padStart(5, '0'); }
-                    document.getElementById('msg').innerText = "Game Over! Spacja by zagrać";
-                }
-            });
+                // Kolizja (hitbox mniejszy niż rysunek)
+                if (dino.x + 20 < obs.x + 14 && dino.x + 40 > obs.x + 4 && dino.y + 47 > 227 - obs.h) { die(); return; }
+            }
             obstacles = obstacles.filter(o => o.x > -30);
 
-            if (!running) return;
-            // Score
-            if (frame % 5 === 0) { score++; if (score % 100 === 0) speed = Math.min(12, speed + 0.15); }
-            document.getElementById('score').innerText = score.toString().padStart(5, '0');
+            if (frame % 5 === 0) {
+                score++;
+                GryKit.score(score);
+                if (score % 100 === 0) {
+                    speed = Math.min(12, speed + 0.15);
+                    GryKit.sfx.play('score');
+                    GryKit.fx.float(dino.x + 22, dino.y + OY - 14, '+100', { on: cvs, color: '#2d5a27' });
+                }
+            }
         }
 
-        // Theme is handled by assets/workshop/shell.js.
-
-        function setPaused(value) {
-            if (!running) return;
-            paused = !!value; lastTime = null; accumulator = 0;
-            document.getElementById('pause-game').textContent = paused ? 'Wznów' : 'Pauza';
-            document.getElementById('msg').innerText = paused ? 'Pauza • P lub dotknij planszy, aby wznowić' : '';
-            if (!paused) cvs.focus();
+        function die() {
+            alive = false;
+            draw();
+            GryKit.fx.flash('#d05c5c', { on: cvs, strength: 0.35 });
+            GryKit.fx.shake(cvs, 7, 300);
+            GryKit.sfx.play('hit');
+            // Opóźnienie: wciskana Spacja nie restartuje gry od razu po zderzeniu.
+            GryKit.over({ score, text: 'Dino wpadł na kaktusa.', delay: 550 });
         }
-        function loop(timestamp) {
+
+        function loop(t) {
             requestAnimationFrame(loop);
-            if (lastTime === null) lastTime = timestamp;
-            const elapsed = Math.max(0, Math.min(100, timestamp - lastTime));
-            lastTime = timestamp;
-            if (!running || paused || document.hidden) { accumulator = 0; return; }
-            accumulator += elapsed;
-            while (accumulator + 0.00001 >= stepMs && running) { step(); accumulator -= stepMs; }
+            if (lastTime === null) lastTime = t;
+            const elapsed = Math.max(0, Math.min(100, t - lastTime));
+            lastTime = t;
+            if (alive && GryKit.playing) {
+                accumulator += elapsed;
+                while (accumulator + 0.00001 >= stepMs && alive && GryKit.playing) { step(); accumulator -= stepMs; }
+            } else accumulator = 0;
+            draw();   // rysujemy co klatkę (także w pauzie/menu – bufor canvasu czyści się przy zmianie rozmiaru)
         }
+
         function jump() {
-            if (paused) { setPaused(false); return; }
-            if (!running) start();
-            if (dino.grounded) { dino.dy = dino.jumpPower; dino.grounded = false; }
+            if (!alive || !GryKit.playing || !dino.grounded) return;
+            dino.dy = dino.jumpPower; dino.grounded = false;
+            GryKit.sfx.play('jump');
         }
+
+        /* ---------- sterowanie (P / Esc = pauza – obsługuje GryKit; Spacja / ↑ = skok) ---------- */
         document.addEventListener('keydown', e => {
-            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select')) return;
-            if (!e.target?.closest?.('button') && (e.code === 'Space' || e.code === 'ArrowUp')) { e.preventDefault(); jump(); }
-            if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); setPaused(!paused); }
+            if (e.repeat || e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select,button')) return;
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                if (!GryKit.playing) return;
+                e.preventDefault(); jump();
+            }
         });
-        cvs.addEventListener('click', jump);
-        document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); lastTime = null; });
-        drawDino(dino.x, dino.y, 0);
-        ctx.fillRect(0, 227, 800, 2);
+        cvs.addEventListener('pointerdown', e => {
+            if (!e.isPrimary || e.button !== 0) return;
+            if (!GryKit.playing) return;
+            e.preventDefault(); jump();
+        });
+        jumpBtn.addEventListener('click', () => {
+            if (GryKit.state === 'menu' || GryKit.state === 'over') GryKit.start();
+            else jump();
+        });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
+
+        GryKit.init({
+            id: 'dino',
+            legacyBestKey: 'dinoHighScore',
+            title: 'Dino Run',
+            icon: '🦖',
+            howTo: ['Dino biegnie sam – przeskakuj kaktusy.', 'Co 5 klatek biegu +1 pkt, co 100 pkt bieg przyspiesza.', 'Jedno zderzenie z kaktusem kończy grę.'],
+            controls: '<kbd>Spacja</kbd> / <kbd>↑</kbd> / klik / dotknięcie – skok · <kbd>P</kbd> / <kbd>Esc</kbd> pauza',
+            board: cvs,
+            focus: cvs,
+            hud: { score: '#score', best: '#highscore' },
+            startKeys: ['ArrowUp'],
+            fit: { el: cvs, width: W, height: H, max: 1.25, sharp: true, extraWidth: 4, extraHeight: 4 },
+            onStart() { reset(); alive = true; },
+            onMenu() { reset(); alive = false; }
+        });
+        reset();
         requestAnimationFrame(loop);
+    })();
     </script>
 </body>
 
