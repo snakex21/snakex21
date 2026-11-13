@@ -1,0 +1,270 @@
+/* Motyw pulpitu dla gier i narzędzi w oknach pulpitu (ładuje go pulpit-theme.js tylko wtedy, gdy pulpit poda motyw).
+   Zasady:
+   - kolory przez tokeny --shell-* (z shell.css) – z nich korzystają nagłówek, kit.css i style narzędzi (--bg, --card-bg…);
+   - ogólne kontrolki (przyciski, pola, listy, panele kit-*, paski przewijania, czcionka, nagłówki, linki) dostają
+     kształt rodziny motywu: zaokrąglenia, ramki, cienie. Bez zmian rozmiarów, marginesów i pozycji (układ zostaje);
+   - <canvas>, plansze gier (komórki, karty, klocki) i kolory przycisków specjalnych zostają nietknięte:
+     w grach styl dostają tylko przyciski kit-* / paska gry i przyciski bez klasy.
+   Rodziny: classic (1.0, 2.0, 3.1), bevel (95, 2000), xp, glass (Vista, 7), flat (8, 8.1, 11).
+   Czcionka: w 1.0 / 2.0 celowo Tahoma (jak 95), nie czcionka o stałej szerokości z pulpitu – szersze litery
+   przesuwały plansze gier w dół (zawijanie nagłówków). */
+
+/* ---------- Tokeny ---------- */
+html[data-pulpit-theme] {
+  --pt-font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+  --pt-radius: 0px;
+  --pt-radius-sm: 0px;
+  --pt-link: #0000c8;
+  --pt-input: var(--shell-card);
+  color-scheme: light;
+}
+html[data-pulpit-theme="win1"] {
+  --shell-bg: #ffffff !important; --shell-text: #000000 !important; --shell-muted: #444444 !important;
+  --shell-border: #000000 !important; --shell-card: #ffffff !important; --shell-hover: #e4e4e4 !important;
+  --shell-accent: #000000 !important; --shell-soft: #d8d8d8 !important; --shell-shadow: transparent !important;
+  --pt-link: #0000aa; --pt-face: #ffffff; --pt-input: #ffffff;
+}
+html[data-pulpit-theme="win2"] {
+  --shell-bg: #ffffff !important; --shell-text: #000000 !important; --shell-muted: #444444 !important;
+  --shell-border: #000000 !important; --shell-card: #ffffff !important; --shell-hover: #d8f4f4 !important;
+  --shell-accent: #0000aa !important; --shell-soft: #aaffff !important; --shell-shadow: transparent !important;
+  --pt-link: #0000aa; --pt-face: #ffffff; --pt-input: #ffffff;
+}
+html[data-pulpit-theme="win31"] {
+  --shell-bg: #ffffff !important; --shell-text: #000000 !important; --shell-muted: #3c3c3c !important;
+  --shell-border: #000000 !important; --shell-card: #c0c0c0 !important; --shell-hover: #d4d4d4 !important;
+  --shell-accent: #000080 !important; --shell-soft: #c0c0c0 !important; --shell-shadow: transparent !important;
+  --pt-font: Arial, Helvetica, "Liberation Sans", "DejaVu Sans", sans-serif;
+  --pt-link: #000080; --pt-face: #c0c0c0; --pt-input: #ffffff;
+}
+html[data-pulpit-theme="win95"] {
+  --shell-bg: #c0c0c0 !important; --shell-text: #000000 !important; --shell-muted: #3c3c3c !important;
+  --shell-border: #808080 !important; --shell-card: #c0c0c0 !important; --shell-hover: #d0d0d0 !important;
+  --shell-accent: #000080 !important; --shell-soft: #b4b4b4 !important; --shell-shadow: transparent !important;
+  --pt-face: #c0c0c0; --pt-light: #dfdfdf; --pt-input: #ffffff;
+}
+html[data-pulpit-theme="win2000"] {
+  --shell-bg: #d4d0c8 !important; --shell-text: #000000 !important; --shell-muted: #404040 !important;
+  --shell-border: #808080 !important; --shell-card: #d4d0c8 !important; --shell-hover: #e0ddd6 !important;
+  --shell-accent: #0a246a !important; --shell-soft: #c6c2ba !important; --shell-shadow: transparent !important;
+  --pt-face: #d4d0c8; --pt-light: #e8e6e1; --pt-input: #ffffff;
+}
+html[data-pulpit-theme="winxp"] {
+  --shell-bg: #ece9d8 !important; --shell-text: #000000 !important; --shell-muted: #4b4b4b !important;
+  --shell-border: #aca899 !important; --shell-card: #fbfbf7 !important; --shell-hover: #fff4d6 !important;
+  --shell-accent: #316ac5 !important; --shell-soft: #d8e4f8 !important; --shell-shadow: rgba(0, 0, 0, .08) !important;
+  --pt-radius: 4px; --pt-radius-sm: 3px; --pt-link: #0b4fb3;
+}
+html[data-pulpit-family="glass"] {
+  --shell-bg: #f0f0f0 !important; --shell-text: #1e1e1e !important; --shell-muted: #5a5a5a !important;
+  --shell-border: #c5c5c5 !important; --shell-card: #ffffff !important; --shell-hover: #e5f3fb !important;
+  --shell-accent: #2b7bd6 !important; --shell-soft: #dcebfc !important; --shell-shadow: rgba(0, 0, 0, .08) !important;
+  --pt-font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pt-radius: 4px; --pt-radius-sm: 3px; --pt-link: #0066cc;
+}
+html[data-pulpit-theme="win8"], html[data-pulpit-theme="win81"] {
+  --shell-bg: #ffffff !important; --shell-text: #000000 !important; --shell-muted: #5f5f5f !important;
+  --shell-border: #ababab !important; --shell-card: #f3f3f3 !important; --shell-hover: #e5f1fb !important;
+  --shell-accent: #2672ec !important; --shell-soft: #cce4f7 !important; --shell-shadow: transparent !important;
+  --pt-font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pt-link: #0066cc;
+}
+html[data-pulpit-theme="win81"] { --shell-accent: #008a8a !important; --shell-soft: #c8eded !important; }
+html[data-pulpit-theme="win11"] {
+  --shell-bg: #f3f3f3 !important; --shell-text: #1b1b1b !important; --shell-muted: #5d5d5d !important;
+  --shell-border: #e0e0e0 !important; --shell-card: #fbfbfb !important; --shell-hover: #f0f0f0 !important;
+  --shell-accent: #005fb8 !important; --shell-soft: #e0eef9 !important; --shell-shadow: rgba(0, 0, 0, .05) !important;
+  --pt-font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pt-radius: 8px; --pt-radius-sm: 4px; --pt-link: #005fb8;
+}
+html[data-pulpit-theme="win11"][data-pulpit-variant="dark"] {
+  --shell-bg: #202020 !important; --shell-text: #ffffff !important; --shell-muted: #c5c5c5 !important;
+  --shell-border: #3a3a3a !important; --shell-card: #2b2b2b !important; --shell-hover: #323232 !important;
+  --shell-accent: #4cc2ff !important; --shell-soft: #2d3e4c !important; --shell-shadow: rgba(0, 0, 0, .25) !important;
+  --pt-link: #99ebff;
+  color-scheme: dark;
+}
+html[data-pulpit-theme] body { --kit-radius: var(--pt-radius); --kit-radius-sm: var(--pt-radius-sm); }
+/* Pola tekstowe narzędzi biorą tło z --input-bg (w shell.css = kolor kart); w 1.0–2000 pola są białe, a karty szare. */
+html[data-pulpit-theme] :is(.workshop:not(.home-page), .content-shell) { --input-bg: var(--pt-input); }
+html[data-pulpit-theme] .kit-input { background-color: var(--pt-input); }
+
+/* ---------- Czcionka, nagłówki, linki, zaznaczenie ---------- */
+html[data-pulpit-theme] body.site-shell,
+html[data-pulpit-theme] .site-shell :is(.site-header, .site-header *, .game-bar, h1, h2, h3, button, select, label, .kit-btn, .kit-tab) {
+  font-family: var(--pt-font);
+}
+html[data-pulpit-theme] .site-shell :is(h1, h2, h3) { letter-spacing: normal; }
+html[data-pulpit-theme] .site-shell a:not([class]):not(.site-header *) { color: var(--pt-link); }
+html[data-pulpit-theme] ::selection { background: var(--shell-accent); color: #fff; }
+html[data-pulpit-theme="win11"][data-pulpit-variant="dark"] ::selection { color: #000; }
+/* Przełącznik jasny / ciemny strony nie działa przy motywie pulpitu – ukryty, ale zostawia miejsce w nagłówku. */
+html[data-pulpit-theme] .site-header #theme-toggle { visibility: hidden; }
+
+/* ---------- Nagłówek strony ---------- */
+html[data-pulpit-theme] .site-shell .site-header { border-radius: 0; }
+html[data-pulpit-theme] .site-header :is(.brand-mark, .site-links a, .site-subnav a, .settings-link) { border-radius: var(--pt-radius-sm); }
+html[data-pulpit-family="bevel"] .site-shell .site-header { border-bottom: 1px solid #808080; box-shadow: 0 1px 0 #fff; }
+html[data-pulpit-family="classic"] .site-shell .site-header { border-bottom: 2px solid #000; }
+html[data-pulpit-theme="winxp"] .site-shell .site-header { border-bottom: 1px solid #aca899; box-shadow: 0 1px 0 #fff; }
+html[data-pulpit-family="glass"] .site-shell .site-header { background: linear-gradient(#ffffff, #eef3fa); border-bottom-color: #b9c9de; }
+
+/* ---------- Przyciski ----------
+   Narzędzia: wszystkie przyciski (tło i kolor zostają z tokenów / strony, zmienia się kształt i obramowanie).
+   Gry: tylko przyciski kit-*, paska gry i HUD-ów oraz przyciski bez klasy – komórki plansz zostają. */
+html[data-pulpit-theme] :is(.kit-btn, .kit-tab, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-radius: var(--pt-radius-sm);
+}
+/* bevel: wypukłe przyciski z czterech linii, wciśnięcie odwraca cienie */
+html[data-pulpit-family="bevel"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-color: transparent;
+  background-clip: padding-box;
+  background-color: var(--pt-face);
+  color: #000;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px var(--pt-light);
+}
+html[data-pulpit-family="bevel"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])):active:not(:disabled) {
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px var(--pt-light), inset 2px 2px #808080;
+}
+/* Przyciski przełączające (aktywna karta, włączona opcja): wciśnięte, z kratką jak w 95 */
+html[data-pulpit-family="bevel"] :is(.content-shell button:not(.site-header *), .game-bar button):is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) {
+  background: repeating-conic-gradient(#fff 0 25%, var(--pt-face) 0 50%) 0 0 / 2px 2px;
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px var(--pt-light), inset 2px 2px #808080;
+}
+html[data-pulpit-family="bevel"] .kit-btn.primary { background: var(--pt-face); color: #000; box-shadow: 0 0 0 1px #000, inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px var(--pt-light); }
+html[data-pulpit-family="bevel"] .kit-btn:hover, html[data-pulpit-family="bevel"] .kit-btn.primary:hover { filter: none; background: var(--pt-face); }
+html[data-pulpit-family="bevel"] .kit-tabs { border-radius: 0; border-color: transparent; background: var(--pt-face); box-shadow: inset -1px -1px #fff, inset 1px 1px #808080; }
+html[data-pulpit-family="bevel"] .kit-tab { border-radius: 0; color: #000; }
+html[data-pulpit-family="bevel"] :is(.kit-tab[aria-selected="true"], .kit-tab.active) {
+  background: repeating-conic-gradient(#fff 0 25%, var(--pt-face) 0 50%) 0 0 / 2px 2px;
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px var(--pt-light), inset 2px 2px #808080;
+}
+/* classic: czarna ramka; 3.1 – szary przycisk z wypukłością */
+html[data-pulpit-family="classic"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-color: #000;
+  background-color: var(--pt-face);
+  color: #000;
+}
+html[data-pulpit-family="classic"] :is(.content-shell button:not(.site-header *), .game-bar button):is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) {
+  background: #000; color: #fff;
+}
+html[data-pulpit-theme="win31"] :is(.content-shell button:not(.site-header *), .game-bar button):is(.active, .selected, [aria-pressed="true"], [aria-selected="true"]) {
+  background: #000080; box-shadow: none;
+}
+html[data-pulpit-theme="win31"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-radius: 2px;
+  box-shadow: inset -2px -2px #808080, inset 2px 2px #fff;
+}
+html[data-pulpit-family="classic"] .kit-btn.primary { background: var(--shell-card); color: #000; box-shadow: 0 0 0 1px #000, inset -2px -2px #808080, inset 2px 2px #fff; }
+html[data-pulpit-family="classic"] :is(.kit-tab[aria-selected="true"], .kit-tab.active) { background: #000; color: #fff; }
+html[data-pulpit-theme="win2"] :is(.kit-tab[aria-selected="true"], .kit-tab.active) { background: #0000aa; }
+/* XP: zaokrąglone, granatowa ramka, jasny połysk */
+html[data-pulpit-theme="winxp"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-color: #003c74;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -3px 3px -1px rgba(0, 0, 0, .1);
+}
+html[data-pulpit-theme="winxp"] :is(.kit-btn, .content-shell button:not(.site-header *)):hover:not(:disabled) {
+  box-shadow: inset 0 0 0 1px #fbc761, inset 0 0 0 2px #f8b636;
+}
+html[data-pulpit-theme="winxp"] .kit-btn.primary { color: #fff; }
+/* Vista / 7: szklany przycisk z dwoma tonami, niebieska poświata po najechaniu */
+html[data-pulpit-family="glass"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-color: #707070;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), inset 0 -12px 10px -8px rgba(0, 0, 0, .07);
+}
+html[data-pulpit-family="glass"] :is(.kit-btn, .content-shell button:not(.site-header *)):hover:not(:disabled) {
+  border-color: #3c7fb1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -12px 10px -8px rgba(40, 140, 220, .18), 0 0 4px rgba(60, 160, 240, .45);
+}
+html[data-pulpit-family="glass"] .kit-btn.primary { color: #fff; border-color: #1c5aa6; }
+/* 8 / 8.1: płaskie prostokąty; 11: zaokrąglone, cienka ramka z ciemniejszym dołem */
+html[data-pulpit-family="flat"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  box-shadow: none;
+}
+html[data-pulpit-theme="win8"] :is(.kit-btn, .content-shell button:not(.site-header *)), html[data-pulpit-theme="win81"] :is(.kit-btn, .content-shell button:not(.site-header *)) { border-color: #acacac; }
+html[data-pulpit-theme="win11"] :is(.kit-btn, .game-bar button, .game-hud__button, .memory-hud__button, .pingpong-restart,
+  .content-shell button:not(.site-header *), .content-shell .shell-tool-toolbar button, .game-shell button:not([class])) {
+  border-color: rgba(0, 0, 0, .07) rgba(0, 0, 0, .07) rgba(0, 0, 0, .16);
+}
+html[data-pulpit-theme="win11"][data-pulpit-variant="dark"] :is(.kit-btn, .game-bar button, .content-shell button:not(.site-header *), .game-shell button:not([class])) {
+  border-color: rgba(255, 255, 255, .09) rgba(255, 255, 255, .09) rgba(255, 255, 255, .05);
+}
+html[data-pulpit-family="flat"] .kit-btn.primary { color: #fff; }
+html[data-pulpit-theme="win11"][data-pulpit-variant="dark"] .kit-btn.primary { color: #000; }
+
+/* ---------- Pola, listy, obszary tekstu ---------- */
+html[data-pulpit-theme] :is(.kit-input,
+  .content-shell :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]), select, textarea):not(.site-header *),
+  .game-shell :is(input[type="text"], input[type="number"], input:not([type]), select)) {
+  border-radius: var(--pt-radius-sm);
+}
+html[data-pulpit-family="bevel"] :is(.kit-input,
+  .content-shell :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]), select, textarea):not(.site-header *),
+  .game-shell :is(input[type="text"], input[type="number"], input:not([type]), select)) {
+  border-color: transparent;
+  background-clip: padding-box;
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px var(--pt-light), inset 2px 2px #0a0a0a;
+}
+html[data-pulpit-family="bevel"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)):focus { box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px var(--pt-light), inset 2px 2px #0a0a0a; border-color: transparent; }
+html[data-pulpit-family="classic"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)) { border-color: #000; }
+html[data-pulpit-theme="winxp"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)) { border-color: #7f9db9; }
+html[data-pulpit-family="glass"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)) { border-color: #abadb3 #dbdfe6 #e3e9ef #e2e3ea; }
+html[data-pulpit-family="glass"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)):hover { border-color: #5794bf #b7d5ea #c7e2f1 #c5daed; }
+html[data-pulpit-theme="win8"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)),
+html[data-pulpit-theme="win81"] :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)) { border-color: #ababab; }
+html[data-pulpit-theme="win11"] :is(.kit-input, .content-shell :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea):not(.site-header *)) {
+  border-color: rgba(0, 0, 0, .07) rgba(0, 0, 0, .07) rgba(0, 0, 0, .45);
+}
+html[data-pulpit-theme="win11"][data-pulpit-variant="dark"] :is(.kit-input, .content-shell :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), select, textarea):not(.site-header *)) {
+  border-color: rgba(255, 255, 255, .08) rgba(255, 255, 255, .08) rgba(255, 255, 255, .5);
+}
+html[data-pulpit-theme]:not([data-pulpit-family="bevel"]) :is(.kit-input, .content-shell :is(input, select, textarea):not(.site-header *)):focus { box-shadow: none; }
+html[data-pulpit-theme] .site-shell :is(input[type="checkbox"], input[type="radio"], input[type="range"], progress) { accent-color: var(--shell-accent); }
+
+/* ---------- Panele ---------- */
+html[data-pulpit-family="bevel"] :is(.kit-card, .kit-stat, .kit-option) {
+  border-color: #808080; box-shadow: inset 1px 1px #fff, 1px 1px #fff;
+}
+html[data-pulpit-family="classic"] :is(.kit-card, .kit-stat, .kit-option, .kit-tabs) { border-color: #000; }
+html[data-pulpit-theme="winxp"] :is(.kit-card, .kit-stat) { border-color: #d0d0bf; }
+html[data-pulpit-family="glass"] :is(.kit-card, .kit-stat) { border-color: #d5dfe5; box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(0, 0, 0, .06); }
+html[data-pulpit-theme="win11"] :is(.kit-card, .kit-stat) { box-shadow: 0 1px 2px rgba(0, 0, 0, .04); }
+html[data-pulpit-family="flat"]:not([data-pulpit-theme="win11"]) :is(.kit-card, .kit-stat, .kit-option, .kit-tabs) { border-radius: 0; }
+
+/* ---------- Fokus ---------- */
+html[data-pulpit-family="bevel"] .site-shell :focus-visible,
+html[data-pulpit-family="classic"] .site-shell :focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+
+/* ---------- Paski przewijania ----------
+   classic / bevel / XP: ::-webkit-scrollbar (Chrome, Edge, Safari); Vista / 7 / 8 / 11: scrollbar-color (wszystkie nowe). */
+html[data-pulpit-family="bevel"] ::-webkit-scrollbar, html[data-pulpit-family="classic"] ::-webkit-scrollbar { width: 15px; height: 15px; }
+html[data-pulpit-family="bevel"] ::-webkit-scrollbar-track { background: repeating-conic-gradient(#fff 0 25%, var(--pt-face) 0 50%) 0 0 / 2px 2px; }
+html[data-pulpit-family="bevel"] ::-webkit-scrollbar-thumb {
+  background: var(--pt-face);
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px var(--pt-light), inset -2px -2px #808080, inset 2px 2px #fff;
+}
+html[data-pulpit-family="bevel"] ::-webkit-scrollbar-corner { background: var(--pt-face); }
+html[data-pulpit-family="classic"] ::-webkit-scrollbar-track { background: #fff; box-shadow: inset 1px 0 #000, inset -1px 0 #000; }
+html[data-pulpit-family="classic"] ::-webkit-scrollbar-thumb { background: #c0c0c0; border: 1px solid #000; }
+html[data-pulpit-family="classic"] ::-webkit-scrollbar-corner { background: #fff; }
+html[data-pulpit-theme="winxp"] ::-webkit-scrollbar { width: 15px; height: 15px; }
+html[data-pulpit-theme="winxp"] ::-webkit-scrollbar-track { background: #f7f7f1; }
+html[data-pulpit-theme="winxp"] ::-webkit-scrollbar-thumb {
+  border: 1px solid #fff; border-radius: 3px;
+  background: linear-gradient(90deg, #c9d8fc, #b7cbfb 50%, #a8bff8); box-shadow: inset 0 0 0 1px #94adf0;
+}
+html[data-pulpit-theme="winxp"] ::-webkit-scrollbar-thumb:horizontal { background: linear-gradient(#c9d8fc, #b7cbfb 50%, #a8bff8); }
+html[data-pulpit-theme="winxp"] ::-webkit-scrollbar-corner { background: #ece9d8; }
+html[data-pulpit-family="glass"], html[data-pulpit-family="glass"] * { scrollbar-color: #c2c2c2 #f0f0f0; }
+html[data-pulpit-theme="win8"], html[data-pulpit-theme="win8"] *,
+html[data-pulpit-theme="win81"], html[data-pulpit-theme="win81"] * { scrollbar-color: #cdcdcd #f0f0f0; }
+html[data-pulpit-theme="win11"], html[data-pulpit-theme="win11"] * { scrollbar-color: #8a8a8a transparent; }
+html[data-pulpit-theme="win11"][data-pulpit-variant="dark"], html[data-pulpit-theme="win11"][data-pulpit-variant="dark"] * { scrollbar-color: #9a9a9a transparent; }
