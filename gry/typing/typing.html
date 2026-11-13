@@ -9,21 +9,20 @@
         :root { --correct: #15803d; --error: #c2410c; }
         [data-theme="dark"] { --correct: #6fd08c; --error: #ff8f86; }
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        main { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 820px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        .game-stage { flex-direction: column; align-items: center; gap: 16px; }
+        main { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 24px; --game-width: 820px; }
+        .game-stage { flex-direction: column; align-items: center; gap: 16px; border-radius: 14px; }
         .time-options { padding: 3px; }
         .time-options .kit-tab { min-height: 28px; padding: 0 10px; font-size: 13px; }
-        .stat-item { text-align: center; }
-        .stat-label { display: block; font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--shell-muted); }
-        .stat-value { display: block; font-size: 1.6rem; font-weight: 750; color: var(--shell-accent); font-variant-numeric: tabular-nums; }
+        /* Słowa i pole wpisywania celowo monospace (równa szerokość liter ułatwia czytanie przy pisaniu). */
         .word-display {
-            box-sizing: border-box; position: relative; width: 100%; height: 168px; overflow: hidden;
+            box-sizing: border-box; position: relative; width: 100%; height: 208px; overflow: hidden;
             display: flex; flex-wrap: wrap; align-content: flex-start;
             padding: 20px 24px; background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
             font: 500 1.4rem/2 var(--kit-mono); user-select: none; scroll-behavior: smooth;
         }
-        .word { margin-right: 0.4em; padding: 0 0.3em; border-radius: 6px; }
+        .word { margin-right: 0.4em; padding: 0 0.3em; border-radius: 6px; transition: background-color .15s, color .15s; }
         .word.current { background: var(--shell-soft); box-shadow: inset 0 -2px 0 var(--shell-accent); }
+        .word.current.typo { box-shadow: inset 0 -2px 0 var(--error); color: var(--error); }
         .word.correct { color: var(--correct); }
         .word.error { color: var(--error); text-decoration: line-through; }
         .input-area { width: 100%; max-width: 520px; }
@@ -33,26 +32,20 @@
             font: 500 1.2rem var(--kit-mono); text-align: center; outline: none; transition: border-color .15s, box-shadow .15s;
         }
         #input-field:focus { border-color: var(--shell-accent); box-shadow: 0 0 0 3px var(--shell-soft); }
+        #input-field.typo { border-color: var(--error); }
         #input-field:disabled { opacity: .6; }
-        .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-        .modal-content {
-            box-sizing: border-box; width: 100%; max-width: 440px; padding: 32px 28px; text-align: center;
-            background: var(--shell-card); color: var(--shell-text); border: 1px solid var(--shell-border); border-radius: 18px;
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-        .modal-content h2 { margin: 0; font-size: 1.4rem; }
-        .modal-content p { margin: 0 0 20px; color: var(--shell-muted); font-size: 14px; }
-        .result-wpm { font-size: 4rem; line-height: 1.1; font-weight: 800; color: var(--shell-accent); margin: 16px 0 4px; }
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-        .result-grid .stat-item { padding: 10px; border: 1px solid var(--shell-border); border-radius: 10px; }
-        .result-grid .stat-value { font-size: 1.3rem; }
-        @media (max-width: 560px) { .word-display { height: 152px; padding: 14px 16px; font-size: 1.15rem; } }
+        .game-stat.low b { color: var(--error); }
+        .game-stage .gk-modes { grid-template-columns: repeat(3, 1fr); }
+        .game-stage .gk-modes .kit-btn { min-height: 44px; }
+        @media (max-width: 560px) { .word-display { height: 180px; padding: 14px 16px; font-size: 1.15rem; } }
+        @media (max-height: 640px) { main { padding-top: 12px; padding-bottom: 12px; } .game-bar { margin-bottom: 10px; } .word-display { height: 150px; padding: 12px 18px; } .game-stage { gap: 10px; } #input-field { min-height: 46px; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -71,8 +64,9 @@
         <div class="game-bar">
             <div class="game-title"><h1>Test pisania</h1><p>Przepisuj słowa, spacja zatwierdza. Czas rusza z pierwszą literą.</p></div>
             <div class="game-stats">
-                <div class="game-stat"><span>Czas</span><b id="timer">60</b></div>
+                <div class="game-stat" id="timer-tile"><span>Czas</span><b id="timer">60</b></div>
                 <div class="game-stat"><span>WPM</span><b id="wpm">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="best">0</b></div>
                 <div class="game-stat"><span>Celność</span><b id="accuracy">100%</b></div>
             </div>
             <div class="game-buttons">
@@ -85,7 +79,7 @@
             </div>
         </div>
 
-        <div class="game-stage">
+        <div class="game-stage" id="stage">
             <div class="word-display" id="word-display" aria-label="Słowa do przepisania"></div>
             <div class="input-area">
                 <input type="text" id="input-field" class="kit-input" placeholder="Zacznij pisać..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Wpisz bieżące słowo">
@@ -93,40 +87,8 @@
         </div>
     </main>
 
-    <div class="modal" id="result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
-        <div class="modal-content">
-            <h2 id="result-title">Koniec czasu!</h2>
-            <div class="result-wpm" id="final-wpm">0</div>
-            <p>Słów na minutę (WPM)</p>
-
-            <div class="result-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Dokładność</span>
-                    <span class="stat-value" id="final-acc">0%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Poprawne słowa</span>
-                    <span class="stat-value" id="final-correct">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Błędy</span>
-                    <span class="stat-value" id="final-errors">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Znaki</span>
-                    <span class="stat-value" id="final-chars">0</span>
-                </div>
-            </div>
-
-            <button class="kit-btn primary block" type="button" onclick="resetGame()">Spróbuj ponownie</button>
-        </div>
-    </div>
-
     <script>
-        // Theme
-        // Theme is handled by assets/workshop/shell.js.
-
-        // Typing Test Logic
+    (() => {
         const wordsList = [
             "czas", "rok", "człowiek", "dzień", "sprawa", "życie", "ręka", "praca", "słowo", "miejsce",
             "rzecz", "oczy", "dom", "pan", "świat", "samochód", "woda", "droga", "dziecko", "głowa",
@@ -139,30 +101,28 @@
             "dobro", "piękno", "natura", "kultura", "sztuka", "nauka", "wiedza", "rozum", "duch", "dusza"
         ];
 
-        let timeLeft = 60;
         let timeLimit = 60;
-        let timer = null, round = 0;
-        let isPlaying = false;
-        let currentWordIndex = 0;
-        let correctWords = 0;
-        let errorWords = 0;
-        let totalChars = 0;
+        let elapsed = 0, lastTick = null, started = false, finished = false;
+        let currentWordIndex = 0, correctWords = 0, errorWords = 0, totalChars = 0;
         let words = [];
 
         const wordDisplay = document.getElementById('word-display');
         const inputField = document.getElementById('input-field');
         const timerDisplay = document.getElementById('timer');
-        const wpmDisplay = document.getElementById('wpm');
+        const timerTile = document.getElementById('timer-tile');
         const accDisplay = document.getElementById('accuracy');
-        const resultModal = document.getElementById('result-modal');
+        const tabs = document.querySelectorAll('.time-btn');
 
         function shuffle(array) {
-            return array.sort(() => Math.random() - 0.5);
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
         function initGame() {
-            ++round;
-            words = shuffle([...wordsList, ...wordsList, ...wordsList]); // Triple list for enough words
+            words = shuffle([...wordsList, ...wordsList, ...wordsList]); // potrójna lista – starczy słów
             wordDisplay.innerHTML = '';
             words.forEach(word => {
                 const span = document.createElement('span');
@@ -170,141 +130,130 @@
                 span.className = 'word';
                 wordDisplay.appendChild(span);
             });
-
             wordDisplay.firstChild.classList.add('current');
             inputField.value = '';
-            inputField.focus();
-
-            timeLeft = timeLimit;
-            timerDisplay.innerText = timeLeft;
-            wpmDisplay.innerText = '0';
+            inputField.classList.remove('typo');
+            elapsed = 0; lastTick = null; started = false; finished = false;
+            currentWordIndex = 0; correctWords = 0; errorWords = 0; totalChars = 0;
+            timerDisplay.innerText = timeLimit;
+            timerTile.classList.remove('low');
+            GryKit.score(0);
             accDisplay.innerText = '100%';
-
-            currentWordIndex = 0;
-            correctWords = 0;
-            errorWords = 0;
-            totalChars = 0;
-            isPlaying = false;
-            clearInterval(timer);
-            resultModal.style.display = 'none';
-
-            // Reset scroll
             wordDisplay.scrollTop = 0;
         }
 
-        function startGame() {
-            if (isPlaying) return;
-            isPlaying = true;
-            const startedRound = round;
-            timer = setInterval(() => {
-                if (startedRound !== round || !isPlaying) return;
-                timeLeft--;
-                timerDisplay.innerText = timeLeft;
+        // Na żywo dzielimy przez co najmniej 5 s, żeby pierwsze słowa nie dawały absurdalnych 300 WPM.
+        const wpmNow = () => Math.round(correctWords / (Math.max(elapsed, 5000) / 60000));
+        const accuracy = () => { const t = correctWords + errorWords; return t === 0 ? 100 : Math.round(correctWords / t * 100); };
 
-                // Calculate WPM on the fly
-                const timeElapsed = timeLimit - timeLeft;
-                const wpm = Math.round((correctWords / timeElapsed) * 60) || 0;
-                wpmDisplay.innerText = wpm;
-
-                if (timeLeft <= 0) {
-                    endGame();
-                }
-            }, 1000);
+        // Zegar liczy tylko w czasie gry (pauza Esc / utrata fokusu go zatrzymuje).
+        function tick() {
+            const now = performance.now();
+            if (!started || finished || !GryKit.playing) { lastTick = null; return; }
+            if (lastTick !== null) elapsed += now - lastTick;
+            lastTick = now;
+            const left = Math.max(0, Math.ceil(timeLimit - elapsed / 1000));
+            if (timerDisplay.innerText !== String(left)) {
+                timerDisplay.innerText = left;
+                if (left <= 5 && left > 0) { timerTile.classList.add('low'); GryKit.sfx.play('tick'); }
+                GryKit.score(wpmNow());
+            }
+            if (elapsed >= timeLimit * 1000) endGame();
         }
+        setInterval(tick, 100);
 
         function endGame() {
-            if (!isPlaying) return;
-            clearInterval(timer);
-            isPlaying = false;
+            if (finished) return;
+            finished = true;
             inputField.disabled = true;
-
-            const wpm = Math.round((correctWords / Math.max(1, timeLimit - timeLeft)) * 60);
-            const total = correctWords + errorWords;
-            const acc = total === 0 ? 0 : Math.round((correctWords / total) * 100);
-
-            document.getElementById('final-wpm').innerText = wpm;
-            document.getElementById('final-acc').innerText = acc + '%';
-            document.getElementById('final-correct').innerText = correctWords;
-            document.getElementById('final-errors').innerText = errorWords;
-            document.getElementById('final-chars').innerText = totalChars;
-
-            resultModal.style.display = 'flex';
-        }
-
-        function resetGame() {
-            inputField.disabled = false;
-            initGame();
+            const time = Math.max(1000, Math.min(elapsed, timeLimit * 1000));
+            const wpm = Math.round(correctWords / (time / 60000));
+            GryKit.score(wpm);
+            GryKit.over({
+                score: wpm, win: true, title: 'Koniec czasu!', icon: '⏱️', scoreLabel: 'WPM',
+                text: `Dokładność ${accuracy()}% · poprawne słowa: ${correctWords} · błędne: ${errorWords} · znaki: ${totalChars}`
+            });
         }
 
         inputField.addEventListener('input', (e) => {
-            if (inputField.disabled || e.isComposing || currentWordIndex >= words.length) return;
-            if (!isPlaying && timeLeft > 0) startGame();
+            if (inputField.disabled || finished || e.isComposing || currentWordIndex >= words.length || !GryKit.playing) return;
+            if (!started && inputField.value.trim()) { started = true; lastTick = performance.now(); }
 
-            const typed = e.target.value;
+            const typed = inputField.value;
             const currentWord = words[currentWordIndex];
-            const wordElements = wordDisplay.querySelectorAll('.word');
+            const wordElements = wordDisplay.children;
+            const cur = wordElements[currentWordIndex];
 
-            // Handle space (word submission)
-            if (typed.endsWith(' ')) {
-                const trimmedTyped = typed.trim();
-
-                if (trimmedTyped === currentWord) {
-                    wordElements[currentWordIndex].classList.add('correct');
-                    correctWords++;
-                    totalChars += currentWord.length;
-                } else {
-                    wordElements[currentWordIndex].classList.add('error');
-                    errorWords++;
-                }
-
-                wordElements[currentWordIndex].classList.remove('current');
-                currentWordIndex++;
-
-                if (currentWordIndex < words.length) {
-                    const nextWord = wordElements[currentWordIndex];
-                    nextWord.classList.add('current');
-
-                    // Improved Scrolling Logic
-                    // We check if the next word is in a new row relative to the previous one
-                    // Or simply ensure it's visible.
-
-                    // Simple logic: scroll into view if needed
-                    const containerRect = wordDisplay.getBoundingClientRect();
-                    const wordRect = nextWord.getBoundingClientRect();
-
-                    // If word is in the bottom half or below, scroll it to center
-                    if (wordRect.bottom > containerRect.bottom - 40) {
-                        // Scroll only the word box (scrollIntoView also jumped the whole page).
-                        const top = nextWord.offsetTop - wordDisplay.clientHeight / 2;
-                        if (wordDisplay.scrollTo) wordDisplay.scrollTo({ top, behavior: 'smooth' });
-                        else wordDisplay.scrollTop = top;
-                    }
-                }
-
-                inputField.value = '';
-
-                // Update accuracy
-                const total = correctWords + errorWords;
-                const acc = total === 0 ? 100 : Math.round((correctWords / total) * 100);
-                accDisplay.innerText = acc + '%';
-                if (currentWordIndex >= words.length) endGame();
+            if (!typed.endsWith(' ')) {
+                const typo = !currentWord.startsWith(typed);
+                cur.classList.toggle('typo', typo);
+                inputField.classList.toggle('typo', typo);
+                return;
             }
+            // Spacja zatwierdza słowo
+            const trimmedTyped = typed.trim();
+            if (!trimmedTyped) { inputField.value = ''; return; }
+            cur.classList.remove('current', 'typo');
+            inputField.classList.remove('typo');
+            if (trimmedTyped === currentWord) {
+                cur.classList.add('correct');
+                correctWords++;
+                totalChars += currentWord.length;
+                GryKit.sfx.play('tap');
+            } else {
+                cur.classList.add('error');
+                errorWords++;
+                GryKit.sfx.play('error');
+            }
+            currentWordIndex++;
+
+            if (currentWordIndex < words.length) {
+                const nextWord = wordElements[currentWordIndex];
+                nextWord.classList.add('current');
+                const containerRect = wordDisplay.getBoundingClientRect();
+                const wordRect = nextWord.getBoundingClientRect();
+                if (wordRect.bottom > containerRect.bottom - 40) {
+                    // Przewija tylko pole słów (scrollIntoView przesuwał całą stronę).
+                    const top = nextWord.offsetTop - wordDisplay.clientHeight / 2;
+                    if (wordDisplay.scrollTo) wordDisplay.scrollTo({ top, behavior: 'smooth' });
+                    else wordDisplay.scrollTop = top;
+                }
+            }
+            inputField.value = '';
+            accDisplay.innerText = accuracy() + '%';
+            GryKit.score(wpmNow());
+            if (currentWordIndex >= words.length) endGame();
         });
 
-        // Time options
-        document.querySelectorAll('.time-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                timeLimit = parseInt(btn.dataset.time);
-                resetGame();
-            });
+        tabs.forEach(btn => btn.addEventListener('click', () => GryKit.start(btn.dataset.time)));
+        document.getElementById('btn-restart').addEventListener('click', () => GryKit.start(GryKit.mode || String(timeLimit)));
+
+        function setLimit(mode) {
+            timeLimit = parseInt(mode, 10) || 60;
+            tabs.forEach(b => b.classList.toggle('active', b.dataset.time === String(timeLimit)));
+        }
+
+        GryKit.init({
+            id: 'typing',
+            title: 'Test pisania',
+            icon: '⌨️',
+            howTo: ['Przepisuj podświetlone słowo i zatwierdzaj spacją.', 'Czas rusza z pierwszą literą. Wynik to słowa na minutę (WPM).'],
+            controls: 'Pisz w polu pod słowami · <kbd>Spacja</kbd> zatwierdza · <kbd>Esc</kbd> pauza',
+            board: '#stage',
+            focus: inputField,
+            hud: { score: '#wpm', best: '#best' },
+            scoreLabel: 'WPM',
+            bestPerMode: true,
+            liveBest: false,
+            pauseKeyP: false,
+            modes: [{ id: '60', label: '60 s' }, { id: '30', label: '30 s' }, { id: '15', label: '15 s' }],
+            onStart(mode) { setLimit(mode); inputField.disabled = false; initGame(); inputField.focus(); },
+            onPause(p) { lastTick = null; inputField.disabled = p; if (!p) inputField.focus(); },
+            onMenu() { inputField.disabled = true; initGame(); }
         });
-
-        document.getElementById('btn-restart').addEventListener('click', resetGame);
-
-        // Init
+        inputField.disabled = true;
         initGame();
+    })();
     </script>
 </body>
 
