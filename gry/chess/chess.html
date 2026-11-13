@@ -7,7 +7,7 @@
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
         .game-wrapper {
-            flex: 1; display: flex; flex-direction: column; padding: 24px 16px 40px; --game-width: 560px;
+            flex: 1; display: flex; flex-direction: column; padding: 24px 16px 16px; --game-width: 560px;
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
         .game-info { display: flex; gap: 8px; }
@@ -24,13 +24,18 @@
         #black-turn::before { background: #2b2b2b; border-color: #8a8a8a; }
         .player-turn.active { color: var(--shell-text); border-color: var(--shell-accent); box-shadow: 0 0 0 2px var(--shell-soft); }
 
-        .chess-options {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px;
-            width: 100%; max-width: var(--game-width); margin: 0 auto 16px;
-        }
-        .chess-options .color-selection, .chess-options .difficulty-selection { display: none; align-items: center; }
-        .chess-options .color-selection.show, .chess-options .difficulty-selection.show { display: inline-flex; }
-        .option-label { padding: 0 6px 0 8px; color: var(--shell-muted); font-size: 13px; font-weight: 600; align-self: center; }
+        /* Opcje gry z komputerem – pokazywane na ekranie startu (GryKit extra) */
+        .chess-options { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .chess-options .kit-tabs { display: inline-flex; align-items: center; }
+        .game-wrapper .game-bar { max-width: 760px; }
+        .game-wrapper .game-status { margin-top: 8px; }
+        .gk-compact .gk-modes .kit-btn { min-height: 34px; }
+        .gk-compact .gk-modes .kit-btn small, .gk-compact .gk-icon { display: none; }
+        .gk-compact .chess-options .kit-tab { min-height: 28px; padding: 2px 9px; font-size: 12.5px; }
+        .gk-compact .chess-options .option-label, .gk-compact .gk-text, .gk-compact .gk-modes + .gk-controls { display: none; }
+        .gk-tiny .gk-card:has(.gk-extra) > h2 { display: none; }
+        .chess-options .kit-tabs { flex-wrap: nowrap; }
+        .option-label { padding: 0 6px 0 8px; color: var(--shell-muted); font-size: 12.5px; font-weight: 600; align-self: center; }
 
         #chess-board {
             --square-size: min(66px, calc((100vw - 40px) / 8));
@@ -56,6 +61,7 @@
         .square::before {
             content: attr(data-piece);
             position: absolute;
+            z-index: 1;
             /* Czarne figury - ciemne z jasnym konturem */
             color: #1a1a1a;
             text-shadow:
@@ -97,6 +103,13 @@
             background: #90ee90 !important;
         }
 
+        /* Ostatni ruch: żółtawa poświata pod figurą (pole startowe i docelowe) */
+        .square.last-move::after {
+            content: ""; position: absolute; inset: 0;
+            background: rgba(246, 214, 70, .5); box-shadow: inset 0 0 0 2px rgba(196, 160, 20, .55);
+        }
+        .square.selected::after, .square.valid-move::after { display: none; }
+
         .square.in-check {
             background: #ff4444 !important;
             animation: check-pulse 1s ease-in-out infinite;
@@ -112,17 +125,6 @@
 
         .controls { line-height: 1.6; }
         .controls strong { color: var(--shell-text); }
-
-        .game-over-message {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: min(380px, calc(100vw - 32px)); box-sizing: border-box; padding: 28px 24px;
-            background: var(--shell-card); color: var(--shell-text);
-            border: 1px solid var(--shell-border); border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .35); z-index: 1000; text-align: center;
-        }
-        .game-over-message.show { display: block; }
-        .game-over-message h2 { margin: 0 0 8px; font-size: 24px; font-weight: 750; }
-        .game-over-message p { margin: 0 0 20px; color: var(--shell-muted); font-size: 15px; }
 
         .promotion-overlay {
             display: none; position: fixed; inset: 0; z-index: 999;
@@ -153,6 +155,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -168,31 +171,25 @@
 
     <main class="game-wrapper" id="main-content" tabindex="-1">
         <div class="game-bar">
-            <div class="game-title"><h1>Szachy</h1><p>Wersja uproszczona: bez bicia w przelocie i automatycznych remisów</p></div>
+            <div class="game-title"><h1>Szachy</h1><p>Bez bicia w przelocie i automatycznych remisów</p></div>
             <div class="game-stats game-info">
                 <div class="player-turn active" id="white-turn">Białe</div>
                 <div class="player-turn" id="black-turn">Czarne</div>
             </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary restart-btn" type="button" onclick="resetGame()">Nowa gra</button>
+                <button class="kit-btn small primary restart-btn" type="button" onclick="GryKit.menu()">Nowa gra</button>
             </div>
         </div>
 
-        <div class="chess-options">
-            <div class="kit-tabs mode-selection" role="group" aria-label="Tryb gry">
-                <button class="kit-tab mode-btn active" type="button" onclick="setMode('pvp')">2 graczy</button>
-                <button class="kit-tab mode-btn" type="button" onclick="setMode('ai')">vs AI</button>
-                <button class="kit-tab mode-btn" type="button" onclick="setMode('auto')">AI vs AI</button>
-            </div>
-
+        <div class="chess-options" id="chess-options" hidden>
             <div class="kit-tabs color-selection" id="color-selection" role="group" aria-label="Kolor gracza">
-                <span class="option-label">Grasz:</span>
+                <span class="option-label">Z komputerem grasz:</span>
                 <button class="kit-tab color-btn active" type="button" onclick="setPlayerColor('white')">Białe</button>
                 <button class="kit-tab color-btn" type="button" onclick="setPlayerColor('black')">Czarne</button>
             </div>
 
-            <div class="kit-tabs difficulty-selection" id="difficulty-selection" role="group" aria-label="Poziom AI">
-                <span class="option-label">AI:</span>
+            <div class="kit-tabs difficulty-selection" id="difficulty-selection" role="group" aria-label="Poziom komputera">
+                <span class="option-label">Poziom:</span>
                 <button class="kit-tab difficulty-btn" type="button" onclick="setDifficulty('easy')">Łatwy</button>
                 <button class="kit-tab difficulty-btn active" type="button" onclick="setDifficulty('medium')">Średni</button>
                 <button class="kit-tab difficulty-btn" type="button" onclick="setDifficulty('hard')">Trudny</button>
@@ -203,16 +200,7 @@
             <div id="chess-board"></div>
         </div>
 
-        <p class="game-status controls" id="controls-text">
-            <strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>
-            Gra dla dwóch graczy - na zmianę białe i czarne.
-        </p>
-
-        <div class="game-over-message" id="game-over-message">
-            <h2 id="game-over-title"></h2>
-            <p id="game-over-text"></p>
-            <button class="kit-btn primary restart-btn" type="button" onclick="resetGame()">Zagraj ponownie</button>
-        </div>
+        <p class="game-status controls" id="controls-text">Kliknij figurę, potem zielone pole · strzałki + Enter z klawiatury</p>
 
         <div class="promotion-overlay" id="promotion-overlay">
             <div class="promotion-modal">
@@ -244,6 +232,7 @@
         let aiDifficulty = 'medium'; // 'easy', 'medium', 'hard'
         let gameOver = false;
         let pendingPromotion = null; // { row, col, color }
+        let lastMove = null; // { fromRow, fromCol, toRow, toCol } – podświetlenie ostatniego ruchu
 
         // Figury szachowe (Unicode)
         const pieces = {
@@ -322,6 +311,10 @@
                     square.className += (row + col) % 2 === 0 ? ' white' : ' black';
                     square.dataset.row = row;
                     square.dataset.col = col;
+
+                    if (lastMove && ((row === lastMove.fromRow && col === lastMove.fromCol) || (row === lastMove.toRow && col === lastMove.toCol))) {
+                        square.classList.add('last-move');
+                    }
 
                     // Podświetl króla w szachu
                     if (checkedKingPos && row === checkedKingPos.row && col === checkedKingPos.col) {
@@ -600,25 +593,43 @@
 
             if (isCheckmate(currentPlayer)) {
                 gameOver = true;
-                const winner = currentPlayer === 'white' ? 'Czarne' : 'Białe';
-                showGameOver(`Szach-mat! ${winner} wygrywają!`, `${winner} pokonały ${currentPlayer === 'white' ? 'białe' : 'czarne'}.`);
+                const winnerColor = currentPlayer === 'white' ? 'black' : 'white';
+                const winner = winnerColor === 'white' ? 'Białe' : 'Czarne';
+                const text = `${winner} pokonały ${currentPlayer === 'white' ? 'białe' : 'czarne'}.`;
+                if (gameMode === 'ai') {
+                    const won = winnerColor === playerColor;
+                    showGameOver({ title: won ? 'Szach-mat! Wygrywasz' : 'Szach-mat! Wygrywa komputer', text, win: won, icon: won ? '🏆' : '♚' });
+                } else {
+                    showGameOver({ title: `Szach-mat! ${winner} wygrywają`, text, win: true, icon: winnerColor === 'white' ? '♔' : '♚' });
+                }
             } else if (isStalemate(currentPlayer)) {
                 gameOver = true;
-                showGameOver('Pat! Remis', 'Brak legalnych ruchów. Gra zakończona remisem.');
+                GryKit.sfx.play('score');
+                showGameOver({ title: 'Pat – remis', text: 'Brak legalnych ruchów, a król nie jest szachowany.', win: false, icon: '🤝', sound: false });
             }
         }
 
-        // Pokazanie komunikatu końca gry
-        function showGameOver(title, text) {
-            document.getElementById('game-over-title').textContent = title;
-            document.getElementById('game-over-text').textContent = text;
-            document.getElementById('game-over-message').classList.add('show');
-
+        // Pokazanie komunikatu końca gry (nakładka GryKit)
+        function showGameOver(o) {
             // Zatrzymaj auto-play jeśli aktywny
             if (autoPlayInterval) {
                 clearInterval(autoPlayInterval);
                 autoPlayInterval = null;
             }
+            if (o.win) GryKit.fx.burstAt(document.getElementById('chess-board'), { count: 36, spread: 170, square: true, color: ['#f2c14e', '#f0d9b5', '#b58863', '#9acd32'] });
+            GryKit.over({ title: o.title, text: o.text, win: o.win, icon: o.icon, sound: o.sound, showScore: false, record: false, delay: 500 });
+        }
+
+        // Dźwięk i efekty po wykonanym ruchu (gracz lub komputer). Wywoływane po zmianie tury.
+        function moveFx(captured) {
+            const target = lastMove && document.querySelector(`[data-row="${lastMove.toRow}"][data-col="${lastMove.toCol}"]`);
+            if (captured) {
+                GryKit.sfx.play('hit');
+                if (target) GryKit.fx.burstAt(target, { count: 10, spread: 34, color: captured.color === 'white' ? ['#ffffff', '#d8d2c4'] : ['#2b2b2b', '#6a6a6a'] });
+            } else {
+                GryKit.sfx.play('tap');
+            }
+            if (!gameOver && isKingInCheck(currentPlayer)) setTimeout(() => GryKit.sfx.play('score', { pitch: 1.3 }), 90);
         }
 
         // Pokazanie UI promocji pionka
@@ -675,8 +686,8 @@
 
         // Obsługa kliknięcia na pole
         function handleSquareClick(row, col) {
-            // Nie pozwalaj na ruchy gdy gra się skończyła
-            if (gameOver || pendingPromotion) return;
+            // Nie pozwalaj na ruchy gdy gra się skończyła albo trwa ekran startu
+            if (gameOver || pendingPromotion || !GryKit.playing) return;
 
             // W trybie auto, nie pozwalaj na kliknięcia
             if (gameMode === 'auto') return;
@@ -688,6 +699,8 @@
                 // Próba ruchu
                 if (isValidMove(selectedPiece.row, selectedPiece.col, row, col)) {
                     const movingPiece = board[selectedPiece.row][selectedPiece.col];
+                    const captured = board[row][col];
+                    lastMove = { fromRow: selectedPiece.row, fromCol: selectedPiece.col, toRow: row, toCol: col };
 
                     // Wykonaj ruch
                     board[row][col] = movingPiece;
@@ -715,6 +728,8 @@
 
                     // Sprawdź promocję pionka
                     if (movingPiece.type === 'pawn' && (row === 0 || row === 7)) {
+                        drawBoard();
+                        GryKit.sfx.play(captured ? 'hit' : 'tap');
                         showPromotionUI(row, col, movingPiece.color);
                         return; // Czekaj na wybór promocji
                     }
@@ -725,6 +740,7 @@
 
                     // Sprawdź koniec gry
                     checkGameOver();
+                    moveFx(captured);
 
                     // W trybie AI, po ruchu gracza, AI wykonuje swój ruch
                     if (!gameOver) {
@@ -833,7 +849,7 @@
 
         // AI wykonuje ruch
         function makeAIMove() {
-            if (gameOver || pendingPromotion || (gameMode === 'ai' && currentPlayer === playerColor)) return;
+            if (gameOver || pendingPromotion || !GryKit.playing || (gameMode === 'ai' && currentPlayer === playerColor)) return;
 
             const validMoves = getAllValidMoves(currentPlayer);
             if (validMoves.length === 0) {
@@ -874,6 +890,8 @@
 
             // Wykonaj ruch
             const movingPiece = board[move.fromRow][move.fromCol];
+            const captured = board[move.toRow][move.toCol];
+            lastMove = { fromRow: move.fromRow, fromCol: move.fromCol, toRow: move.toRow, toCol: move.toCol };
             board[move.toRow][move.toCol] = movingPiece;
             board[move.fromRow][move.fromCol] = null;
             movingPiece.hasMoved = true;
@@ -912,6 +930,7 @@
 
             // Sprawdź koniec gry
             checkGameOver();
+            moveFx(captured);
         }
 
         // Zmiana koloru gracza
@@ -927,13 +946,6 @@
                 }
             });
 
-            // Aktualizuj tekst kontrolek
-            const controlsText = document.getElementById('controls-text');
-            const aiColor = color === 'white' ? 'czarne' : 'białe';
-            const playerColorName = color === 'white' ? 'białe' : 'czarne';
-            controlsText.innerHTML = `<strong>Jak grać:</strong> Grasz jako ${playerColorName}. Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>AI gra jako ${aiColor} i wykonuje ruchy automatycznie.`;
-
-            resetGame();
         }
 
         // Zmiana poziomu trudności AI
@@ -952,55 +964,27 @@
             });
         }
 
-        // Zmiana trybu gry
+        // Zmiana trybu gry (z ekranu startu GryKit)
         function setMode(mode) {
             gameMode = mode;
-
-            // Aktualizuj przyciski
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            const modes = ['pvp', 'ai', 'auto'];
-            document.querySelectorAll('.mode-btn')[modes.indexOf(mode)]?.classList.add('active');
-
-            // Zatrzymaj auto-play jeśli był aktywny
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-                autoPlayInterval = null;
-            }
-
-            // Pokaż/ukryj wybór koloru i trudności
-            const colorSelection = document.getElementById('color-selection');
-            const difficultySelection = document.getElementById('difficulty-selection');
-
-            if (mode === 'ai') {
-                colorSelection.classList.add('show');
-                difficultySelection.classList.add('show');
-            } else if (mode === 'auto') {
-                colorSelection.classList.remove('show');
-                difficultySelection.classList.add('show');
-            } else {
-                colorSelection.classList.remove('show');
-                difficultySelection.classList.remove('show');
-            }
-
-            // Aktualizuj tekst kontrolek
             const controlsText = document.getElementById('controls-text');
             if (mode === 'pvp') {
-                controlsText.innerHTML = '<strong>Jak grać:</strong> Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>Gra dla dwóch graczy - na zmianę białe i czarne.';
+                controlsText.textContent = 'Dwóch graczy na zmianę: kliknij figurę, potem zielone pole.';
             } else if (mode === 'ai') {
                 const aiColor = playerColor === 'white' ? 'czarne' : 'białe';
                 const playerColorName = playerColor === 'white' ? 'białe' : 'czarne';
-                controlsText.innerHTML = `<strong>Jak grać:</strong> Grasz jako ${playerColorName}. Kliknij figurę aby ją wybrać, potem kliknij na zielone pole aby wykonać ruch. <br>AI gra jako ${aiColor} i wykonuje ruchy automatycznie.`;
-            } else if (mode === 'auto') {
-                controlsText.innerHTML = '<strong>Tryb auto:</strong> Obserwuj jak AI gra przeciwko AI. Gra toczy się automatycznie. <br>Możesz zatrzymać i rozpocząć nową grę w dowolnym momencie.';
-                // Rozpocznij auto-play
-                autoPlayInterval = setInterval(() => {
-                    makeAIMove();
-                }, 1000); // 1 ruch na sekundę
+                controlsText.textContent = `Grasz jako ${playerColorName}, komputer jako ${aiColor}. Kliknij figurę, potem zielone pole.`;
+            } else {
+                controlsText.textContent = 'Komputer gra sam ze sobą – jeden ruch na sekundę.';
             }
-
             resetGame();
+        }
+
+        function stopGame() {
+            clearTimeout(aiTimeout); aiTimeout = null;
+            if (autoPlayInterval) { clearInterval(autoPlayInterval); autoPlayInterval = null; }
+            pendingPromotion = null;
+            document.getElementById('promotion-overlay').classList.remove('show');
         }
 
         // Reset gry
@@ -1015,7 +999,7 @@
             // Zresetuj stan gry
             gameOver = false;
             pendingPromotion = null;
-            document.getElementById('game-over-message').classList.remove('show');
+            lastMove = null;
             document.getElementById('promotion-overlay').classList.remove('show');
 
             initBoard();
@@ -1036,7 +1020,30 @@
             }
         }
 
-        // Start gry
+        // Start gry: ekran startu GryKit z wyborem trybu
+        const optionsEl = document.getElementById('chess-options');
+        optionsEl.hidden = false;
+        optionsEl.remove();
+        GryKit.init({
+            id: 'chess',
+            title: 'Szachy',
+            icon: '♞',
+            subtitle: 'Kliknij figurę, a potem zielone pole.',
+            board: '#chess-board',
+            overlayHost: '.game-stage',
+            focus: null,
+            pausable: false,
+            hud: false,
+            extra: optionsEl,
+            modes: [
+                { id: 'ai', label: 'Z komputerem', desc: 'Kolor i poziom – opcje wyżej' },
+                { id: 'pvp', label: 'Dwóch graczy', desc: 'Na zmianę przy jednym ekranie' },
+                { id: 'auto', label: 'Komputer kontra komputer', desc: 'Pokaz – oglądasz partię' }
+            ],
+            fit: { el: '#chess-board', zoom: true, max: 1, min: 0.3 },
+            onStart(mode) { setMode(mode); },
+            onMenu() { stopGame(); gameOver = false; lastMove = null; selectedPiece = null; initBoard(); currentPlayer = 'white'; drawBoard(); updateTurnDisplay(); }
+        });
         initBoard();
         drawBoard();
         updateTurnDisplay();
