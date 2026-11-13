@@ -3,29 +3,72 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Koło Fortuny - Hub</title>
+    <title>Koło fortuny - Hub</title>
     <style>
         body {
             display: flex; flex-direction: column; min-height: 100vh; margin: 0;
             background: var(--shell-bg); color: var(--shell-text);
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.5;
         }
-        .game-wrapper { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 48px; --game-width: 720px; }
-        .intro-card {
-            width: 100%; box-sizing: border-box; padding: 28px;
-            background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
+        .game-wrapper { flex: 1; width: 100%; box-sizing: border-box; padding: 24px 16px 24px; --game-width: 940px; }
+        .wheel-layout {
+            display: grid; width: 100%; gap: 16px 24px; align-items: start;
+            grid-template-columns: minmax(0, 1fr) minmax(250px, 320px);
         }
-        .intro-card h2 {
-            margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; color: var(--shell-muted);
+        .wheel-layout > * { box-sizing: border-box; min-width: 0; }
+        .wheel-box { position: relative; display: flex; justify-content: center; }
+        #wheel {
+            display: block; width: 500px; height: 500px; max-width: 100%;
+            border-radius: 50%; cursor: pointer; touch-action: manipulation; outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        .intro-card > p { margin: 0 0 16px; font-size: 16px; }
-        .intro-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 0 0 22px; padding: 0; list-style: none; }
-        .intro-list li { padding: 14px 16px; border: 1px solid var(--shell-border); border-radius: 10px; background: var(--shell-bg); font-size: 14px; color: var(--shell-muted); }
-        .intro-list b { display: block; margin-bottom: 2px; font-size: 15px; color: var(--shell-text); }
-        @media (max-width: 560px) {
-            .intro-card { padding: 20px 16px; }
-            .intro-card .kit-btn { width: 100%; }
+        #wheel:focus-visible { box-shadow: 0 0 0 4px var(--shell-soft), 0 0 0 6px var(--shell-accent); }
+        #wheel.is-empty, #wheel.is-spinning { cursor: default; }
+        .wheel-side {
+            display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden;
+            padding: 16px; background: var(--shell-card); border: 1px solid var(--shell-border); border-radius: 14px;
+        }
+        .wheel-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin: 0; }
+        .wheel-form .kit-input { min-width: 0; }
+        .spin-trigger { width: 100%; min-height: 48px; font-size: 17px; }
+        .winner { margin: 0; min-height: 1.4em; font-size: 14px; color: var(--shell-muted); overflow-wrap: anywhere; }
+        .winner b { color: var(--shell-text); }
+        .list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .list-title { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--shell-muted); }
+        .participants {
+            flex: 1 1 auto; min-height: 60px; overflow-y: auto; margin: 0 -4px; padding: 0 4px;
+            display: flex; flex-direction: column; gap: 6px; list-style: none;
+        }
+        .participants:empty::before { content: 'Lista jest pusta – wpisz imię lub zadanie i kliknij „Dodaj”.'; color: var(--shell-muted); font-size: 14px; }
+        .participants li {
+            display: flex; align-items: center; gap: 10px; padding: 5px 6px 5px 10px;
+            background: var(--shell-bg); border: 1px solid var(--shell-border); border-radius: 10px;
+            font-size: 14px; font-weight: 600;
+        }
+        .participants li.picked { border-color: var(--shell-accent); box-shadow: 0 0 0 2px var(--shell-soft); }
+        .participants .dot { flex: 0 0 12px; width: 12px; height: 12px; border-radius: 50%; }
+        .participants .name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
+        .participants .remove {
+            flex: 0 0 auto; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px;
+            background: transparent; color: var(--shell-muted); font-size: 18px; line-height: 1; cursor: pointer;
+        }
+        .participants .remove:hover:not(:disabled), .participants .remove:focus-visible { background: var(--shell-hover); color: var(--kit-danger, #c2453d); }
+        .participants .remove:disabled { opacity: .35; cursor: default; }
+        .wheel-hint { margin: 0; font-size: 12px; color: var(--shell-muted); }
+        .wheel-hint kbd {
+            display: inline-block; padding: 0 5px; border: 1px solid var(--shell-border); border-bottom-width: 2px; border-radius: 5px;
+            background: var(--shell-bg); font: 600 11px/1.5 ui-monospace, Consolas, monospace;
+        }
+        .wheel-side.tight { gap: 8px; padding: 12px; }
+        .wheel-side.tight .wheel-hint, .wheel-side.tight .winner:empty { display: none; }
+        .wheel-side.tight .spin-trigger { min-height: 42px; }
+        .wheel-side.tight .participants li { padding-top: 2px; padding-bottom: 2px; }
+        .gk-card h2 { overflow-wrap: anywhere; }
+        .gk-actions .kit-btn { white-space: normal; }
+        @media (max-width: 699px) {
+            .wheel-layout { grid-template-columns: minmax(0, 1fr); }
+            .wheel-side { padding: 14px; overflow: visible; }
+            .participants { overflow: visible; }
         }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
@@ -33,6 +76,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -48,22 +92,36 @@
 
     <main class="game-wrapper" id="main-content" tabindex="-1">
         <div class="game-bar">
-            <div class="game-title"><h1>Koło Fortuny</h1><p>Dodaj imiona lub zadania i wylosuj zwycięzcę</p></div>
-            <div class="game-buttons"><a class="kit-btn small primary" href="play.html">Zagraj teraz</a></div>
+            <div class="game-title"><h1>Koło fortuny</h1><p>Dodaj imiona lub zadania i zakręć kołem</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Na kole</span><b id="wheel-count">0</b></div>
+                <div class="game-stat"><span>Losowania</span><b id="spin-count">0</b></div>
+            </div>
+            <div class="game-buttons">
+                <button type="button" class="kit-btn small danger reset">Wyczyść</button>
+            </div>
         </div>
 
         <div class="game-stage">
-            <section class="intro-card" aria-labelledby="intro-title">
-                <h2 id="intro-title">O grze</h2>
-                <p>Kolorowe losowanie idealne do wyboru kolejności, przydziału zadań czy zabaw.</p>
-                <ul class="intro-list">
-                    <li><b>1. Dodaj</b>wpisz imiona lub zadania</li>
-                    <li><b>2. Losuj</b>zakręć kołem jednym kliknięciem</li>
-                    <li><b>3. Wynik</b>obserwuj animację i poznaj zwycięzcę</li>
-                </ul>
-                <a class="kit-btn primary" href="play.html">Zagraj teraz →</a>
-            </section>
+            <div class="wheel-layout">
+                <div class="wheel-box">
+                    <canvas id="wheel" class="canvas" width="500" height="500" tabindex="0" role="button" aria-label="Koło losowania – kliknij, aby zakręcić"></canvas>
+                </div>
+                <div class="wheel-side" id="wheel-side">
+                    <form class="wheel-form iform" action="#" method="get" autocomplete="off">
+                        <input id="joiner" name="joiner" class="joiner kit-input" maxlength="200" aria-label="Imię lub zadanie do losowania (kilka – po przecinku)" placeholder="Imię, zadanie… (kilka po przecinku)">
+                        <button type="submit" class="kit-btn add">Dodaj</button>
+                    </form>
+                    <button type="button" class="kit-btn primary spin-trigger">🎡 Losuj</button>
+                    <p class="winner" role="status" aria-live="polite"></p>
+                    <div class="list-head"><h2 class="list-title">Na kole</h2></div>
+                    <ul class="participants" aria-label="Uczestnicy losowania"></ul>
+                    <p class="wheel-hint">Kliknij koło albo <kbd>Spacja</kbd>, gdy jest zaznaczone. Lista zapisuje się w przeglądarce.</p>
+                </div>
+            </div>
         </div>
     </main>
+
+    <script src="./script.js?v=20261113-wheel"></script>
 </body>
 </html>
