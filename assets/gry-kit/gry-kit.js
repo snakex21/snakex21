@@ -399,7 +399,7 @@
   var mode = null;
   var overlay = null, card = null, host = null;
   var hud = { score: null, best: null, lives: null };
-  var current = 0, best = 0, livesValue = null;
+  var current = 0, best = 0, bestAtStart = 0, livesValue = null;
   var lastFocus = null;
 
   function $(sel) { return typeof sel === 'string' ? doc.querySelector(sel) : sel; }
@@ -417,7 +417,8 @@
     var raw = read(bestKey());
     if (raw === null && cfg.legacyBestKey && !(cfg.bestPerMode && mode)) raw = read(cfg.legacyBestKey);
     var v = parseFloat(raw);
-    best = isFinite(v) ? v : (cfg.lowerIsBetter ? 0 : 0);
+    best = isFinite(v) ? v : 0;
+    bestAtStart = best;
     showBest();
   }
   function showBest() {
@@ -624,6 +625,7 @@
       if (m !== undefined) mode = m;
       else if (mode == null && cfg.modes && cfg.modes.length) mode = cfg.modes[0].id;
       if (cfg.bestPerMode) loadBest();
+      bestAtStart = best;
       current = 0;
       hide();
       state = 'playing';
@@ -673,11 +675,11 @@
       syncPauseButtons();
       var score = o.score != null ? o.score : current;
       var record = false;
-      if (o.record !== false && cfg.hud !== false && score != null && better(score)) {
-        record = !!best || score > 0;
-        best = score;
-        write(bestKey(), best);
-        showBest();
+      if (o.record !== false && cfg.hud !== false && score != null) {
+        if (better(score)) { best = score; write(bestKey(), best); showBest(); }
+        // Rekord bity w tej partii (także gdy GryKit.score() podbijał go na bieżąco).
+        var prevBest = bestAtStart;
+        record = best === score && (cfg.lowerIsBetter ? score > 0 && (!prevBest || score < prevBest) : score > prevBest && score > 0);
       }
       if (o.sound !== false) sfx.play(o.win ? 'win' : 'lose');
       var nodes = [head(o.title || (o.win ? 'Wygrana!' : 'Koniec gry'), o.icon || (o.win ? '🏆' : ''))];
