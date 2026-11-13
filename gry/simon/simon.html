@@ -7,7 +7,7 @@
     <title>Simon Says - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-container { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 420px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .game-container { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 24px; --game-width: 480px; }
         .game-stage { padding: 8px 0; }
 
         .simon {
@@ -15,7 +15,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            width: min(340px, calc(100vw - 48px));
+            width: min(360px, calc(100vw - 48px));
             aspect-ratio: 1;
             border-radius: 50%;
             overflow: hidden;
@@ -23,28 +23,34 @@
             background: #202b27;
             position: relative;
             box-shadow: 0 10px 30px rgba(28, 49, 36, .18);
+            transition: box-shadow .12s;
         }
+        /* Poświata wokół całego koła w kolorze zapalonej ćwiartki */
+        .simon[data-lit="0"] { box-shadow: 0 0 46px 8px rgba(34, 197, 94, .55); }
+        .simon[data-lit="1"] { box-shadow: 0 0 46px 8px rgba(239, 68, 68, .55); }
+        .simon[data-lit="2"] { box-shadow: 0 0 46px 8px rgba(250, 204, 21, .6); }
+        .simon[data-lit="3"] { box-shadow: 0 0 46px 8px rgba(59, 130, 246, .55); }
+        .simon.wrong { box-shadow: 0 0 46px 10px rgba(208, 92, 92, .75); }
 
         .pad {
             border: 0;
             padding: 0;
-            opacity: 0.68;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
-            transition: opacity .1s, filter .1s, box-shadow .1s;
+            filter: brightness(.62) saturate(.85);
+            transition: filter .12s, box-shadow .12s;
         }
-
+        .pad:hover { filter: brightness(.74) saturate(.9); }
         .pad:active,
         .pad.lit {
-            opacity: 1;
-            filter: brightness(1.15) saturate(1.1);
-            box-shadow: inset 0 0 28px rgba(255, 255, 255, 0.55);
+            filter: brightness(1.35) saturate(1.25);
+            box-shadow: inset 0 0 36px rgba(255, 255, 255, .75), inset 0 0 8px rgba(255, 255, 255, .9);
         }
 
-        .green { background: #22c55e; border-top-left-radius: 100% ; }
-        .red { background: #ef4444; border-top-right-radius: 100%; }
-        .yellow { background: #facc15; border-bottom-left-radius: 100%; }
-        .blue { background: #3b82f6; border-bottom-right-radius: 100%; }
+        .green { background: radial-gradient(circle at 100% 100%, #4ade80, #16a34a 75%); border-top-left-radius: 100%; }
+        .red { background: radial-gradient(circle at 0% 100%, #f87171, #dc2626 75%); border-top-right-radius: 100%; }
+        .yellow { background: radial-gradient(circle at 100% 0%, #fde047, #eab308 75%); border-bottom-left-radius: 100%; }
+        .blue { background: radial-gradient(circle at 0% 0%, #60a5fa, #2563eb 75%); border-bottom-right-radius: 100%; }
 
         .center {
             box-sizing: border-box;
@@ -54,7 +60,7 @@
             transform: translate(-50%, -50%);
             width: 34%;
             aspect-ratio: 1;
-            background: #17231e;
+            background: radial-gradient(circle at 40% 35%, #26342d, #141d19);
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -66,19 +72,22 @@
             color: #eef2e7;
             pointer-events: none;
         }
-        .center b { font-size: clamp(15px, 4.5vw, 20px); font-weight: 800; letter-spacing: .5px; }
+        .center b { font-size: 26px; font-weight: 800; letter-spacing: .5px; font-variant-numeric: tabular-nums; }
         .center span { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #afbeb1; }
 
         .pad:focus-visible { outline: 4px solid #fff; outline-offset: -8px; }
         .msg { min-height: 1.5em; font-weight: 650; color: var(--shell-text); }
-        [data-theme="dark"] .simon { box-shadow: 0 10px 30px rgba(0, 0, 0, .35); border-color: #0f1814; background: #0f1814; }
+        [data-theme="dark"] .simon { border-color: #0f1814; background: #0f1814; }
+        [data-theme="dark"] .simon:not([data-lit]):not(.wrong) { box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
         [data-theme="dark"] .center { border-color: #0f1814; }
+        @media (max-height: 640px) { .game-container { padding-top: 12px; padding-bottom: 12px; } .game-bar { margin-bottom: 8px; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -98,33 +107,38 @@
             <div class="game-title"><h1>Simon</h1><p>Powtarzaj sekwencję · klawisze 1–4</p></div>
             <div class="game-stats">
                 <div class="game-stat"><span>Runda</span><b id="score">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="best">0</b></div>
             </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary start-btn" type="button" onclick="startGame()">Start</button>
+                <button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button>
             </div>
         </div>
         <div class="game-stage">
-            <div class="simon">
-                <button type="button" class="pad green" id="0" onclick="userClick(0)" aria-label="Pole 1"></button>
-                <button type="button" class="pad red" id="1" onclick="userClick(1)" aria-label="Pole 2"></button>
-                <button type="button" class="pad yellow" id="2" onclick="userClick(2)" aria-label="Pole 3"></button>
-                <button type="button" class="pad blue" id="3" onclick="userClick(3)" aria-label="Pole 4"></button>
-                <div class="center" aria-hidden="true"><span>Simon</span><b>1–4</b></div>
+            <div class="simon" id="simon">
+                <button type="button" class="pad green" id="0" aria-label="Pole 1 (zielone)"></button>
+                <button type="button" class="pad red" id="1" aria-label="Pole 2 (czerwone)"></button>
+                <button type="button" class="pad yellow" id="2" aria-label="Pole 3 (żółte)"></button>
+                <button type="button" class="pad blue" id="3" aria-label="Pole 4 (niebieskie)"></button>
+                <div class="center" aria-hidden="true"><span>Runda</span><b id="center-round">–</b></div>
             </div>
         </div>
-        <p class="game-status msg" id="msg" aria-live="polite">Wciśnij Start</p>
+        <p class="game-status msg" id="msg" aria-live="polite">Kliknij „Graj”</p>
     </div>
 
     <script>
+    (() => {
         let sequence = [];
         let userStep = 0;
         let turn = 'idle';
-        let audioContext = null;
         const timers = new Set();
+        const simon = document.getElementById('simon');
         const pads = [0, 1, 2, 3].map(i => document.getElementById(String(i)));
         const msg = document.getElementById('msg');
-        const scoreEl = document.getElementById('score');
+        const roundEl = document.getElementById('score');
+        const centerRound = document.getElementById('center-round');
+        // Własne tony ćwiartek (jak w klasycznym Simonie), grane przez wspólny dźwięk GryKit (działa wyciszenie 🔊).
         const freqs = [329.63, 261.63, 220, 164.81];
+        const COLORS = [['#4ade80', '#bbf7d0'], ['#f87171', '#fecaca'], ['#fde047', '#fef9c3'], ['#60a5fa', '#bfdbfe']];
 
         function later(callback, delay) {
             const id = setTimeout(() => { timers.delete(id); callback(); }, delay);
@@ -135,63 +149,89 @@
             timers.forEach(clearTimeout);
             timers.clear();
             pads.forEach(pad => pad.classList.remove('lit'));
+            delete simon.dataset.lit;
+            simon.classList.remove('wrong');
         }
-        function beep(i) {
-            if (!audioContext) return;
-            try {
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                osc.frequency.value = freqs[i] || 100;
-                osc.connect(gain); gain.connect(audioContext.destination);
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.3);
-                osc.stop(audioContext.currentTime + 0.3);
-            } catch (_) { /* The visual sequence remains playable without audio. */ }
+        function setRound(n) {
+            roundEl.textContent = n;
+            centerRound.textContent = n || '–';
         }
-        function lightUp(i) {
-            pads[i].classList.add('lit'); beep(i);
-            later(() => pads[i].classList.remove('lit'), 300);
+        function lightUp(i, ms = 300) {
+            pads[i].classList.add('lit');
+            simon.dataset.lit = i;
+            GryKit.sfx.tone({ freq: freqs[i], dur: ms / 1000, type: 'triangle', vol: 0.9 });
+            later(() => {
+                pads[i].classList.remove('lit');
+                if (simon.dataset.lit === String(i)) delete simon.dataset.lit;
+            }, ms);
         }
         function startGame() {
             clearPlayback();
-            try {
-                const Audio = window.AudioContext || window.webkitAudioContext;
-                if (!audioContext && Audio) audioContext = new Audio();
-                if (audioContext && audioContext.state === 'suspended') audioContext.resume().catch(() => {});
-            } catch (_) { audioContext = null; }
             sequence = []; userStep = 0;
-            scoreEl.textContent = '0'; nextRound();
+            GryKit.score(0);
+            setRound(0);
+            nextRound();
         }
         function nextRound() {
-            userStep = 0; turn = 'comp'; msg.textContent = 'Słuchaj...';
+            userStep = 0; turn = 'comp'; msg.textContent = 'Słuchaj…';
             sequence.push(Math.floor(Math.random() * 4));
-            scoreEl.textContent = sequence.length;
+            setRound(sequence.length);
+            GryKit.fx.pop(centerRound, 1.3);
+            const gap = Math.max(380, 800 - sequence.length * 30);
             let i = 0;
             function playStep() {
-                lightUp(sequence[i++]);
-                if (i < sequence.length) later(playStep, 800);
-                else { turn = 'user'; msg.textContent = 'Twoja kolej'; }
+                lightUp(sequence[i++], Math.min(300, gap - 80));
+                if (i < sequence.length) later(playStep, gap);
+                else later(() => { turn = 'user'; msg.textContent = 'Twoja kolej'; }, 200);
             }
             later(playStep, 800);
         }
         function userClick(i) {
-            if (turn !== 'user') return;
-            lightUp(i);
+            if (turn !== 'user' || !GryKit.playing) return;
+            lightUp(i, 220);
             if (i !== sequence[userStep]) {
-                turn = 'over'; msg.textContent = 'Błąd! Koniec gry. Wciśnij Start, aby spróbować ponownie.';
-                beep(-1); return;
+                turn = 'over';
+                const done = sequence.length - 1;
+                msg.textContent = 'Błąd! Koniec gry.';
+                simon.classList.add('wrong');
+                GryKit.sfx.play('error');
+                GryKit.fx.shake(simon, 7, 320);
+                GryKit.over({ score: done, sound: false, delay: 700,
+                    text: `Pomyłka w rundzie ${sequence.length}. Powtórzona sekwencja: ${done} ${done === 1 ? 'krok' : (done % 10 >= 2 && done % 10 <= 4 && (done % 100 < 10 || done % 100 >= 20) ? 'kroki' : 'kroków')}.` });
+                later(() => GryKit.sfx.play('lose'), 300);
+                return;
             }
             if (++userStep === sequence.length) {
-                turn = 'comp'; msg.textContent = 'Dobrze!'; later(nextRound, 1000);
+                turn = 'comp'; msg.textContent = 'Dobrze!';
+                GryKit.score(sequence.length);
+                GryKit.fx.burstAt(centerRound, { color: COLORS[i], count: 14, spread: 70 });
+                later(() => GryKit.sfx.play('score'), 240);
+                later(nextRound, 1000);
             }
         }
+        pads.forEach((pad, i) => pad.addEventListener('click', () => userClick(i)));
         document.addEventListener('keydown', event => {
             if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.target?.matches?.('input, textarea, select, [contenteditable]')) return;
-            if (/^[1-4]$/.test(event.key)) { event.preventDefault(); userClick(Number(event.key) - 1); }
+            if (/^[1-4]$/.test(event.key) && GryKit.playing) { event.preventDefault(); userClick(Number(event.key) - 1); }
         });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
 
-        // Theme Logic
-        // Theme is handled by assets/workshop/shell.js.
+        GryKit.init({
+            id: 'simon',
+            title: 'Simon',
+            icon: '🎵',
+            howTo: ['Patrz i słuchaj, które pola się zapalają.', 'Powtórz całą sekwencję – co rundę dochodzi jeden krok.', 'Jedna pomyłka kończy grę.'],
+            controls: 'Klik / dotyk albo <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>',
+            board: simon,
+            overlayHost: '.game-stage',
+            hud: { best: '#best' },
+            scoreLabel: 'Seria',
+            pausable: false,
+            fit: { el: simon, zoom: true, max: 1.2, min: 0.5 },
+            onStart() { startGame(); },
+            onMenu() { clearPlayback(); turn = 'idle'; setRound(0); msg.textContent = 'Kliknij „Graj”'; }
+        });
+    })();
     </script>
 </body>
 
