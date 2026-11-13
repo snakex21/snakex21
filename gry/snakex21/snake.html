@@ -6,14 +6,22 @@
     <title>Snake - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 432px; }
-        canvas { display: block; width: 100%; max-width: 400px; height: auto; background: #17231e; border: 2px solid var(--shell-border); border-radius: 10px; touch-action: none; }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 560px; }
+        .game-stage { position: relative; }
+        #gameCanvas {
+            display: block; width: 400px; height: 400px; max-width: 100%;
+            background: #14201b; border: 2px solid var(--shell-border); border-radius: 12px;
+            box-shadow: 0 10px 28px rgba(20, 40, 30, .18); touch-action: none; outline: none;
+        }
+        #gameCanvas:focus-visible { border-color: var(--shell-accent); }
+        .game-status { min-height: 21px; }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -29,122 +37,301 @@
 
     <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <div class="game-bar">
-            <div class="game-title"><h1>Snake</h1><p>Zbieraj jedzenie i nie gryź własnego ogona</p></div>
+            <div class="game-title"><h1>Snake</h1><p>Zbieraj owoce, omijaj ściany i własny ogon</p></div>
             <div class="game-stats">
                 <div class="game-stat"><span>Wynik</span><b id="score">0</b></div>
                 <div class="game-stat"><span>Rekord</span><b id="high-score">0</b></div>
+                <div class="game-stat"><span>Długość</span><b id="length">3</b></div>
             </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary" type="button" onclick="newGame()">Nowa gra</button>
-                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
+                <button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button>
             </div>
         </div>
 
         <div class="game-stage">
-            <canvas id="gameCanvas" width="400" height="400" tabindex="0" aria-label="Plansza Snake"></canvas>
+            <canvas id="gameCanvas" width="400" height="400" tabindex="0" aria-label="Plansza Snake. Strzałki lub WASD: ruch, P lub Esc: pauza."></canvas>
         </div>
-        <p class="game-status" id="game-status" role="status">Strzałki rozpoczynają grę. P: pauza.</p>
+        <p class="game-status" id="game-status" role="status">Strzałki / WASD: ruch · przesunięcie palcem na planszy · P / Esc: pauza</p>
 
         <div class="game-pad" aria-label="Sterowanie dotykowe">
-            <button class="kit-btn up" type="button" aria-label="W górę" onclick="changeDirection({keyCode: 38})">▲</button>
-            <button class="kit-btn left" type="button" aria-label="W lewo" onclick="changeDirection({keyCode: 37})">◀</button>
-            <button class="kit-btn down" type="button" aria-label="W dół" onclick="changeDirection({keyCode: 40})">▼</button>
-            <button class="kit-btn right" type="button" aria-label="W prawo" onclick="changeDirection({keyCode: 39})">▶</button>
+            <button class="kit-btn up" type="button" aria-label="W górę" data-dir="up">▲</button>
+            <button class="kit-btn left" type="button" aria-label="W lewo" data-dir="left">◀</button>
+            <button class="kit-btn down" type="button" aria-label="W dół" data-dir="down">▼</button>
+            <button class="kit-btn right" type="button" aria-label="W prawo" data-dir="right">▶</button>
         </div>
     </div>
 
     <script>
-        // Game Logic
+    (() => {
+        // Plansza 20 × 20 pól. Logika chodzi w krokach (tick), rysowanie co klatkę z interpolacją między krokami.
+        // Zasada: ściany zabijają (zgodnie z opisem gry), podobnie ugryzienie własnego ogona.
+        const N = 20, SIZE = 400, CELL = SIZE / N;
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const highScoreElement = document.getElementById('high-score');
-        const statusElement = document.getElementById('game-status');
-        const gridSize = 20, tileCount = canvas.width / gridSize;
-        let speed = 7, score = 0, highScore = 0;
-        try { highScore = Math.max(0, parseInt(localStorage.getItem('snake_highscore'), 10) || 0); } catch (_) {}
-        highScoreElement.textContent = highScore;
-        let velocityX = 1, velocityY = 0;
-        let snake = [{x:10,y:10}], food = {x:15,y:15};
-        let gameInterval, isGameRunning = false, paused = false, directionChanged = false, round = 0, ended = false;
-        function scheduleTick() {
-            clearInterval(gameInterval);
-            const startedRound = ++round;
-            gameInterval = setInterval(() => { if (startedRound === round) update(); }, 1000 / speed);
+        const lengthEl = document.getElementById('length');
+        const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+        const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
+
+        let snake, prev, dir, queue, food, bonus, score, stepMs, acc, last, dead, deathT, eatPulse, tongue, running;
+
+        function reset() {
+            snake = [{ x: 9, y: 10 }, { x: 8, y: 10 }, { x: 7, y: 10 }];
+            prev = snake.map(p => ({ ...p }));
+            dir = 'right'; queue = [];
+            score = 0; stepMs = 140; acc = 0; dead = false; deathT = 0; eatPulse = 0; tongue = 0;
+            bonus = null;
+            GryKit.score(0);
+            lengthEl.textContent = snake.length;
+            placeFood();
         }
-        function startGame() {
-            if (isGameRunning) return;
-            if (ended) resetGame();
-            isGameRunning = true; paused = false; directionChanged = false;
-            statusElement.textContent = 'Strzałki: ruch · P: pauza';
-            scheduleTick();
-            canvas.focus();
-        }
-        function setPaused(value) {
-            if (!isGameRunning) return;
-            paused = !!value;
-            document.getElementById('pause-game').textContent = paused ? 'Wznów' : 'Pauza';
-            statusElement.textContent = paused ? 'Pauza · P lub Wznów, aby kontynuować' : 'Strzałki: ruch · P: pauza';
-            if (!paused) canvas.focus();
-        }
-        function finish(won = false) {
-            clearInterval(gameInterval); ++round; isGameRunning = false; paused = false; ended = true;
-            statusElement.textContent = `${won ? 'Wygrana!' : 'Koniec gry!'} Wynik: ${score}. Strzałka lub Nowa gra: zagraj ponownie.`;
-        }
-        function update() {
-            if (!isGameRunning || paused || document.hidden) return;
-            directionChanged = false;
-            const head = {x:(snake[0].x + velocityX + tileCount) % tileCount, y:(snake[0].y + velocityY + tileCount) % tileCount};
-            const eating = food && head.x === food.x && head.y === food.y;
-            // The tail vacates its cell during a non-growing move.
-            const body = eating ? snake : snake.slice(0, -1);
-            if (body.some(part => part.x === head.x && part.y === head.y)) { finish(); return; }
-            snake.unshift(head);
-            if (eating) {
-                score += 10; scoreElement.textContent = score;
-                if (score > highScore) { highScore = score; highScoreElement.textContent = highScore; try { localStorage.setItem('snake_highscore', highScore); } catch (_) {} }
-                if (score % 50 === 0) { speed = Math.min(18, speed + 1); scheduleTick(); }
-                placeFood();
-            } else snake.pop();
-            draw();
-        }
-        function draw() {
-            ctx.fillStyle = '#17231e'; ctx.fillRect(0,0,canvas.width,canvas.height);
-            snake.forEach((part,index) => { ctx.fillStyle = index ? '#b8d58e' : '#e7ecdd'; ctx.fillRect(part.x*gridSize,part.y*gridSize,gridSize-2,gridSize-2); });
-            if (food) { ctx.fillStyle='#e8763d';ctx.beginPath();ctx.arc(food.x*gridSize+10,food.y*gridSize+10,8,0,Math.PI*2);ctx.fill(); }
+
+        function freeCell() {
+            const used = new Set(snake.map(p => p.y * N + p.x));
+            if (food) used.add(food.y * N + food.x);
+            if (bonus) used.add(bonus.y * N + bonus.x);
+            const free = [];
+            for (let i = 0; i < N * N; i++) if (!used.has(i)) free.push(i);
+            if (!free.length) return null;
+            const c = free[Math.floor(Math.random() * free.length)];
+            return { x: c % N, y: Math.floor(c / N) };
         }
         function placeFood() {
-            const occupied = new Set(snake.map(part => part.y * tileCount + part.x));
-            const free = [];
-            for (let i=0;i<tileCount*tileCount;i++) if (!occupied.has(i)) free.push(i);
-            if (!free.length) { food = null; finish(true); return; }
-            const cell = free[Math.floor(Math.random()*free.length)];
-            food = {x:cell%tileCount,y:Math.floor(cell/tileCount)};
+            food = null;
+            food = freeCell();
+            if (food) food.born = performance.now();
         }
-        function resetGame() {
-            clearInterval(gameInterval); ++round; isGameRunning=false; paused=false; ended=false; directionChanged=false;
-            snake=[{x:10,y:10}];score=0;speed=7;velocityX=1;velocityY=0;
-            scoreElement.textContent=0;document.getElementById('pause-game').textContent='Pauza';
-            statusElement.textContent='Strzałki rozpoczynają grę. P: pauza.';
-            placeFood();draw();
+
+        function turn(name) {
+            if (!running || dead) return;
+            const lastDir = queue.length ? queue[queue.length - 1] : dir;
+            const [x, y] = DIRS[name], [lx, ly] = DIRS[lastDir];
+            if (name === lastDir || (x === -lx && y === -ly)) return;
+            if (queue.length < 2) queue.push(name);
         }
-        function newGame() { resetGame(); startGame(); canvas.focus(); }
-        function changeDirection(event) {
-            if (event.altKey || event.ctrlKey || event.metaKey || event.target?.closest?.('header,a,input,textarea,select')) return;
-            const key = event.keyCode || ({ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40})[event.key];
-            if (event.code === 'KeyP' || event.code === 'Escape') { event.preventDefault?.(); if (!event.repeat) setPaused(!paused); return; }
-            if (event.target?.closest?.('button') || ![37,38,39,40].includes(key)) return;
-            event.preventDefault?.();
-            if (paused) return;
-            if (!isGameRunning) startGame();
-            if (directionChanged) return;
-            const [x,y] = ({37:[-1,0],38:[0,-1],39:[1,0],40:[0,1]})[key];
-            if (snake.length > 1 && x === -velocityX && y === -velocityY) return;
-            velocityX=x;velocityY=y;directionChanged=true;
+
+        function step() {
+            if (queue.length) dir = queue.shift();
+            const [dx, dy] = DIRS[dir];
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            const eating = food && head.x === food.x && head.y === food.y;
+            const eatingBonus = bonus && head.x === bonus.x && head.y === bonus.y;
+            const grows = eating || eatingBonus;
+            const body = grows ? snake : snake.slice(0, -1);
+            if (head.x < 0 || head.y < 0 || head.x >= N || head.y >= N || body.some(p => p.x === head.x && p.y === head.y)) {
+                die(head);
+                return;
+            }
+            prev = snake.map(p => ({ ...p }));
+            if (grows) prev.push({ ...prev[prev.length - 1] });
+            snake.unshift(head);
+            if (!grows) snake.pop();
+            if (grows) {
+                const points = eatingBonus ? 30 : 10;
+                score += points;
+                GryKit.score(score);
+                lengthEl.textContent = snake.length;
+                const cx = head.x * CELL + CELL / 2, cy = head.y * CELL + CELL / 2;
+                GryKit.fx.burst(cx, cy, { on: canvas, color: eatingBonus ? ['#f2c14e', '#fff3c4', '#e8a33d'] : ['#e8763d', '#f2c14e', '#b8d58e'], count: eatingBonus ? 18 : 10 });
+                GryKit.fx.float(cx, cy - 6, '+' + points, { on: canvas, color: eatingBonus ? '#f2c14e' : '#fff' });
+                GryKit.sfx.play(eatingBonus ? 'coin' : 'eat', { pitch: 1 + Math.min(0.5, snake.length / 120) });
+                eatPulse = 1;
+                if (eatingBonus) bonus = null;
+                if (eating) {
+                    placeFood();
+                    if (!bonus && Math.random() < 0.18) { bonus = freeCell(); if (bonus) bonus.born = performance.now(); }
+                }
+                if (score % 50 === 0) stepMs = Math.max(70, stepMs - 8);
+                if (!food && !bonus) { win(); return; }
+            }
         }
-        document.addEventListener('keydown',changeDirection);
-        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);});
-        draw();
+
+        function die(head) {
+            dead = true; running = false; deathT = performance.now();
+            const h = snake[0];
+            GryKit.fx.shake(canvas, 8, 340);
+            GryKit.fx.flash('#d05c5c', { on: canvas, strength: 0.4 });
+            GryKit.fx.burst(h.x * CELL + CELL / 2, h.y * CELL + CELL / 2, { on: canvas, color: ['#9fd67c', '#2f7a55', '#e7ecdd'], count: 22, spread: 70 });
+            GryKit.sfx.play('boom');
+            GryKit.over({ score, text: head.x < 0 || head.y < 0 || head.x >= N || head.y >= N ? 'Wąż uderzył w ścianę.' : 'Wąż ugryzł własny ogon.', delay: 650, sound: false });
+            setTimeout(() => GryKit.sfx.play('lose'), 250);
+        }
+        function win() {
+            running = false;
+            GryKit.over({ score, win: true, text: 'Wąż wypełnił całą planszę!' });
+        }
+
+        /* ---------- rysowanie ---------- */
+        const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        function drawBoard() {
+            for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+                ctx.fillStyle = (x + y) % 2 ? '#17251f' : '#1b2c24';
+                ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+            }
+            // delikatna winieta i świecąca krawędź = ściana
+            const g = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.25, SIZE / 2, SIZE / 2, SIZE * 0.75);
+            g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
+            ctx.fillStyle = g; ctx.fillRect(0, 0, SIZE, SIZE);
+            ctx.strokeStyle = 'rgba(184,213,142,.35)'; ctx.lineWidth = 2;
+            ctx.strokeRect(1, 1, SIZE - 2, SIZE - 2);
+        }
+        function drawFruit(f, t, golden) {
+            const age = (t - f.born) / 1000;
+            const appear = Math.min(1, age * 4);
+            const bob = Math.sin(t / 260 + f.x) * 1.5;
+            const cx = f.x * CELL + CELL / 2, cy = f.y * CELL + CELL / 2 + bob;
+            const r = CELL * 0.38 * (appear < 1 ? 0.5 + 0.7 * appear - 0.2 * appear * appear : 1);
+            ctx.save();
+            ctx.shadowColor = golden ? 'rgba(242,193,78,.8)' : 'rgba(232,118,61,.65)';
+            ctx.shadowBlur = 12;
+            if (golden) {
+                // złota gwiazdka z pierścieniem pokazującym czas
+                ctx.fillStyle = '#f2c14e';
+                ctx.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const a = -Math.PI / 2 + i * Math.PI / 5 + t / 900, rr = i % 2 ? r * 0.5 : r * 1.1;
+                    ctx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
+                }
+                ctx.closePath(); ctx.fill();
+                ctx.shadowBlur = 0;
+                const left = Math.max(0, 1 - age / 6);
+                ctx.strokeStyle = 'rgba(242,193,78,.7)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(cx, cy, r * 1.45, -Math.PI / 2, -Math.PI / 2 + left * Math.PI * 2); ctx.stroke();
+            } else {
+                const body = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r);
+                body.addColorStop(0, '#ffb07a'); body.addColorStop(0.55, '#e8763d'); body.addColorStop(1, '#b84a22');
+                ctx.fillStyle = body;
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#5b3a1e'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(cx, cy - r * 0.8); ctx.lineTo(cx + 1, cy - r * 1.25); ctx.stroke();
+                ctx.fillStyle = '#7cc46b';
+                ctx.beginPath(); ctx.ellipse(cx + r * 0.42, cy - r * 1.05, r * 0.38, r * 0.18, -0.5, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,.55)';
+                ctx.beginPath(); ctx.ellipse(cx - r * 0.38, cy - r * 0.35, r * 0.18, r * 0.11, -0.7, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+        }
+        function points(k) {
+            // Pozycje segmentów między poprzednim a bieżącym krokiem (płynny ruch).
+            return snake.map((p, i) => {
+                const q = prev[i] || p;
+                return { x: (q.x + (p.x - q.x) * k) * CELL + CELL / 2, y: (q.y + (p.y - q.y) * k) * CELL + CELL / 2 };
+            });
+        }
+        function drawSnake(t, k) {
+            const pts = points(k);
+            const n = pts.length;
+            const deadFade = dead ? Math.min(1, (t - deathT) / 500) : 0;
+            ctx.save();
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            // cień
+            ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = CELL * 0.78;
+            ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x + 2, p.y + 3) : ctx.moveTo(p.x + 2, p.y + 3)); ctx.stroke();
+            // ciało: segmenty od ogona do głowy, coraz grubsze i jaśniejsze
+            for (let i = n - 1; i > 0; i--) {
+                const a = pts[i], b = pts[i - 1];
+                const f = 1 - i / n;
+                const w = CELL * (0.5 + 0.3 * f) * (1 + eatPulse * 0.12 * Math.max(0, 1 - i / 4));
+                const lightness = 34 + f * 22 - deadFade * 18;
+                ctx.strokeStyle = `hsl(${105 - f * 15}, ${45 + f * 15 - deadFade * 30}%, ${lightness}%)`;
+                ctx.lineWidth = w;
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            }
+            // łuski: jaśniejszy pasek na grzbiecie
+            ctx.strokeStyle = 'rgba(232,248,200,.18)'; ctx.lineWidth = CELL * 0.16;
+            ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y - 2) : ctx.moveTo(p.x, p.y - 2)); ctx.stroke();
+            // głowa
+            const h = pts[0];
+            const [dx, dy] = DIRS[queue.length && !dead ? dir : dir];
+            const ang = Math.atan2(dy, dx);
+            ctx.translate(h.x, h.y); ctx.rotate(ang);
+            const hr = CELL * 0.48;
+            ctx.fillStyle = dead ? '#7d8f76' : '#a8dc7f';
+            ctx.beginPath(); ctx.ellipse(1, 0, hr * 1.08, hr * 0.92, 0, 0, Math.PI * 2); ctx.fill();
+            // język
+            if (!dead && Math.sin(t / 140 + tongue) > 0.6) {
+                ctx.strokeStyle = '#d05c5c'; ctx.lineWidth = 1.6;
+                ctx.beginPath(); ctx.moveTo(hr, 0); ctx.lineTo(hr + 7, 0); ctx.lineTo(hr + 10, -3); ctx.moveTo(hr + 7, 0); ctx.lineTo(hr + 10, 3); ctx.stroke();
+            }
+            // oczy
+            for (const side of [-1, 1]) {
+                ctx.fillStyle = '#fffefa';
+                ctx.beginPath(); ctx.arc(hr * 0.25, side * hr * 0.45, hr * 0.32, 0, Math.PI * 2); ctx.fill();
+                if (dead) {
+                    ctx.strokeStyle = '#1f2a25'; ctx.lineWidth = 1.5;
+                    const ex = hr * 0.25, ey = side * hr * 0.45, s = hr * 0.18;
+                    ctx.beginPath(); ctx.moveTo(ex - s, ey - s); ctx.lineTo(ex + s, ey + s); ctx.moveTo(ex + s, ey - s); ctx.lineTo(ex - s, ey + s); ctx.stroke();
+                } else {
+                    ctx.fillStyle = '#1f2a25';
+                    ctx.beginPath(); ctx.arc(hr * 0.36, side * hr * 0.45, hr * 0.16, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath(); ctx.arc(hr * 0.4, side * hr * 0.45 - 1.5, hr * 0.06, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            ctx.restore();
+        }
+
+        function frame(t) {
+            requestAnimationFrame(frame);
+            const r = GryKit.ratio(canvas);
+            ctx.setTransform(r, 0, 0, r, 0, 0);
+            if (last == null) last = t;
+            let dt = Math.min(100, t - last); last = t;
+            if (running && GryKit.playing) {
+                acc += dt;
+                while (acc >= stepMs && running) { acc -= stepMs; step(); }
+            }
+            eatPulse = Math.max(0, eatPulse - dt / 220);
+            if (bonus && t - bonus.born > 6000) bonus = null;
+            const k = running ? ease(Math.min(1, acc / stepMs)) : 1;
+            drawBoard();
+            if (food) drawFruit(food, t, false);
+            if (bonus) drawFruit(bonus, t, true);
+            drawSnake(t, k);
+        }
+
+        /* ---------- sterowanie ---------- */
+        document.addEventListener('keydown', e => {
+            if (e.altKey || e.ctrlKey || e.metaKey) return;
+            const name = KEYS[e.key];
+            if (!name || e.target.closest?.('input,textarea,select,header,a')) return;
+            e.preventDefault();
+            turn(name);
+        });
+        document.querySelectorAll('.game-pad [data-dir]').forEach(b => b.addEventListener('click', () => {
+            if (GryKit.state === 'menu') GryKit.start();
+            turn(b.dataset.dir);
+        }));
+        let touchStart = null;
+        canvas.addEventListener('touchstart', e => { const t = e.touches[0]; touchStart = { x: t.clientX, y: t.clientY }; }, { passive: true });
+        canvas.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+        canvas.addEventListener('touchend', e => {
+            if (!touchStart) return;
+            const t = e.changedTouches[0], dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+            touchStart = null;
+            if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+            turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+        });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
+
+        GryKit.init({
+            id: 'snake',
+            legacyBestKey: 'snake_highscore',
+            title: 'Snake',
+            icon: '🐍',
+            howTo: ['Zbieraj owoce – każdy to +10 pkt i dłuższy wąż.', 'Złota gwiazdka znika po chwili, ale daje +30.', 'Ściana albo własny ogon kończą grę.'],
+            controls: '<kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> / <kbd>WASD</kbd> albo przesunięcie palcem · <kbd>P</kbd> pauza',
+            board: canvas,
+            focus: canvas,
+            hud: { score: '#score', best: '#high-score' },
+            startKeys: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'],
+            fit: { el: canvas, width: SIZE, height: SIZE, max: 1.6, sharp: true },
+            onStart() { reset(); running = true; acc = 0; },
+            onMenu() { reset(); running = false; }
+        });
+        reset();
+        requestAnimationFrame(frame);
+    })();
     </script>
 </body>
 </html>
