@@ -20,41 +20,125 @@
             --cell-revealed: #242927;
             --grid-bg: #1b1f1d;
         }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; padding: 24px 16px; --game-width: 460px; }
-        .difficulty-select {
-            min-height: 34px; padding: 0 30px 0 12px; border: 1px solid var(--shell-border); border-radius: 8px;
-            background: var(--shell-card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 11px center;
-            color: var(--shell-text); font: 650 13px/1.2 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            appearance: none; -webkit-appearance: none; cursor: pointer;
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; padding: 24px 16px; --game-width: 640px; }
+        /* Nakładka GryKit obejmuje cały „stół” (min. 420 px), a nie tylko planszę – na małej planszy karta ma miejsce. */
+        .game-wrapper .game-stage { width: fit-content; min-width: min(100%, 420px); max-width: 100%; align-items: flex-start; }
+        .game-stage .gk-overlay.gk-compact .gk-modes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .game-stage .gk-overlay.gk-compact .gk-modes .kit-btn { padding: 4px 6px; }
+        /* Telefon: krótszy pasek (opis gry jest na ekranie startu). */
+        @media (max-width: 560px) {
+            .game-wrapper .game-title p { display: none; }
+            .game-wrapper .skin-tabs .kit-tab { padding: 0 8px; }
+            .game-wrapper .game-buttons .kit-btn.small { padding: 0 10px; }
         }
-        .difficulty-select:focus-visible { outline: none; border-color: var(--shell-accent); box-shadow: 0 0 0 3px var(--shell-soft); }
+        /* Niskie okno: zwarty pasek gry, status tylko dla czytników ekranu. */
+        @media (max-height: 640px) {
+            .game-shell .game-wrapper { padding-top: 10px; padding-bottom: 6px; }
+            .game-wrapper .game-title p { display: none; }
+            .game-wrapper .game-bar { margin-bottom: 8px; row-gap: 8px; }
+            .game-wrapper .game-stat { min-height: 40px; }
+            .game-wrapper .game-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: 0; }
+        }
         .reset-btn { font-size: 18px; min-width: 40px; padding: 0 8px; }
         #flag-mode[aria-pressed="true"] { background: var(--shell-accent); border-color: var(--shell-accent); color: var(--shell-bg); }
-        .board-scroll { max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
-        .grid { display: grid; grid-template-columns: repeat(10, 30px); grid-template-rows: repeat(10, 30px); gap: 2px; width: max-content; background: var(--grid-bg); padding: 6px; border: 1px solid var(--shell-border); border-radius: 10px; }
+        .skin-tabs { padding: 3px; }
+        .skin-tabs .kit-tab { min-height: 30px; padding: 0 11px; font-size: 13px; }
+
+        /* ---------- plansza: klasyczny ---------- */
+        .grid {
+            --cell: 30px;
+            display: grid; grid-template-columns: repeat(10, var(--cell)); grid-template-rows: repeat(10, var(--cell)); gap: 2px;
+            width: max-content; background: var(--grid-bg); padding: 6px; border: 1px solid var(--shell-border); border-radius: 10px;
+            transition: background .25s, box-shadow .25s, border-color .25s;
+        }
         .cell {
-            width: 30px; height: 30px; padding: 0;
+            position: relative; width: var(--cell); height: var(--cell); padding: 0;
             background: var(--cell-bg);
             border-top: 2px solid var(--cell-border-light); border-left: 2px solid var(--cell-border-light);
             border-bottom: 2px solid var(--cell-border-dark); border-right: 2px solid var(--cell-border-dark);
             border-radius: 3px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none;
-            font: 700 17px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--shell-text);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; -webkit-user-select: none;
+            font-family: inherit; font-size: 17px; font-weight: 800; line-height: 1; color: var(--shell-text); touch-action: manipulation;
         }
-        .cell:active { border: 2px inset var(--cell-border-dark); }
+        .cell:hover:not(.revealed) { filter: brightness(1.06); }
+        .cell:active:not(.revealed) { border: 2px inset var(--cell-border-dark); }
         .cell.revealed { background: var(--cell-revealed); border: 1px solid var(--cell-border-dark); cursor: default; }
         .cell.bomb { background: #e5534b; }
+        .cell.bomb.hit { background: #b91c1c; }
+        .cell svg { width: 70%; height: 70%; display: block; pointer-events: none; }
+        .cell .mine-body { fill: #1f2523; }
+        .cell .mine-spikes { stroke: #1f2523; }
+        .cell .mine-shine { fill: #fff; opacity: .75; }
+        .cell .flag-cloth { fill: #dc2626; }
+        .cell .flag-pole { stroke: #2f3532; }
+        [data-theme="dark"] .cell .flag-pole { stroke: #d7ddd6; }
+        .cell.wrong::after { content: ""; position: absolute; inset: 18%; background:
+            linear-gradient(45deg, transparent 44%, #b91c1c 44% 56%, transparent 56%),
+            linear-gradient(-45deg, transparent 44%, #b91c1c 44% 56%, transparent 56%); }
         .cell[data-num="1"] { color: #2563eb; } .cell[data-num="2"] { color: #15803d; } .cell[data-num="3"] { color: #dc2626; }
         .cell[data-num="4"] { color: #6d28d9; } .cell[data-num="5"] { color: #b45309; } .cell[data-num="6"] { color: #0e7490; }
+        .cell[data-num="7"] { color: #1f2523; } .cell[data-num="8"] { color: #6b7280; }
         [data-theme="dark"] .cell[data-num="1"] { color: #7aa7ff; } [data-theme="dark"] .cell[data-num="2"] { color: #6fd08c; } [data-theme="dark"] .cell[data-num="3"] { color: #ff7b72; }
         [data-theme="dark"] .cell[data-num="4"] { color: #c4a5ff; } [data-theme="dark"] .cell[data-num="5"] { color: #f0b860; } [data-theme="dark"] .cell[data-num="6"] { color: #5fd3e0; }
-        .cell:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: -3px; }
+        [data-theme="dark"] .cell[data-num="7"] { color: #eef2e7; } [data-theme="dark"] .cell[data-num="8"] { color: #a8b0aa; }
+        .cell:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: -3px; z-index: 1; }
+
+        /* ---------- plansza: neon ---------- */
+        .grid.neon {
+            gap: 3px; background: radial-gradient(120% 120% at 50% 0%, #121a33 0%, #070a14 70%);
+            border-color: #26345c; box-shadow: 0 0 0 1px rgba(90, 140, 255, .15), 0 0 28px rgba(70, 110, 255, .28), inset 0 0 30px rgba(0, 0, 0, .6);
+        }
+        .neon .cell {
+            background: linear-gradient(160deg, #18213a, #0f1528);
+            border: 1px solid rgba(110, 160, 255, .38); border-radius: 5px;
+            box-shadow: inset 0 0 7px rgba(90, 140, 255, .28), 0 0 5px rgba(90, 140, 255, .18);
+            color: #dfe6ff; transition: box-shadow .15s, border-color .15s;
+        }
+        .neon .cell:hover:not(.revealed) { filter: none; border-color: #5ff3ff; box-shadow: inset 0 0 9px rgba(95, 243, 255, .4), 0 0 10px rgba(95, 243, 255, .5); }
+        .neon .cell:active:not(.revealed) { border: 1px solid #5ff3ff; }
+        .neon .cell.revealed { background: #080c18; border: 1px solid rgba(110, 160, 255, .09); box-shadow: inset 0 0 6px rgba(0, 0, 0, .6); }
+        .neon .cell.bomb { background: #2a0a16; border-color: rgba(255, 59, 107, .5); box-shadow: inset 0 0 10px rgba(255, 59, 107, .45), 0 0 8px rgba(255, 59, 107, .35); }
+        .neon .cell.bomb.hit { background: #5c0b22; box-shadow: inset 0 0 14px rgba(255, 59, 107, .8), 0 0 16px rgba(255, 59, 107, .8); }
+        .neon .cell[data-num] { text-shadow: 0 0 4px currentColor, 0 0 11px currentColor; }
+        .neon .cell[data-num="1"] { color: #4dd0ff; } .neon .cell[data-num="2"] { color: #5cff9d; } .neon .cell[data-num="3"] { color: #ff4d8d; }
+        .neon .cell[data-num="4"] { color: #b48cff; } .neon .cell[data-num="5"] { color: #ffb84d; } .neon .cell[data-num="6"] { color: #4dfff0; }
+        .neon .cell[data-num="7"] { color: #ff7bff; } .neon .cell[data-num="8"] { color: #f2f4ff; }
+        .neon .cell .mine-body { fill: #ff3b6b; }
+        .neon .cell .mine-spikes { stroke: #ff3b6b; }
+        .neon .cell .mine-shine { fill: #ffe0ea; }
+        .neon .cell .flag-cloth { fill: #ffd23f; }
+        .neon .cell .flag-pole { stroke: #ffe9a8; }
+        .neon .cell svg { filter: drop-shadow(0 0 3px currentColor); }
+        .neon .cell.flag { color: #ffd23f; border-color: rgba(255, 210, 63, .55); box-shadow: inset 0 0 8px rgba(255, 210, 63, .3), 0 0 7px rgba(255, 210, 63, .3); }
+        .neon .cell.bomb { color: #ff3b6b; }
+        .neon .cell.wrong::after { background:
+            linear-gradient(45deg, transparent 44%, #ff3b6b 44% 56%, transparent 56%),
+            linear-gradient(-45deg, transparent 44%, #ff3b6b 44% 56%, transparent 56%); filter: drop-shadow(0 0 3px #ff3b6b); }
+
+        /* ---------- animacje ---------- */
+        .cell.anim { animation: reveal .26s cubic-bezier(.2, .9, .3, 1.25) both; animation-delay: var(--d, 0ms); }
+        .neon .cell.anim { animation-name: reveal-neon; }
+        .cell.boom { animation: mine-pop .32s ease-out both; }
+        .cell.planted { animation: plant .2s ease-out; }
+        @keyframes reveal { from { transform: scale(.55); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+        @keyframes reveal-neon {
+            0% { transform: scale(.55); opacity: .1; box-shadow: 0 0 0 rgba(95, 243, 255, 0); }
+            45% { box-shadow: 0 0 14px rgba(95, 243, 255, .75); background: #12304a; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes mine-pop { 0% { transform: scale(.4); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+        @keyframes plant { 0% { transform: scale(.7); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+        /* pauza: plansza ukryta pod nakładką */
+        .grid { position: relative; }
+        .grid.is-paused::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; background: inherit; }
+        @media (prefers-reduced-motion: reduce) { .cell.anim, .cell.boom, .cell.planted { animation: none; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -72,41 +156,73 @@
         <div class="game-bar">
             <div class="game-title"><h1>Saper</h1><p>Odkryj wszystkie pola bez min. Flaga: prawy przycisk, F lub tryb flagi.</p></div>
             <div class="game-stats">
-                <div class="game-stat"><span>Miny</span><b class="stat" id="bomb-count">010</b></div>
-                <div class="game-stat"><span>Czas</span><b class="stat" id="timer">000</b></div>
+                <div class="game-stat"><span>Miny</span><b id="bomb-count">10</b></div>
+                <div class="game-stat"><span>Czas</span><b id="timer">0:00</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="best">–</b></div>
             </div>
             <div class="game-buttons">
-                <select class="difficulty-select" id="difficulty-select" aria-label="Poziom trudności">
-                    <option value="easy">Łatwy (10x10)</option>
-                    <option value="medium">Średni (16x16)</option>
-                    <option value="hard">Trudny (30x16)</option>
-                </select>
-                <button class="kit-btn small reset-btn" type="button" id="reset-btn" aria-label="Nowa gra" title="Nowa gra">🙂</button>
-                <button class="kit-btn small" type="button" id="flag-mode" aria-pressed="false">🚩 Tryb flagi: wyłączony</button>
+                <div class="kit-tabs skin-tabs" role="tablist" aria-label="Wygląd planszy">
+                    <button class="kit-tab" type="button" role="tab" data-skin="classic" aria-selected="false">Klasyczny</button>
+                    <button class="kit-tab" type="button" role="tab" data-skin="neon" aria-selected="false">Neon</button>
+                </div>
+                <button class="kit-btn small reset-btn" type="button" id="reset-btn" aria-label="Nowa gra na tym samym poziomie" title="Nowa gra">🙂</button>
+                <button class="kit-btn small" type="button" id="level-btn" title="Zmień poziom trudności">Poziom</button>
+                <button class="kit-btn small" type="button" id="flag-mode" aria-pressed="false">🚩 Flagi: wył.</button>
             </div>
         </div>
         <div class="game-stage">
-            <div class="board-scroll"><div class="grid" id="grid"></div></div>
+            <div class="grid neon" id="grid" role="grid" aria-label="Plansza sapera"></div>
         </div>
-        <p class="game-status" id="saper-status" role="status">Kliknij pole, aby odkryć. Pierwsze pole jest zawsze bezpieczne.</p>
+        <p class="game-status" id="saper-status" role="status">Wybierz poziom, aby zacząć.</p>
     </div>
 
     <script>
-        // Theme Logic
-        // Theme is handled by assets/workshop/shell.js.
+    (() => {
+        const LEVELS = {
+            easy: { w: 10, h: 10, mines: 10, label: 'Łatwy' },
+            medium: { w: 16, h: 16, mines: 40, label: 'Średni' },
+            hard: { w: 30, h: 16, mines: 99, label: 'Trudny' }
+        };
+        const SKIN_KEY = 'saper:motyw';
+        const MINE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><g class="mine-spikes" stroke-width="2.4" stroke-linecap="round"><path d="M12 2.5v19M2.5 12h19M5.3 5.3l13.4 13.4M18.7 5.3 5.3 18.7"/></g><circle class="mine-body" cx="12" cy="12" r="6.6"/><circle class="mine-shine" cx="9.6" cy="9.6" r="1.9"/></svg>';
+        const FLAG_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="flag-pole" d="M7 3v18M4 21h9" stroke-width="2.2" stroke-linecap="round" fill="none"/><path class="flag-cloth" d="M8 3.5 19 8l-11 4.5z"/></svg>';
 
-        // Game Logic
         const grid = document.getElementById('grid');
         const bombCountEl = document.getElementById('bomb-count');
-        const timerEl = document.getElementById('timer');
         const resetBtn = document.getElementById('reset-btn');
-        const diffSelect = document.getElementById('difficulty-select');
-        const statusEl = document.getElementById('saper-status');
-        const setStatus = text => { if (statusEl) statusEl.textContent = text; };
-        
-        let width = 10, height = 10, bombAmount = 10, flags = 0;
-        let squares = [], isGameOver = false, timer = 0, timerId = null, started = false, flagMode = false;
         const flagButton = document.getElementById('flag-mode');
+        const statusEl = document.getElementById('saper-status');
+        const setStatus = text => { statusEl.textContent = text; };
+        const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s) % 60).padStart(2, '0')}`;
+
+        let level = 'easy', width = 10, height = 10, bombAmount = 10, flags = 0;
+        let squares = [], isGameOver = true, started = false, flagMode = false;
+        let elapsed = 0, lastTick = 0, timerId = null;
+        const pending = new Set();
+        const later = (fn, ms) => { const id = setTimeout(() => { pending.delete(id); fn(); }, ms); pending.add(id); };
+
+        /* ---------- wygląd ---------- */
+        function setSkin(skin) {
+            grid.classList.toggle('neon', skin === 'neon');
+            document.querySelectorAll('.skin-tabs .kit-tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.skin === skin)));
+            GryKit.store.set(SKIN_KEY, skin);
+        }
+        document.querySelectorAll('.skin-tabs .kit-tab').forEach(t => t.addEventListener('click', () => { setSkin(t.dataset.skin); GryKit.sfx.play('click'); }));
+        setSkin(GryKit.store.get(SKIN_KEY) === 'classic' ? 'classic' : 'neon');
+
+        /* ---------- czas ---------- */
+        function tick() {
+            const now = performance.now();
+            if (GryKit.playing && started && !isGameOver) {
+                elapsed += (now - lastTick) / 1000;
+                GryKit.score(Math.floor(elapsed));
+            }
+            lastTick = now;
+        }
+        function startTimer() { clearInterval(timerId); lastTick = performance.now(); timerId = setInterval(tick, 250); }
+        function stopTimer() { tick(); clearInterval(timerId); timerId = null; }
+
+        /* ---------- plansza ---------- */
         function neighbors(id) {
             const row = Math.floor(id / width), col = id % width, result = [];
             for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -117,97 +233,211 @@
         }
         function calculateNumbers() {
             squares.forEach((square, id) => {
-                if (square.dataset.type === 'valid') square.setAttribute('data', neighbors(id).filter(n => squares[n].dataset.type === 'bomb').length);
+                if (square.dataset.type === 'valid') square.dataset.n = neighbors(id).filter(n => squares[n].dataset.type === 'bomb').length;
             });
         }
-        function setDifficulty() {
-            const val = diffSelect.value;
-            if (val === 'easy') { width = 10; height = 10; bombAmount = 10; }
-            else if (val === 'medium') { width = 16; height = 16; bombAmount = 40; }
-            else if (val === 'hard') { width = 30; height = 16; bombAmount = 99; }
-            createBoard();
-        }
-        diffSelect.addEventListener('change', setDifficulty);
-        flagButton.addEventListener('click', () => {
-            flagMode = !flagMode;
-            flagButton.setAttribute('aria-pressed', String(flagMode));
-            flagButton.textContent = flagMode ? '🚩 Tryb flagi: włączony' : '🚩 Tryb flagi: wyłączony';
-        });
-        function createBoard() {
+        const label = (i, what) => `Wiersz ${Math.floor(i / width) + 1}, kolumna ${i % width + 1}: ${what}`;
+        function createBoard(lv) {
+            pending.forEach(clearTimeout); pending.clear();
             clearInterval(timerId); timerId = null;
-            grid.innerHTML = ''; squares = []; isGameOver = false; flags = 0; timer = 0; started = false;
-            timerEl.textContent = '000';
-            grid.style.gridTemplateColumns = `repeat(${width}, 30px)`;
-            grid.style.gridTemplateRows = `repeat(${height}, 30px)`;
-            grid.closest('.game-wrapper')?.style.setProperty?.('--game-width', `${Math.max(460, width * 32 + 16)}px`);
-            bombCountEl.textContent = String(bombAmount).padStart(3, '0'); resetBtn.textContent = '🙂';
-            setStatus('Kliknij pole, aby odkryć. Pierwsze pole jest zawsze bezpieczne.');
+            level = LEVELS[lv] ? lv : 'easy';
+            const L = LEVELS[level];
+            // Telefon w pionie: szeroką planszę obracamy, żeby pola były większe.
+            const portrait = window.innerWidth < 700 && window.innerHeight > window.innerWidth;
+            width = portrait && L.w > L.h ? L.h : L.w;
+            height = portrait && L.w > L.h ? L.w : L.h;
+            bombAmount = L.mines;
+            grid.innerHTML = ''; squares = []; isGameOver = false; flags = 0; elapsed = 0; started = false;
+            grid.classList.remove('is-paused');
+            GryKit.score(0);
+            grid.style.gridTemplateColumns = `repeat(${width}, var(--cell))`;
+            grid.style.gridTemplateRows = `repeat(${height}, var(--cell))`;
+            bombCountEl.textContent = bombAmount; resetBtn.textContent = '🙂';
+            setStatus(`${L.label}: ${L.w}×${L.h}, ${L.mines} min. Pierwsze pole jest zawsze bezpieczne.`);
             const gameArray = Array(width * height).fill('valid');
             for (let i = 0; i < bombAmount; i++) gameArray[i] = 'bomb';
             for (let i = gameArray.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [gameArray[i], gameArray[j]] = [gameArray[j], gameArray[i]];
             }
+            const frag = document.createDocumentFragment();
             for (let i = 0; i < gameArray.length; i++) {
                 const square = document.createElement('button');
-                square.type = 'button'; square.id = i; square.className = 'cell'; square.dataset.type = gameArray[i];
-                square.setAttribute('aria-label', `Wiersz ${Math.floor(i / width) + 1}, kolumna ${i % width + 1}: zakryte`);
-                grid.appendChild(square); squares.push(square);
-                square.addEventListener('click', () => flagMode ? addFlag(square) : click(square));
-                square.addEventListener('contextmenu', e => { e.preventDefault(); addFlag(square); });
-                square.addEventListener('keydown', e => { if (e.key.toLowerCase() === 'f') { e.preventDefault(); addFlag(square); } });
+                square.type = 'button'; square.className = 'cell'; square.dataset.id = i; square.dataset.type = gameArray[i];
+                square.setAttribute('role', 'gridcell');
+                square.setAttribute('aria-label', label(i, 'zakryte'));
+                frag.appendChild(square); squares.push(square);
             }
+            grid.appendChild(frag);
             calculateNumbers();
+            GryKit.refit();
         }
+        const cellOf = e => e.target.closest && e.target.closest('.cell');
+        grid.addEventListener('click', e => { const c = cellOf(e); if (c) (flagMode ? addFlag(c) : click(c)); });
+        grid.addEventListener('contextmenu', e => { const c = cellOf(e); if (c) { e.preventDefault(); addFlag(c); } });
+        grid.addEventListener('keydown', e => {
+            const c = cellOf(e); if (!c) return;
+            const id = Number(c.dataset.id);
+            if (e.key === 'f' || e.key === 'F') { e.preventDefault(); addFlag(c); return; }
+            const moves = { ArrowUp: -width, ArrowDown: width, ArrowLeft: -1, ArrowRight: 1 };
+            if (!(e.key in moves)) return;
+            e.preventDefault();
+            const x = id % width, nx = x + (e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0);
+            const next = id + moves[e.key];
+            if (nx < 0 || nx >= width || next < 0 || next >= squares.length) return;
+            squares[next].focus();
+        });
+
         function addFlag(square) {
-            if (isGameOver || square.classList.contains('revealed')) return;
+            if (!GryKit.playing || isGameOver || square.classList.contains('revealed')) return;
+            const i = Number(square.dataset.id);
             if (square.classList.contains('flag')) {
-                square.classList.remove('flag'); square.textContent = ''; flags--;
-                square.setAttribute('aria-label', 'Zakryte pole');
+                square.classList.remove('flag', 'planted'); square.innerHTML = ''; flags--;
+                square.setAttribute('aria-label', label(i, 'zakryte'));
             } else if (flags < bombAmount) {
-                square.classList.add('flag'); square.textContent = '🚩'; flags++;
-                square.setAttribute('aria-label', 'Flaga');
-            }
-            bombCountEl.textContent = String(bombAmount - flags).padStart(3, '0'); checkForWin();
-        }
-        function click(square) {
-            if (isGameOver || square.classList.contains('revealed') || square.classList.contains('flag')) return;
-            if (!started) {
-                // The first revealed square is always safe; move a mine rather than rerolling the board.
-                if (square.dataset.type === 'bomb') {
-                    const target = squares.find(s => s !== square && s.dataset.type === 'valid');
-                    target.dataset.type = 'bomb'; square.dataset.type = 'valid'; calculateNumbers();
-                }
-                started = true;
-                timerId = setInterval(() => { timer++; timerEl.textContent = String(timer).padStart(3, '0'); }, 1000);
-            }
-            if (square.dataset.type === 'bomb') { gameOver(); return; }
-            // Synchronous queue: no delayed callbacks can reveal a replacement board.
-            const queue = [Number(square.id)];
-            while (queue.length) {
-                const id = queue.pop(), cell = squares[id];
-                if (cell.classList.contains('revealed') || cell.classList.contains('flag') || cell.dataset.type === 'bomb') continue;
-                const total = Number(cell.getAttribute('data'));
-                cell.classList.add('revealed'); cell.textContent = total || ''; cell.dataset.num = total;
-                cell.setAttribute('aria-label', total ? `${total} sąsiednich min` : 'Puste pole');
-                if (!total) queue.push(...neighbors(id));
-            }
+                square.classList.add('flag'); square.innerHTML = FLAG_SVG; flags++;
+                square.classList.remove('planted'); void square.offsetWidth; square.classList.add('planted');
+                square.setAttribute('aria-label', label(i, 'flaga'));
+            } else { GryKit.sfx.play('error'); return; }
+            GryKit.sfx.play('click');
+            bombCountEl.textContent = bombAmount - flags;
             checkForWin();
         }
-        function gameOver() {
-            isGameOver = true; resetBtn.textContent = '😵'; clearInterval(timerId);
-            setStatus('Boom! Trafiłeś na minę. Kliknij 🙂, aby zagrać ponownie.');
-            squares.forEach(sq => { if (sq.dataset.type === 'bomb') { sq.textContent = '💣'; sq.classList.remove('flag'); sq.classList.add('revealed', 'bomb'); sq.setAttribute('aria-label', 'Mina'); } });
-        }
-        function checkForWin() {
-            if (isGameOver) return;
-            const allSafeRevealed = squares.every(s => s.dataset.type === 'bomb' || s.classList.contains('revealed'));
-            const allMinesFlagged = squares.filter(s => s.classList.contains('flag') && s.dataset.type === 'bomb').length === bombAmount;
-            if (allSafeRevealed || allMinesFlagged) { isGameOver = true; resetBtn.textContent = '😎'; clearInterval(timerId); setStatus(`Wygrana! Czas: ${timer} s.`); }
+        function click(square) {
+            if (!GryKit.playing || isGameOver || square.classList.contains('revealed') || square.classList.contains('flag')) return;
+            if (!started) {
+                // Pierwsze pole (i jego sąsiedzi, jeśli się da) zawsze bez miny – przenosimy miny zamiast losować od nowa.
+                const safe = new Set([Number(square.dataset.id), ...neighbors(Number(square.dataset.id))]);
+                const free = squares.filter((s, i) => !safe.has(i) && s.dataset.type === 'valid');
+                safe.forEach(i => {
+                    if (squares[i].dataset.type !== 'bomb') return;
+                    const target = free.length ? free.splice(Math.floor(Math.random() * free.length), 1)[0] : null;
+                    if (target) { target.dataset.type = 'bomb'; squares[i].dataset.type = 'valid'; }
+                    else if (i === Number(square.dataset.id)) {
+                        const any = squares.find(s => s !== square && s.dataset.type === 'valid');
+                        any.dataset.type = 'bomb'; square.dataset.type = 'valid';
+                    }
+                });
+                calculateNumbers();
+                started = true; elapsed = 0; startTimer();
+                resetBtn.textContent = '🙂';
+            }
+            if (square.dataset.type === 'bomb') { explode(square); return; }
+            // Kolejka BFS: odległość od klikniętego pola = opóźnienie fali odsłaniania.
+            const start = Number(square.dataset.id);
+            const dist = new Map([[start, 0]]);
+            const queue = [start];
+            let opened = 0;
+            const animate = !GryKit.reducedMotion;
+            while (queue.length) {
+                const id = queue.shift(), cell = squares[id];
+                if (cell.classList.contains('revealed') || cell.classList.contains('flag') || cell.dataset.type === 'bomb') continue;
+                const total = Number(cell.dataset.n);
+                cell.classList.add('revealed'); cell.textContent = total || ''; cell.dataset.num = total;
+                cell.setAttribute('aria-label', label(id, total ? `${total} sąsiednich min` : 'puste'));
+                if (animate) { cell.style.setProperty('--d', Math.min(600, dist.get(id) * 28) + 'ms'); cell.classList.add('anim'); }
+                opened++;
+                if (!total) neighbors(id).forEach(n => { if (!dist.has(n)) { dist.set(n, dist.get(id) + 1); queue.push(n); } });
+            }
+            if (opened) GryKit.sfx.play('tap', { pitch: opened > 1 ? 0.85 : 1 + Math.random() * 0.12 });
+            if (opened > 8) later(() => GryKit.sfx.play('tick'), 160);
+            checkForWin();
         }
 
-        resetBtn.addEventListener('click', createBoard); 
-        createBoard();
+        function explode(square) {
+            isGameOver = true; stopTimer(); resetBtn.textContent = '😵';
+            const neon = grid.classList.contains('neon');
+            square.classList.add('revealed', 'bomb', 'hit', 'boom'); square.innerHTML = MINE_SVG;
+            square.setAttribute('aria-label', label(Number(square.dataset.id), 'mina – wybuch'));
+            GryKit.fx.burstAt(square, { color: neon ? ['#ff3b6b', '#ffd23f', '#5ff3ff', '#ffffff'] : ['#f2c14e', '#e8763d', '#d05c5c', '#3a3a3a'], count: 34, spread: 90, size: 8 });
+            GryKit.fx.shake(grid, 9, 380);
+            GryKit.fx.flash(neon ? '#ff3b6b' : '#ff6b4a', { on: grid, strength: 0.5 });
+            GryKit.sfx.play('boom');
+            setStatus('Boom! Trafiłeś na minę.');
+            // Pozostałe miny wychodzą kaskadowo, od najbliższej do najdalszej.
+            const sid = Number(square.dataset.id), sx = sid % width, sy = Math.floor(sid / width);
+            const rest = squares.filter(s => s !== square && s.dataset.type === 'bomb' && !s.classList.contains('flag'))
+                .map(s => { const i = Number(s.dataset.id); return { s, d: Math.hypot(i % width - sx, Math.floor(i / width) - sy) }; })
+                .sort((a, b) => a.d - b.d);
+            const step = GryKit.reducedMotion ? 0 : Math.max(8, Math.min(45, 1100 / Math.max(1, rest.length)));
+            rest.forEach(({ s }, k) => later(() => {
+                s.classList.add('revealed', 'bomb', 'boom'); s.innerHTML = MINE_SVG;
+                s.setAttribute('aria-label', label(Number(s.dataset.id), 'mina'));
+                if (k % 6 === 0) GryKit.sfx.play('hit', { pitch: 0.7 + Math.random() * 0.4 });
+            }, 220 + k * step));
+            squares.forEach(s => {
+                if (s.classList.contains('flag') && s.dataset.type !== 'bomb') { s.classList.add('wrong'); s.setAttribute('aria-label', label(Number(s.dataset.id), 'błędna flaga')); }
+            });
+            const total = 220 + rest.length * step;
+            later(() => GryKit.sfx.play('lose'), Math.min(total, 900));
+            GryKit.over({
+                score: Math.floor(elapsed), record: false, sound: false, delay: total + 450,
+                title: 'Boom!', icon: '💥',
+                text: `Mina! Odkryto ${squares.filter(s => s.classList.contains('revealed') && s.dataset.type !== 'bomb').length} z ${squares.length - bombAmount} bezpiecznych pól.`
+            });
+        }
+        function checkForWin() {
+            if (isGameOver || !started) return;
+            const allSafeRevealed = squares.every(s => s.dataset.type === 'bomb' || s.classList.contains('revealed'));
+            const allMinesFlagged = flags === bombAmount && squares.filter(s => s.classList.contains('flag') && s.dataset.type === 'bomb').length === bombAmount;
+            if (!allSafeRevealed && !allMinesFlagged) return;
+            isGameOver = true; stopTimer(); resetBtn.textContent = '😎';
+            const time = Math.max(1, Math.ceil(elapsed));
+            GryKit.score(time);
+            squares.forEach(s => { if (s.dataset.type === 'bomb' && !s.classList.contains('flag')) { s.classList.add('flag'); s.innerHTML = FLAG_SVG; } });
+            bombCountEl.textContent = 0;
+            setStatus(`Wygrana! Czas: ${fmt(time)}.`);
+            const colors = grid.classList.contains('neon') ? ['#5ff3ff', '#ff4d8d', '#5cff9d', '#ffd23f', '#b48cff'] : ['#e8763d', '#f2c14e', '#b8d58e', '#7aa7ff', '#d05c5c'];
+            const r = grid.getBoundingClientRect(), b = document.body.getBoundingClientRect();
+            for (let k = 0; k < 6; k++) later(() => {
+                GryKit.fx.burst(r.left - b.left + r.width * (0.15 + Math.random() * 0.7), r.top - b.top + r.height * (0.15 + Math.random() * 0.5),
+                    { on: document.body, color: colors, count: 34, spread: 140, gravity: 70, square: true, duration: 1000 });
+            }, k * 140);
+            GryKit.over({ score: time, win: true, delay: 900, icon: '😎', text: `${LEVELS[level].label} poziom ukończony w ${fmt(time)}.` });
+        }
+
+        resetBtn.addEventListener('click', () => GryKit.start());
+        document.getElementById('level-btn').addEventListener('click', () => GryKit.menu());
+        flagButton.addEventListener('click', () => {
+            flagMode = !flagMode;
+            flagButton.setAttribute('aria-pressed', String(flagMode));
+            flagButton.textContent = flagMode ? '🚩 Flagi: wł.' : '🚩 Flagi: wył.';
+        });
+
+        GryKit.init({
+            id: 'saper',
+            title: 'Saper',
+            icon: '💣',
+            howTo: ['Liczba mówi, ile min dotyka pola.', 'Oznacz miny flagą, odkryj resztę – jak najszybciej.'],
+            controls: '<kbd>LPM</kbd> odkryj · <kbd>PPM</kbd>/<kbd>F</kbd> flaga · <kbd>P</kbd> pauza',
+            board: '.game-stage',
+            hud: { score: '#timer', best: '#best' },
+            scoreLabel: 'Czas',
+            bestLabel: 'Rekord',
+            lowerIsBetter: true,
+            bestPerMode: true,
+            format: fmt,
+            modes: [
+                { id: 'easy', label: 'Łatwy', desc: '10 × 10 · 10 min' },
+                { id: 'medium', label: 'Średni', desc: '16 × 16 · 40 min' },
+                { id: 'hard', label: 'Trudny', desc: '30 × 16 · 99 min' }
+            ],
+            fit: { el: grid, zoom: true, max: 1.45, min: 0.2, within: document.querySelector('.game-wrapper') },
+            onStart(mode) { createBoard(mode); },
+            onPause(paused) {
+                grid.classList.toggle('is-paused', paused);
+                if (paused) stopTimer(); else if (started && !isGameOver) startTimer();
+            },
+            onMenu() {
+                pending.forEach(clearTimeout); pending.clear();
+                stopTimer(); isGameOver = true;
+                setStatus('Wybierz poziom, aby zacząć.');
+            }
+        });
+        createBoard('easy');
+        isGameOver = true;
+        setStatus('Wybierz poziom, aby zacząć. Pierwsze pole jest zawsze bezpieczne.');
+    })();
     </script>
 </body>
 </html>
