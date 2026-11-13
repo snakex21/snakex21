@@ -1,0 +1,119 @@
+/* Wspólna warstwa gier (GryKit): ekran startu / pauzy / końca, efekty, kafelki HUD, dopasowanie planszy.
+   Kolory z tokenów --shell-* (shell.css), więc działa w jasnym, ciemnym i w motywach pulpitu.
+   Czcionka strony także w grach (bez tego body w grach dziedziczyło Times New Roman). */
+body.game-shell {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body.game-shell :is(button, input, select, textarea) { font-family: inherit; }
+
+/* W oknie pulpitu (iframe) nagłówek strony zwija się do linku „← Wszystkie gry”, żeby plansza miała miejsce. */
+html.gk-embedded .game-shell .site-header .site-nav { display: none; }
+html.gk-embedded .game-shell .site-header .site-context { padding-top: 6px; padding-bottom: 6px; }
+html.gk-embedded .game-shell .site-header .site-context a { min-height: 26px; }
+html.gk-embedded .game-shell .game-wrapper { padding-top: 12px; padding-bottom: 8px; }
+html.gk-embedded .game-shell .game-title p { display: none; }
+html.gk-embedded .game-shell .game-bar { margin-bottom: 10px; }
+
+/* Host nakładki (rodzic planszy) */
+.gk-host { position: relative; }
+
+/* ---------- Nakładka ---------- */
+.gk-overlay {
+  position: absolute; z-index: 30; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px; border-radius: 12px; overflow: auto;
+  background: rgba(12, 20, 16, .66);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  color: #eef2e7; text-align: center;
+  font-family: inherit;
+  animation: gk-fade .18s ease-out;
+}
+.gk-overlay[hidden] { display: none !important; }
+.gk-card {
+  box-sizing: border-box; width: min(360px, 100%); max-height: 100%;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 20px 20px 18px; border-radius: 14px;
+  background: var(--shell-card); color: var(--shell-text);
+  border: 1px solid var(--shell-border);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .28);
+  animation: gk-pop .22s cubic-bezier(.2, .9, .3, 1.2);
+}
+.gk-card h2 {
+  margin: 0; font-size: clamp(22px, 4vw, 30px); line-height: 1.15; font-weight: 750; letter-spacing: -.5px;
+  color: var(--shell-text);
+}
+.gk-icon { font-size: 34px; line-height: 1; }
+.gk-text { margin: 0; font-size: 14px; line-height: 1.45; color: var(--shell-muted); }
+.gk-howto { margin: 2px 0 0; padding: 0; list-style: none; font-size: 13.5px; line-height: 1.45; color: var(--shell-text); }
+.gk-howto li { margin: 2px 0; }
+.gk-controls {
+  margin: 4px 0 0; font-size: 12px; line-height: 1.4; color: var(--shell-muted);
+}
+.gk-controls kbd, .gk-card kbd {
+  display: inline-block; min-width: 20px; padding: 1px 6px; margin: 0 1px;
+  border: 1px solid var(--shell-border); border-bottom-width: 2px; border-radius: 5px;
+  background: var(--shell-bg); color: var(--shell-text);
+  font: 600 11px/1.5 ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+.gk-score { display: flex; gap: 10px; justify-content: center; margin: 4px 0 2px; }
+.gk-score div {
+  min-width: 92px; padding: 6px 12px; border-radius: 10px;
+  background: var(--shell-soft); border: 1px solid var(--shell-border);
+}
+.gk-score span { display: block; font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--shell-muted); }
+.gk-score b { display: block; font-size: 24px; line-height: 1.2; font-weight: 750; color: var(--shell-accent); font-variant-numeric: tabular-nums; }
+.gk-record {
+  display: inline-block; padding: 2px 10px; border-radius: 99px;
+  background: var(--shell-accent); color: var(--shell-bg);
+  font-size: 12px; font-weight: 750; letter-spacing: .4px;
+  animation: gk-pulse 1.2s ease-in-out infinite;
+}
+.gk-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; width: 100%; }
+.gk-actions .kit-btn { flex: 1 1 120px; max-width: 220px; }
+.gk-modes { display: grid; gap: 8px; width: 100%; margin-top: 6px; }
+.gk-modes .kit-btn { width: 100%; flex-direction: column; gap: 0; min-height: 50px; padding: 6px 14px; white-space: normal; }
+.gk-modes .kit-btn small { display: block; font-size: 11.5px; font-weight: 500; opacity: .8; }
+.gk-extra { width: 100%; }
+.gk-best { margin: 0; font-size: 12.5px; color: var(--shell-muted); }
+
+/* Mała plansza: zwarty układ */
+.gk-overlay.gk-compact { padding: 6px; }
+.gk-overlay.gk-compact .gk-card { padding: 12px 12px 10px; gap: 5px; }
+.gk-overlay.gk-compact .gk-card h2 { font-size: 20px; }
+.gk-overlay.gk-compact .gk-icon { font-size: 24px; }
+.gk-overlay.gk-compact .gk-howto, .gk-overlay.gk-compact .gk-text { font-size: 12.5px; }
+.gk-overlay.gk-compact .gk-score b { font-size: 19px; }
+.gk-overlay.gk-compact .kit-btn { min-height: 36px; }
+.gk-overlay.gk-tiny .gk-howto, .gk-overlay.gk-tiny .gk-controls, .gk-overlay.gk-tiny .gk-icon { display: none; }
+
+/* ---------- Przycisk dźwięku ---------- */
+.gk-mute[aria-pressed="true"] { color: var(--shell-muted); }
+
+/* ---------- Efekty ---------- */
+.gk-fx { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+.gk-particle {
+  position: absolute; left: 0; top: 0; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; will-change: transform, opacity;
+}
+.gk-float {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, -50%);
+  font: 800 18px/1 Inter, -apple-system, "Segoe UI", sans-serif; white-space: nowrap;
+  color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 0 8px rgba(0, 0, 0, .25);
+  will-change: transform, opacity;
+}
+html[data-pulpit-theme] .gk-float { font-family: var(--pt-font); }
+.gk-flash { position: absolute; z-index: 25; pointer-events: none; border-radius: 12px; opacity: 0; }
+
+/* Kafelek HUD z życiami */
+.game-stat.gk-lives b { letter-spacing: 1px; color: #d05c5c; }
+[data-theme="dark"] .game-stat.gk-lives b { color: #ff8f86; }
+
+/* Plansze skalowane: ostre piksele, gdy gra o to prosi */
+.gk-pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+@keyframes gk-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gk-pop { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes gk-pulse { 50% { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) {
+  .gk-overlay, .gk-card, .gk-record { animation: none; }
+}
