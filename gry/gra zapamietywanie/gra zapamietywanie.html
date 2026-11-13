@@ -6,11 +6,12 @@
     <title>Gra w zapamiętywanie - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 720px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 24px; --game-width: 720px; }
 
         .memory-grid {
             box-sizing: border-box;
-            width: 100%;
+            /* stała szerokość (nie 100%), żeby GryKit.fit mógł planszę zmniejszyć przez zoom */
+            width: min(720px, calc(100vw - 32px));
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 12px;
@@ -22,85 +23,79 @@
 
         .memory-card {
             position: relative;
-            display: grid;
-            place-items: center;
             aspect-ratio: 1 / 1;
             border-radius: 10px;
-            border: 2px solid var(--shell-border);
-            background: var(--shell-card);
-            font-size: clamp(1.4rem, 6vw, 2.6rem);
-            line-height: 1;
             cursor: pointer;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.15s, background-color 0.15s, border-color 0.15s, opacity 0.2s;
+            font-size: clamp(1.4rem, 6vw, 2.6rem);
+            line-height: 1;
+            transition: transform .15s, opacity .35s, visibility 0s;
         }
-
-        .memory-card:hover {
-            transform: translateY(-2px);
+        .memory-card:hover { transform: translateY(-2px); }
+        /* Karta = dwie ściany obracane w 3D (przód z obrazkiem, tył ze wzorem). */
+        .card-inner {
+            position: absolute; inset: 0;
+            transform-style: preserve-3d;
+            transform: perspective(600px) rotateY(0deg);
+            transition: transform .4s cubic-bezier(.3, .7, .3, 1.15);
         }
-
-        .memory-card.hidden {
-            font-size: 0;
-            color: transparent;
-            text-shadow: none;
+        .memory-card.hidden .card-inner { transform: perspective(600px) rotateY(180deg); }
+        .face {
+            position: absolute; inset: 0; box-sizing: border-box;
+            display: grid; place-items: center;
+            border-radius: 10px; border: 2px solid var(--shell-border); background: var(--shell-card);
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            box-shadow: 0 2px 6px rgba(20, 40, 30, .12);
+        }
+        .face.back {
+            transform: rotateY(180deg);
             background:
                 radial-gradient(circle at center, var(--shell-accent) 0 3px, transparent 4px),
                 repeating-linear-gradient(45deg, transparent 0 8px, var(--shell-hover) 8px 10px),
                 var(--shell-card);
-            border-color: var(--shell-border);
         }
-        .memory-card.hidden:hover { border-color: var(--shell-accent); }
+        .memory-card:hover .face.back { border-color: var(--shell-accent); }
 
         .memory-card.off {
             cursor: default;
             opacity: 0;
             visibility: hidden;
+            transform: scale(.8);
+            transition: transform .35s, opacity .35s, visibility 0s .35s;
         }
+        .memory-card.miss .face.front { animation: miss .38s ease-in-out; border-color: #d05c5c; }
+        @keyframes miss { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
 
-        .memory-card:not(.hidden).red { background-color: #ef4444; border-color: #dc2626; }
-        .memory-card:not(.hidden).green { background-color: #22c55e; border-color: #16a34a; }
-        .memory-card:not(.hidden).blue { background-color: #3b82f6; border-color: #2563eb; }
-        .memory-card:not(.hidden).magenta { background-color: #e879f9; border-color: #d946ef; }
-        .memory-card:not(.hidden).yellow { background-color: #facc15; border-color: #eab308; }
-        .memory-card:not(.hidden).bisque { background-color: #fbbf24; border-color: #f59e0b; }
-        .memory-card:not(.hidden).brown { background-color: #b45309; border-color: #92400e; }
-        .memory-card:not(.hidden).cyan { background-color: #22d3ee; border-color: #06b6d4; }
-        .memory-card:not(.hidden).orange { background-color: #fb923c; border-color: #f97316; }
+        .memory-card.red .front { background-color: #ef4444; border-color: #dc2626; }
+        .memory-card.green .front { background-color: #22c55e; border-color: #16a34a; }
+        .memory-card.blue .front { background-color: #3b82f6; border-color: #2563eb; }
+        .memory-card.magenta .front { background-color: #e879f9; border-color: #d946ef; }
+        .memory-card.yellow .front { background-color: #facc15; border-color: #eab308; }
+        .memory-card.bisque .front { background-color: #fbbf24; border-color: #f59e0b; }
+        .memory-card.brown .front { background-color: #b45309; border-color: #92400e; }
+        .memory-card.cyan .front { background-color: #22d3ee; border-color: #06b6d4; }
+        .memory-card.orange .front { background-color: #fb923c; border-color: #f97316; }
         .memory-card:focus-visible { outline: 3px solid var(--shell-accent); outline-offset: 2px; }
-
-        .message {
-            display: none;
-            max-width: var(--game-width);
-            margin: 16px auto 0;
-            padding: 10px 16px;
-            border-radius: 10px;
-            border: 1px solid var(--shell-border);
-            background: var(--shell-card);
-            color: var(--shell-text);
-            font-weight: 650;
-            text-align: center;
-        }
-
-        .message.visible {
-            display: block;
-        }
-
-        .best-score b { color: var(--shell-text); font-weight: 650; }
 
         @media (max-width: 560px) {
             .game-wrapper { padding: 16px 16px 24px; }
-            .memory-grid { gap: 6px; padding: 8px; }
-            .memory-card { border-radius: 8px; }
+            .memory-grid { grid-template-columns: repeat(3, 1fr); width: min(380px, calc(100vw - 32px)); gap: 8px; padding: 10px; }
+            .memory-card { font-size: 2.2rem; }
+            .memory-card, .face { border-radius: 8px; }
             .memory-card:hover { transform: none; }
         }
+        @media (max-height: 640px) { .game-wrapper { padding-top: 12px; padding-bottom: 12px; } .game-bar { margin-bottom: 10px; } }
+        @media (prefers-reduced-motion: reduce) { .card-inner { transition: none; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
+
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
     <header class="site-header" data-site-shell>
@@ -120,6 +115,7 @@
                 <div class="game-stat"><span>Ruchy</span><b data-memory-moves>0</b></div>
                 <div class="game-stat"><span>Czas</span><b data-memory-time>0:00</b></div>
                 <div class="game-stat"><span>Celność</span><b data-memory-accuracy>100%</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="best">–</b></div>
             </div>
             <div class="game-buttons">
                 <button class="kit-btn small primary" type="button" data-memory-reset>Nowa gra</button>
@@ -148,278 +144,169 @@
                 <div class="memory-card" data-card></div>
             </div>
         </div>
-
-        <div class="message" data-memory-message role="status"></div>
-
-        <p class="game-status best-score">
-            Rekord: <b><span data-memory-best-score>--</span>%</b> ·
-            czas <b data-memory-best-time>--</b> ·
-            ruchy <b data-memory-best-moves>--</b>
-            <br>Najlepszy wynik zapisuje się w przeglądarce.
-        </p>
+        <p class="game-status" data-memory-status role="status">Kliknij kartę (albo <kbd>Tab</kbd> + <kbd>Enter</kbd>) · <kbd>P</kbd> / <kbd>Esc</kbd> pauza</p>
     </div>
 
     <script>
-        // Motyw ciemny
-        // Theme is handled by assets/workshop/shell.js.
+    (() => {
+        const CARD_COLORS = ["red", "green", "blue", "magenta", "yellow", "bisque", "brown", "cyan", "orange"];
+        const EMOJI = ['🍎', '🍀', '💧', '🌸', '⭐', '🍪', '🐻', '❄️', '🍊'];
+        const HEX = ['#ef4444', '#22c55e', '#3b82f6', '#e879f9', '#facc15', '#fbbf24', '#b45309', '#22d3ee', '#fb923c'];
+        const PAIRS = CARD_COLORS.length;
+        const LEGACY_KEY = 'memory-best-score';   // stary zapis {score, time, moves} – czas przejmujemy jako rekord
 
-        // Gra w zapamiętywanie
-        const CARD_COLORS = [
-            "red", "red",
-            "green", "green",
-            "blue", "blue",
-            "magenta", "magenta",
-            "yellow", "yellow",
-            "bisque", "bisque",
-            "brown", "brown",
-            "cyan", "cyan",
-            "orange", "orange",
-        ];
+        const gridElement = document.querySelector('[data-memory-grid]');
+        const movesElement = document.querySelector('[data-memory-moves]');
+        const timeElement = document.querySelector('[data-memory-time]');
+        const accuracyElement = document.querySelector('[data-memory-accuracy]');
+        const statusElement = document.querySelector('[data-memory-status]');
+        const cards = Array.from(gridElement.querySelectorAll('[data-card]'));
 
-        const gridElement = document.querySelector("[data-memory-grid]");
-        const movesElement = document.querySelector("[data-memory-moves]");
-        const timeElement = document.querySelector("[data-memory-time]");
-        const accuracyElement = document.querySelector("[data-memory-accuracy]");
-        const resetButton = document.querySelector("[data-memory-reset]");
-        const messageElement = document.querySelector("[data-memory-message]");
-        const bestScoreElement = document.querySelector("[data-memory-best-score]");
-        const bestTimeElement = document.querySelector("[data-memory-best-time]");
-        const bestMovesElement = document.querySelector("[data-memory-best-moves]");
+        const state = { openCards: [], foundPairs: 0, moves: 0, started: false, elapsed: 0, lastTick: null, isBusy: true, gen: 0 };
+        const timers = new Set();
+        const later = (fn, ms) => { const g = state.gen; const id = setTimeout(() => { timers.delete(id); if (g === state.gen) fn(); }, ms); timers.add(id); };
 
-        const BEST_SCORE_KEY = "memory-best-score";
+        const formatTime = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+        const seconds = () => Math.floor(state.elapsed / 1000);
+        const accuracy = () => state.moves === 0 ? 100 : Math.max(0, Math.min(100, Math.round(state.foundPairs / state.moves * 100)));
 
-        if (!gridElement) {
-            console.warn("Nie znaleziono planszy gry w zapamiętywanie.");
-        } else {
-            const cards = Array.from(gridElement.querySelectorAll("[data-card]"));
-            const state = {
-                openCards: [],
-                foundPairs: 0,
-                moves: 0,
-                startTime: null,
-                timerId: null,
-                isBusy: false,
-                previewTimer: null,
-                mismatchTimer: null,
-            };
+        const updateHud = () => {
+            movesElement.textContent = state.moves;
+            timeElement.textContent = formatTime(seconds());
+            accuracyElement.textContent = accuracy() + '%';
+        };
+        // Zegar liczy tylko w trakcie gry – pauza (P / Esc / utrata fokusu) go zatrzymuje.
+        setInterval(() => {
+            const now = performance.now();
+            if (!state.started || !GryKit.playing) { state.lastTick = null; return; }
+            if (state.lastTick !== null) state.elapsed += now - state.lastTick;
+            state.lastTick = now;
+            updateHud();
+        }, 250);
 
-            const formatTime = seconds => {
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
-            };
+        const center = el => {
+            const r = el.getBoundingClientRect(), b = document.body.getBoundingClientRect();
+            return { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top };
+        };
 
-            const updateHud = () => {
-                if (movesElement) {
-                    movesElement.textContent = state.moves.toString();
-                }
-                if (timeElement) {
-                    const elapsed = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
-                    timeElement.textContent = formatTime(elapsed);
-                }
-                if (accuracyElement) {
-                    const accuracy = state.moves === 0 ? 100 : Math.round((state.foundPairs / state.moves) * 100);
-                    accuracyElement.textContent = `${Math.max(0, Math.min(accuracy, 100))}%`;
-                }
-            };
+        const hideCards = list => list.forEach(card => {
+            card.classList.add('hidden');
+            card.setAttribute('aria-label', 'Zakryta karta');
+        });
 
-            const stopTimer = () => {
-                if (state.timerId) {
-                    clearInterval(state.timerId);
-                    state.timerId = null;
-                }
-            };
+        const finishGame = () => {
+            const time = Math.max(1, seconds());
+            updateHud();
+            state.started = false;
+            GryKit.over({ score: time, win: true, delay: 500, text: `Wszystkie pary w ${formatTime(time)} · ruchy: ${state.moves} · celność ${accuracy()}%.` });
+        };
 
-            const startTimer = () => {
-                if (!state.startTime) {
-                    state.startTime = Date.now();
-                    state.timerId = setInterval(updateHud, 1000);
-                }
-            };
+        const revealCard = card => {
+            if (!GryKit.playing || state.isBusy || card.classList.contains('off') || state.openCards.includes(card)) return;
+            if (!state.started) { state.started = true; state.lastTick = performance.now(); }
+            card.classList.remove('hidden', 'miss');
+            card.setAttribute('aria-label', card.dataset.label);
+            state.openCards.push(card);
+            GryKit.sfx.play('tap');
+            if (state.openCards.length < 2) return;
 
-            const resetMessage = () => {
-                if (messageElement) {
-                    messageElement.textContent = "";
-                    messageElement.classList.remove("visible");
-                }
-            };
-
-            const showMessage = text => {
-                if (!messageElement) {
-                    return;
-                }
-                messageElement.textContent = text;
-                messageElement.classList.add("visible");
-            };
-
-            const validResult = result => result && ['score', 'time', 'moves'].every(key => Number.isFinite(result[key]) && result[key] >= 0);
-            const saveBestResult = result => {
-                try {
-                    const stored = JSON.parse(localStorage.getItem(BEST_SCORE_KEY) || "null");
-                    if (!validResult(stored) || result.score > stored.score || (result.score === stored.score && result.time < stored.time)) {
-                        localStorage.setItem(BEST_SCORE_KEY, JSON.stringify(result));
-                        return result;
-                    }
-                    return stored;
-                } catch (error) {
-                    console.error("Nie udało się zapisać najlepszego wyniku", error);
-                    return null;
-                }
-            };
-
-            const loadBestResult = () => {
-                try {
-                    const stored = JSON.parse(localStorage.getItem(BEST_SCORE_KEY) || "null");
-                    return validResult(stored) ? stored : null;
-                } catch (error) {
-                    console.error("Nie udało się wczytać najlepszego wyniku", error);
-                    return null;
-                }
-            };
-
-            const updateBestSummary = best => {
-                if (!validResult(best)) {
-                    return;
-                }
-                if (bestScoreElement) {
-                    bestScoreElement.textContent = best.score.toString();
-                }
-                if (bestTimeElement) {
-                    bestTimeElement.textContent = formatTime(best.time);
-                }
-                if (bestMovesElement) {
-                    bestMovesElement.textContent = best.moves.toString();
-                }
-            };
-
-            const finishGame = () => {
-                stopTimer();
-                const totalTime = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
-                const score = state.moves === 0 ? 100 : Math.round((state.foundPairs / state.moves) * 100);
-                const result = { score, time: totalTime, moves: state.moves };
-                const best = saveBestResult(result) || result;
-                updateBestSummary(best);
-                showMessage(`Gratulacje! Ukończyłeś planszę w ${formatTime(totalTime)} i ${state.moves} ruchach.`);
-            };
-
-            const hideCards = cardsToHide => {
-                cardsToHide.forEach(card => { card.classList.add("hidden"); card.setAttribute('aria-label', 'Zakryta karta'); });
-            };
-
-            const markAsFound = cardsToMark => {
-                cardsToMark.forEach(card => { card.classList.add("off"); card.tabIndex = -1; card.setAttribute('aria-label', 'Znaleziona para'); });
-            };
-
-            const revealCard = card => {
-                if (state.isBusy || card.classList.contains("off") || state.openCards.includes(card)) {
-                    return;
-                }
-
-                startTimer();
-                resetMessage();
-                card.classList.remove("hidden");
-                card.setAttribute('aria-label', card.textContent);
-                state.openCards.push(card);
-
-                if (state.openCards.length < 2) {
-                    return;
-                }
-
-                state.isBusy = true;
-                state.moves += 1;
+            state.isBusy = true;
+            state.moves += 1;
+            const [first, second] = state.openCards;
+            if (first.dataset.color === second.dataset.color) {
+                state.foundPairs += 1;
                 updateHud();
-
-                const [first, second] = state.openCards;
-                const firstColor = first.dataset.color;
-                const secondColor = second.dataset.color;
-
-                if (firstColor === secondColor) {
-                    markAsFound(state.openCards);
-                    state.foundPairs += 1;
-                    updateHud();
+                state.openCards = [];
+                state.isBusy = false;
+                const color = HEX[CARD_COLORS.indexOf(first.dataset.color)];
+                later(() => {
+                    GryKit.sfx.play('coin', { pitch: 1 + state.foundPairs * 0.04 });
+                    [first, second].forEach(c => GryKit.fx.burstAt(c, { color: [color, '#fff', '#f2c14e'], count: 12 }));
+                    const c = center(second);
+                    GryKit.fx.float(c.x, c.y, 'Para!', { on: document.body, color: '#fff' });
+                }, 280);
+                later(() => [first, second].forEach(c => {
+                    c.classList.add('off'); c.tabIndex = -1; c.setAttribute('aria-label', 'Znaleziona para');
+                }), 520);
+                if (state.foundPairs === PAIRS) finishGame();
+            } else {
+                updateHud();
+                later(() => { GryKit.sfx.play('error'); first.classList.add('miss'); second.classList.add('miss'); }, 300);
+                later(() => {
+                    hideCards(state.openCards);
+                    state.openCards.forEach(c => c.classList.remove('miss'));
                     state.openCards = [];
                     state.isBusy = false;
-                    if (state.foundPairs === CARD_COLORS.length / 2) {
-                        finishGame();
-                    }
-                } else {
-                    state.mismatchTimer = setTimeout(() => {
-                        state.mismatchTimer = null;
-                        hideCards(state.openCards);
-                        state.openCards = [];
-                        state.isBusy = false;
-                    }, 750);
-                }
-            };
-
-            const shuffleCards = () => {
-                const deck = [...CARD_COLORS];
-                cards.forEach(card => {
-                    card.className = "memory-card"; card.tabIndex = 0;
-                    const randomIndex = Math.floor(Math.random() * deck.length);
-                    const color = deck.splice(randomIndex, 1)[0];
-                    card.dataset.color = color;
-                    card.classList.add(color);
-                    card.textContent = ['🍎','🍀','💧','🌸','⭐','🍪','🐻','❄️','🍊'][Math.floor(CARD_COLORS.indexOf(color) / 2)];
-                });
-            };
-
-            const stopHiding = () => {
-                cards.forEach(card => card.classList.remove("hidden", "off"));
-            };
-
-            const resetGame = () => {
-                stopTimer();
-                clearTimeout(state.previewTimer); clearTimeout(state.mismatchTimer);
-                state.previewTimer = state.mismatchTimer = null;
-                state.openCards = [];
-                state.foundPairs = 0;
-                state.moves = 0;
-                state.startTime = null;
-                state.isBusy = false;
-                cards.forEach(card => {
-                    card.className = "memory-card";
-                    delete card.dataset.color;
-                });
-                shuffleCards();
-                stopHiding();
-                state.isBusy = true;
-                state.previewTimer = setTimeout(() => {
-                    state.previewTimer = null; state.isBusy = false;
-                    hideCards(cards);
-                }, 1800);
-                updateHud();
-                resetMessage();
-            };
-
-            const initialise = () => {
-                shuffleCards();
-                const handleCardClick = event => revealCard(event.currentTarget);
-                cards.forEach(card => {
-                    card.classList.remove("hidden", "off");
-                    card.setAttribute('role', 'button'); card.tabIndex = 0;
-                    card.setAttribute('aria-label', 'Karta pamięci');
-                    card.addEventListener("click", handleCardClick);
-                    card.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); revealCard(card); } });
-                });
-                state.isBusy = true;
-                state.previewTimer = setTimeout(() => {
-                    state.previewTimer = null; state.isBusy = false;
-                    hideCards(cards);
-                }, 1800);
-                updateHud();
-                const best = loadBestResult();
-                if (best) {
-                    updateBestSummary(best);
-                }
-            };
-
-            if (resetButton) {
-                resetButton.addEventListener("click", resetGame);
+                }, 900);
             }
+        };
 
-            initialise();
+        const shuffleCards = () => {
+            const deck = [...CARD_COLORS, ...CARD_COLORS];
+            cards.forEach(card => {
+                const color = deck.splice(Math.floor(Math.random() * deck.length), 1)[0];
+                const i = CARD_COLORS.indexOf(color);
+                card.className = 'memory-card ' + color;
+                card.tabIndex = 0;
+                card.dataset.color = color;
+                card.dataset.label = 'Karta: ' + EMOJI[i];
+                card.innerHTML = `<span class="card-inner"><span class="face front" aria-hidden="true">${EMOJI[i]}</span><span class="face back"></span></span>`;
+            });
+        };
+
+        // Nowa partia: tasowanie, chwilowy podgląd wszystkich kart, potem zakrycie.
+        const resetGame = preview => {
+            timers.forEach(clearTimeout); timers.clear();
+            state.gen++;
+            Object.assign(state, { openCards: [], foundPairs: 0, moves: 0, started: false, elapsed: 0, lastTick: null, isBusy: true });
+            shuffleCards();
+            updateHud();
+            if (!preview) { hideCards(cards); return; }
+            statusElement.textContent = 'Zapamiętaj karty…';
+            later(() => {
+                hideCards(cards);
+                GryKit.sfx.play('tick');
+                state.isBusy = false;
+                statusElement.innerHTML = 'Odkrywaj pary · <kbd>P</kbd> / <kbd>Esc</kbd> pauza';
+            }, 1800);
+        };
+
+        cards.forEach(card => {
+            card.setAttribute('role', 'button');
+            card.addEventListener('click', () => revealCard(card));
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); revealCard(card); }
+            });
+        });
+        document.querySelector('[data-memory-reset]').addEventListener('click', () => GryKit.start());
+
+        GryKit.init({
+            id: 'memory',
+            title: 'Gra w zapamiętywanie',
+            icon: '🧠',
+            howTo: ['Na początku wszystkie karty są przez chwilę odkryte – zapamiętaj je.', 'Odkrywaj po dwie karty i szukaj par.', 'Liczy się czas – im szybciej, tym lepszy rekord.'],
+            controls: 'Klik / dotyk albo <kbd>Tab</kbd> + <kbd>Enter</kbd> · <kbd>P</kbd> / <kbd>Esc</kbd> pauza',
+            board: gridElement,
+            hud: { best: '#best' },
+            scoreLabel: 'Czas',
+            bestLabel: 'Rekord',
+            lowerIsBetter: true,
+            format: v => formatTime(Math.round(v)),
+            fit: { el: gridElement, zoom: true, min: 0.45 },
+            onStart() { resetGame(true); },
+            onPause(p) { state.lastTick = null; },
+            onMenu() { resetGame(false); statusElement.innerHTML = 'Kliknij kartę (albo <kbd>Tab</kbd> + <kbd>Enter</kbd>) · <kbd>P</kbd> / <kbd>Esc</kbd> pauza'; }
+        });
+        // Przeniesienie starego rekordu (czasu) do wspólnego formatu, jeśli jeszcze go nie ma.
+        if (!GryKit.best) {
+            try {
+                const old = JSON.parse(localStorage.getItem(LEGACY_KEY) || 'null');
+                if (old && Number.isFinite(old.time) && old.time > 0) GryKit.setBest(old.time);
+            } catch (e) { /* brak dostępu do pamięci – gra działa bez rekordu */ }
         }
+        resetGame(false);
+    })();
     </script>
 </body>
+
 </html>
