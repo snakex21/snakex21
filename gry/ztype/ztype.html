@@ -7,40 +7,45 @@
     <title>Z-Type - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 32px; --game-width: 900px; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 16px; --game-width: 900px; }
+        /* Słowa celowo w kroju monospace (gra w pisanie – litery równej szerokości), reszta UI czcionką strony. */
         #game-area {
-            position: relative; overflow: hidden; box-sizing: border-box; width: 100%;
-            height: min(62vh, 620px); min-height: 380px;
-            background: radial-gradient(ellipse at 50% 120%, #14263a 0%, #0a111c 60%); border: 2px solid var(--shell-border); border-radius: 12px;
-            font-family: var(--kit-mono); outline: none;
+            position: relative; overflow: hidden; box-sizing: border-box; width: 100%; height: 520px;
+            background:
+                radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.55) 50%, transparent 51%),
+                radial-gradient(1px 1px at 68% 32%, rgba(255,255,255,.4) 50%, transparent 51%),
+                radial-gradient(1.5px 1.5px at 38% 64%, rgba(255,255,255,.45) 50%, transparent 51%),
+                radial-gradient(1px 1px at 86% 76%, rgba(255,255,255,.35) 50%, transparent 51%),
+                radial-gradient(1px 1px at 24% 84%, rgba(255,255,255,.3) 50%, transparent 51%),
+                radial-gradient(ellipse at 50% 120%, #14263a 0%, #0a111c 60%);
+            border: 2px solid var(--shell-border); border-radius: 12px; outline: none;
         }
         #game-area:focus-visible { border-color: var(--shell-accent); }
-        .enemy { position: absolute; font-size: 1.4rem; font-weight: 700; color: #8ef59b; text-shadow: 0 0 8px rgba(110, 255, 140, .55); white-space: nowrap; }
+        .enemy { position: absolute; font: 700 1.4rem/1.2 var(--kit-mono); color: #8ef59b; text-shadow: 0 0 8px rgba(110, 255, 140, .55); white-space: nowrap; }
         .enemy span { transition: color 0.1s; }
+        .enemy.target { color: #c9ffd0; }
+        .enemy.target::after { content: ""; position: absolute; left: -4px; right: -4px; bottom: -4px; height: 2px; border-radius: 2px; background: #ffd84a; box-shadow: 0 0 8px #ffb800; }
         .enemy .matched { color: #ffd84a; text-shadow: 0 0 10px #ffb800; }
+        .enemy.hit { color: #ff8f86; text-shadow: 0 0 10px #ff5a4f; }
         .ship {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 0; height: 0;
-            border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 40px solid #8ef59b;
+            position: absolute; bottom: 14px; left: 50%; width: 44px; height: 50px; margin-left: -22px;
+            transform-origin: 50% 60%; transition: transform .08s ease-out, opacity .3s;
             filter: drop-shadow(0 0 8px rgba(110, 255, 140, .5));
         }
-        .laser { position: absolute; width: 2px; height: 20px; background: #ffd84a; }
-        .game-over {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;
-            box-sizing: border-box; width: min(88%, 440px); padding: 20px 24px; border-radius: 12px;
-            background: rgba(10, 17, 28, .82); border: 1px solid rgba(255, 255, 255, .14);
-            color: #f2f5f0; font: 700 1.4rem/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-align: center;
-        }
-        .game-over small { display: block; margin-top: 6px; font-size: .95rem; font-weight: 500; color: #b8c4bd; }
+        .ship.dead { opacity: 0; }
+        .laser { position: absolute; left: 0; top: 0; width: 3px; height: 16px; border-radius: 2px; background: #ffd84a; box-shadow: 0 0 8px #ffb800; pointer-events: none; }
         .type-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: var(--game-width); margin: 12px auto 0; }
         .type-row label { flex: none; font-size: 13px; font-weight: 650; color: var(--shell-muted); }
         .type-row .kit-input { flex: 1; min-width: 0; width: auto; font-family: var(--kit-mono); text-transform: uppercase; letter-spacing: 1px; }
-        @media (max-width: 560px) { #game-area { height: 52vh; min-height: 320px; } .enemy { font-size: 1.15rem; } }
+        @media (max-width: 560px) { .enemy { font-size: 1.15rem; } }
+        @media (max-height: 640px) { .game-wrapper { padding-top: 12px; } .game-bar { margin-bottom: 10px; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -57,86 +62,211 @@
 
     <main class="game-wrapper">
         <div class="game-bar">
-            <div class="game-title"><h1>Z-Type</h1><p>Wpisuj litery nadlatujących słów, zanim dolecą do statku · Enter: start · Esc: pauza</p></div>
-            <div class="game-stats"><div class="game-stat"><span>Wynik</span><b id="score">0</b></div></div>
+            <div class="game-title"><h1>Z-Type</h1><p>Wpisuj litery nadlatujących słów, zanim dolecą do statku</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Wynik</span><b id="score">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="best">0</b></div>
+                <div class="game-stat"><span>Słowa</span><b id="destroyed">0</b></div>
+            </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary" id="start-game" type="button" onclick="startGame()">Start / nowa gra</button>
-                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
+                <button class="kit-btn small primary" id="new-game" type="button">Nowa gra</button>
             </div>
         </div>
         <div class="game-stage">
             <div id="game-area" tabindex="-1" aria-label="Plansza Z-Type">
-                <div class="ship" id="ship"></div>
-                <div class="game-over" id="go" role="status">Z-Type<br><small>Naciśnij Start lub Enter, potem wpisuj litery nadlatujących słów</small></div>
+                <svg class="ship" id="ship" viewBox="0 0 44 50" aria-hidden="true">
+                    <path d="M22 2 L31 30 L42 40 L30 40 L27 46 L17 46 L14 40 L2 40 L13 30 Z" fill="#1d3a2a" stroke="#8ef59b" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M22 12 L26 28 L18 28 Z" fill="#8ef59b"/>
+                    <path d="M18 46 L22 50 L26 46" fill="#ffd84a"/>
+                </svg>
             </div>
         </div>
         <div class="type-row"><label for="typing-input">Klawiatura</label><input id="typing-input" class="kit-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Pisz litery…" aria-label="Wpisuj litery słów"></div>
     </main>
 
     <script>
-        const words = ["KOD", "JAVA", "HTML", "CSS", "NODE", "REACT", "DATA", "BIT", "BYTE", "PIXEL", "LINUX", "SERVER", "CLOUD", "WIFI", "MOUSE", "SCREEN", "LOGIC", "ARRAY", "LOOP", "INPUT", "OUTPUT", "FILE", "DISK", "ERROR", "DEBUG"];
+    (() => {
+        const WORDS = ["KOD", "JAVA", "HTML", "CSS", "NODE", "REACT", "DATA", "BIT", "BYTE", "PIXEL", "LINUX", "SERVER", "CLOUD", "WIFI", "MOUSE", "SCREEN", "LOGIC", "ARRAY", "LOOP", "INPUT", "OUTPUT", "FILE", "DISK", "ERROR", "DEBUG"];
+        const COLORS = ['#8ef59b', '#ffd84a', '#ffffff'];
 
         const area = document.getElementById('game-area');
-        const scoreEl = document.getElementById('score');
         const ship = document.getElementById('ship');
-
-        let enemies = [], score = 0, activeTarget = null, spawnRate = 2000;
-        let gameOver = false, started = false, paused = false, lastTime = null, spawnElapsed = 0;
-        const message = document.getElementById('go');
         const input = document.getElementById('typing-input');
-        message.style.display='block';
-        function startGame() {
-            enemies.forEach(e=>e.el.remove());area.querySelectorAll('.laser').forEach(e=>e.remove());
-            enemies=[];score=0;activeTarget=null;spawnRate=2000;spawnElapsed=1000;lastTime=null;gameOver=false;started=true;paused=false;
-            scoreEl.textContent=0;message.style.display='none';document.getElementById('pause-game').textContent='Pauza';
-            input.value='';input.focus();
+        const typeRow = document.querySelector('.type-row');
+        const destroyedEl = document.getElementById('destroyed');
+
+        let enemies = [], activeTarget = null, score = 0, destroyed = 0;
+        let spawnRate = 2000, spawnElapsed = 0, lastTime = null, running = false, ending = false, gen = 0;
+
+        // Wysokość planszy = wolne miejsce w oknie (słowa mają stały rozmiar, więc nie skalujemy całej planszy).
+        function sizeArea() {
+            area.style.height = '';
+            const header = document.querySelector('.site-header');
+            const headerOff = innerWidth < 700 && header ? header.getBoundingClientRect().bottom + scrollY : 0;
+            const top = area.getBoundingClientRect().top + scrollY - headerOff;
+            const wrapPad = parseFloat(getComputedStyle(area.closest('.game-wrapper')).paddingBottom) || 0;
+            const below = typeRow.offsetHeight + 12 + wrapPad + 10;
+            area.style.height = Math.round(Math.max(200, Math.min(560, innerHeight - top - below))) + 'px';
         }
-        function setPaused(value) {
-            if(!started||gameOver)return;
-            paused=!!value;lastTime=null;message.textContent='Pauza';message.style.display=paused?'block':'none';
-            document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';if(!paused)input.focus();
+        addEventListener('resize', sizeArea);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeArea);
+
+        const W = () => area.clientWidth || 600;
+        const H = () => area.clientHeight || 500;
+        const center = el => {
+            const r = el.getBoundingClientRect(), b = document.body.getBoundingClientRect();
+            return { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top };
+        };
+
+        function clearBoard() {
+            enemies.forEach(e => e.el.remove());
+            area.querySelectorAll('.laser').forEach(l => l.remove());
+            enemies = []; activeTarget = null;
         }
+        function reset() {
+            gen++;
+            clearBoard();
+            score = 0; destroyed = 0; spawnRate = 2000; spawnElapsed = 1000; lastTime = null; ending = false;
+            ship.classList.remove('dead'); ship.style.transform = '';
+            GryKit.score(0); destroyedEl.textContent = '0';
+            input.value = '';
+        }
+
         function spawn() {
-            if(!started||gameOver||paused)return;
-            const word=words[Math.floor(Math.random()*words.length)],div=document.createElement('div');
-            div.className='enemy';
-            const width=area.getBoundingClientRect().width||window.innerWidth;
-            div.style.left=(12+Math.random()*Math.max(0,width-word.length*16-24))+'px';div.style.top='-30px';
-            div.innerHTML=word.split('').map(l=>`<span>${l}</span>`).join('');area.appendChild(div);
-            enemies.push({el:div,word,progress:0,x:parseFloat(div.style.left),y:-30});spawnRate=Math.max(700,spawnRate-40);
+            const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+            const div = document.createElement('div');
+            div.className = 'enemy';
+            div.innerHTML = word.split('').map(l => `<span>${l}</span>`).join('');
+            area.appendChild(div);
+            const x = 12 + Math.random() * Math.max(0, W() - div.offsetWidth - 24);
+            div.style.left = x + 'px'; div.style.top = '-30px';
+            enemies.push({ el: div, word, progress: 0, x, y: -30 });
+            spawnRate = Math.max(700, spawnRate - 40);
         }
-        function update(timestamp) {
+
+        function update(t) {
             requestAnimationFrame(update);
-            if(lastTime===null)lastTime=timestamp;
-            const dt=Math.max(0,Math.min(100,timestamp-lastTime));lastTime=timestamp;
-            if(!started||gameOver||paused||document.hidden)return;
-            spawnElapsed+=dt;if(spawnElapsed>=spawnRate){spawnElapsed-=spawnRate;spawn();}
-            const bottom=(area.getBoundingClientRect().height||400)-65;
-            for(const e of enemies){e.y+=30*dt/1000;e.el.style.top=e.y+'px';if(e.y>=bottom){gameOver=true;message.textContent=`Koniec gry • wynik: ${score}. Naciśnij Start / nowa gra`;message.style.display='block';break;}}
+            if (lastTime === null) lastTime = t;
+            const dt = Math.max(0, Math.min(100, t - lastTime)); lastTime = t;
+            if (!running || ending || !GryKit.playing) return;
+            spawnElapsed += dt;
+            if (spawnElapsed >= spawnRate) { spawnElapsed -= spawnRate; spawn(); }
+            const bottom = H() - 70;
+            const speed = 30 + Math.min(40, destroyed * 0.8);
+            for (const e of enemies) {
+                e.y += speed * dt / 1000;
+                e.el.style.top = e.y + 'px';
+                if (e.y >= bottom) { lose(e); break; }
+            }
         }
-        function shoot(x,y) {
-            const laser=document.createElement('div');laser.className='laser';area.appendChild(laser);
-            if(!laser.animate){laser.remove();return;}
-            const animation=laser.animate([{left:'50%',bottom:'60px',opacity:1},{left:(x+20)+'px',top:y+'px',opacity:0}],{duration:200,fill:'forwards'});
-            animation.onfinish=()=>laser.remove();
+
+        // Statek obraca się do celu i wystrzeliwuje pocisk.
+        function aimAt(tx, ty) {
+            const sx = W() / 2, sy = H() - 44;
+            const dx = tx - sx, dy = ty - sy;
+            const ang = Math.atan2(dx, -dy) * 180 / Math.PI;
+            ship.style.transform = `rotate(${ang.toFixed(1)}deg)`;
+            const laser = document.createElement('div');
+            laser.className = 'laser';
+            area.appendChild(laser);
+            if (!laser.animate || GryKit.reducedMotion) { setTimeout(() => laser.remove(), 60); return; }
+            laser.animate([
+                { transform: `translate(${sx}px,${sy}px) translate(-50%,-50%) rotate(${ang}deg)`, opacity: 1 },
+                { transform: `translate(${tx}px,${ty}px) translate(-50%,-50%) rotate(${ang}deg)`, opacity: .9 }
+            ], { duration: 110, easing: 'linear' }).onfinish = () => laser.remove();
         }
+
+        function explode(e, big) {
+            const c = center(e.el);
+            GryKit.fx.burst(c.x, c.y, { on: document.body, color: big ? ['#ff8f86', '#ffd84a', '#fff'] : COLORS, count: big ? 14 : 18, spread: 60 });
+            e.el.remove();
+            enemies = enemies.filter(x => x !== e);
+            return c;
+        }
+
         function typeLetter(char) {
-            if(!started||gameOver||paused||!/^[A-Z]$/.test(char))return;
-            if(!activeTarget){activeTarget=enemies.filter(e=>e.word.startsWith(char)).sort((a,b)=>b.y-a.y)[0]||null;if(activeTarget)Array.from(activeTarget.el.children).forEach(el=>el.classList.add('target'));}
-            if(!activeTarget||activeTarget.word[activeTarget.progress]!==char)return;
-            activeTarget.el.children[activeTarget.progress++].classList.add('matched');shoot(activeTarget.x,activeTarget.y);
-            if(activeTarget.progress===activeTarget.word.length){activeTarget.el.remove();enemies=enemies.filter(e=>e!==activeTarget);activeTarget=null;score+=10;scoreEl.textContent=score;}
+            if (!running || ending || !GryKit.playing || !/^[A-Z]$/.test(char)) return;
+            if (!activeTarget) {
+                activeTarget = enemies.filter(e => e.word.startsWith(char)).sort((a, b) => b.y - a.y)[0] || null;
+                if (activeTarget) activeTarget.el.classList.add('target');
+            }
+            if (!activeTarget || activeTarget.word[activeTarget.progress] !== char) {
+                GryKit.sfx.play('error');
+                GryKit.fx.shake(typeRow, 4, 180);
+                return;
+            }
+            const span = activeTarget.el.children[activeTarget.progress++];
+            span.classList.add('matched');
+            aimAt(activeTarget.x + span.offsetLeft + span.offsetWidth / 2, activeTarget.y + span.offsetHeight);
+            GryKit.sfx.play('tap');
+            if (activeTarget.progress === activeTarget.word.length) {
+                const points = 10;
+                const c = explode(activeTarget, false);
+                GryKit.fx.float(c.x, c.y - 10, '+' + points, { on: document.body, color: '#ffd84a' });
+                GryKit.sfx.play('boom');
+                activeTarget = null;
+                score += points; destroyed++;
+                GryKit.score(score);
+                destroyedEl.textContent = destroyed;
+            }
         }
-        document.addEventListener('keydown',e=>{
-            if(e.altKey||e.ctrlKey||e.metaKey||e.isComposing)return;
-            if(e.code==='Escape'&&!e.repeat){e.preventDefault();setPaused(!paused);return;}
-            if(e.target===input||e.target?.closest?.('button,a,input,textarea,select'))return;
-            if(e.code==='Enter'&&!e.repeat){e.preventDefault();if(!started||gameOver)startGame();else if(paused)setPaused(false);return;}
-            if(!e.repeat&&/^[a-z]$/i.test(e.key)){e.preventDefault();typeLetter(e.key.toUpperCase());}
+
+        // Słowo doleciało do statku: wszystkie słowa wybuchają po kolei, potem statek i ekran końca
+        // (pod komunikatem nic już nie jest rysowane).
+        function lose(hit) {
+            ending = true; running = false;
+            const myGen = gen;
+            hit.el.classList.add('hit');
+            GryKit.fx.shake(area, 8, 340);
+            GryKit.fx.flash('#d05c5c', { on: area, strength: 0.4 });
+            const order = [hit, ...enemies.filter(e => e !== hit).sort((a, b) => b.y - a.y)];
+            order.forEach((e, i) => setTimeout(() => {
+                if (gen !== myGen) return;
+                explode(e, true);
+                if (i < 5) GryKit.sfx.play('boom', { pitch: 1 - i * 0.08 });
+            }, 80 * i));
+            const last = 80 * order.length;
+            setTimeout(() => {
+                if (gen !== myGen) return;
+                GryKit.fx.burstAt(ship, { color: ['#8ef59b', '#ffd84a', '#ff8f86'], count: 26, spread: 80 });
+                ship.classList.add('dead');
+                area.querySelectorAll('.laser').forEach(l => l.remove());
+                GryKit.sfx.play('lose');
+            }, last);
+            GryKit.over({ score, sound: false, delay: last + 650,
+                text: `Słowo „${hit.word}” dotarło do statku. Zestrzelone słowa: ${destroyed}.` });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing || e.repeat) return;
+            if (e.target === input || e.target?.closest?.('button,a,input,textarea,select')) return;
+            if (/^[a-z]$/i.test(e.key) && GryKit.playing) { e.preventDefault(); typeLetter(e.key.toUpperCase()); }
         });
-        input.addEventListener('input',e=>{if(e.isComposing)return;for(const char of input.value.toUpperCase())typeLetter(char);input.value='';});
-        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);lastTime=null;});
+        input.addEventListener('input', e => {
+            if (e.isComposing) return;
+            for (const char of input.value.toUpperCase()) typeLetter(char);
+            input.value = '';
+        });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
+
+        GryKit.init({
+            id: 'ztype',
+            title: 'Z-Type',
+            icon: '🚀',
+            howTo: ['Wpisuj litery nadlatujących słów – statek strzela przy każdej trafionej literze.', 'Całe słowo = wybuch i +10 pkt.', 'Słowo, które doleci do statku, kończy grę.'],
+            controls: '<kbd>A</kbd>–<kbd>Z</kbd> pisanie · <kbd>Esc</kbd> pauza',
+            board: area,
+            focus: input,
+            hud: { score: '#score', best: '#best' },
+            pauseKeyP: false,
+            onStart() { reset(); running = true; sizeArea(); },
+            onPause(p) { lastTime = null; input.value = ''; },
+            onMenu() { reset(); running = false; }
+        });
+        sizeArea();
+        reset();
         requestAnimationFrame(update);
+    })();
     </script>
 </body>
 
