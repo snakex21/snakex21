@@ -8,34 +8,21 @@
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
         .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 804px; }
-        .board { position: relative; width: 100%; max-width: 804px; }
+        .game-stage { position: relative; }
         #gameCanvas {
-            display: block; width: 100%; height: auto; background: #101a16;
-            border: 2px solid var(--shell-border); border-radius: 12px; touch-action: none;
+            display: block; width: 800px; height: 550px; max-width: 100%; background: #101a16;
+            border: 2px solid var(--shell-border); border-radius: 12px; touch-action: none; outline: none;
         }
-        .overlay {
-            position: absolute; inset: 0; z-index: 10;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-            padding: 16px; border-radius: 12px; text-align: center;
-            background: rgba(10, 18, 14, 0.62); color: #eef2e7;
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-        .overlay h2 { margin: 0; font-size: clamp(24px, 5vw, 42px); font-weight: 750; letter-spacing: -.5px; }
-        .overlay p { margin: 0; font-size: clamp(13px, 2vw, 16px); color: #c9d4c6; }
-        .overlay .kit-btn { margin-top: 12px; min-width: 140px; }
-        .hidden { display: none; }
+        #gameCanvas:focus-visible { border-color: var(--shell-accent); }
         .game-status { min-height: 21px; }
-        @media (max-width: 560px) {
-            .game-wrapper { padding: 16px; }
-            .overlay { gap: 2px; }
-            .overlay .kit-btn { margin-top: 8px; min-height: 38px; }
-        }
+        @media (max-width: 560px) { .game-wrapper { padding: 16px; } }
     </style>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -52,56 +39,44 @@
 
     <div class="game-wrapper" id="main-content" tabindex="-1" role="main">
         <div class="game-bar">
-            <div class="game-title"><h1>Arkanoid</h1><p>Strzałki, mysz lub przeciągnięcie: paletka · P: pauza</p></div>
+            <div class="game-title"><h1>Arkanoid</h1><p>Strzałki, mysz lub przeciągnięcie: paletka · P / Esc: pauza</p></div>
             <div class="game-stats">
                 <div class="game-stat"><span>Poziom</span><b id="level">1</b></div>
                 <div class="game-stat"><span>Wynik</span><b id="score">0</b></div>
-                <div class="game-stat"><span>Życia</span><b id="lives">3</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="best">0</b></div>
+                <div class="game-stat"><span>Życia</span><b id="lives">♥♥♥</b></div>
             </div>
             <div class="game-buttons">
-                <button class="kit-btn small primary" type="button" onclick="resetGame()">Nowa gra</button>
-                <button class="kit-btn small" id="pause-game" type="button" onclick="setPaused(!paused)">Pauza</button>
+                <button class="kit-btn small primary" type="button" id="new-game">Nowa gra</button>
             </div>
         </div>
         <div class="game-stage">
-            <div class="board">
-                <canvas tabindex="0" aria-label="Arkanoid. Strzałki lub przeciągnięcie: ruch. P: pauza." id="gameCanvas" width="800" height="550"></canvas>
-                <div id="start-screen" class="overlay">
-                    <h2>Arkanoid</h2>
-                    <p>Odbijaj piłkę paletką i rozbij wszystkie cegły</p>
-                    <button class="kit-btn primary" type="button" onclick="startGame()">Start</button>
-                </div>
-                <div id="level-screen" class="overlay hidden">
-                    <h2>Poziom <span id="level-display">1</span></h2>
-                    <p>Przygotuj się!</p>
-                    <button class="kit-btn primary" type="button" onclick="continueGame()">Kontynuuj</button>
-                </div>
-                <div id="game-over-screen" class="overlay hidden">
-                    <h2 id="end-msg">Koniec Gry</h2>
-                    <p>Wynik: <span id="final-score">0</span></p>
-                    <p>Osiągnięty poziom: <span id="final-level">1</span></p>
-                    <button class="kit-btn primary" type="button" onclick="resetGame()">Zagraj ponownie</button>
-                </div>
-            </div>
+            <canvas tabindex="0" aria-label="Arkanoid. Strzałki, mysz lub przeciągnięcie: ruch paletki. P lub Esc: pauza." id="gameCanvas" width="800" height="550"></canvas>
         </div>
-        <p class="game-status" id="game-status" role="status"></p>
+        <p class="game-status" id="game-status" role="status">Strzałki / mysz / przeciągnięcie palcem: paletka · P / Esc: pauza</p>
     </div>
 
     <script>
-        // Theme Logic
-        // Theme is handled by assets/workshop/shell.js.
-
-        // Game Logic
+    (() => {
+        // Plansza logiczna 800 × 550; GryKit.fit skaluje canvas do okna (bufor ostry na ekranach HiDPI).
+        const W = 800, H = 550, STEP = 1000 / 60;
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        let score = 0, lives = 3, level = 1, isRunning = false, animationId;
-        let round = 0, roundActive = false, waitingForLevel = false, lifeTimer = null, paused = false, lastTime = null, accumulator = 0;
-        const paddle = { x: canvas.width / 2 - 60, y: canvas.height - 25, w: 120, h: 12, speed: 10, dx: 0 };
-        const ball = { x: canvas.width / 2, y: canvas.height - 40, r: 8, dx: 5, dy: -5, baseSpeed: 5, speed: 5 };
-
-        // Więcej bloków dla większego pola gry: 11 kolumn x 7 rzędów
+        const levelEl = document.getElementById('level');
+        const statusEl = document.getElementById('game-status');
+        const paddle = { x: W / 2 - 60, y: H - 25, w: 120, h: 12, speed: 10, dx: 0 };
+        const ball = { x: W / 2, y: H - 40, r: 8, dx: 5, dy: -5, baseSpeed: 5, speed: 5 };
+        // 11 kolumn × 7 rzędów
         const brickInfo = { r: 7, c: 11, w: 65, h: 22, padding: 6, offsetTop: 40, offsetLeft: 20 };
-        let bricks = [];
+        const RESPAWN_STEPS = 60; // ~1 s przerwy po utracie życia (liczone tylko w trakcie gry, więc pauza ją wstrzymuje)
+
+        let bricks = [], score = 0, lives = 3, level = 1;
+        let running = false;          // runda trwa (piłka w ruchu albo czeka na serw)
+        let waitingForLevel = false;  // ekran „Poziom N” – gra stoi
+        let respawn = 0, lastTime = null, accumulator = 0;
+        const keys = { left: false, right: false };
+
+        const brickHue = r => (r * 35 + level * 20) % 360;
 
         function initBricks() {
             bricks = [];
@@ -112,198 +87,226 @@
                 }
             }
         }
-
-        document.addEventListener('keydown', e => {
-            if (e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select')) return;
-            if (!e.target?.closest?.('button') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); paddle.dx = (e.key === 'ArrowRight' ? 1 : -1) * paddle.speed; }
-            if ((e.code === 'KeyP' || e.code === 'Escape') && !e.repeat) { e.preventDefault(); setPaused(!paused); }
-        });
-        document.addEventListener('keyup', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') paddle.dx = 0; });
-        function movePointer(e) {
-            const rect = canvas.getBoundingClientRect();
-            if (!rect.width) return;
-            paddle.x = Math.max(0,Math.min(canvas.width-paddle.w,(e.clientX-rect.left)*canvas.width/rect.width-paddle.w/2));
+        function countBricks() {
+            let n = 0;
+            for (const col of bricks) for (const b of col) if (b.status === 1) n++;
+            return n;
         }
-        canvas.addEventListener('pointerdown', e => { if (e.isPrimary === false) return; e.preventDefault(); canvas.setPointerCapture?.(e.pointerId); movePointer(e); });
-        canvas.addEventListener('pointermove', e => { if (e.isPrimary !== false) movePointer(e); });
-        function setPaused(value) {
-            if (!roundActive) return;
-            paused=!!value;paddle.dx=0;lastTime=null;accumulator=0;
-            document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';
-            document.getElementById('game-status').textContent=paused?'Pauza':'';
-            if (!paused) canvas.focus();
+        function resetBallAndPaddle() {
+            ball.x = W / 2;
+            ball.y = H - 40;
+            ball.dx = ball.speed * (Math.random() > 0.5 ? 1 : -1);
+            ball.dy = -ball.speed;
+            paddle.x = (W - paddle.w) / 2;
         }
-        document.addEventListener('visibilitychange',()=>{if(document.hidden)setPaused(true);});
-        window.addEventListener('blur',()=>{paddle.dx=0;setPaused(true);});
 
+        /* ---------- logika ---------- */
+        function collisionDetection() {
+            for (let c = 0; c < brickInfo.c; c++) {
+                for (let r = 0; r < brickInfo.r; r++) {
+                    const b = bricks[c][r];
+                    if (b.status === 1 &&
+                        ball.x + ball.r > b.x && ball.x - ball.r < b.x + brickInfo.w &&
+                        ball.y + ball.r > b.y && ball.y - ball.r < b.y + brickInfo.h) {
+                        ball.dy = -ball.dy;
+                        b.status = 0;
+                        const points = 10 * level;
+                        score += points;
+                        GryKit.score(score);
+                        const hue = brickHue(r);
+                        const cx = b.x + brickInfo.w / 2, cy = b.y + brickInfo.h / 2;
+                        GryKit.fx.burst(cx, cy, { on: canvas, color: [`hsl(${hue},70%,50%)`, `hsl(${hue},80%,68%)`], count: 7, spread: 34, size: 6, square: true });
+                        GryKit.sfx.play('hit', { pitch: 1 + (brickInfo.r - r) * 0.04 });
+                        if (countBricks() === 0) nextLevel();
+                        return;
+                    }
+                }
+            }
+        }
+
+        function update() {
+            paddle.dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+            paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x + paddle.dx * paddle.speed));
+            if (respawn > 0) {
+                // Piłka czeka na paletce, aż minie przerwa po utracie życia.
+                respawn--;
+                ball.x = paddle.x + paddle.w / 2; ball.y = paddle.y - ball.r;
+                return;
+            }
+            collisionDetection();
+            if (!running || waitingForLevel) return;
+            if (ball.x + ball.dx > W - ball.r || ball.x + ball.dx < ball.r) { ball.dx = -ball.dx; GryKit.sfx.play('bounce', { pitch: 0.8 }); }
+            if (ball.y + ball.dy < ball.r) { ball.dy = Math.abs(ball.dy); GryKit.sfx.play('bounce', { pitch: 0.8 }); }
+            if (ball.dy > 0 && ball.y + ball.r <= paddle.y + paddle.h && ball.y + ball.r + ball.dy >= paddle.y && ball.x + ball.r > paddle.x && ball.x - ball.r < paddle.x + paddle.w) {
+                const hit = Math.max(-1, Math.min(1, (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2)));
+                ball.dx = Math.sin(hit * Math.PI / 3) * ball.speed; ball.dy = -Math.cos(hit * Math.PI / 3) * ball.speed;
+                ball.y = paddle.y - ball.r;
+                GryKit.sfx.play('bounce');
+            } else if (ball.y + ball.dy - ball.r > H) {
+                loseLife();
+                return;
+            }
+            ball.x += ball.dx; ball.y += ball.dy;
+        }
+
+        function loseLife() {
+            lives--;
+            GryKit.lives(lives);
+            GryKit.fx.shake(canvas, 6, 300);
+            GryKit.fx.flash('#d05c5c', { on: canvas, strength: 0.3 });
+            if (lives <= 0) { gameOver(); return; }
+            GryKit.sfx.play('lose');
+            resetBallAndPaddle();
+            respawn = RESPAWN_STEPS;
+        }
+
+        function nextLevel() {
+            waitingForLevel = true;
+            level++;
+            levelEl.textContent = level;
+            ball.speed = Math.min(10, ball.baseSpeed + (level - 1) * 0.5);
+            GryKit.sfx.play('win');
+            GryKit.fx.flash('#f2c14e', { on: canvas, strength: 0.25 });
+            showLevelMessage();
+        }
+        // GryKit.message nie zmienia GryKit.state – gra stoi dzięki waitingForLevel (pętla nie wywołuje update).
+        function showLevelMessage() {
+            GryKit.message({
+                title: 'Poziom ' + level, icon: '🧱',
+                text: 'Wszystkie cegły rozbite! Piłka będzie szybsza.',
+                buttons: [{ label: 'Kontynuuj', primary: true, onClick: continueGame }]
+            });
+        }
+        function continueGame() {
+            if (!waitingForLevel || !running) return;
+            waitingForLevel = false;
+            initBricks();
+            resetBallAndPaddle();
+            keys.left = keys.right = false;
+            lastTime = null; accumulator = 0;
+        }
+
+        function gameOver() {
+            running = false;
+            GryKit.over({ score, text: 'Osiągnięty poziom: ' + level + '.', delay: 400 });
+        }
+
+        function startGame() {
+            initBricks();
+            level = 1; lives = 3; score = 0; ball.speed = ball.baseSpeed; respawn = 0;
+            keys.left = keys.right = false;
+            GryKit.score(0); GryKit.lives(lives); levelEl.textContent = level;
+            resetBallAndPaddle();
+            waitingForLevel = false; running = true; lastTime = null; accumulator = 0;
+        }
+
+        /* ---------- rysowanie ---------- */
+        function drawBricks() {
+            for (let c = 0; c < brickInfo.c; c++) {
+                for (let r = 0; r < brickInfo.r; r++) {
+                    const b = bricks[c][r];
+                    if (b.status !== 1) continue;
+                    const hue = brickHue(r);
+                    ctx.beginPath();
+                    ctx.roundRect(b.x, b.y, brickInfo.w, brickInfo.h, 3);
+                    ctx.fillStyle = `hsl(${hue}, 70%, 50%)`;
+                    ctx.fill();
+                    ctx.strokeStyle = `hsl(${hue}, 70%, 35%)`;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(255,255,255,.18)';
+                    ctx.fillRect(b.x + 3, b.y + 3, brickInfo.w - 6, 4);
+                }
+            }
+        }
         function drawBall() {
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-            // Gradient dla piłki
             const gradient = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 0, ball.x, ball.y, ball.r);
             gradient.addColorStop(0, '#fff');
             gradient.addColorStop(1, '#00bcd4');
             ctx.fillStyle = gradient;
             ctx.fill();
-            ctx.closePath();
         }
-
         function drawPaddle() {
             ctx.beginPath();
-            // Zaokrąglona paletka
             ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 6);
             const gradient = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + paddle.h);
             gradient.addColorStop(0, '#fff');
             gradient.addColorStop(1, '#aaa');
             ctx.fillStyle = gradient;
             ctx.fill();
-            ctx.closePath();
         }
-
-        function drawBricks() {
-            for (let c = 0; c < brickInfo.c; c++) {
-                for (let r = 0; r < brickInfo.r; r++) {
-                    if (bricks[c][r].status === 1) {
-                        const brickX = (c * (brickInfo.w + brickInfo.padding)) + brickInfo.offsetLeft;
-                        const brickY = (r * (brickInfo.h + brickInfo.padding)) + brickInfo.offsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
-                        ctx.beginPath();
-                        ctx.roundRect(brickX, brickY, brickInfo.w, brickInfo.h, 3);
-                        // Różne kolory dla każdego rzędu
-                        const hue = (r * 35 + level * 20) % 360;
-                        ctx.fillStyle = `hsl(${hue}, 70%, 50%)`;
-                        ctx.fill();
-                        // Obramowanie
-                        ctx.strokeStyle = `hsl(${hue}, 70%, 35%)`;
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                        ctx.closePath();
-                    }
-                }
+        function render() {
+            const k = GryKit.ratio(canvas);
+            ctx.setTransform(k, 0, 0, k, 0, 0);
+            ctx.clearRect(0, 0, W, H);
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            if (running && respawn > 0 && GryKit.playing) {
+                ctx.fillStyle = 'rgba(238,242,231,.85)';
+                ctx.font = GryKit.font(22, 700);
+                ctx.textAlign = 'center';
+                ctx.fillText('Przygotuj się…', W / 2, H * 0.62);
             }
         }
-
-        function countBricks() {
-            let count = 0;
-            for (let c = 0; c < brickInfo.c; c++) {
-                for (let r = 0; r < brickInfo.r; r++) {
-                    if (bricks[c][r].status === 1) count++;
-                }
-            }
-            return count;
-        }
-
-        function collisionDetection() {
-            for (let c = 0; c < brickInfo.c; c++) {
-                for (let r = 0; r < brickInfo.r; r++) {
-                    const b = bricks[c][r];
-                    if (b.status === 1) {
-                        if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + brickInfo.w &&
-                            ball.y + ball.r > b.y && ball.y - ball.r < b.y + brickInfo.h) {
-                            ball.dy = -ball.dy;
-                            b.status = 0;
-                            score += 10 * level;
-                            document.getElementById('score').innerText = score;
-
-                            // Sprawdź czy wszystkie bloki zniszczone - następny poziom
-                            if (countBricks() === 0) {
-                                nextLevel();
-                            }
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        function nextLevel() {
-            isRunning = false;
-            waitingForLevel = true;
-            level++;
-            document.getElementById('level').innerText = level;
-            document.getElementById('level-display').innerText = level;
-
-            // Zwiększ prędkość piłki z każdym poziomem
-            ball.speed = Math.min(10, ball.baseSpeed + (level - 1) * 0.5);
-
-            // Pokaż ekran nowego poziomu
-            document.getElementById('level-screen').classList.remove('hidden');
-        }
-
-        function continueGame() {
-            if (!waitingForLevel || !roundActive) return;
-            waitingForLevel = false;
-            canvas.focus();
-            document.getElementById('level-screen').classList.add('hidden');
-            initBricks();
-            resetBallAndPaddle();
-            isRunning = true;
-            lastTime = null; accumulator = 0;
-        }
-
-        function resetBallAndPaddle() {
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height - 40;
-            ball.dx = ball.speed * (Math.random() > 0.5 ? 1 : -1);
-            ball.dy = -ball.speed;
-            paddle.x = (canvas.width - paddle.w) / 2;
-        }
-
-        function update() {
-            if (!isRunning || paused || document.hidden) return;
-            paddle.x=Math.max(0,Math.min(canvas.width-paddle.w,paddle.x+paddle.dx));
-            collisionDetection();
-            if (!isRunning) return;
-            if (ball.x+ball.dx > canvas.width-ball.r || ball.x+ball.dx < ball.r) ball.dx=-ball.dx;
-            if (ball.y+ball.dy < ball.r) ball.dy=Math.abs(ball.dy);
-            if (ball.dy > 0 && ball.y+ball.r <= paddle.y+paddle.h && ball.y+ball.r+ball.dy >= paddle.y && ball.x+ball.r > paddle.x && ball.x-ball.r < paddle.x+paddle.w) {
-                const hit = Math.max(-1,Math.min(1,(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2)));
-                ball.dx=Math.sin(hit*Math.PI/3)*ball.speed;ball.dy=-Math.cos(hit*Math.PI/3)*ball.speed;
-                ball.y=paddle.y-ball.r;
-            } else if (ball.y+ball.dy-ball.r > canvas.height) {
-                lives--;document.getElementById('lives').innerText=lives;
-                if (!lives) { gameOver(false); return; }
-                isRunning=false;resetBallAndPaddle();
-                const lostRound=round;
-                lifeTimer=setTimeout(()=>{lifeTimer=null;if(lostRound!==round||!roundActive)return;isRunning=true;lastTime=null;accumulator=0;},1000);
-                return;
-            }
-            ball.x+=ball.dx;ball.y+=ball.dy;
-        }
-        function render() { ctx.clearRect(0,0,canvas.width,canvas.height);drawBricks();drawBall();drawPaddle(); }
         function loop(timestamp) {
-            animationId=requestAnimationFrame(loop);
-            if(lastTime===null)lastTime=timestamp;
-            const elapsed=Math.max(0,Math.min(100,timestamp-lastTime));lastTime=timestamp;
-            if(isRunning&&!paused&&!document.hidden){accumulator+=elapsed;while(accumulator+0.00001>=1000/60&&isRunning){update();accumulator-=1000/60;}}
-            else accumulator=0;
+            requestAnimationFrame(loop);
+            if (lastTime === null) lastTime = timestamp;
+            const elapsed = Math.max(0, Math.min(100, timestamp - lastTime)); lastTime = timestamp;
+            if (running && !waitingForLevel && GryKit.playing) {
+                accumulator += elapsed;
+                while (accumulator + 0.00001 >= STEP && running && !waitingForLevel) { update(); accumulator -= STEP; }
+            } else accumulator = 0;
             render();
         }
-        function startGame() {
-            if(roundActive)return;
-            ++round;clearTimeout(lifeTimer);lifeTimer=null;roundActive=true;waitingForLevel=false;paused=false;
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.add('hidden');
-            document.getElementById('level-screen').classList.add('hidden');
-            document.getElementById('pause-game').textContent='Pauza';document.getElementById('game-status').textContent='';
-            initBricks();level=1;lives=3;score=0;ball.speed=ball.baseSpeed;paddle.dx=0;
-            document.getElementById('score').innerText=score;document.getElementById('lives').innerText=lives;document.getElementById('level').innerText=level;
-            resetBallAndPaddle();isRunning=true;lastTime=null;accumulator=0;canvas.focus();
-        }
-        function gameOver(win) {
-            isRunning=false;roundActive=false;++round;clearTimeout(lifeTimer);lifeTimer=null;
-            document.getElementById('game-over-screen').classList.remove('hidden');
-            document.getElementById('end-msg').innerText=win?'Gratulacje!':'Koniec gry';
-            document.getElementById('final-score').innerText=score;document.getElementById('final-level').innerText=level;
-        }
-        function resetGame() { roundActive=false;startGame(); }
 
-        // Inicjalizacja początkowa
+        /* ---------- sterowanie ---------- */
+        const canMove = () => running && !waitingForLevel && GryKit.playing;
+        document.addEventListener('keydown', e => {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.target?.closest?.('header,a,input,textarea,select,button')) return;
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            e.preventDefault();
+            if (!canMove()) return;
+            keys[e.key === 'ArrowRight' ? 'right' : 'left'] = true;
+        });
+        document.addEventListener('keyup', e => {
+            if (e.key === 'ArrowRight') keys.right = false;
+            if (e.key === 'ArrowLeft') keys.left = false;
+        });
+        function movePointer(e) {
+            if (!canMove() || !canvas.getBoundingClientRect().width) return;
+            const p = GryKit.pointer(canvas, e);
+            paddle.x = Math.max(0, Math.min(W - paddle.w, p.x - paddle.w / 2));
+        }
+        canvas.addEventListener('pointerdown', e => { if (e.isPrimary === false) return; e.preventDefault(); canvas.setPointerCapture?.(e.pointerId); movePointer(e); });
+        canvas.addEventListener('pointermove', e => { if (e.isPrimary !== false) movePointer(e); });
+        document.getElementById('new-game').addEventListener('click', () => GryKit.start());
+
+        GryKit.init({
+            id: 'arkanoid',
+            title: 'Arkanoid',
+            icon: '🧱',
+            howTo: ['Odbijaj piłkę paletką i rozbij wszystkie cegły.', 'Miejsce odbicia na paletce zmienia kąt lotu piłki.', 'Masz 3 życia – każdy poziom to szybsza piłka i więcej punktów za cegłę.'],
+            controls: '<kbd>←</kbd><kbd>→</kbd>, mysz albo przeciągnięcie palcem · <kbd>P</kbd>/<kbd>Esc</kbd> pauza',
+            board: canvas,
+            focus: canvas,
+            hud: { score: '#score', best: '#best', lives: '#lives' },
+            fit: { el: canvas, width: W, height: H, max: 1, sharp: true },
+            onStart() { startGame(); },
+            onPause(p) {
+                keys.left = keys.right = false; lastTime = null; accumulator = 0;
+                // Pauza zastępuje komunikat „Poziom N” – po wznowieniu pokaż go ponownie.
+                if (!p && waitingForLevel && running) showLevelMessage();
+            },
+            onMenu() { running = false; waitingForLevel = false; initBricks(); resetBallAndPaddle(); GryKit.score(0); GryKit.lives(3); levelEl.textContent = 1; }
+        });
         initBricks();
-        drawBricks();
-        drawPaddle();
-        animationId=requestAnimationFrame(loop);
+        resetBallAndPaddle();
+        GryKit.lives(lives);
+        requestAnimationFrame(loop);
+    })();
     </script>
 </body>
 
