@@ -91,7 +91,6 @@ var SPRITE_SHEET_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAEACA
 var LEFT_KEY = 37;
 var RIGHT_KEY = 39;
 var SHOOT_KEY = 88;
-var TEXT_BLINK_FREQ = 500;
 var PLAYER_CLIP_RECT = { x: 0, y: 204, w: 62, h: 32 };
 var ALIEN_BOTTOM_ROW = [ { x: 0, y: 0, w: 51, h: 34 }, { x: 0, y: 102, w: 51, h: 34 }];
 var ALIEN_MIDDLE_ROW = [ { x: 0, y: 137, w: 50, h: 33 }, { x: 0, y: 170, w: 50, h: 34 }];
@@ -180,8 +179,9 @@ var alienYDown = 0;
 var alienCount = 0;
 var wave = 1;
 var hasGameStarted = false;
-var paused = false;
-var ended = false;
+var waveBanner = 0; // sekundy pozostałe do zniknięcia napisu „Fala N”
+var waveEl = null;
+var shootQueued = false; // krótkie stuknięcie Spacji (krótsze niż klatka) też strzela
 
 
 
@@ -264,6 +264,7 @@ var Player = SheetSprite.extend({
   shoot: function() {
     var bullet = new Bullet(this.position.x, this.position.y - this.bounds.h / 2, 1, 1000);
     this.bullets.push(bullet);
+    GryKit.sfx.play('shoot', { pitch: 1.1 });
   },
   
   handleInput: function() {
@@ -273,12 +274,13 @@ var Player = SheetSprite.extend({
       this.xVel = 175;
     } else this.xVel = 0;
     
-    if (isKeyDown(SHOOT_KEY) || isKeyDown(32)) {
+    if (isKeyDown(SHOOT_KEY) || isKeyDown(32) || shootQueued) {
       if (this.bulletDelayAccumulator >= 0.5) {
         this.shoot(); 
         this.bulletDelayAccumulator = 0;
       }
     }
+    shootQueued = false;
   },
   
   updateBullets: function(dt) {
@@ -308,7 +310,9 @@ var Player = SheetSprite.extend({
   },
   
   draw: function(resized) {
-    this._super(resized);
+    // po trafieniu statek miga, dopóki jest nietykalny
+    if (!(this.invulnerable > 0 && Math.floor(this.invulnerable * 10) % 2)) this._super(resized);
+    else this._updateBounds();
 
     // draw bullets
     for (var i = 0, len = this.bullets.length; i < len; i++) {
@@ -374,7 +378,7 @@ var Enemy = SheetSprite.extend({
       updateAlienLogic = true;
     }
       if (this.position.y >= CANVAS_HEIGHT - 85) {
-        endGame(); return;
+        endGame('Kosmici wylądowali – obrona przełamana.'); return;
       }
       
       var fireTest = Math.floor(Math.random() * (this.stepDelay + 1));
@@ -483,19 +487,22 @@ function initCanvas() {
   spriteSheetImg.src = SPRITE_SHEET_SRC;  
   preDrawImages();
 
-  // add event listeners and initially resize
-  window.addEventListener('resize', resize);
+  // add event listeners (pauza P/Esc, Enter na ekranach i auto-pauza – GryKit)
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
-  document.getElementById('start-game').addEventListener('click', startGame);
-  document.getElementById('pause-game').addEventListener('click', function(){setPaused(!paused);});
+  waveEl = document.getElementById('wave');
+  document.getElementById('start-game').addEventListener('click', function(){ GryKit.start(); });
   document.querySelectorAll('[data-game-key]').forEach(function(button){
     var key=Number(button.dataset.gameKey);
-    button.addEventListener('pointerdown',function(e){e.preventDefault();button.setPointerCapture?.(e.pointerId);if(!hasGameStarted)startGame();keyStates[key]=true;});
+    button.addEventListener('pointerdown',function(e){
+      e.preventDefault();button.setPointerCapture?.(e.pointerId);
+      if(GryKit.state==='menu'||GryKit.state==='over'){GryKit.start();return;}
+      if(!GryKit.playing)return;
+      keyStates[key]=true;
+      if(key===32)shootQueued=true;
+    });
     ['pointerup','pointercancel','lostpointercapture'].forEach(function(type){button.addEventListener(type,function(){keyStates[key]=false;});});
   });
-  document.addEventListener('visibilitychange',function(){if(document.hidden)setPaused(true);});
-  window.addEventListener('blur',function(){setPaused(true);});
 }
 
 function preDrawImages() {
@@ -521,8 +528,15 @@ function initGame() {
   aliens = [];
   player = new Player();
   particleManager = new ParticleExplosion();
-  setupAlienFormation();  
-  drawBottomHud();
+  setupAlienFormation();
+  waveBanner = 0;
+  syncHud();
+}
+
+function syncHud() {
+  GryKit.score(player.score);
+  GryKit.lives(player.lives);
+  if (waveEl) waveEl.textContent = wave;
 }
 
 function setupAlienFormation() {
@@ -543,27 +557,40 @@ function setupAlienFormation() {
   }
 }
 
-function reset() { startGame(); }
+// Wywoływane przez GryKit („Graj”, „Zagraj ponownie”, Enter na ekranie startu/końca, „Nowa gra”).
 function startGame() {
-  initGame();hasGameStarted=true;ended=false;paused=false;keyStates=[];prevKeyStates=[];lastTime=window.performance.now();
-  document.getElementById('game-status').textContent='';document.getElementById('pause-game').textContent='Pauza';canvas.focus();
+  initGame();hasGameStarted=true;keyStates=[];prevKeyStates=[];lastTime=window.performance.now();
+  document.getElementById('game-status').textContent='Fala 1 – powodzenia!';
 }
-function setPaused(value) {
-  keyStates=[];prevKeyStates=[];
+function clearKeys() { keyStates=[];prevKeyStates=[];shootQueued=false;lastTime=window.performance.now(); }
+function endGame(reason) {
   if(!hasGameStarted)return;
-  paused=!!value;lastTime=window.performance.now();if(!paused)canvas.focus();
-  document.getElementById('pause-game').textContent=paused?'Wznów':'Pauza';document.getElementById('game-status').textContent=paused?'Pauza':'';
-}
-function endGame() {
-  hasGameStarted=false;ended=true;paused=false;keyStates=[];prevKeyStates=[];
-  document.getElementById('game-status').textContent='Koniec gry. Wynik: '+player.score+' · fala: '+wave+'. Enter lub Start: nowa gra';
+  hasGameStarted=false;clearKeys();
+  var text=(reason||'Statek zniszczony.')+' Dotarłeś do fali '+wave+'.';
+  document.getElementById('game-status').textContent='Koniec gry. Wynik: '+player.score+' · fala: '+wave+'.';
+  GryKit.over({ score: player.score, text: text, delay: 600 });
 }
 
 function init() {
   initCanvas();
   keyStates = [];
   prevKeyStates = [];
-  resize();
+  GryKit.init({
+    id: 'spaceinvaders',
+    title: 'Space Invaders',
+    icon: '👾',
+    howTo: ['Zestrzeliwuj kosmitów – każdy to +25 pkt.', 'Gdy formacja zniknie, nadlatuje kolejna, szybsza fala.', 'Masz 3 życia, a kosmici nie mogą dotrzeć do ziemi.'],
+    controls: '<kbd>←</kbd><kbd>→</kbd> ruch · <kbd>Spacja</kbd>/<kbd>X</kbd> strzał · <kbd>P</kbd>/<kbd>Esc</kbd> pauza',
+    board: canvas,
+    focus: canvas,
+    hud: { score: '#score', best: '#high-score', lives: '#lives' },
+    fit: { el: canvas, width: CANVAS_WIDTH, height: CANVAS_HEIGHT, max: 1, min: 0.3, sharp: true },
+    onStart: startGame,
+    onPause: clearKeys,
+    onMenu: function(){ hasGameStarted=false; clearKeys(); initGame(); document.getElementById('game-status').textContent=''; }
+  });
+  // plansza w tle ekranu startowego (formacja kosmitów stoi)
+  initGame();
 }
 
 
@@ -601,6 +628,10 @@ function updateAliens(dt) {
       if (alienCount < 1) {
         wave++;
         setupAlienFormation();
+        waveBanner = 1.6;
+        if (waveEl) { waveEl.textContent = wave; GryKit.fx.pop(waveEl.parentElement); }
+        document.getElementById('game-status').textContent = 'Fala ' + wave + '!';
+        GryKit.sfx.play('win');
       }
       return;
     }
@@ -630,6 +661,9 @@ function resolveBulletEnemyCollisions() {
         alien.alive = bullet.alive = false;
         particleManager.createExplosion(alien.position.x, alien.position.y, 'white', 70, 5,5,3,.15,50);
         player.score += 25;
+        GryKit.score(player.score);
+        // ciche „bum” (kitowy 'boom' jest za głośny na każdego z 55 kosmitów)
+        GryKit.sfx.tone({ noise: true, freq: 1600 + Math.random() * 600, to: 160, dur: 0.16, vol: 0.28 });
         break;
       }
     }
@@ -642,8 +676,12 @@ function resolveBulletPlayerCollisions() {
     var bullet=aliens[i].bullet;
     if(bullet&&bullet.alive&&checkRectCollision(bullet.bounds,player.bounds)) {
       bullet.alive=false;player.lives=Math.max(0,player.lives-1);
-      particleManager.createExplosion(player.position.x,player.position.y,'green',50,8,8,6,0.001,40);
-      if(player.lives===0){endGame();return;}
+      particleManager.createExplosion(player.position.x,player.position.y,'#3ddc5a',50,8,8,6,0.001,40);
+      GryKit.lives(player.lives);
+      GryKit.fx.shake(canvas, 9, 360);
+      GryKit.fx.flash('#d05c5c', { on: canvas, strength: 0.4 });
+      if(player.lives===0){GryKit.sfx.play('boom');endGame('Statek zniszczony.');return;}
+      GryKit.sfx.play('hit');
       player.position.set(CANVAS_WIDTH/2,CANVAS_HEIGHT-70);player._updateBounds();player.invulnerable=1;
       break;
     }
@@ -656,6 +694,7 @@ function resolveCollisions() {
 }
 
 function updateGame(dt) {
+  waveBanner = Math.max(0, waveBanner - dt);
   player.handleInput();
   prevKeyStates = keyStates.slice();
   player.update(dt);
@@ -672,33 +711,25 @@ function drawIntoCanvas(width, height, drawFunc) {
   return canvas;
 }
 
-function fillText(text, x, y, color, fontSize) {
-  if (typeof color !== 'undefined') ctx.fillStyle = color;
-  if (typeof fontSize !== 'undefined') ctx.font = fontSize + 'px Play, Inter, "Segoe UI", sans-serif';
-  ctx.fillText(text, x, y);
-}
-
-function fillCenteredText(text, x, y, color, fontSize) {
-  var metrics = ctx.measureText(text);
-  fillText(text, x - metrics.width/2, y, color, fontSize);
-}
-
-function fillBlinkingText(text, x, y, blinkFreq, color, fontSize) {
-  if (~~(0.5 + Date.now() / blinkFreq) % 2) {
-    fillCenteredText(text, x, y, color, fontSize);
-  }
-}
-
+// Wynik, rekord, życia i fala są w kafelkach nad planszą – w canvasie zostaje tylko linia ziemi.
 function drawBottomHud() {
   ctx.fillStyle = '#02ff12';
   ctx.fillRect(0, CANVAS_HEIGHT - 30, CANVAS_WIDTH, 2);
-  fillText(player.lives + ' x ', 10, CANVAS_HEIGHT - 7.5, 'white', 20);
-  ctx.drawImage(spriteSheetImg, player.clipRect.x, player.clipRect.y, player.clipRect.w, 
-                 player.clipRect.h, 45, CANVAS_HEIGHT - 23, player.clipRect.w * 0.5,
-                 player.clipRect.h * 0.5);
-  fillText('CREDIT: ', CANVAS_WIDTH - 115, CANVAS_HEIGHT - 7.5);
-  fillCenteredText('SCORE: ' + player.score, CANVAS_WIDTH/2, 20);
-  fillBlinkingText('00', CANVAS_WIDTH - 25, CANVAS_HEIGHT - 7.5, TEXT_BLINK_FREQ);
+}
+
+function drawWaveBanner() {
+  if (waveBanner <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, waveBanner / 0.4);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = GryKit.font(44, 800);
+  ctx.fillStyle = '#02ff12';
+  ctx.fillText('Fala ' + wave, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+  ctx.font = GryKit.font(18, 600);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('kosmici przyspieszają', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
+  ctx.restore();
 }
 
 function drawAliens(resized) {
@@ -711,33 +742,29 @@ function drawAliens(resized) {
 function drawGame(resized) {
   player.draw(resized);  
   drawAliens(resized);
-  particleManager.draw();
+  // cząsteczki (wybuchy) dogrywają się także po końcu gry, ale stoją w pauzie
+  if (!GryKit.paused) particleManager.draw();
   drawBottomHud();
-}
-
-function drawStartScreen() {
-  fillCenteredText("Space Invaders", CANVAS_WIDTH/2, CANVAS_HEIGHT/2.75, '#FFFFFF', 36);
-  fillBlinkingText(ended ? "Koniec gry • Enter: nowa gra" : "Enter: start • Spacja / X: strzał", CANVAS_WIDTH/2, CANVAS_HEIGHT/2, 500, '#FFFFFF', 36);
+  drawWaveBanner();
 }
 
 function animate() {
   var now = window.performance.now();
   var dt = now - lastTime;
   if (dt > 100) dt = 100;
-  if (wasKeyPressed(13) && !hasGameStarted) startGame();
-  
-  if (hasGameStarted && !paused && !document.hidden) {
-     updateGame(dt / 1000);  
+
+  // logika stoi poza stanem „gra” (menu, pauza, koniec gry)
+  if (hasGameStarted && GryKit.playing) {
+     updateGame(dt / 1000);
   }
 
- 
+  // bufor w rozdzielczości ekranu (GryKit.fit sharp) – rysujemy w jednostkach logicznych 640×640
+  var r = GryKit.ratio(canvas);
+  ctx.setTransform(r, 0, 0, r, 0, 0);
+  setImageSmoothing(false);
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  if (hasGameStarted) {
-    drawGame(false);
-  } else {
-    drawStartScreen();
-  }
+  drawGame(false);
   prevKeyStates = keyStates.slice();
   lastTime = now;
   requestAnimationFrame(animate);
@@ -749,21 +776,20 @@ function animate() {
 // Event Listener functions
 //
 // ###################################################################
-function resize() {
-  canvas.width=CANVAS_WIDTH;canvas.height=CANVAS_HEIGHT;setImageSmoothing(false);
-  canvas.style.width='100%';canvas.style.maxWidth=CANVAS_WIDTH+'px';canvas.style.height='auto';
-}
+// Pauza (P/Esc), Enter na ekranach startu/końca i auto-pauza są w GryKit; tu tylko ruch i strzał.
 function onKeyDown(e) {
   if(e.altKey||e.ctrlKey||e.metaKey||e.target?.closest?.('header,a,input,textarea,select'))return;
-  if((e.code==='KeyP'||e.code==='Escape')&&!e.repeat){e.preventDefault();setPaused(!paused);return;}
   if(e.target?.closest?.('button'))return;
-  var key=e.keyCode||({ArrowLeft:37,ArrowRight:39,Space:32,Enter:13,KeyX:88})[e.code];
-  if(![13,32,37,39,88].includes(key))return;
-  e.preventDefault();keyStates[key]=true;
+  var key=e.keyCode||({ArrowLeft:37,ArrowRight:39,Space:32,KeyX:88})[e.code];
+  if(![32,37,39,88].includes(key))return;
+  e.preventDefault();
+  if(!GryKit.playing)return;
+  keyStates[key]=true;
+  if(key===32||key===88)shootQueued=true;
 }
 function onKeyUp(e) {
-  var key=e.keyCode||({ArrowLeft:37,ArrowRight:39,Space:32,Enter:13,KeyX:88})[e.code];
-  if(![13,32,37,39,88].includes(key))return;
+  var key=e.keyCode||({ArrowLeft:37,ArrowRight:39,Space:32,KeyX:88})[e.code];
+  if(![32,37,39,88].includes(key))return;
   keyStates[key]=false;
 }
 
@@ -771,7 +797,6 @@ function onKeyUp(e) {
 // Start game!
 //
 // ###################################################################
-window.onload = function() {
-  init();
-  animate();
-};
+// skrypt ładowany z defer – DOM jest gotowy
+init();
+animate();

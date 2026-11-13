@@ -7,22 +7,29 @@
     <link rel="stylesheet" href="spaceinvaders.css">
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: min(644px, max(324px, calc(100vh - 286px))); }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px; --game-width: 780px; }
+        .game-stage { position: relative; }
+        /* rozmiar ustawia GryKit.fit (plansza 640×640 logicznie, mieści się w oknie) */
         #game-canvas {
-            display: block; width: 100%; max-width: min(640px, max(320px, calc(100vh - 290px))) !important; height: auto; background: #000;
-            border: 2px solid var(--shell-border); border-radius: 12px; image-rendering: pixelated; touch-action: none;
+            display: block; width: 640px; height: 640px; max-width: 100%; margin: 0 auto; background: #000;
+            border: 2px solid var(--shell-border); border-radius: 12px; touch-action: none; outline: none;
         }
+        #game-canvas:focus-visible { border-color: var(--shell-accent); }
         .game-status { min-height: 21px; }
+        /* niskie okno: status tylko dla czytników ekranu, żeby plansza była większa */
+        @media (max-height: 620px) { .game-wrapper { padding-top: 12px; padding-bottom: 8px; } }
+        @media (max-height: 620px) { .game-status { position: absolute; width: 1px; height: 1px; min-height: 0; overflow: hidden; clip: rect(0 0 0 0); margin: 0; } }
         .si-pad { display: none; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; width: 100%; max-width: 360px; margin: 12px auto 0; }
         .si-pad .kit-btn { min-height: 56px; font-size: 18px; touch-action: none; user-select: none; -webkit-user-select: none; }
         @media (hover: none), (max-width: 700px) { .si-pad { display: grid; } }
     </style>
-    <script defer src="spaceinvaders.js?v=20261010-kit"></script>
+    <script defer src="spaceinvaders.js?v=20261113-grykit"></script>
 <link rel="icon" href="../../assets/workshop/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../../assets/workshop/shell.css?v=20261010-prefs">
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -38,14 +45,19 @@
 
     <main class="game-wrapper" id="main-content" tabindex="-1">
         <div class="game-bar">
-            <div class="game-title"><h1>Space Invaders</h1><p>← →: ruch · Spacja lub X: strzał · P: pauza</p></div>
+            <div class="game-title"><h1>Space Invaders</h1><p>Zestrzel formację, zanim wyląduje</p></div>
+            <div class="game-stats">
+                <div class="game-stat"><span>Wynik</span><b id="score">0</b></div>
+                <div class="game-stat"><span>Rekord</span><b id="high-score">0</b></div>
+                <div class="game-stat"><span>Życia</span><b id="lives">♥♥♥</b></div>
+                <div class="game-stat"><span>Fala</span><b id="wave">1</b></div>
+            </div>
             <div class="game-buttons">
                 <button class="kit-btn small primary" type="button" id="start-game">Nowa gra</button>
-                <button class="kit-btn small" type="button" id="pause-game">Pauza</button>
             </div>
         </div>
         <div class="game-stage">
-            <canvas tabindex="0" aria-label="Space Invaders. Strzałki: ruch. Spacja lub X: strzał. P: pauza." id="game-canvas" width="640" height="640"></canvas>
+            <canvas tabindex="0" aria-label="Plansza Space Invaders. Strzałki: ruch. Spacja lub X: strzał. P lub Esc: pauza." id="game-canvas" width="640" height="640"></canvas>
         </div>
         <p class="game-status" id="game-status" role="status"></p>
         <div class="si-pad" aria-label="Sterowanie dotykowe">
