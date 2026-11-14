@@ -763,7 +763,8 @@
     }
     if (state === 'paused' && (isPause || key === 'Enter' || key === ' ')) {
       if (key !== 'Escape' && typingTarget(e.target)) return;
-      if ((key === 'Enter' || key === ' ') && e.target && e.target.closest && e.target.closest('button') && overlay.contains(e.target)) return;
+      // Enter/Spacja na linku lub przycisku (nagłówek strony, przyciski nakładki) zostaje przy nim – nie wznawia gry.
+      if ((key === 'Enter' || key === ' ') && e.target && e.target.closest && e.target.closest('a,button,select')) return;
       e.preventDefault(); e.stopImmediatePropagation();
       if (!e.repeat) api.resume();
       return;

@@ -85,7 +85,7 @@ test('Dino: pausing clears time accumulation and ignores navigation Space',()=>{
  key(p,'KeyP');advance(p,1000/60);assert.ok(Number(dinoScore(p))-Number(score)<=1,'no catch-up burst after pause');
  key(p,'KeyP');p.fire('click',{},$(p,'#jump-btn'));assert.equal(state(p),'paused','jump button does not resume');
 });
-test('Dino: Space or Enter on a focused header link while paused stays with the link',{todo:'GryKit resumes on Space/Enter from any non-overlay target (needs a fix in assets/gry-kit)'},()=>{
+test('Dino: Space or Enter on a focused header link while paused stays with the link',()=>{
  const p=game('dino');clickStart(p);key(p,'KeyP');const link=$(p,'.site-links a');
  for(const code of['Space','Enter']){const e=key(p,code,{},link);assert.equal(state(p),'paused',code);assert.equal(e.defaultPrevented,false,code);}
 });
