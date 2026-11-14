@@ -3,11 +3,186 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kółko i krzyżyk (2 osoby) – Max Playground</title>
-    <meta name="description" content="Rozegraj klasyczne kółko i krzyżyk z kolegą obok. Szybkie partie, proste sterowanie i natychmiastowy restart." />
+    <title>Kółko i krzyżyk – Max Playground</title>
+    <meta name="description" content="Graj w kółko i krzyżyk na jednym ekranie. Dwóch graczy na zmianę stawia X i O, a plansza dopasowuje się do Twojego urządzenia." />
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <style>
+        .game-stage--tictactoe {
+            --ttt-board-gap: clamp(0.6rem, 2vw, 1rem);
+            --ttt-tile-radius: 26px;
+            --ttt-accent-x: #38bdf8;
+            --ttt-accent-o: #f472b6;
+            --ttt-surface: linear-gradient(150deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.95));
+            --ttt-border: rgba(148, 163, 184, 0.35);
+        }
+
+        .game-stage--tictactoe .game-stage__board {
+            justify-content: center;
+            gap: clamp(1rem, 3vw, 1.75rem);
+        }
+
+        .tictactoe-app {
+            width: min(920px, 100%);
+            display: grid;
+            gap: clamp(1rem, 3vw, 1.75rem);
+            justify-items: center;
+        }
+
+        .tictactoe-board {
+            width: min(520px, 90vw);
+            aspect-ratio: 1 / 1;
+            background: var(--ttt-surface);
+            border-radius: calc(var(--ttt-tile-radius) * 1.4);
+            border: 1px solid var(--ttt-border);
+            padding: clamp(1rem, 3vw, 1.6rem);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--ttt-board-gap);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 28px 60px rgba(15, 23, 42, 0.55);
+        }
+
+        .tictactoe-cell {
+            border: none;
+            border-radius: var(--ttt-tile-radius);
+            background: rgba(15, 23, 42, 0.65);
+            color: #f8fafc;
+            font-weight: 700;
+            font-size: clamp(2.5rem, 6vw, 3.4rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 18px 35px rgba(8, 47, 73, 0.45);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .tictactoe-cell:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 28px 60px rgba(8, 47, 73, 0.55);
+        }
+
+        .tictactoe-cell:disabled {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .tictactoe-cell.is-x {
+            color: var(--ttt-accent-x);
+        }
+
+        .tictactoe-cell.is-o {
+            color: var(--ttt-accent-o);
+        }
+
+        .tictactoe-cell.is-winning {
+            background: rgba(45, 212, 191, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 28px 70px rgba(45, 212, 191, 0.32);
+        }
+
+        .tictactoe-hud {
+            width: min(840px, 100%);
+            display: grid;
+            gap: clamp(0.75rem, 2vw, 1.25rem);
+            justify-items: center;
+        }
+
+        .tictactoe-turn {
+            font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+            font-weight: 600;
+            color: var(--color-text);
+            text-align: center;
+        }
+
+        .game-stage--tictactoe .game-hud .game-score {
+            min-width: clamp(120px, 30vw, 160px);
+        }
+
+        .game-stage--tictactoe .game-hud .game-score.is-active {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 14px 25px rgba(56, 189, 248, 0.28);
+        }
+
+        .tictactoe-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .tictactoe-actions button {
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 0.65rem 1.4rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: rgba(30, 64, 175, 0.18);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+        }
+
+        .tictactoe-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 35px rgba(30, 64, 175, 0.28);
+            background: rgba(56, 189, 248, 0.22);
+        }
+
+        .tictactoe-actions button:focus-visible {
+            outline: 2px solid rgba(56, 189, 248, 0.75);
+            outline-offset: 3px;
+        }
+
+        .tictactoe-history {
+            width: min(520px, 100%);
+            padding: 1rem 1.25rem;
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .tictactoe-history h2 {
+            margin: 0 0 0.6rem;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+        }
+
+        .tictactoe-history p {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.92rem;
+        }
+
+        .tictactoe-history ol {
+            margin: 0;
+            padding-left: 1.1rem;
+            display: grid;
+            gap: 0.35rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 720px) {
+            .tictactoe-board {
+                width: min(92vw, 420px);
+            }
+        }
+
+        @media (max-width: 520px) {
+            .tictactoe-board {
+                padding: 0.85rem;
+                gap: clamp(0.45rem, 4vw, 0.65rem);
+                border-radius: calc(var(--ttt-tile-radius) * 1.1);
+            }
+
+            .tictactoe-cell {
+                border-radius: calc(var(--ttt-tile-radius) * 0.75);
+            }
+        }
+    </style>
     <script defer src="../../assets/js/site.js"></script>
 </head>
 <body class="game-page" data-root="../../">
@@ -24,6 +199,10 @@
                         <a href="../../Programy/generator kolorow/generator kolorow.html">Generator kolorów</a>
                         <a href="../../Programy/generator czcionek/generator czcionek.html">Generator czcionek</a>
                         <a href="../../Programy/generator emoji/generator emoji.html">Generator emoji</a>
+                        <a href="../../Programy/konwerter jednostek/konwerter jednostek.html">Konwerter jednostek</a>
+                        <a href="../../Programy/planer zadan/planer zadan.html">Planer zadań</a>
+                        <a href="../../Programy/kalkulator bmi/kalkulator bmi.html">Kalkulator BMI</a>
+                        <a href="../../Programy/pomodoro timer/pomodoro timer.html">Timer Pomodoro</a>
                     </div>
                 </div>
                 <a class="nav-link is-active" href="../gry.html">Gry</a>
@@ -41,66 +220,251 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Kółko i krzyżyk – hot seat</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-kolkokrzyzykc-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <article class="game-stage game-stage--tictactoe">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Hot seat</span>
+                    <h1>Kółko i krzyżyk</h1>
+                    <p>Dwóch graczy przy jednym urządzeniu. Klikaj pola na zmianę, zbieraj wygrane rundy i obserwuj historię pojedynków bez opuszczania planszy.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Kółko i krzyżyk dla dwóch osób" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-kolkokrzyzykc-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Idealna mini-gra na szybką rywalizację obok jednego ekranu. Kolejne ruchy zapisują się automatycznie, a jednym kliknięciem rozpoczniesz nową partię.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Dwóch graczy przy jednym urządzeniu</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Czas rundy</dt>
-                            <dd>1–3 minuty</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Mechanika</dt>
-                            <dd>Tura po turze</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Opcje</dt>
-                            <dd>Przycisk Restart na dole planszy</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                <div class="game-hud">
+                    <div class="game-score" data-player="x">
+                        <span>Wygrane X</span>
+                        <strong data-score-x>0</strong>
+                    </div>
+                    <div class="game-score" data-player="o">
+                        <span>Wygrane O</span>
+                        <strong data-score-o>0</strong>
+                    </div>
+                    <div class="game-score" data-player="draws">
+                        <span>Remisy</span>
+                        <strong data-score-draws>0</strong>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Kliknij na wybrane pole planszy, aby postawić symbol.</li>
-                        <li>Gracze wykonują ruchy naprzemiennie – brak dodatkowych ustawień.</li>
-                        <li>Komunikaty nad planszą informują, kto wygrał bieżącą partię.</li>
-                    </ul>
-                    <p>Gra automatycznie informuje o zwycięstwie lub remisie. Wybierz „Restart”, gdy tylko będziecie gotowi na rewanż.</p>
+            </header>
+
+            <div class="game-stage__board">
+                <div class="tictactoe-app">
+                    <div class="tictactoe-hud">
+                        <div class="tictactoe-turn" data-turn-display>Runda 1 · Tura gracza X</div>
+                        <div class="tictactoe-actions">
+                            <button type="button" data-action="next">Nowa runda</button>
+                            <button type="button" data-action="reset">Wyzeruj mecz</button>
+                        </div>
+                    </div>
+
+                    <div class="tictactoe-board" role="grid" aria-label="Plansza gry kółko i krzyżyk">
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 1" data-index="0"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 2" data-index="1"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 3" data-index="2"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 4" data-index="3"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 5" data-index="4"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 6" data-index="5"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 7" data-index="6"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 8" data-index="7"></button>
+                        <button type="button" class="tictactoe-cell" data-cell aria-label="Pole 9" data-index="8"></button>
+                    </div>
+
+                    <p class="game-status" data-status aria-live="polite">Rozpocznij rundę i doprowadź do trzech swoich symboli w linii.</p>
+
+                    <section class="tictactoe-history" aria-live="polite">
+                        <h2>Historia partii</h2>
+                        <p data-history-empty>Jeszcze nie rozegrano żadnej partii.</p>
+                        <ol data-history></ol>
+                    </section>
                 </div>
-                <div class="game-card">
-                    <h2>Domowe turnieje</h2>
-                    <ul class="game-list">
-                        <li>Liczycie punkty? 1 za zwycięstwo, 0 za remis – zobaczcie, kto pierwszy zdobędzie 5.</li>
-                        <li>Zmiana symbolu po każdej partii pozwala wyrównać szanse.</li>
-                        <li>Spróbujcie grać na czas, aby ćwiczyć szybkie decyzje.</li>
-                    </ul>
-                    <p>Ustalcie dodatkowe zasady: np. po remisie kolejna partia toczy się bez pola środkowego albo tylko na krawędziach.</p>
-                </div>
-            </aside>
-        </section>
+            </div>
+        </article>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Miłej rywalizacji!</p>
-    </footer>
+    <script>
+        (() => {
+            const cells = Array.from(document.querySelectorAll('[data-cell]'));
+            const turnDisplay = document.querySelector('[data-turn-display]');
+            const statusEl = document.querySelector('[data-status]');
+            const scoreXEl = document.querySelector('[data-score-x]');
+            const scoreOEl = document.querySelector('[data-score-o]');
+            const scoreDrawEl = document.querySelector('[data-score-draws]');
+            const historyList = document.querySelector('[data-history]');
+            const historyEmpty = document.querySelector('[data-history-empty]');
+            const nextButton = document.querySelector('[data-action="next"]');
+            const resetButton = document.querySelector('[data-action="reset"]');
+            const scoreCards = {
+                X: document.querySelector('[data-player="x"]'),
+                O: document.querySelector('[data-player="o"]'),
+            };
+
+            const winningCombos = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6],
+            ];
+
+            const state = {
+                board: Array(9).fill(null),
+                current: 'X',
+                finished: false,
+                moves: 0,
+                round: 1,
+                scores: {
+                    X: 0,
+                    O: 0,
+                    draws: 0,
+                },
+            };
+
+            function updateTurnDisplay() {
+                if (state.finished) {
+                    return;
+                }
+                turnDisplay.textContent = `Runda ${state.round} · Tura gracza ${state.current}`;
+                scoreCards.X.classList.toggle('is-active', state.current === 'X');
+                scoreCards.O.classList.toggle('is-active', state.current === 'O');
+            }
+
+            function setStatus(text, variant = '') {
+                statusEl.textContent = text;
+                statusEl.classList.remove('won', 'lose');
+                if (variant) {
+                    statusEl.classList.add(variant);
+                }
+            }
+
+            function clearBoardUI() {
+                cells.forEach((cell) => {
+                    cell.textContent = '';
+                    cell.disabled = false;
+                    cell.classList.remove('is-x', 'is-o', 'is-winning');
+                });
+            }
+
+            function checkWinner() {
+                for (const combo of winningCombos) {
+                    const [a, b, c] = combo;
+                    const mark = state.board[a];
+                    if (mark && mark === state.board[b] && mark === state.board[c]) {
+                        return { winner: mark, combo };
+                    }
+                }
+                if (state.moves === state.board.length) {
+                    return { winner: null, combo: [] };
+                }
+                return null;
+            }
+
+            function highlightCombo(combo) {
+                combo.forEach((index) => {
+                    const cell = cells[index];
+                    if (cell) {
+                        cell.classList.add('is-winning');
+                    }
+                });
+            }
+
+            function finishRound(result) {
+                state.finished = true;
+                scoreCards.X.classList.remove('is-active');
+                scoreCards.O.classList.remove('is-active');
+                cells.forEach((cell) => (cell.disabled = true));
+
+                let message;
+                if (result.winner) {
+                    state.scores[result.winner] += 1;
+                    message = `Gracz ${result.winner} wygrywa rundę ${state.round}!`;
+                    setStatus(message, 'won');
+                    highlightCombo(result.combo);
+                    turnDisplay.textContent = message;
+                } else {
+                    state.scores.draws += 1;
+                    message = `Runda ${state.round} kończy się remisem.`;
+                    setStatus(message);
+                    turnDisplay.textContent = message;
+                }
+
+                scoreXEl.textContent = state.scores.X;
+                scoreOEl.textContent = state.scores.O;
+                scoreDrawEl.textContent = state.scores.draws;
+                appendHistoryEntry(message);
+            }
+
+            function appendHistoryEntry(text) {
+                const entry = document.createElement('li');
+                entry.textContent = text;
+                historyList.prepend(entry);
+                historyEmpty.hidden = true;
+                const maxEntries = 8;
+                while (historyList.children.length > maxEntries) {
+                    historyList.removeChild(historyList.lastElementChild);
+                }
+            }
+
+            function handleCellClick(event) {
+                const cell = event.currentTarget;
+                const index = Number(cell.dataset.index);
+                if (state.finished || state.board[index]) {
+                    return;
+                }
+
+                state.board[index] = state.current;
+                state.moves += 1;
+                cell.textContent = state.current;
+                cell.classList.add(state.current === 'X' ? 'is-x' : 'is-o');
+                cell.disabled = true;
+
+                const result = checkWinner();
+                if (result) {
+                    finishRound(result);
+                } else {
+                    state.current = state.current === 'X' ? 'O' : 'X';
+                    updateTurnDisplay();
+                    setStatus(`Twoim zadaniem jest ułożyć trzy symbole ${state.current} w linii.`);
+                }
+            }
+
+            function newRound(resetScore = false) {
+                state.board.fill(null);
+                state.moves = 0;
+                state.finished = false;
+                state.current = state.round % 2 === 0 ? 'O' : 'X';
+
+                if (resetScore) {
+                    state.scores.X = 0;
+                    state.scores.O = 0;
+                    state.scores.draws = 0;
+                    state.round = 1;
+                    state.current = 'X';
+                    historyList.innerHTML = '';
+                    historyEmpty.hidden = false;
+                }
+
+                clearBoardUI();
+                updateTurnDisplay();
+                setStatus('Rozpocznij rundę i doprowadź do trzech swoich symboli w linii.');
+
+                scoreXEl.textContent = state.scores.X;
+                scoreOEl.textContent = state.scores.O;
+                scoreDrawEl.textContent = state.scores.draws;
+            }
+
+            cells.forEach((cell) => cell.addEventListener('click', handleCellClick));
+            nextButton.addEventListener('click', () => {
+                if (!state.finished && state.moves > 0) {
+                    appendHistoryEntry(`Runda ${state.round} została przerwana.`);
+                }
+                state.round += 1;
+                newRound();
+            });
+
+            resetButton.addEventListener('click', () => {
+                newRound(true);
+            });
+
+            newRound();
+        })();
+    </script>
 </body>
 </html>

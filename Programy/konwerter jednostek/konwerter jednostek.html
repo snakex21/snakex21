@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Konwerter jednostek – Max Playground</title>
+    <meta name="description" content="Przeliczaj długości, masy, temperatury i dane w czasie rzeczywistym. Jedno narzędzie, które uporządkowuje codzienne obliczenia." />
+    <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+
+        body {
+            background: radial-gradient(circle at top, rgba(115, 148, 255, 0.16), transparent 55%),
+                var(--surface-page, #0f172a);
+        }
+
+        .converter-layout {
+            display: grid;
+            gap: 2.5rem;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .converter-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .converter-panel,
+        .converter-sidebar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 24px;
+            padding: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+            box-shadow: 0 28px 60px -40px rgba(15, 23, 42, 0.8);
+        }
+
+        .converter-panel header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .converter-panel header h2 {
+            font-size: clamp(1.75rem, 2vw + 1.25rem, 2.4rem);
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .converter-panel header p {
+            color: rgba(226, 232, 240, 0.78);
+            max-width: 48ch;
+            line-height: 1.6;
+        }
+
+        .converter-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .converter-fieldset {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .converter-fieldset label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(148, 163, 184, 0.9);
+            font-weight: 600;
+        }
+
+        .converter-fieldset select,
+        .converter-fieldset input {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.65);
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .converter-fieldset select:focus,
+        .converter-fieldset input:focus {
+            border-color: rgba(129, 140, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+            outline: none;
+        }
+
+        .converter-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .converter-actions button {
+            border: none;
+            border-radius: 999px;
+            padding: 0.75rem 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #fff;
+            box-shadow: 0 16px 35px -20px rgba(79, 70, 229, 0.9);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.16);
+            color: rgba(226, 232, 240, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .converter-actions button:focus-visible,
+        .converter-actions button:hover {
+            transform: translateY(-1px);
+        }
+
+        .converter-results {
+            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            overflow: hidden;
+        }
+
+        .converter-results table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .converter-results thead {
+            background: rgba(79, 70, 229, 0.12);
+        }
+
+        .converter-results th,
+        .converter-results td {
+            padding: 0.9rem 1.1rem;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .converter-results tbody tr:nth-child(even) {
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .converter-results tbody tr:hover {
+            background: rgba(99, 102, 241, 0.12);
+        }
+
+        .converter-results .unit-label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .converter-results .unit-symbol {
+            font-size: 0.75rem;
+            color: rgba(148, 163, 184, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .converter-empty {
+            padding: 1.5rem;
+            text-align: center;
+            color: rgba(148, 163, 184, 0.9);
+        }
+
+        .converter-sidebar h3 {
+            font-size: 1.15rem;
+            color: #cbd5f5;
+            margin-bottom: 1rem;
+        }
+
+        .converter-sidebar p,
+        .converter-sidebar li {
+            color: rgba(226, 232, 240, 0.78);
+            line-height: 1.6;
+        }
+
+        .converter-sidebar ul {
+            display: grid;
+            gap: 0.6rem;
+            margin: 1.25rem 0;
+            padding-left: 1.1rem;
+        }
+
+        .converter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .converter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(148, 163, 184, 0.16);
+            color: rgba(226, 232, 240, 0.85);
+            border-radius: 999px;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .converter-meta {
+            display: grid;
+            gap: 0.4rem;
+            margin-top: 1.25rem;
+            font-size: 0.85rem;
+            color: rgba(148, 163, 184, 0.85);
+        }
+
+        .preference-note {
+            font-size: 0.8rem;
+            color: rgba(148, 163, 184, 0.75);
+        }
+    </style>
+    <script defer src="../../assets/js/site.js"></script>
+</head>
+<body class="app-page app-page--dark" data-root="../../">
+    <header class="site-header">
+        <nav class="main-nav" aria-label="Główna nawigacja">
+            <a class="nav-brand" href="../../index.html"><span>MX</span>Max Playground</a>
+            <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+            <div class="nav-menu" data-nav-menu id="primary-navigation">
+                <a class="nav-link" href="../../index.html">Strona główna</a>
+                <div class="nav-item nav-item--dropdown">
+                    <button class="nav-dropdown-toggle is-active" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" aria-controls="nav-programy">Programy</button>
+                    <div class="nav-dropdown" id="nav-programy" role="menu">
+                        <a href="../programy.html">Przegląd wszystkich programów</a>
+                        <a href="../generator kolorow/generator kolorow.html">Generator kolorów</a>
+                        <a href="../generator czcionek/generator czcionek.html">Generator czcionek</a>
+                        <a href="../generator emoji/generator emoji.html">Generator emoji</a>
+                        <a class="is-current" href="konwerter jednostek.html">Konwerter jednostek</a>
+                        <a href="../planer zadan/planer zadan.html">Planer zadań</a>
+                        <a href="../kalkulator bmi/kalkulator bmi.html">Kalkulator BMI</a>
+                        <a href="../pomodoro timer/pomodoro timer.html">Timer Pomodoro</a>
+                    </div>
+                </div>
+                <a class="nav-link" href="../../gry/gry.html">Gry</a>
+                <a class="nav-link" href="../../filmy/filmy glowna.html">Filmy</a>
+                <a class="nav-link" href="../../muzyka/muzyka.html">Muzyka</a>
+                <a class="nav-link" href="../../zmiany.html">Dziennik zmian</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost theme-toggle" type="button" data-theme-toggle aria-pressed="false">🌙 Tryb nocny</button>
+                <div class="header-clock">
+                    <span class="clock-time" data-clock-time>--:--:--</span>
+                    <span class="clock-date" data-clock-date>Ładowanie…</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main class="standalone-app standalone-app--dark">
+        <section class="app-hero">
+            <div class="app-hero__content">
+                <span class="badge">Asystent obliczeń</span>
+                <h1>Konwerter jednostek</h1>
+                <p>Jedno miejsce do przeliczania długości, masy, temperatur oraz danych cyfrowych. Wyniki aktualizują się w czasie rzeczywistym, a Twoje preferencje zapamiętują się między wizytami.</p>
+            </div>
+            <div class="app-hero__actions">
+                <a class="btn btn-secondary" href="../programy.html">← Wróć do listy programów</a>
+            </div>
+        </section>
+        <div class="standalone-app__inner converter-layout">
+            <section class="converter-panel" aria-label="Konwerter jednostek">
+                <header>
+                    <h2>Dostosuj przeliczanie</h2>
+                    <p>Wybierz kategorię, jednostki wejściowe i docelowe. Narzędzie automatycznie przeliczy wynik i wyświetli dodatkowe wartości dla wszystkich dostępnych miar.</p>
+                </header>
+                <form class="converter-form" data-converter-form>
+                    <div class="converter-fieldset">
+                        <label for="converter-category">Obszar konwersji</label>
+                        <select id="converter-category" data-converter-category></select>
+                        <p class="preference-note" data-category-description></p>
+                    </div>
+                    <div class="converter-fieldset">
+                        <label for="converter-value">Wartość do przeliczenia</label>
+                        <input id="converter-value" type="number" step="any" inputmode="decimal" value="1" data-converter-value />
+                    </div>
+                    <div class="converter-fieldset">
+                        <label for="converter-from">Z jednostki</label>
+                        <select id="converter-from" data-converter-from></select>
+                    </div>
+                    <div class="converter-fieldset">
+                        <label for="converter-to">Na jednostkę</label>
+                        <select id="converter-to" data-converter-to></select>
+                    </div>
+                    <div class="converter-actions">
+                        <button class="btn-primary" type="button" data-converter-swap>
+                            <span aria-hidden="true">⇄</span>
+                            <span>Zamień jednostki</span>
+                        </button>
+                        <button class="btn-secondary" type="button" data-converter-reset>Wyczyść i przywróć domyślne</button>
+                        <button class="btn-secondary" type="button" data-converter-save>Zapamiętaj preferencje</button>
+                    </div>
+                    <div class="converter-results" data-converter-results>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Jednostka</th>
+                                    <th scope="col">Wartość</th>
+                                    <th scope="col">Opis</th>
+                                </tr>
+                            </thead>
+                            <tbody data-converter-table></tbody>
+                        </table>
+                    </div>
+                </form>
+            </section>
+            <aside class="converter-sidebar" aria-label="Podpowiedzi i skróty">
+                <h3>Przydatne wskazówki</h3>
+                <ul>
+                    <li>Wartości aktualizują się automatycznie po zmianie któregokolwiek pola. Wynik w docelowej jednostce podświetla się na liście.</li>
+                    <li>Przycisk „Zamień jednostki” pozwala szybko porównać kierunki konwersji, np. z kilometrów na mile i odwrotnie.</li>
+                    <li>Po zapisaniu preferencji narzędzie przywróci wybraną kategorię i jednostki przy kolejnym uruchomieniu.</li>
+                </ul>
+                <div class="converter-meta">
+                    <span data-selected-summary></span>
+                    <span data-converted-output></span>
+                </div>
+                <h3>Popularne zastosowania</h3>
+                <div class="converter-chips" data-converter-chips>
+                    <span class="converter-chip">⚙️ Inżynieria</span>
+                    <span class="converter-chip">🌡️ Laboratorium</span>
+                    <span class="converter-chip">📦 Logistyka</span>
+                    <span class="converter-chip">💾 Administracja IT</span>
+                </div>
+            </aside>
+        </div>
+    </main>
+    <footer>
+        <p>Copyright © 2024 Max · Projekt tworzony z pasją i odrobiną magii CSS.</p>
+    </footer>
+    <script>
+        (function () {
+            const unitGroups = {
+                length: {
+                    id: "length",
+                    label: "Długość",
+                    description: "Przelicz od milimetrów aż po mile. Idealne przy projektach technicznych i podróżach.",
+                    units: {
+                        mm: { label: "Milimetry", symbol: "mm", toBase: (value) => value / 1000, fromBase: (value) => value * 1000, description: "Najmniejsze przeliczenie metryczne" },
+                        cm: { label: "Centymetry", symbol: "cm", toBase: (value) => value / 100, fromBase: (value) => value * 100, description: "Codzienne pomiary w domu" },
+                        m: { label: "Metry", symbol: "m", toBase: (value) => value, fromBase: (value) => value, description: "Podstawowa jednostka SI" },
+                        km: { label: "Kilometry", symbol: "km", toBase: (value) => value * 1000, fromBase: (value) => value / 1000, description: "Dystanse na mapie" },
+                        in: { label: "Cale", symbol: "in", toBase: (value) => value * 0.0254, fromBase: (value) => value / 0.0254, description: "Standard USA i UK" },
+                        ft: { label: "Stopy", symbol: "ft", toBase: (value) => value * 0.3048, fromBase: (value) => value / 0.3048, description: "Budownictwo i wzrost" },
+                        yd: { label: "Jardy", symbol: "yd", toBase: (value) => value * 0.9144, fromBase: (value) => value / 0.9144, description: "Boiska i golf" },
+                        mi: { label: "Mile", symbol: "mi", toBase: (value) => value * 1609.344, fromBase: (value) => value / 1609.344, description: "Podróże drogowe" }
+                    }
+                },
+                mass: {
+                    id: "mass",
+                    label: "Masa",
+                    description: "Kuchnia, laboratorium i logistyka – zamieniaj kilogramy, funty i inne jednostki.",
+                    units: {
+                        mg: { label: "Miligramy", symbol: "mg", toBase: (value) => value / 1_000_000, fromBase: (value) => value * 1_000_000, description: "Składniki i leki" },
+                        g: { label: "Gramy", symbol: "g", toBase: (value) => value / 1000, fromBase: (value) => value * 1000, description: "Wypieki i kuchnia" },
+                        kg: { label: "Kilogramy", symbol: "kg", toBase: (value) => value, fromBase: (value) => value, description: "Podstawowa jednostka masy" },
+                        t: { label: "Tony", symbol: "t", toBase: (value) => value * 1000, fromBase: (value) => value / 1000, description: "Transport i ładunki" },
+                        lb: { label: "Funty", symbol: "lb", toBase: (value) => value * 0.45359237, fromBase: (value) => value / 0.45359237, description: "Skale imperialne" },
+                        oz: { label: "Uncje", symbol: "oz", toBase: (value) => value * 0.0283495231, fromBase: (value) => value / 0.0283495231, description: "Porcje kuchenne" }
+                    }
+                },
+                temperature: {
+                    id: "temperature",
+                    label: "Temperatura",
+                    description: "Konwertuj między skalami Celsjusza, Fahrenheita i Kelvina w badaniach i codzienności.",
+                    units: {
+                        c: {
+                            label: "Stopnie Celsjusza",
+                            symbol: "°C",
+                            toBase: (value) => value + 273.15,
+                            fromBase: (value) => value - 273.15,
+                            description: "Najpopularniejsza skala pogodowa"
+                        },
+                        f: {
+                            label: "Stopnie Fahrenheita",
+                            symbol: "°F",
+                            toBase: (value) => ((value - 32) * 5) / 9 + 273.15,
+                            fromBase: (value) => ((value - 273.15) * 9) / 5 + 32,
+                            description: "Klimatyzacja i medycyna USA"
+                        },
+                        k: {
+                            label: "Kelwiny",
+                            symbol: "K",
+                            toBase: (value) => value,
+                            fromBase: (value) => value,
+                            description: "Fizyka i chemia"
+                        }
+                    }
+                },
+                data: {
+                    id: "data",
+                    label: "Dane cyfrowe",
+                    description: "Kalkuluj rozmiary plików i przepustowość pamięci masowej.",
+                    units: {
+                        b: { label: "Bity", symbol: "b", toBase: (value) => value / 8, fromBase: (value) => value * 8, description: "Minimalna jednostka informacji" },
+                        B: { label: "Bajty", symbol: "B", toBase: (value) => value, fromBase: (value) => value, description: "Podstawowa miara rozmiaru" },
+                        kB: { label: "Kilobajty", symbol: "kB", toBase: (value) => value * 1000, fromBase: (value) => value / 1000, description: "Dokumenty tekstowe" },
+                        MB: { label: "Megabajty", symbol: "MB", toBase: (value) => value * 1_000_000, fromBase: (value) => value / 1_000_000, description: "Zdjęcia i muzyka" },
+                        GB: { label: "Gigabajty", symbol: "GB", toBase: (value) => value * 1_000_000_000, fromBase: (value) => value / 1_000_000_000, description: "Filmy i aplikacje" },
+                        TB: { label: "Terabajty", symbol: "TB", toBase: (value) => value * 1_000_000_000_000, fromBase: (value) => value / 1_000_000_000_000, description: "Serwery i archiwa" }
+                    }
+                }
+            };
+
+            const categorySelect = document.querySelector('[data-converter-category]');
+            const categoryDescription = document.querySelector('[data-category-description]');
+            const valueInput = document.querySelector('[data-converter-value]');
+            const fromSelect = document.querySelector('[data-converter-from]');
+            const toSelect = document.querySelector('[data-converter-to]');
+            const tableBody = document.querySelector('[data-converter-table]');
+            const resultsWrapper = document.querySelector('[data-converter-results]');
+            const swapButton = document.querySelector('[data-converter-swap]');
+            const resetButton = document.querySelector('[data-converter-reset]');
+            const saveButton = document.querySelector('[data-converter-save]');
+            const summaryLabel = document.querySelector('[data-selected-summary]');
+            const outputLabel = document.querySelector('[data-converted-output]');
+            const preferencesKey = 'mx-unit-converter-preferences';
+
+            const getGroupEntries = () => Object.entries(unitGroups);
+
+            const getCurrentGroup = () => {
+                const id = categorySelect?.value;
+                return getGroupEntries().find(([key]) => key === id)?.[1] ?? null;
+            };
+
+            const formatNumber = (value) => {
+                if (!Number.isFinite(value)) {
+                    return '—';
+                }
+                const abs = Math.abs(value);
+                if (abs !== 0 && (abs < 0.001 || abs >= 1_000_000)) {
+                    return value.toExponential(4);
+                }
+                return new Intl.NumberFormat('pl-PL', {
+                    maximumFractionDigits: 6,
+                    minimumFractionDigits: 0
+                }).format(value);
+            };
+
+            const convertValue = (inputValue, from, to, group) => {
+                if (!group) return Number.NaN;
+                const fromUnit = group.units[from];
+                const toUnit = group.units[to];
+                if (!fromUnit || !toUnit) return Number.NaN;
+                const baseValue = fromUnit.toBase(Number(inputValue));
+                return toUnit.fromBase(baseValue);
+            };
+
+            const populateCategoryOptions = () => {
+                if (!categorySelect) return;
+                getGroupEntries().forEach(([id, group]) => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = group.label;
+                    categorySelect.appendChild(option);
+                });
+            };
+
+            const populateUnitOptions = (group) => {
+                if (!group || !fromSelect || !toSelect) return;
+                const entries = Object.entries(group.units);
+                const renderOptions = (select, selectedKey) => {
+                    select.innerHTML = '';
+                    entries.forEach(([key, unit]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = `${unit.label} (${unit.symbol})`;
+                        if (selectedKey && selectedKey === key) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+                };
+                const defaultFrom = entries[0]?.[0] ?? '';
+                const defaultTo = entries[1]?.[0] ?? defaultFrom;
+                renderOptions(fromSelect, fromSelect.dataset.persistedUnit ?? defaultFrom);
+                renderOptions(toSelect, toSelect.dataset.persistedUnit ?? defaultTo);
+                delete fromSelect.dataset.persistedUnit;
+                delete toSelect.dataset.persistedUnit;
+            };
+
+            const renderResults = () => {
+                if (!tableBody || !resultsWrapper) return;
+                const group = getCurrentGroup();
+                if (!group) return;
+                const rawValue = Number(valueInput?.value ?? 0);
+                if (!Number.isFinite(rawValue)) {
+                    tableBody.innerHTML = '';
+                    resultsWrapper.setAttribute('aria-busy', 'true');
+                    return;
+                }
+                resultsWrapper.removeAttribute('aria-busy');
+                tableBody.innerHTML = '';
+                const entries = Object.entries(group.units);
+                const fromUnit = group.units[fromSelect.value];
+                const toUnit = group.units[toSelect.value];
+
+                const highlightKey = toSelect.value;
+
+                entries.forEach(([key, unit]) => {
+                    const row = document.createElement('tr');
+                    if (key === highlightKey) {
+                        row.setAttribute('aria-current', 'true');
+                        row.style.backgroundColor = 'rgba(99, 102, 241, 0.2)';
+                    }
+                    const labelCell = document.createElement('td');
+                    labelCell.className = 'unit-label';
+                    labelCell.innerHTML = `<strong>${unit.label}</strong><span class="unit-symbol">${unit.symbol}</span>`;
+
+                    const valueCell = document.createElement('td');
+                    const converted = convertValue(rawValue, fromSelect.value, key, group);
+                    valueCell.textContent = formatNumber(converted);
+
+                    const descriptionCell = document.createElement('td');
+                    descriptionCell.textContent = unit.description ?? '';
+
+                    row.append(labelCell, valueCell, descriptionCell);
+                    tableBody.appendChild(row);
+                });
+
+                if (summaryLabel && fromUnit && toUnit) {
+                    summaryLabel.textContent = `Konwertujesz ${formatNumber(rawValue)} ${fromUnit.symbol} (${fromUnit.label}) na ${toUnit.symbol} (${toUnit.label}).`;
+                }
+
+                if (outputLabel && toUnit) {
+                    const converted = convertValue(rawValue, fromSelect.value, toSelect.value, group);
+                    outputLabel.textContent = `Wynik: ${formatNumber(converted)} ${toUnit.symbol}`;
+                }
+
+                if (!entries.length) {
+                    const emptyRow = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 3;
+                    cell.className = 'converter-empty';
+                    cell.textContent = 'Brak jednostek do wyświetlenia.';
+                    emptyRow.appendChild(cell);
+                    tableBody.appendChild(emptyRow);
+                }
+            };
+
+            const updateCategoryDescription = () => {
+                const group = getCurrentGroup();
+                if (!categoryDescription) return;
+                categoryDescription.textContent = group?.description ?? '';
+            };
+
+            const applyPreferences = (prefs) => {
+                if (!prefs) return;
+                if (prefs.category && categorySelect) {
+                    categorySelect.value = prefs.category;
+                }
+                const group = getCurrentGroup();
+                if (group && fromSelect && toSelect) {
+                    if (prefs.from && group.units[prefs.from]) {
+                        fromSelect.dataset.persistedUnit = prefs.from;
+                    }
+                    if (prefs.to && group.units[prefs.to]) {
+                        toSelect.dataset.persistedUnit = prefs.to;
+                    }
+                }
+            };
+
+            const loadPreferences = () => {
+                try {
+                    const stored = localStorage.getItem(preferencesKey);
+                    if (!stored) return null;
+                    return JSON.parse(stored);
+                } catch (error) {
+                    console.error('Nie udało się wczytać preferencji konwertera', error);
+                    return null;
+                }
+            };
+
+            const persistPreferences = () => {
+                try {
+                    const payload = {
+                        category: categorySelect?.value ?? null,
+                        from: fromSelect?.value ?? null,
+                        to: toSelect?.value ?? null
+                    };
+                    localStorage.setItem(preferencesKey, JSON.stringify(payload));
+                    saveButton?.classList.add('btn-primary');
+                    setTimeout(() => {
+                        saveButton?.classList.remove('btn-primary');
+                    }, 1200);
+                } catch (error) {
+                    console.error('Nie udało się zapisać preferencji', error);
+                }
+            };
+
+            populateCategoryOptions();
+
+            const preferences = loadPreferences();
+            applyPreferences(preferences);
+
+            const initialGroup = getCurrentGroup() ?? getGroupEntries()[0]?.[1];
+            if (initialGroup) {
+                populateUnitOptions(initialGroup);
+            }
+
+            updateCategoryDescription();
+            renderResults();
+
+            categorySelect?.addEventListener('change', () => {
+                const group = getCurrentGroup();
+                populateUnitOptions(group);
+                updateCategoryDescription();
+                renderResults();
+            });
+
+            [valueInput, fromSelect, toSelect].forEach((element) => {
+                element?.addEventListener('input', () => {
+                    renderResults();
+                });
+            });
+
+            swapButton?.addEventListener('click', () => {
+                if (!fromSelect || !toSelect) return;
+                const currentFrom = fromSelect.value;
+                fromSelect.value = toSelect.value;
+                toSelect.value = currentFrom;
+                renderResults();
+            });
+
+            resetButton?.addEventListener('click', () => {
+                categorySelect.selectedIndex = 0;
+                populateUnitOptions(getCurrentGroup());
+                valueInput.value = '1';
+                renderResults();
+            });
+
+            saveButton?.addEventListener('click', () => {
+                persistPreferences();
+            });
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    persistPreferences();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
