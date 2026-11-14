@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -238,7 +238,7 @@
             focus: cvs,
             hud: { score: '#score', best: '#highscore' },
             startKeys: ['ArrowUp'],
-            fit: { el: cvs, width: W, height: H, max: 1.25, sharp: true, extraWidth: 4, extraHeight: 4 },
+            fit: { el: cvs, width: W, height: H, max: 2, sharp: true, extraWidth: 4, extraHeight: 4 },
             onStart() { reset(); alive = true; },
             onMenu() { reset(); alive = false; }
         });

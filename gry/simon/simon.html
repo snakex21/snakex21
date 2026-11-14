@@ -87,7 +87,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -227,7 +227,7 @@
             hud: { best: '#best' },
             scoreLabel: 'Seria',
             pausable: false,
-            fit: { el: simon, zoom: true, max: 1.2, min: 0.5 },
+            fit: { el: simon, zoom: true, max: 2, min: 0.5 },
             onStart() { startGame(); },
             onMenu() { clearPlayback(); turn = 'idle'; setRound(0); msg.textContent = 'Kliknij „Graj”'; }
         });

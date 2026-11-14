@@ -53,7 +53,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -347,7 +347,7 @@
                 hud: { score: '#streak', best: '#best' },
                 scoreLabel: 'Seria',
                 bestLabel: 'Rekord serii',
-                fit: { el: appElement, zoom: true, max: 1, min: 0.4 },
+                fit: { el: appElement, zoom: true, max: 1.3, min: 0.4 },
                 onStart() { resetGame(); appElement.inert = false; },
                 onMenu() { streak = 0; resetGame(); appElement.inert = true; }
             });

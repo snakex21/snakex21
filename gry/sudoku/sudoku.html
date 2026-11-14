@@ -63,7 +63,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -255,7 +255,7 @@
                 { id: 'medium', label: 'Średni', desc: '37 cyfr na start' },
                 { id: 'hard', label: 'Trudny', desc: 'Około 29 cyfr na start' }
             ],
-            fit: { el: boardEl, zoom: true, max: 1, min: 0.3 },
+            fit: { el: boardEl, zoom: true, max: 1.8, min: 0.3 },
             onStart(level) { newGame(level); boardEl.inert = false; const first = boardEl.querySelector('.cell:not(.fixed)'); if (first && matchMedia('(hover: hover)').matches) first.focus({ preventScroll: true }); },
             onPause(paused) { boardEl.inert = paused; lastTick = performance.now(); },
             onMenu() { boardEl.inert = true; }

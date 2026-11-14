@@ -7,7 +7,7 @@
     <title>Z-Type - Hub</title>
     <style>
         body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; background: var(--shell-bg); color: var(--shell-text); }
-        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 16px; --game-width: 900px; }
+        .game-wrapper { flex: 1; display: flex; flex-direction: column; padding: 24px 16px 16px; --game-width: 1040px; }
         /* Słowa celowo w kroju monospace (gra w pisanie – litery równej szerokości), reszta UI czcionką strony. */
         #game-area {
             position: relative; overflow: hidden; box-sizing: border-box; width: 100%; height: 520px;
@@ -45,7 +45,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -106,7 +106,7 @@
             const top = area.getBoundingClientRect().top + scrollY - headerOff;
             const wrapPad = parseFloat(getComputedStyle(area.closest('.game-wrapper')).paddingBottom) || 0;
             const below = typeRow.offsetHeight + 12 + wrapPad + 10;
-            area.style.height = Math.round(Math.max(200, Math.min(560, innerHeight - top - below))) + 'px';
+            area.style.height = Math.round(Math.max(200, Math.min(720, innerHeight - top - below))) + 'px';
         }
         addEventListener('resize', sizeArea);
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeArea);

@@ -30,7 +30,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -556,7 +556,7 @@
             modes: order.map(id => ({ id, label: MODES[id].label, desc: MODES[id].desc })),
             bestPerMode: true,
             hud: { score: '#rally', best: '#best' },
-            fit: { el: canvas, width: W, height: H, max: 1.35, sharp: true },
+            fit: { el: canvas, width: W, height: H, sharp: true },
             onStart(m) {
                 mode = m; demo = false;
                 for (const k in keys) keys[k] = false;

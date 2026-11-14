@@ -159,7 +159,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -378,7 +378,7 @@
             pausable: false,
             hud: false,
             // Na telefonie (jedna kolumna) zwykłe przewijanie listy ulepszeń; na szerszych ekranach plansza mieści się w oknie.
-            fit: matchMedia('(min-width: 761px)').matches ? { el: '.container', zoom: true, min: 0.55 } : false
+            fit: matchMedia('(min-width: 761px)').matches ? { el: '.container', zoom: true, max: 1.25, min: 0.55 } : false
         });
     </script>
 </body>

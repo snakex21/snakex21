@@ -155,7 +155,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -1040,7 +1040,7 @@
                 { id: 'pvp', label: 'Dwóch graczy', desc: 'Na zmianę przy jednym ekranie' },
                 { id: 'auto', label: 'Komputer kontra komputer', desc: 'Pokaz – oglądasz partię' }
             ],
-            fit: { el: '#chess-board', zoom: true, max: 1, min: 0.3 },
+            fit: { el: '#chess-board', zoom: true, max: 1.8, min: 0.3 },
             onStart(mode) { setMode(mode); },
             onMenu() { stopGame(); gameOver = false; lastMove = null; selectedPiece = null; initBoard(); currentPlayer = 'white'; drawBoard(); updateTurnDisplay(); }
         });

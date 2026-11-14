@@ -371,7 +371,7 @@
             id: 'kolo', title: 'Koło fortuny', icon: '🎡',
             board: canvas, focus: canvas,
             startScreen: false, pausable: false, autoPause: false, hud: false,
-            fit: { el: canvas, width: SIZE, height: SIZE, max: 1.2, min: 0.4, sharp: true, onFit: syncSide }
+            fit: { el: canvas, width: SIZE, height: SIZE, max: 1.8, min: 0.4, sharp: true, onFit: syncSide }
         });
     }
     renderList();

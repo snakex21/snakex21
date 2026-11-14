@@ -22,7 +22,8 @@
  *   GryKit.fx.burst(x, y, { on: canvas, color: '#e8763d' }); GryKit.fx.float(x, y, '+10', { on: canvas });
  *   GryKit.fx.shake(); GryKit.fx.flash('#d05c5c'); GryKit.sfx.play('eat');
  *   GryKit.font(18, 700)  → '700 18px <czcionka strony>' dla ctx.font
- *   GryKit.fit(canvas, { pixel: true })  → plansza mieści się w oknie (bez przewijania)
+ *   GryKit.fit(canvas, { pixel: true })  → plansza wypełnia wolne miejsce w oknie (zmniejsza i powiększa,
+ *                                          domyślnie do 3×; { max } ogranicza), bez przewijania
  * Wszystko działa bez localStorage, bez WebAudio i z prefers-reduced-motion. */
 (function () {
   'use strict';
@@ -307,7 +308,7 @@
     if (!el || el.nodeType !== 1) return 0;
     var cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.position === 'absolute' || cs.position === 'fixed') return 0;
-    return el.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+    return (el.offsetHeight || 0) + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
   }
   function reserveBelow(el) {
     // Wysokość elementów pod planszą (pasek statusu, pad dotykowy) aż do końca głównego kontenera.
@@ -328,48 +329,75 @@
     var hd = doc.querySelector('.site-header');
     return hd ? hd.getBoundingClientRect().bottom + window.scrollY : 0;
   }
+  // Domyślny limit powiększenia: plansza rośnie do wolnego miejsca w oknie, ale nie bardziej niż 3×.
+  var FIT_MAX = 3;
+  function innerW(el) {
+    var cs = getComputedStyle(el);
+    return (el.clientWidth || 0) - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+  }
   function applyFit(item) {
     var el = item.el, o = item.opts;
     if (!el.isConnected) return;
+    // .game-stage ma max-width z --game-width (rozmiar naturalny planszy). Plansza o stałej szerokości może przy
+    // powiększaniu wyjść poza nią aż do szerokości kontenera strony; wtedy scena dostaje własny max-width.
+    var stage = o.free === false ? null : el.closest('.game-stage');
+    if (stage) stage.style.maxWidth = '';
     var host = o.within || el.parentElement;
-    var hcs = getComputedStyle(host);
-    var availW = host.clientWidth - (parseFloat(hcs.paddingLeft) || 0) - (parseFloat(hcs.paddingRight) || 0);
-    if (o.maxWidth) availW = Math.min(availW, o.maxWidth);
+    var availW = innerW(host);
     var extraW = o.extraWidth || 0, extraH = o.extraHeight || 0;
+    var gap = o.gap == null ? 12 : o.gap;
+    var cap = o.max || FIT_MAX;
+    var stageW = 0, wideW = availW;
+    if (stage && stage.parentElement && stage.contains(host)) {
+      stageW = stage.getBoundingClientRect().width || 0;
+      // Szerokość dostępna, gdyby scena zajęła cały kontener (minus to, co scena dokłada wokół hosta).
+      wideW = Math.max(availW, availW + innerW(stage.parentElement) - stageW);
+    }
+    var natW, natH, scale;
     if (o.zoom) {
       el.style.zoom = '';
-      var natW = el.offsetWidth, natH = el.offsetHeight;
-      var top = el.getBoundingClientRect().top + window.scrollY;
-      var reserve = o.reserve != null ? o.reserve : reserveBelow(el);
-      var availH = window.innerHeight - (top - headerOffset()) - reserve - (o.gap == null ? 12 : o.gap);
-      var z = Math.min(o.max || 1, (availW - extraW) / natW, (availH - extraH) / natH);
-      z = Math.max(o.min || 0.45, z);
-      if (z < 0.995 || z > 1.005) el.style.zoom = z.toFixed(3);
-      item.scale = z;
+      natW = el.offsetWidth; natH = el.offsetHeight;
     } else {
       if (!item.natW) { item.natW = o.width || el.width || el.offsetWidth; item.natH = o.height || el.height || el.offsetHeight; }
-      var w = item.natW, h = item.natH;
+      natW = item.natW; natH = item.natH;
       el.style.width = ''; el.style.height = '';
-      var topC = el.getBoundingClientRect().top + window.scrollY;
-      var res = o.reserve != null ? o.reserve : reserveBelow(el);
-      var availHC = window.innerHeight - (topC - headerOffset()) - res - (o.gap == null ? 12 : o.gap);
-      var s = Math.min(o.max || 1, (availW - extraW) / w, (availHC - extraH) / h);
-      s = Math.max(o.min || 0.35, s);
-      if (o.pixel && s >= 1) s = Math.floor(s);
+    }
+    // Plansza „płynna” (np. width: 100% sceny) nie może urosnąć wszerz – zostaje w scenie. Sprawdzenie: czy jej
+    // szerokość zmienia się, gdy scena nie ma limitu.
+    var fluid = false;
+    if (o.zoom && natW >= availW - 1) {
+      fluid = true;
+      if (stageW) { stage.style.maxWidth = 'none'; fluid = el.offsetWidth !== natW; stage.style.maxWidth = ''; }
+    }
+    var roomW = Math.min(fluid ? availW : wideW, o.maxWidth || Infinity);
+    var top = el.getBoundingClientRect().top + window.scrollY;
+    var reserve = o.reserve != null ? o.reserve : reserveBelow(el);
+    var availH = window.innerHeight - (top - headerOffset()) - reserve - gap;
+    scale = Math.min(cap, (roomW - extraW) / natW, (availH - extraH) / natH);
+    if (o.zoom) {
+      scale = Math.max(o.min || 0.45, scale);
+      if (scale < 0.995 || scale > 1.005) el.style.zoom = scale.toFixed(3);
+    } else {
+      scale = Math.max(o.min || 0.35, scale);
+      if (o.pixel && scale >= 1) scale = Math.floor(scale);
+      var cw = Math.floor(natW * scale), ch = Math.floor(natH * scale);
       el.style.maxWidth = 'none';
-      el.style.width = Math.floor(w * s) + 'px';
-      el.style.height = Math.floor(h * s) + 'px';
+      el.style.width = cw + 'px';
+      el.style.height = ch + 'px';
       if (o.pixel) el.classList.add('gk-pixel');
       if (o.sharp && el.tagName === 'CANVAS') {
-        // Bufor w rozdzielczości ekranu; gra rysuje w jednostkach logicznych (w × h) po ctx.setTransform(GryKit.ratio(canvas)…).
+        // Bufor w rozdzielczości ekranu; gra rysuje w jednostkach logicznych (natW × natH) po ctx.setTransform(GryKit.ratio(canvas)…).
         var dpr = Math.min(3, window.devicePixelRatio || 1);
-        var bw = Math.max(1, Math.round(Math.floor(w * s) * dpr)), bh = Math.max(1, Math.round(Math.floor(h * s) * dpr));
+        var bw = Math.max(1, Math.round(cw * dpr)), bh = Math.max(1, Math.round(ch * dpr));
         if (el.width !== bw) el.width = bw;
         if (el.height !== bh) el.height = bh;
-        el._gkLogical = { w: w, h: h };
+        el._gkLogical = { w: natW, h: natH };
       }
-      item.scale = s;
     }
+    // Szersza plansza niż scena: poszerz scenę (wyśrodkowana w kontenerze), reszta strony bez zmian.
+    var need = natW * scale + extraW;
+    if (stage && stageW && need > availW + 0.5) stage.style.maxWidth = Math.ceil(stageW + need - availW) + 'px';
+    item.scale = scale;
     if (o.onFit) o.onFit(item.scale);
     syncOverlay();
   }
@@ -515,7 +543,16 @@
     if (host === board) {
       overlay.style.left = '0px'; overlay.style.top = '0px';
       w = board.clientWidth; h = board.clientHeight;
-      overlay.style.width = '100%'; overlay.style.height = '100%';
+      // Plansza powiększona przez zoom (GryKit.fit): karta nakładki w zwykłym rozmiarze, nie powiększona razem z nią.
+      var bz = parseFloat(board.style.zoom) || 1;
+      if (bz > 1) {
+        w *= bz; h *= bz;
+        overlay.style.zoom = String(1 / bz);
+        overlay.style.width = w + 'px'; overlay.style.height = h + 'px';
+      } else {
+        overlay.style.zoom = '';
+        overlay.style.width = '100%'; overlay.style.height = '100%';
+      }
     } else {
       var hr = host.getBoundingClientRect(), br = board.getBoundingClientRect();
       var z = parseFloat(getComputedStyle(host).zoom) || 1;
@@ -729,6 +766,8 @@
     setBest: function (v) { best = v; write(bestKey(), v); showBest(); },
     fit: fit,
     refit: refit,
+    // Dopasowane plansze: [{ el, scale }] (diagnostyka i testy).
+    fitted: function () { return fitted.map(function (i) { return { el: i.el, scale: i.scale }; }); },
     // Skala bufora canvasu względem jednostek logicznych (po fit z { sharp: true }): ctx.setTransform(r, 0, 0, r, 0, 0).
     ratio: function (canvas) { return canvas && canvas._gkLogical ? canvas.width / canvas._gkLogical.w : 1; },
     // Punkt zdarzenia (mysz / dotyk) w jednostkach logicznych canvasu.

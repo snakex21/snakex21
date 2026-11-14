@@ -138,7 +138,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 <body class="site-shell game-shell">
 <a class="skip-link" href="#main-content">Przejdź do treści</a>
@@ -422,7 +422,7 @@
                 { id: 'medium', label: 'Średni', desc: '16 × 16 · 40 min' },
                 { id: 'hard', label: 'Trudny', desc: '30 × 16 · 99 min' }
             ],
-            fit: { el: grid, zoom: true, max: 1.45, min: 0.2, within: document.querySelector('.game-wrapper') },
+            fit: { el: grid, zoom: true, max: 2.2, min: 0.2, within: document.querySelector('.game-wrapper') },
             onStart(mode) { createBoard(mode); },
             onPause(paused) {
                 grid.classList.toggle('is-paused', paused);

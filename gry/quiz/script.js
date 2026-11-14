@@ -256,7 +256,7 @@
         board: card,
         hud: { score: '#quiz-score-stat', best: '#quiz-best' },
         bestPerMode: true, liveBest: false,
-        fit: { el: card, zoom: true, min: 0.6 },
+        fit: { el: card, zoom: true, max: 1.25, min: 0.6 },
         onStart: start,
         onMenu: renderIdle
     });

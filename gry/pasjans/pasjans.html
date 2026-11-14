@@ -57,7 +57,7 @@
 <link rel="stylesheet" href="../../assets/workshop/kit.css?v=20261010-kit">
 <script src="../../assets/workshop/shell.js?v=20261010-prefs" defer></script>
 <script src="../../assets/pulpit-theme/pulpit-theme.js?v=1"></script>
-<script src="../../assets/gry-kit/gry-kit.js?v=1"></script>
+<script src="../../assets/gry-kit/gry-kit.js?v=2"></script>
 </head>
 
 <body class="site-shell game-shell">
@@ -344,7 +344,7 @@
             scoreLabel: 'Czas',
             lowerIsBetter: true,
             format: (v) => fmtTime(v),
-            fit: { el: feltEl, zoom: true, max: 1, min: 0.3 },
+            fit: { el: feltEl, zoom: true, max: 1.8, min: 0.3 },
             onStart() { initGame(); feltEl.inert = false; },
             onPause(paused) { feltEl.inert = paused; lastTick = performance.now(); },
             onMenu() { initGame(); feltEl.inert = true; }

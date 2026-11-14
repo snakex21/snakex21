@@ -584,7 +584,7 @@ function init() {
     board: canvas,
     focus: canvas,
     hud: { score: '#score', best: '#high-score', lives: '#lives' },
-    fit: { el: canvas, width: CANVAS_WIDTH, height: CANVAS_HEIGHT, max: 1, min: 0.3, sharp: true },
+    fit: { el: canvas, width: CANVAS_WIDTH, height: CANVAS_HEIGHT, min: 0.3, sharp: true },
     onStart: startGame,
     onPause: clearKeys,
     onMenu: function(){ hasGameStarted=false; clearKeys(); initGame(); document.getElementById('game-status').textContent=''; }
