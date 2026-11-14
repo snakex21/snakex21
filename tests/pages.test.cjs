@@ -35,7 +35,9 @@ function loadPage(file, options = {}) {
   return { document, context, storage, Event, run: js => vm.runInContext(js, context, {timeout: 1000}) };
 }
 function seedGame(page, rows) {
-  page.run('buildGridOverlay(); gameActive = true; score(0)');
+  // Start a round through GryKit (resets score), then replace the random opening tiles with the seeded board.
+  page.run('GryKit.start(); buildGridOverlay()');
+  assert.equal(page.run('GryKit.state'), 'playing');
   rows.flat().forEach((value, index) => {
     if (!value) return;
     const id = `${Math.floor(index / 4) + 1}${index % 4 + 1}`;
@@ -62,18 +64,20 @@ test('2048: one 2+2 merge adds four points once', () => {
 });
 test('2048: a full board with a vertical merge is not game over', () => {
   const p = loadPage(gamePath); seedGame(p, [[2,4,8,16],[2,8,16,32],[4,16,32,64],[8,32,64,128]]);
-  p.run('loose()'); assert.equal(p.run('gameActive'),true);
+  p.run('loose()'); assert.equal(p.run('GryKit.state'),'playing');
 });
 test('2048: a full board without adjacent equal values ends the game', () => {
   const p = loadPage(gamePath); seedGame(p, [[2,4,8,16],[4,8,16,32],[8,16,32,64],[16,32,64,128]]);
-  p.run('loose()'); assert.equal(p.run('gameActive'),false);
+  p.run('loose()'); assert.equal(p.run('GryKit.state'),'over');
 });
 test('2048: a tile merges at most once per move', () => {
   const p = loadPage(gamePath); seedGame(p, [[2,2,4,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]);
   move(p,37); assert.deepEqual(board(p).slice(0,2),[4,4]);
 });
-test('2048: arrow input suppresses page scrolling', () => {
-  const p = loadPage(gamePath); assert.equal(move(p,37),true);
+test('2048: arrows do not play under the start screen; during a round they suppress page scrolling', () => {
+  const p = loadPage(gamePath); const initial = board(p);
+  assert.equal(p.run('GryKit.state'),'menu'); assert.equal(move(p,37),false); assert.deepEqual(board(p),initial);
+  p.run('GryKit.start()'); assert.equal(move(p,37),true);
 });
 test('tasks: malformed JSON does not prevent adding session-only tasks or overwrite stored bytes', () => {
   const p = loadPage(todoPath,{storage:{tasks:'{broken'}});
@@ -120,7 +124,7 @@ test('2048: swipes move once; tap, cancel and multi-touch do not move', () => {
   const moved = board(p); touch(p,'touchend',[],[{clientX:20,clientY:100}]); assert.deepEqual(board(p),moved);
 });
 test('2048: editing text, modifier shortcuts and unrelated keys do not play', () => {
-  const p=loadPage(gamePath); const initial=board(p);
+  const p=loadPage(gamePath); p.run('GryKit.start()'); assert.equal(p.run('GryKit.state'),'playing'); const initial=board(p);
   const input=p.document.createElement('input');
   for(const event of [{keyCode:37,target:input},{keyCode:37,ctrlKey:true},{keyCode:65}]) {
     p.context.directions({...event,preventDefault(){ assert.fail('must not intercept'); }});
@@ -128,8 +132,12 @@ test('2048: editing text, modifier shortcuts and unrelated keys do not play', ()
   }
 });
 test('2048: restart resets score and game-over state to two initial tiles', () => {
-  const p=loadPage(gamePath); p.run('gameActive=false; score(48)'); p.context.reset();
-  assert.equal(p.run('gameActive'),true); assert.equal(p.document.getElementById('value').textContent,'0');
+  const p=loadPage(gamePath); seedGame(p, [[2,4,8,16],[4,8,16,32],[8,16,32,64],[16,32,64,128]]);
+  p.run('score(48); loose()'); assert.equal(p.run('GryKit.state'),'over');
+  assert.equal(p.document.getElementById('best').textContent,'48');
+  p.document.getElementById('repeat').dispatchEvent(new p.Event('click'));
+  assert.equal(p.run('GryKit.state'),'playing'); assert.equal(p.document.getElementById('value').textContent,'0');
+  assert.equal(p.document.getElementById('best').textContent,'48');
   assert.equal(board(p).filter(Boolean).length,2);
 });
 test('2048: all directions match independent merge oracle on 160 seeded boards', () => {
@@ -176,7 +184,8 @@ test('tasks: empty/whitespace input is ignored, Enter works, composing Enter doe
   assert.equal(JSON.parse(p.storage.get('tasks')).length,1);
 });
 test('2048: restarting cancels a gesture already in progress', () => {
-  const p=loadPage(gamePath); touch(p,'touchstart',[{clientX:100,clientY:100}]);
-  p.context.reset(); const fresh=board(p);
+  const p=loadPage(gamePath); p.run('GryKit.start()'); touch(p,'touchstart',[{clientX:100,clientY:100}]);
+  p.document.getElementById('repeat').dispatchEvent(new p.Event('click')); const fresh=board(p);
+  assert.equal(p.run('GryKit.state'),'playing'); assert.equal(fresh.filter(Boolean).length,2);
   touch(p,'touchend',[],[{clientX:10,clientY:100}]); assert.deepEqual(board(p),fresh);
 });
