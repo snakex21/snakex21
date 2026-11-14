@@ -8,7 +8,9 @@
     <link rel="icon" type="image/x-icon" href="https://www.solojuve.com/spolecznosc/zdj%C4%99cia/306-bezimienny-jpg/pobierz" />
     <link rel="stylesheet" href="../../assets/css/site.css" />
     <link rel="stylesheet" href="../../assets/css/game-page.css" />
+    <link rel="stylesheet" href="pongcoop.css" />
     <script defer src="../../assets/js/site.js"></script>
+    <script defer src="pongcoop.js"></script>
 </head>
 <body class="game-page" data-root="../../">
     <header class="site-header">
@@ -41,66 +43,29 @@
         </nav>
     </header>
     <main>
-        <section class="game-layout" id="play" data-instructions-layout>
-            <h1 class="visually-hidden">Pong Coop</h1>
-            <div class="game-layout__main">
-                <div class="game-layout__controls">
-                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-pongcoop-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+        <section class="game-stage game-stage--pongcoop">
+            <header class="game-stage__header">
+                <div>
+                    <span class="game-eyebrow">Kooperacyjny klasyk</span>
+                    <h1>Pong Coop</h1>
+                    <p>Współpracujcie przy jednej klawiaturze – plansza gry wypełnia całe okno, więc liczy się refleks i komunikacja.</p>
                 </div>
-                <div class="game-frame">
-                    <iframe src="play.html" title="Pong Coop – zagraj" loading="lazy"></iframe>
-                </div>
-            </div>
-            <aside class="game-layout__aside" id="game-pongcoop-instructions" data-instructions-panel hidden tabindex="-1">
-                <div class="game-card">
-                    <h2>Opis gry</h2>
-                    <p>Współpracujcie, aby utrzymać piłkę w grze jak najdłużej. Jeden gracz steruje lewą paletką, drugi prawą – liczy się komunikacja i szybki refleks.</p>
-                    <dl class="game-details">
-                        <div class="game-details__item">
-                            <dt>Tryb</dt>
-                            <dd>Dwóch graczy przy jednej klawiaturze</dd>
+            </header>
+            <div class="game-stage__board">
+                <div class="game-board">
+                    <div class="game-board__inner pongcoop-game">
+                        <div class="pongcoop-stage" role="application" aria-label="Plansza gry Pong Coop">
+                            <canvas id="c" width="640" height="480"></canvas>
                         </div>
-                        <div class="game-details__item">
-                            <dt>Cel</dt>
-                            <dd>Nie dopuśćcie, by piłka minęła którąkolwiek paletkę</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Tempo</dt>
-                            <dd>Coraz szybsza piłka</dd>
-                        </div>
-                        <div class="game-details__item">
-                            <dt>Najlepiej działa</dt>
-                            <dd>Na pełnej klawiaturze</dd>
-                        </div>
-                    </dl>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                        <ul class="pongcoop-controls">
+                            <li>Gracz 1: Q (góra) · A (dół)</li>
+                            <li>Gracz 2: ↑ (góra) · ↓ (dół)</li>
+                            <li>Naciśnij ESC, aby zapauzować i wznowić.</li>
+                        </ul>
                     </div>
                 </div>
-                <div class="game-card">
-                    <h2>Sterowanie</h2>
-                    <ul class="game-list">
-                        <li>Gracz 1: klawisze <strong>Q</strong> (góra) i <strong>A</strong> (dół).</li>
-                        <li>Gracz 2: strzałka w górę i strzałka w dół.</li>
-                        <li>Piłka startuje automatycznie po wczytaniu gry.</li>
-                    </ul>
-                    <p>Najlepsze efekty daje wspólna strategia – spróbujcie ustawić się tak, aby piłka odbijała się naprzemiennie między graczami.</p>
-                </div>
-                <div class="game-card">
-                    <h2>Drużynowe wskazówki</h2>
-                    <ul class="game-list">
-                        <li>Ustalcie z góry, kto odpowiada za dolne i górne strefy.</li>
-                        <li>Rozmawiajcie podczas gry – łatwiej zaplanować odbicia.</li>
-                        <li>Wprowadźcie system punktów za liczbę odbić w jednej serii.</li>
-                    </ul>
-                    <p>Ustalcie limit błędów, po których zmieniacie się miejscami, albo modyfikujcie zasady, dodając np. obowiązkowe podwójne odbicia.</p>
-                </div>
-            </aside>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>© 2024 Max Playground · Działajcie razem i wygrajcie!</p>
-    </footer>
 </body>
 </html>
