@@ -13,7 +13,7 @@ const FILE = 'gry/pong/pong.html';
 const W = 900, H = 540, PAD_H = 104;
 const LEGACY = [
   { page: 'gry/pingpong/Ping-pong.html', mode: 'ai' },
-  { page: 'gry/pongcoop/pongcoop.html', mode: 'coop' }
+  { page: 'gry/pongcoop/pongcoop.html', mode: '2p' } // old Co-op page was a two-player match
 ];
 
 function redirect(page, search, hash = '') {

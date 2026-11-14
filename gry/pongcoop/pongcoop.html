@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ping-pong – przekierowanie</title>
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="0; url=../pong/pong.html?tryb=coop">
+<meta http-equiv="refresh" content="0; url=../pong/pong.html?tryb=2p">
 <link rel="canonical" href="../pong/pong.html">
 <script>
-  // Dawny Pong Co-op jest teraz trybem gry Ping-pong. Zachowaj parametry (np. theme/variant z pulpitu) i hash.
+  // Dawny Pong Co-op (mecz dwóch graczy: Q/A kontra strzałki) to teraz tryb „2 graczy” gry Ping-pong. Zachowaj parametry (np. theme/variant z pulpitu) i hash.
   (function () {
     var q = new URLSearchParams(location.search);
-    if (!q.has('tryb')) q.set('tryb', 'coop');
+    if (!q.has('tryb')) q.set('tryb', '2p');
     location.replace('../pong/pong.html?' + q.toString() + location.hash);
   })();
 </script>
 </head>
 <body>
-<p><a href="../pong/pong.html?tryb=coop">Przejdź do gry Ping-pong</a></p>
+<p><a href="../pong/pong.html?tryb=2p">Przejdź do gry Ping-pong</a></p>
 </body>
 </html>
