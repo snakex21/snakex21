@@ -37,7 +37,8 @@ function localFile(file, ref) {
 }
 
 test('Site shell: every HTML entry has the same six accessible, project-relative destinations', () => {
-  assert.ok(pages.length >= 77, 'Inventory includes nested tools, games and LinkHub pages');
+  // 79 before Pong/Ping-pong/Co-op and the two tic-tac-toe pages were merged and two landing pages became redirects.
+  assert.ok(pages.length >= 72, 'Inventory includes nested tools, games and LinkHub pages');
   for (const file of pages) {
     const { document } = parseHTML(read(file));
     assert.equal(document.querySelectorAll('[data-site-shell]').length, 1, file);
@@ -45,7 +46,7 @@ test('Site shell: every HTML entry has the same six accessible, project-relative
     assert.ok(nav, file);
     const links = [...nav.querySelectorAll('.site-links a')];
     assert.equal(links.length, destinations.length, file);
-    assert.deepEqual(links.map(a => path.relative(root, localFile(file, a.getAttribute('href')))), destinations, file);
+    assert.deepEqual(links.map(a => path.relative(root, localFile(file, a.getAttribute('href'))).split(path.sep).join('/')), destinations, file);
     links.forEach(a => {
       assert.ok(fs.existsSync(localFile(file, a.getAttribute('href'))), file);
       assert.ok(a.textContent.trim(), file);
@@ -72,7 +73,7 @@ test('Site shell: skip links reach focusable content and nested pages have catal
     if (/^(gry|Programy)\/[^/]+\//.test(file)) {
       const back = document.querySelector('.site-context a');
       assert.ok(back, file);
-      assert.equal(path.relative(root, localFile(file, back.getAttribute('href'))),
+      assert.equal(path.relative(root, localFile(file, back.getAttribute('href'))).split(path.sep).join('/'),
         file.startsWith('gry/') ? 'gry/gry.html' : 'Programy/programy.html', file);
     }
   }
@@ -105,7 +106,7 @@ test('Site shell: blocked storage, malformed preference, legacy preference and d
     assert.equal(page.document.documentElement.getAttribute('data-theme'), 'light');
     assert.equal(page.handlers.storage.length, 1);
   }
-  const legacy = mount('gry/kolkos/kolkos.html', { storage: { 'site-theme': 'dark' } });
+  const legacy = mount('gry/kolkokrzyrzykc/kolkokrzyzykc.html', { storage: { 'site-theme': 'dark' } });
   assert.equal(legacy.document.body.classList.contains('theme-dark'), true);
   legacy.click();
   assert.equal(legacy.values.get('theme'), 'light');
