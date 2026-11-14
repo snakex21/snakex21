@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const { parseHTML } = require('linkedom');
+const { loadGame } = require('./helpers/arcade-harness.cjs');
 const root = path.join(__dirname, '..');
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 function load(file, external, options = {}) {
@@ -52,15 +53,6 @@ test('Wojna Er: a projectile collides with a moving unit before its old target p
   const p=war();prepareWar(p);
   p.run("state.units=[new Unit(ERAS[0].units[0],'enemy')];state.units[0].x=150;state.projectiles=[new Projectile(140,420,200,420,10,'player')];state.projectiles[0].update()");
   assert.equal(p.run('state.units[0].hp'),40);
-});
-test('Tower: start and rapid restart keep exactly one animation loop',()=>{
-  const p=load('gry/tower/tower.html');assert.equal(p.frames.size,1);p.run('place()');assert.equal(p.frames.size,1);p.run('gameOver=true;place()');assert.equal(p.frames.size,1);
-});
-test('Flappy: repeated start never duplicates simulation or pipe spawn timers',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('startGame();startGame()');assert.equal(p.timers.size,2);
-});
-test('Flappy: game over clears every pipe timer before a fast restart',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('startGame();createPipe();gameOver()');assert.equal(p.timers.size,0);p.run('resetGame()');assert.equal(p.timers.size,2);
 });
 test('Wojna Er: waits for Start, and pause freezes combat, income and recruitment',()=>{
   const p=war();for(let i=0;i<180;i++)p.frame(i*1000/60);
@@ -116,51 +108,10 @@ test('Wojna Er: keyboard shortcuts are repeat-safe and ignore editing fields',()
   const input=p.document.createElement('input');p.document.body.append(input);key('1',input);key('1',p.document.body,true);assert.equal(p.run('state.units.length'),0);
   key('1',p.document.body);assert.equal(p.run('state.units.length'),1);key('p',p.document.body);assert.equal(p.run('state.paused'),true);
 });
-test('Tower: one second of block movement is refresh-rate independent',()=>{
-  const xs=[];
-  for(const hz of [30,60,120]){const p=load('gry/tower/tower.html');p.run('place()');for(let i=0;i<=hz;i++)p.frame(i*1000/hz);xs.push(p.run('currentBlock.x'));}
-  assert.ok(Math.max(...xs)-Math.min(...xs)<0.001,JSON.stringify(xs));
-});
-test('Tower: blocked and corrupt storage cannot prevent a round or game-over message',()=>{
-  for(const options of [{blockStorage:true},{storage:{towerHighScore:'corrupt'}}]) {
-    const p=load('gry/tower/tower.html',null,options);p.run('place();score=2;currentBlock.x=400;place()');assert.equal(p.run('gameOver'),true);assert.match(p.document.getElementById('msg').textContent,/Game Over/);assert.equal(p.run('highScore'),2);
-  }
-});
-test('Tower: repeated/modified Space and focused navigation controls never place blocks',()=>{
-  const p=load('gry/tower/tower.html');const before=p.run('gameOver');
-  for(const props of [{repeat:true},{ctrlKey:true},{target:p.document.querySelector('a')}]){const e=new p.Event('keydown',{bubbles:true});Object.defineProperty(e,'code',{value:'Space'});for(const[k,v]of Object.entries(props))if(k!=='target')Object.defineProperty(e,k,{value:v});(props.target||p.document.body).dispatchEvent(e);}
-  assert.equal(p.run('gameOver'),before);
-});
-test('Flappy: stale pipe callbacks cannot score or kill a new round',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('startGame();createPipe()');const old=[...p.timers.values()].at(-1).cb;p.run('gameOver();resetGame()');for(let i=0;i<200;i++)old();assert.equal(p.run('score'),0);assert.equal(p.run('isGameRunning'),true);
-});
-test('Flappy: cleared physics callback does nothing after game over',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('startGame();gameOver()');const y=p.run('birdY');p.run('update()');assert.equal(p.run('birdY'),y);
-});
-test('Flappy: button pointerdown is not also a game action',()=>{
-  const p=load('gry/flappy/flappy.html');const game=p.document.getElementById('game');const e=new p.Event('pointerdown',{bubbles:true});Object.defineProperties(e,{isPrimary:{value:true},button:{value:0}});p.document.querySelector('#start-screen button').dispatchEvent(e);assert.equal(p.run('isGameRunning'),false);
-});
-test('Flappy: touch-style primary pointer starts and jumps using one game handler',()=>{
-  const p=load('gry/flappy/flappy.html');const game=p.document.getElementById('game');function pointer(){const e=new p.Event('pointerdown');Object.defineProperties(e,{isPrimary:{value:true},button:{value:0},target:{value:game}});game.dispatchEvent(e);}
-  pointer();assert.equal(p.timers.size,2);pointer();assert.equal(p.run('velocity'),-7);assert.equal(p.timers.size,2);
-});
-test('Flappy: blocked storage still allows a complete start/end/restart lifecycle',()=>{
-  const p=load('gry/flappy/flappy.html',null,{blockStorage:true});p.run('startGame();gameOver();resetGame()');assert.equal(p.run('isGameRunning'),true);assert.equal(p.timers.size,2);
-});
 test('Games: all changed local navigation and asset links resolve',()=>{
   for(const file of ['gry/wojna_er/index.html','gry/tower/tower.html','gry/flappy/flappy.html']){
     const {document}=parseHTML(read(file));for(const node of document.querySelectorAll('a[href],link[href],script[src]')){const v=node.getAttribute('href')||node.getAttribute('src');if(/^(?:[a-z]+:|#|\/\/)/i.test(v))continue;assert.ok(fs.existsSync(path.resolve(root,path.dirname(file),decodeURIComponent(v.split(/[?#]/)[0]))),v);}
   }
-});
-test('Flappy: queued old physics and spawn callbacks cannot change a restarted round',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('startGame()');const old=[...p.timers.values()].map(t=>t.cb);p.run('gameOver();resetGame()');old.forEach(cb=>cb());assert.equal(p.run('birdY'),280);assert.equal(p.document.querySelectorAll('.pipe').length,0);
-});
-test('Flappy: pipe gaps fit within the ground and points require fully passing a pipe',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('Math.random=()=>1;startGame();createPipe()');const pipes=p.document.querySelectorAll('.pipe');assert.equal(pipes[0].style.height,'360px');assert.equal(pipes[1].style.height,'50px');
-  p.run('birdY=430');const tick=[...p.timers.values()].at(-1).cb;for(let i=0;i<135;i++)tick();assert.equal(p.run('score'),0);for(let i=0;i<23;i++)tick();assert.equal(p.run('score'),1);
-});
-test('Flappy: the bird cannot remain alive after crossing the ground hitbox',()=>{
-  const p=load('gry/flappy/flappy.html');p.run('startGame();birdY=551;velocity=0;update()');assert.equal(p.run('isGameRunning'),false);
 });
 test('Flappy and Tower: narrow layouts retain the visible games catalogue backlink',()=>{
   for(const file of ['gry/flappy/flappy.html','gry/tower/tower.html']) {
@@ -170,4 +121,169 @@ test('Flappy and Tower: narrow layouts retain the visible games catalogue backli
     assert.ok(document.querySelector('link[href="../../assets/workshop/shell.css?v=20261010-prefs"]'));
     assert.doesNotMatch(read('assets/workshop/shell.css'),/\.site-(?:links|context)\s*\{[^}]*display:\s*none/);
   }
+});
+// Tower Stack and Flappy run on GryKit inside an IIFE: tests drive them through the real page (GryKit API,
+// overlay buttons, key/pointer events) and observe only what the player sees (canvas draws, DOM, HUD tiles).
+function arcade(file, options) {
+  const p = loadGame(file, options);
+  let time = 0;
+  Object.assign(p, {
+    state: () => p.run('GryKit.state'),
+    key(props, target = p.document.body) { return p.fire('keydown', props, target); },
+    clickPrimary() { p.document.querySelector('.gk-overlay .kit-btn.primary').dispatchEvent(new p.Event('click', { bubbles: true })); },
+    overlayVisible() { const o = p.document.querySelector('.gk-overlay'); return !!o && !o.hidden; },
+    step(ms) { time += ms; p.frame(time); },
+    steps(n, ms, each) { for (let i = 0; i < n; i++) { p.step(ms); if (each && each(i) === false) break; } }
+  });
+  p.step(16);   // first frame: GryKit.fit's one-off measuring callback runs, only the game loop stays queued
+  return p;
+}
+const tower = options => arcade('gry/tower/tower.html', options);
+// The moving block is drawn last; its outline (strokeRect x, y, w, h) gives its position.
+function towerBlock(p) { const s = p.draws.filter(d => d[0] === 'strokeRect').at(-1); return { x: s[1], w: s[3] }; }
+function towerFrame(p, ms) { p.draws.length = 0; p.step(ms); return towerBlock(p); }
+const towerScore = p => p.document.getElementById('score').textContent;
+const space = { code: 'Space', key: ' ' };
+const newRound = p => p.document.getElementById('new-game').dispatchEvent(new p.Event('click'));
+test('Tower: start and rapid restart keep exactly one animation loop', () => {
+  const p = tower(); assert.equal(p.frames.size, 1);
+  p.run('GryKit.start(); GryKit.start()'); assert.equal(p.frames.size, 1);
+  p.key(space); assert.equal(towerScore(p), '1'); assert.equal(p.frames.size, 1);
+  newRound(p); assert.equal(towerScore(p), '0'); assert.equal(p.frames.size, 1);
+  // One loop: one second at 60 Hz moves the fresh block 2 px per frame, not double.
+  let block; for (let i = 0; i <= 60; i++) block = towerFrame(p, 1000 / 60);
+  assert.ok(Math.abs(block.x - 120) < 0.001, String(block.x));
+});
+test('Tower: one second of block movement is refresh-rate independent', () => {
+  const xs = [];
+  for (const hz of [30, 60, 120]) { const p = tower(); p.run('GryKit.start()'); let b; for (let i = 0; i <= hz; i++) b = towerFrame(p, 1000 / hz); xs.push(b.x); }
+  assert.ok(Math.max(...xs) - Math.min(...xs) < 0.001, JSON.stringify(xs));
+  assert.ok(Math.abs(xs[0] - 120) < 0.001, JSON.stringify(xs));
+});
+test('Tower: blocked and corrupt storage cannot prevent a round, game-over screen or record', () => {
+  for (const options of [{ blockStorage: true }, { storage: { towerHighScore: 'corrupt' } }]) {
+    const p = tower(options); p.run('GryKit.start()'); p.step(16);
+    p.key(space);                                                       // far off: the block is trimmed to 10 px
+    assert.equal(towerScore(p), '1'); assert.equal(towerFrame(p, 1000 / 60).w, 10);
+    p.steps(200, 1000 / 60, () => { const b = towerBlock(p); p.draws.length = 0; if (Math.abs(b.x - 130) < 4) { p.key(space); return false; } });
+    assert.equal(towerScore(p), '2');
+    p.key(space);                                                       // new 10 px block at x=0 misses the tower
+    assert.equal(p.state(), 'over'); assert.equal(towerScore(p), '2');
+    assert.equal(p.document.getElementById('highscore').textContent, '2'); assert.equal(p.run('GryKit.best'), 2);
+    if (!options.blockStorage) assert.equal(p.storage.get('gry:tower-stack:best'), '2');
+    p.tick(450); assert.ok(p.overlayVisible());
+    assert.match(p.document.querySelector('.gk-overlay h2').textContent, /Wieża skończona/);
+    p.clickPrimary(); assert.equal(p.state(), 'playing'); assert.equal(towerScore(p), '0'); assert.equal(p.frames.size, 1);
+  }
+});
+test('Tower: repeated/modified Space and focused navigation controls never place blocks; Space never pauses', () => {
+  const p = tower(); p.run('GryKit.start()'); p.step(16);
+  for (const props of [{ repeat: true }, { ctrlKey: true }, { altKey: true }]) p.key({ ...space, ...props });
+  p.key(space, p.document.querySelector('.site-header a'));
+  p.key(space, p.document.getElementById('new-game'));
+  p.key({ code: 'Enter', key: 'Enter' });                               // Enter places only from the focused board
+  assert.equal(towerScore(p), '0'); assert.equal(p.state(), 'playing');
+  p.key(space); assert.equal(towerScore(p), '1'); assert.equal(p.state(), 'playing');
+  newRound(p); p.key({ code: 'Enter', key: 'Enter' }, p.document.getElementById('game')); assert.equal(towerScore(p), '1');
+});
+test('Tower: the start screen and pause freeze the block and reject placing; resume continues', () => {
+  const p = tower(); const board = p.document.getElementById('game'); const menuX = towerFrame(p, 16).x;
+  p.steps(30, 1000 / 60); assert.equal(towerFrame(p, 16).x, menuX);
+  p.fire('pointerdown', { isPrimary: true, button: 0 }, board); assert.equal(towerScore(p), '0'); assert.equal(p.state(), 'menu');
+  p.run('GryKit.start()'); p.steps(10, 1000 / 60); const before = towerFrame(p, 1000 / 60).x; assert.ok(before > 0);
+  p.key({ key: 'Escape', code: 'Escape' }); assert.equal(p.state(), 'paused');
+  p.steps(60, 1000 / 60); assert.equal(towerFrame(p, 1000 / 60).x, before);
+  p.fire('pointerdown', { isPrimary: true, button: 0 }, board); assert.equal(towerScore(p), '0');
+  p.key({ key: 'p', code: 'KeyP' }); assert.equal(p.state(), 'playing');
+  towerFrame(p, 1000 / 60); assert.ok(towerFrame(p, 1000 / 60).x > before);
+  p.fire('pointerdown', { isPrimary: true, button: 0 }, board); assert.equal(towerScore(p), '1');
+});
+
+const flappy = options => arcade('gry/flappy/flappy.html', options);
+const birdY = p => parseFloat(p.document.getElementById('bird').style.top);
+const pipes = p => [...p.document.querySelectorAll('#game .pipe')];
+const flappyScore = p => p.document.getElementById('board-score').textContent;
+const hudTiles = p => [...p.document.querySelectorAll('.game-stats .game-stat b')].map(b => b.textContent);
+const flap = p => p.key(space);
+const newGame = newRound;
+// Physics runs in fixed 20 ms steps; with 20 ms frames every frame is exactly one step.
+const STEP = 20;
+test('Flappy: repeated start never duplicates the simulation loop', () => {
+  const p = flappy(); p.run('GryKit.start(); GryKit.start()'); newGame(p);
+  assert.equal(p.frames.size, 1); p.steps(11, STEP);
+  assert.equal(p.frames.size, 1); assert.equal(birdY(p), 280 + 0.5 * 55);   // exactly 10 physics steps, not 20
+});
+test('Flappy: game over stops physics and a fast restart starts from a clean board', () => {
+  const p = flappy(); p.clickPrimary(); assert.equal(p.state(), 'playing');
+  p.steps(60, STEP, () => p.state() === 'playing');                       // no flaps: the bird falls
+  assert.equal(p.state(), 'over'); const y = birdY(p);
+  p.steps(200, STEP); assert.equal(birdY(p), y); assert.equal(pipes(p).length, 0);
+  newGame(p);
+  assert.equal(p.state(), 'playing'); assert.equal(birdY(p), 280); assert.equal(flappyScore(p), '0'); assert.equal(pipes(p).length, 0); assert.equal(p.frames.size, 1);
+});
+test('Flappy: a stale game-over screen from the previous round cannot end a restarted round', () => {
+  const p = flappy(); p.clickPrimary(); p.steps(60, STEP, () => p.state() === 'playing'); assert.equal(p.state(), 'over');
+  newGame(p);                                                             // restart before the delayed screen appears
+  p.tick(550); assert.equal(p.state(), 'playing'); assert.equal(p.overlayVisible(), false); assert.equal(flappyScore(p), '0');
+  p.steps(5, STEP); assert.ok(birdY(p) > 280);
+});
+test('Flappy: overlay buttons and pointers under the start screen are not game actions', () => {
+  const p = flappy();
+  p.fire('pointerdown', { isPrimary: true, button: 0 }, p.document.querySelector('.gk-overlay .kit-btn.primary'));
+  p.fire('pointerdown', { isPrimary: true, button: 0 }, p.document.getElementById('game'));
+  p.key(space, p.document.querySelector('.site-header a'));            // Space on a focused header link is not a start
+  assert.equal(p.state(), 'menu'); p.steps(20, STEP); assert.equal(birdY(p), 280);
+});
+test('Flappy: primary pointer jumps through one handler; secondary pointers and header keys do nothing', () => {
+  const p = flappy(); const game = p.document.getElementById('game'); p.clickPrimary(); p.step(STEP);
+  p.fire('pointerdown', { isPrimary: false, button: 0 }, game); p.fire('pointerdown', { isPrimary: true, button: 2 }, game);
+  p.key(space, p.document.querySelector('.site-header a'));
+  p.step(STEP); assert.equal(birdY(p), 280.5);
+  p.fire('pointerdown', { isPrimary: true, button: 0 }, game); p.step(STEP); assert.equal(birdY(p), 280.5 - 6.5);
+  assert.equal(p.frames.size, 1);
+});
+test('Flappy: pause (Esc, P, hidden tab) freezes bird and pipes; Space jumps but never pauses', () => {
+  const p = flappy(); p.clickPrimary();
+  p.steps(100, STEP, () => { if (birdY(p) > 320) flap(p); });
+  assert.equal(p.state(), 'playing'); assert.equal(pipes(p).length, 2);
+  const view = () => JSON.stringify([birdY(p), pipes(p).map(e => e.style.left)]);
+  const hideTab = () => { p.document.hidden = true; p.document.dispatchEvent(new p.Event('visibilitychange')); p.document.hidden = false; };
+  for (const pause of [() => p.key({ key: 'Escape', code: 'Escape' }), () => p.key({ key: 'p', code: 'KeyP' }), hideTab]) {
+    pause(); assert.equal(p.state(), 'paused');
+    const snapshot = view();
+    p.steps(150, STEP); p.fire('pointerdown', { isPrimary: true, button: 0 }, p.document.getElementById('game'));
+    assert.equal(view(), snapshot);
+    p.run('GryKit.resume()'); p.step(STEP); assert.notEqual(view(), snapshot);
+  }
+  flap(p); assert.equal(p.state(), 'playing');
+});
+test('Flappy: blocked storage still allows a complete start/score/end/restart lifecycle with a record', () => {
+  const p = flappy({ blockStorage: true }); p.clickPrimary();
+  p.steps(400, STEP, () => { if (birdY(p) > 320) flap(p); return flappyScore(p) !== '1'; });
+  assert.equal(flappyScore(p), '1'); assert.deepEqual(hudTiles(p), ['1', '1']);
+  p.steps(200, STEP, () => p.state() === 'playing'); assert.equal(p.state(), 'over');
+  assert.equal(p.run('GryKit.best'), 1);
+  p.tick(550); assert.ok(p.overlayVisible()); assert.match(p.document.querySelector('.gk-overlay').textContent, /Koniec gry/);
+  p.clickPrimary(); assert.equal(p.state(), 'playing'); assert.equal(p.frames.size, 1);
+  assert.deepEqual(hudTiles(p), ['0', '1']); assert.equal(pipes(p).length, 0);
+});
+test('Flappy: pipe gaps fit within the ground and points require fully passing a pipe', () => {
+  const p = flappy({ random: () => 1 }); p.clickPrimary();
+  let checked = 0;
+  p.steps(400, STEP, () => {
+    if (birdY(p) > 470) flap(p);
+    assert.equal(p.state(), 'playing');
+    const first = pipes(p)[0]; if (!first) return;
+    if (checked === 0) { assert.equal(first.style.height, '360px'); assert.equal(pipes(p)[1].style.height, '50px'); }
+    const passed = parseFloat(first.style.left) + 70 <= 80;
+    assert.equal(flappyScore(p), passed ? '1' : '0', 'pipe at ' + first.style.left);
+    checked++;
+    return parseFloat(first.style.left) > 0;
+  });
+  assert.equal(flappyScore(p), '1'); assert.ok(checked > 150, String(checked));
+});
+test('Flappy: the bird cannot remain alive after crossing the ground hitbox', () => {
+  const p = flappy(); p.clickPrimary();
+  p.steps(100, STEP, () => { if (p.state() === 'playing') assert.ok(birdY(p) + 40 < 590, String(birdY(p))); });
+  assert.equal(p.state(), 'over'); assert.ok(birdY(p) + 40 >= 590);
 });
