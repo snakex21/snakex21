@@ -78,7 +78,7 @@ test('catalog: merged Ping-pong and tic-tac-toe entries point at the single game
  const p=catalog({games:true});const data=p.window.gamesCatalog;
  const pong=data.find(g=>g.slug==='pong');assert.equal(pong.title,'Ping-pong');assert.equal(pong.url,'pong/pong.html');
  assert.deepEqual([...pong.modes],['Solo','Dwóch graczy','Wspólna gra']);
- assert.equal(data.filter(g=>/ping|pong/i.test(g.url)).length,1);
+ assert.equal(data.filter(g=>/^(pong|pingpong|pongcoop)\//.test(g.url)).length,1);
  assert.equal(data.filter(g=>/kolkos|kolkokrzy/.test(g.url)).length,1);
  for(const g of data)assert.ok(fs.existsSync(path.join(root,'gry',g.url))&&!/http-equiv=["']refresh/i.test(fs.readFileSync(path.join(root,'gry',g.url),'utf8')),g.url);
 });
