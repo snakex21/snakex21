@@ -6,8 +6,11 @@ const vm = require('node:vm');
 const { parseHTML } = require('linkedom');
 const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+// Forward slashes on every OS; redirect stubs left at old game addresses (meta refresh) are not site pages.
+const isRedirect = file => /<meta\s+http-equiv=["']refresh["']/i.test(read(file));
 const pages = fs.readdirSync(root, { recursive: true })
-  .filter(file => file.endsWith('.html') && !file.startsWith('node_modules/'));
+  .map(file => file.split(path.sep).join('/'))
+  .filter(file => file.endsWith('.html') && !file.startsWith('node_modules/') && !file.startsWith('.git/') && !isRedirect(file));
 const destinations = ['index.html', 'Programy/programy.html', 'gry/gry.html',
   'LinkHub/index.html', 'muzyka/muzyka.html', 'filmy/filmy glowna.html'];
 const shellSource = read('assets/workshop/shell.js');

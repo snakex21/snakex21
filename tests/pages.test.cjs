@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const { parseHTML } = require('linkedom');
+const { installGryKit } = require('./helpers/gry-kit-env.cjs');
 const gamePath = 'gry/2048/2048.html';
 const todoPath = 'Programy/lista zadan/lista zadan.html';
 function loadPage(file, options = {}) {
@@ -26,6 +27,7 @@ function loadPage(file, options = {}) {
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
     setTimeout: () => 1,
   });
+  if (source.includes('gry-kit/gry-kit.js')) installGryKit(context);
   for (const match of source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
     vm.runInContext(match[1], context, { timeout: 1000 });
   }

@@ -750,7 +750,8 @@
   function typingTarget(t) {
     return t && t.closest && t.closest('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]), textarea, select, [contenteditable="true"]');
   }
-  window.addEventListener('keydown', function (e) {
+  // Na document (faza przechwytywania): działa przed obsługą klawiszy gier, także tych podpiętych pod document.
+  doc.addEventListener('keydown', function (e) {
     if (!cfg || e.altKey || e.ctrlKey || e.metaKey) return;
     var key = e.key;
     var isPause = key === 'Escape' || ((e.code === 'KeyP' || key === 'p' || key === 'P') && cfg.pauseKeyP !== false);

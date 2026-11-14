@@ -28,8 +28,11 @@ function loadGame(file, options = {}) {
   document.createElement = (...args) => prepare(create(...args));
   const requestAnimationFrame = cb => {const id=next++;frames.set(id,cb);return id;};
   const timer = repeat => (cb,delay=0) => { const id=next++;timers.set(id,{cb,delay,repeat});return id; };
-  const window = {innerWidth:options.width || 800,innerHeight:options.height || 800,document,performance:{now:()=>now},requestAnimationFrame,addEventListener(type,cb){(events[type] ||= []).push(cb);},getComputedStyle:()=>({})};
-  const context = vm.createContext({document,window,console,Event,HTMLElement,Image:class{},navigator:{userAgent:'Test',vendor:''},performance:window.performance,
+  const computed = () => ({position:'static',display:'block',zoom:'1',paddingLeft:'0',paddingRight:'0',paddingBottom:'0',marginTop:'0',marginBottom:'0',fontFamily:'Inter, sans-serif',getPropertyValue:()=>''});
+  const window = {innerWidth:options.width || 800,innerHeight:options.height || 800,scrollY:0,document,performance:{now:()=>now},requestAnimationFrame,addEventListener(type,cb){(events[type] ||= []).push(cb);},getComputedStyle:computed};
+  const matchMedia = () => ({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
+  Object.assign(window,{parent:window,matchMedia,removeEventListener(){},scrollTo(){},devicePixelRatio:1});
+  const context = vm.createContext({document,window,console,Event,HTMLElement,Image:class{},getComputedStyle:computed,matchMedia,addEventListener:window.addEventListener,removeEventListener(){},devicePixelRatio:1,navigator:{userAgent:'Test',vendor:''},performance:window.performance,
     location:{search:'',href:'https://example.test/'+file},URLSearchParams,
     alert(){},confirm:()=>true,
     Math:Object.assign(Object.create(Math),{random:options.random || (()=>0.5)}),
@@ -40,7 +43,12 @@ function loadGame(file, options = {}) {
   const run = js => vm.runInContext(js,context,{timeout:2000});
   for(const node of document.querySelectorAll('script')) {
     const src=node.getAttribute('src');
-    if(src) { if(!src.startsWith('../../') && !/^https?:/.test(src))run(fs.readFileSync(path.resolve(root,path.dirname(file),src.split(/[?#]/)[0]),'utf8')); }
+    if(src) {
+      const clean=src.split(/[?#]/)[0];
+      // The shared game layer (assets/gry-kit) runs like page code; other shared assets stay out of game tests.
+      if(/assets\/gry-kit\/gry-kit\.js$/.test(clean)) { run(fs.readFileSync(path.resolve(root,path.dirname(file),clean),'utf8')); context.GryKit=window.GryKit; }
+      else if(!src.startsWith('../../') && !/^https?:/.test(src))run(fs.readFileSync(path.resolve(root,path.dirname(file),clean),'utf8'));
+    }
     else if(node.textContent.trim())run(node.textContent);
   }
   if (options.onload && window.onload) window.onload();
