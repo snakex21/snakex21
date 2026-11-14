@@ -168,8 +168,10 @@
         }
         function aim(e, side) {
             if (!GryKit.playing) return;
+            const y = GryKit.pointer(canvas, e).y;
+            if (!isFinite(y)) return; // ukryty / zwinięty canvas (0 px) – bez tego paletka dostałaby NaN i znikła
             const p = side === 'left' ? left : right;
-            p.target = GryKit.pointer(canvas, e).y - PAD_H / 2;
+            p.target = y - PAD_H / 2;
         }
         canvas.addEventListener('pointerdown', e => {
             if (!GryKit.playing) return;
