@@ -576,6 +576,7 @@ function init() {
   keyStates = [];
   prevKeyStates = [];
   GryKit.init({
+    layout: 'auto', // w szerokim oknie pasek gry obok planszy (więcej wysokości dla planszy)
     id: 'spaceinvaders',
     title: 'Space Invaders',
     icon: '👾',

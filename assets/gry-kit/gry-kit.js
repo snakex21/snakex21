@@ -24,6 +24,9 @@
  *   GryKit.font(18, 700)  → '700 18px <czcionka strony>' dla ctx.font
  *   GryKit.fit(canvas, { pixel: true })  → plansza wypełnia wolne miejsce w oknie (zmniejsza i powiększa,
  *                                          domyślnie do 3×; { max } ogranicza), bez przewijania
+ *   GryKit.init({ …, layout: 'auto' })   → w szerokim oknie pionowa/kwadratowa plansza dostaje całą wysokość:
+ *                                          tytuł, kafelki i przyciski przechodzą do kolumny obok (klasa .gk-side
+ *                                          na wspólnym rodzicu .game-bar i .game-stage); w wąskim oknie zostają nad nią
  * Wszystko działa bez localStorage, bez WebAudio i z prefers-reduced-motion. */
 (function () {
   'use strict';
@@ -335,12 +338,33 @@
     var cs = getComputedStyle(el);
     return (el.clientWidth || 0) - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
   }
-  function applyFit(item) {
+  // Skala planszy natW × natH w miejscu roomW × availH (extraW/extraH: ramka wokół planszy), najwyżej cap.
+  function fitScale(roomW, availH, natW, natH, extraW, extraH, cap) {
+    return Math.min(cap, (roomW - extraW) / natW, (availH - extraH) / natH);
+  }
+  // Układ „auto”: pasek gry (tytuł, kafelki, przyciski) obok planszy, gdy tak plansza wychodzi wyraźnie większa.
+  // Próg wejścia (+4%) jest wyższy od progu wyjścia (+1%), żeby przy przeciąganiu okna układ nie migał.
+  var SIDE_MIN_VW = 700, SIDE_MAX_ASPECT = 1.1, SIDE_ENTER = 1.04, SIDE_STAY = 1.01;
+  function pickLayout(stackScale, sideScale, wasSide) {
+    if (!(sideScale > 0)) return 'stack';
+    return sideScale > stackScale * (wasSide ? SIDE_STAY : SIDE_ENTER) ? 'side' : 'stack';
+  }
+  // Wspólny kontener paska gry i sceny planszy (wrapper strony) – tylko w nim da się przełożyć pasek na bok.
+  function sideParts(el) {
+    var stage = el.closest('.game-stage');
+    var bar = doc.querySelector('.game-bar');
+    if (!stage || !bar || !stage.parentElement || bar.parentElement !== stage.parentElement) return null;
+    return { wrap: stage.parentElement, bar: bar, stage: stage };
+  }
+  function setSide(parts, on) {
+    parts.wrap.classList.toggle('gk-side', on);
+    parts.wrap.setAttribute('data-gk-layout', on ? 'side' : 'stack');
+  }
+  // Pomiar: plansza w rozmiarze naturalnym, skala dla bieżącego układu (side: pasek obok planszy). Sam niczego
+  // nie ustala na stałe – applyFit wybiera układ i zapisuje rozmiar.
+  function measureFit(item, side) {
     var el = item.el, o = item.opts;
-    if (!el.isConnected) return;
-    // .game-stage ma max-width z --game-width (rozmiar naturalny planszy). Plansza o stałej szerokości może przy
-    // powiększaniu wyjść poza nią aż do szerokości kontenera strony; wtedy scena dostaje własny max-width.
-    var stage = o.free === false ? null : el.closest('.game-stage');
+    var stage = side || o.free === false ? null : el.closest('.game-stage');
     if (stage) stage.style.maxWidth = '';
     var host = o.within || el.parentElement;
     var availW = innerW(host);
@@ -353,7 +377,7 @@
       // Szerokość dostępna, gdyby scena zajęła cały kontener (minus to, co scena dokłada wokół hosta).
       wideW = Math.max(availW, availW + innerW(stage.parentElement) - stageW);
     }
-    var natW, natH, scale;
+    var natW, natH;
     if (o.zoom) {
       el.style.zoom = '';
       natW = el.offsetWidth; natH = el.offsetHeight;
@@ -362,21 +386,81 @@
       natW = item.natW; natH = item.natH;
       el.style.width = ''; el.style.height = '';
     }
-    // Plansza „płynna” (np. width: 100% sceny) nie może urosnąć wszerz – zostaje w scenie. Sprawdzenie: czy jej
-    // szerokość zmienia się, gdy scena nie ma limitu.
-    var fluid = false;
-    if (o.zoom && natW >= availW - 1) {
-      fluid = true;
-      if (stageW) { stage.style.maxWidth = 'none'; fluid = el.offsetWidth !== natW; stage.style.maxWidth = ''; }
+    var roomW;
+    if (side) {
+      // Kolumna planszy = kontener minus kolumna paska i odstęp między nimi.
+      var colGap = parseFloat(getComputedStyle(side.wrap).columnGap) || 0;
+      roomW = Math.min(innerW(side.wrap) - side.bar.offsetWidth - colGap, o.maxWidth || Infinity);
+    } else {
+      // Plansza „płynna” (np. width: 100% sceny) nie może urosnąć wszerz – zostaje w scenie. Sprawdzenie: czy jej
+      // szerokość zmienia się, gdy scena nie ma limitu.
+      var fluid = false;
+      if (o.zoom && natW >= availW - 1) {
+        fluid = true;
+        if (stageW) { stage.style.maxWidth = 'none'; fluid = el.offsetWidth !== natW; stage.style.maxWidth = ''; }
+      }
+      roomW = Math.min(fluid ? availW : wideW, o.maxWidth || Infinity);
     }
-    var roomW = Math.min(fluid ? availW : wideW, o.maxWidth || Infinity);
-    var top = el.getBoundingClientRect().top + window.scrollY;
-    var reserve = o.reserve != null ? o.reserve : reserveBelow(el);
+    var er = el.getBoundingClientRect();
+    var top = er.top + window.scrollY;
+    var reserve, ok = true;
+    if (side) {
+      // Status i pady stoją w lewej kolumnie: pod planszą zostaje tylko jej ramka w scenie i dół kontenera.
+      reserve = Math.max(0, side.stage.getBoundingClientRect().bottom - er.bottom) + (parseFloat(getComputedStyle(side.wrap).paddingBottom) || 0);
+      // Lewa kolumna musi zmieścić się w oknie (inaczej pojawiłby się pasek przewijania).
+      var colBottom = 0;
+      for (var c = side.wrap.firstElementChild; c; c = c.nextElementSibling) {
+        if (c !== side.stage && c.tagName !== 'SCRIPT') colBottom = Math.max(colBottom, c.getBoundingClientRect().bottom);
+      }
+      ok = roomW > 0 && colBottom <= window.innerHeight - gap;
+    } else {
+      reserve = o.reserve != null ? o.reserve : reserveBelow(el);
+    }
     var availH = window.innerHeight - (top - headerOffset()) - reserve - gap;
-    scale = Math.min(cap, (roomW - extraW) / natW, (availH - extraH) / natH);
+    return {
+      scale: fitScale(roomW, availH, natW, natH, extraW, extraH, cap), ok: ok,
+      natW: natW, natH: natH, extraW: extraW, availW: availW, stage: stage, stageW: stageW,
+      aspect: (natW + extraW) / (natH + extraH)
+    };
+  }
+  function applyFit(item) {
+    var el = item.el, o = item.opts;
+    if (!el.isConnected) return;
+    var parts = o.layout === 'auto' ? sideParts(el) : null;
+    if (parts) setSide(parts, false);
+    var m = measureFit(item, null);
+    var layout = 'stack';
+    // Pasek na bok tylko w szerszym oknie (nie na telefonie) i przy planszy pionowej lub kwadratowej.
+    if (parts && window.innerWidth >= SIDE_MIN_VW && m.aspect <= SIDE_MAX_ASPECT) {
+      setSide(parts, true);
+      var ms = measureFit(item, parts);
+      // Plansza „płynna” (szerokość z kontenera) w kolumnie bez stałej szerokości zmieniłaby rozmiar naturalny –
+      // taka zostaje nad paskiem.
+      var same = Math.abs(ms.natW - m.natW) <= 1 && Math.abs(ms.natH - m.natH) <= 1;
+      layout = pickLayout(m.scale, ms.ok && same ? ms.scale : 0, item.layout === 'side');
+      if (layout === 'side') m = ms; else setSide(parts, false);
+    }
+    item.layout = layout;
+    var scale = setSize(item, m, m.scale);
+    // Pasek obok planszy: gdyby coś w scenie (np. panel boczny gry) wyszło wyżej niż przy pomiarze i pojawił się
+    // pasek przewijania, plansza maleje o brakujące piksele (najwyżej 3 poprawki).
+    for (var i = 0; layout === 'side' && i < 3; i++) {
+      syncOverlay(); // nakładka w starym rozmiarze planszy też liczyłaby się do wysokości strony
+      var over = root.scrollHeight - window.innerHeight;
+      if (!(over > 0)) break;
+      scale = setSize(item, m, scale - (over + 1) / m.natH);
+    }
+    item.scale = scale;
+    if (o.onFit) o.onFit(item.scale, item.layout);
+    syncOverlay();
+  }
+  // Zapis rozmiaru planszy dla skali `raw` (z dolnym limitem min i pełnymi krokami dla { pixel }); zwraca skalę.
+  function setSize(item, m, raw) {
+    var el = item.el, o = item.opts;
+    var scale = raw, natW = m.natW, natH = m.natH;
     if (o.zoom) {
       scale = Math.max(o.min || 0.45, scale);
-      if (scale < 0.995 || scale > 1.005) el.style.zoom = scale.toFixed(3);
+      el.style.zoom = scale < 0.995 || scale > 1.005 ? scale.toFixed(3) : '';
     } else {
       scale = Math.max(o.min || 0.35, scale);
       if (o.pixel && scale >= 1) scale = Math.floor(scale);
@@ -395,11 +479,9 @@
       }
     }
     // Szersza plansza niż scena: poszerz scenę (wyśrodkowana w kontenerze), reszta strony bez zmian.
-    var need = natW * scale + extraW;
-    if (stage && stageW && need > availW + 0.5) stage.style.maxWidth = Math.ceil(stageW + need - availW) + 'px';
-    item.scale = scale;
-    if (o.onFit) o.onFit(item.scale);
-    syncOverlay();
+    var need = natW * scale + m.extraW;
+    if (m.stage && m.stageW && need > m.availW + 0.5) m.stage.style.maxWidth = Math.ceil(m.stageW + need - m.availW) + 'px';
+    return scale;
   }
   var fitQueued = false;
   function refit() {
@@ -644,7 +726,11 @@
         setupHud();
         setupButtons();
         buildOverlay();
-        if (cfg.fit) fit(cfg.fit === true ? cfg.board : $(cfg.fit.el || cfg.board), cfg.fit === true ? {} : cfg.fit);
+        if (cfg.fit) {
+          var fo = cfg.fit === true ? {} : cfg.fit;
+          if (cfg.layout && fo.layout == null) fo.layout = cfg.layout;
+          fit(cfg.fit === true ? cfg.board : $(cfg.fit.el || cfg.board), fo);
+        }
         if (cfg.startScreen === false) { state = 'idle'; syncPauseButtons(); }
         else showMenu();
       };
@@ -767,7 +853,11 @@
     fit: fit,
     refit: refit,
     // Dopasowane plansze: [{ el, scale }] (diagnostyka i testy).
-    fitted: function () { return fitted.map(function (i) { return { el: i.el, scale: i.scale }; }); },
+    fitted: function () { return fitted.map(function (i) { return { el: i.el, scale: i.scale, layout: i.layout || 'stack' }; }); },
+    // Bieżący układ strony gry: 'side' (pasek gry obok planszy) albo 'stack' (pasek nad planszą).
+    get layout() { return (fitted[0] && fitted[0].layout) || 'stack'; },
+    // Czysta matematyka dopasowania (testy): skala planszy i wybór układu.
+    fitMath: { scale: fitScale, pick: pickLayout, SIDE_MIN_VW: SIDE_MIN_VW, SIDE_MAX_ASPECT: SIDE_MAX_ASPECT },
     // Skala bufora canvasu względem jednostek logicznych (po fit z { sharp: true }): ctx.setTransform(r, 0, 0, r, 0, 0).
     ratio: function (canvas) { return canvas && canvas._gkLogical ? canvas.width / canvas._gkLogical.w : 1; },
     // Punkt zdarzenia (mysz / dotyk) w jednostkach logicznych canvasu.

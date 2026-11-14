@@ -117,3 +117,27 @@ html[data-pulpit-theme] .gk-float { font-family: var(--pt-font); }
 @media (prefers-reduced-motion: reduce) {
   .gk-overlay, .gk-card, .gk-record { animation: none; }
 }
+
+/* ---------- Układ „auto” (GryKit.init({ layout: 'auto' })): pasek gry obok planszy ----------
+   GryKit przełącza klasę .gk-side na wspólnym rodzicu .game-bar i .game-stage, gdy w szerokim oknie pionowa
+   lub kwadratowa plansza wychodzi wtedy wyraźnie większa. Plansza dostaje prawą kolumnę na całą wysokość, a pasek
+   gry, status i pady dotykowe stają w lewej kolumnie. Kolejność w DOM (czytniki, Tab) się nie zmienia. */
+.game-shell .gk-side {
+  display: grid;
+  grid-template-columns: var(--gk-side-w, 220px) auto;
+  /* Plansza obejmuje wszystkie wiersze; ostatni (1fr) przyjmuje jej wysokość, więc wiersze lewej kolumny nie rosną. */
+  grid-template-rows: repeat(6, auto) 1fr;
+  column-gap: var(--gk-side-gap, 24px); row-gap: 0;
+  justify-content: center; align-content: start; align-items: start;
+}
+.game-shell .gk-side > * { grid-column: 1; min-width: 0; max-width: none; margin: 12px 0 0; text-align: left; }
+.game-shell .gk-side > .game-stage { grid-column: 2; grid-row: 1 / -1; width: auto; margin: 0; }
+.game-shell .gk-side > .game-bar {
+  margin: 0;
+  flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 14px; width: auto;
+}
+.game-shell .gk-side > .game-bar > * { flex: none; min-width: 0; }
+.game-shell .gk-side > .game-bar .game-title h1 { font-size: clamp(22px, 2vw, 28px); overflow-wrap: anywhere; }
+.game-shell .gk-side > .game-bar .game-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.game-shell .gk-side > .game-bar .game-stat { min-width: 0; }
+.game-shell .gk-side > .game-bar .game-buttons > * { flex: 1 1 auto; }
