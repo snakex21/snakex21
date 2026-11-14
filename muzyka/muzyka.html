@@ -4,13 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Strefa muzyczna – Max Playground</title>
-    <meta name="description" content="Dynamiczny odtwarzacz Maxa z setkami utworów, wyszukiwarką i losowymi propozycjami dopasowanymi do Twojego nastroju." />
+    <meta
+        name="description"
+        content="Nowy odtwarzacz w stylu Spotify z biblioteką Maxa. Kolejkuj utwory, przeglądaj playlistę i graj bezpośrednio z przeglądarki."
+    />
     <link rel="icon" href="ikona.png" type="image/png" />
     <link rel="stylesheet" href="../assets/css/site.css" />
     <link rel="stylesheet" href="../assets/css/music.css" />
     <script defer src="../assets/js/site.js"></script>
 </head>
-<body>
+<body class="music-page">
     <header class="site-header">
         <nav class="main-nav" aria-label="Główna nawigacja">
             <a class="nav-brand" href="../index.html"><span>MX</span>Max Playground</a>
@@ -45,92 +48,179 @@
         <section class="hero hero--subpage hero--media">
             <div class="hero-content">
                 <span class="hero-eyebrow">Strefa muzyczna</span>
-                <h1>Kolekcja dźwięków Maxa</h1>
-                <p class="hero-lead">Losuj utwory, buduj playlisty i miksuj tempo od chilloutu po epickie soundtracki. Jeden interfejs – setki inspiracji.</p>
+                <h1>Odtwarzacz Maxa w stylu Spotify</h1>
+                <p class="hero-lead">
+                    Wskocz do ulubionych hitów, buduj kolejkę i miksuj nastroje bez wychodzenia z przeglądarki. Wszystko sterujesz z jednego, nowoczesnego panelu.
+                </p>
                 <div class="hero-actions">
-                    <a class="btn btn-primary" href="#playlists">Przejdź do playlist</a>
+                    <a class="btn btn-primary" href="#playlists">Przeglądaj bibliotekę</a>
                     <a class="btn btn-secondary" href="../filmy/filmy glowna.html">Włącz seans filmowy</a>
                 </div>
                 <div class="hero-highlight">
-                    <span class="badge">Aktualna playlista</span>
-                    <span>Wyszukaj ulubiony utwór lub zdaj się na losowanie w panelu poniżej.</span>
+                    <span class="badge">Statystyki kolekcji</span>
+                    <span><strong id="track-count">0</strong> utworów gotowych do odtworzenia w dowolnej chwili.</span>
                 </div>
             </div>
             <div class="hero-illustration hero-illustration--media">
                 <div class="hero-panel">
                     <h2>Panel dźwiękowy</h2>
-                    <p>Śledź co ostatnio grało i eksperymentuj z prędkością odtwarzania oraz trybem loop/autoplay.</p>
+                    <p>Śledź co ostatnio grało, obserwuj aktywne tryby i uruchamiaj ulubione utwory jednym kliknięciem.</p>
                     <div class="panel-metrics">
-                        <div class="metric"><span>Liczba utworów</span><strong id="track-count">∞</strong></div>
-                        <div class="metric"><span>Tryb autoplay</span><strong id="autoplay-status">Włączony</strong></div>
-                        <div class="metric"><span>Ostatnio odtworzone</span><strong id="last-played">Jeszcze nic</strong></div>
+                        <div class="metric"><span>Tryb miksu</span><strong id="autoplay-status">Losowo wyłączone</strong></div>
+                        <div class="metric"><span>Powtarzanie</span><strong id="loop-status">Brak</strong></div>
+                        <div class="metric"><span>Ostatnio grane</span><strong id="last-played">Jeszcze nic</strong></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="section" id="playlists">
+        <section class="section music-dashboard" id="playlists">
             <div class="section-header">
                 <div>
-                    <span class="section-eyebrow">Twoje playlisty</span>
-                    <h2 class="section-title">Szukaj, losuj i odkrywaj nowe brzmienia</h2>
-                    <p class="section-description">Filtruj po tytułach lub artystach, klikaj w okładki, aby w jednej chwili uruchomić wybrany utwór.</p>
+                    <span class="section-eyebrow">Twoja strefa odsłuchu</span>
+                    <h2 class="section-title">Steruj muzyką jak w Spotify</h2>
+                    <p class="section-description">Wybierz utwór z biblioteki lub kolejki, włącz losowanie, zapętlaj i odkrywaj brzmienia z repozytorium Maxa.</p>
                 </div>
             </div>
-            <div class="music-layout">
-                <aside class="music-sidebar">
-                    <label class="visually-hidden" for="search-bar">Szukaj utworów</label>
-                    <input class="input" type="search" id="search-bar" placeholder="Wpisz tytuł lub wykonawcę" />
-                    <div class="music-random">
-                        <h2>Losowe utwory</h2>
-                        <p class="music-random__hint">Kliknij w propozycję, by natychmiast ją odtworzyć.</p>
-                        <div class="music-random__list" id="random-tracks"></div>
+
+            <div class="dashboard-grid">
+                <div class="player-column">
+                    <article class="now-playing-card" aria-live="polite">
+                        <div class="cover-wrapper">
+                            <div class="cover-art" data-cover data-has-image="false" data-initial="M"></div>
+                        </div>
+                        <div class="now-playing-meta">
+                            <span class="eyebrow">Teraz odtwarzane</span>
+                            <h2 data-title>Wybierz utwór</h2>
+                            <p data-artist>Twoja kolej na muzykę</p>
+                            <p class="now-playing-album" data-album></p>
+                        </div>
+                        <div class="player-timeline">
+                            <span data-current-time>0:00</span>
+                            <input type="range" value="0" min="0" max="1000" step="1" data-progress aria-label="Pozycja utworu" />
+                            <span data-duration>0:00</span>
+                        </div>
+                        <div class="player-controls">
+                            <div class="primary-controls">
+                                <button class="player-btn" data-action="shuffle" aria-pressed="false" aria-label="Przełącz losowe odtwarzanie">🔀</button>
+                                <button class="player-btn" data-action="prev" aria-label="Poprzedni utwór">⏮</button>
+                                <button class="player-btn player-btn--main" data-action="play" aria-label="Odtwórz">▶</button>
+                                <button class="player-btn" data-action="next" aria-label="Następny utwór">⏭</button>
+                                <button class="player-btn" data-action="loop" aria-label="Zmień tryb powtarzania">🔁</button>
+                            </div>
+                            <div class="secondary-controls">
+                                <button class="tag-btn" data-action="like" aria-pressed="false" aria-label="Dodaj do ulubionych">♡ Ulubiony</button>
+                                <button class="tag-btn" data-action="random" aria-label="Losuj dowolny utwór">Losuj utwór</button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <section class="library-section" aria-labelledby="library-heading">
+                        <div class="library-header">
+                            <div>
+                                <span class="eyebrow">Twoja biblioteka</span>
+                                <h3 id="library-heading">Przeglądaj albumy i single</h3>
+                                <p>Dotknij karty, aby natychmiast odtworzyć, lub dodaj do kolejki ulubione brzmienia.</p>
+                            </div>
+                            <div class="library-actions">
+                                <label class="visually-hidden" for="library-search">Szukaj w bibliotece</label>
+                                <input id="library-search" class="input" type="search" placeholder="Filtruj bibliotekę" data-library-search />
+                                <button class="tag-btn" type="button" data-action="open-library">Pełna lista</button>
+                            </div>
+                        </div>
+                        <div class="library-grid" data-library-grid></div>
+                        <p class="library-empty" data-library-empty hidden>Brak wyników. Spróbuj innego wyszukiwania.</p>
+                    </section>
+                </div>
+
+                <aside class="queue-column">
+                    <div class="queue-card">
+                        <div class="queue-header">
+                            <div>
+                                <span class="eyebrow">Kolejka</span>
+                                <h3>Najbliższe utwory</h3>
+                            </div>
+                            <span class="queue-count" data-queue-count>0 utworów</span>
+                        </div>
+                        <div class="queue-search">
+                            <label class="visually-hidden" for="queue-search">Szukaj w kolejce</label>
+                            <input id="queue-search" class="input" type="search" placeholder="Szukaj po tytule lub artyście" data-search />
+                        </div>
+                        <div class="queue-actions">
+                            <button class="tag-btn" data-action="shuffle">Losowe</button>
+                            <button class="tag-btn" data-action="clear-search">Wyczyść</button>
+                        </div>
+                        <ol class="queue-list" data-queue role="listbox" aria-label="Lista utworów do odtworzenia"></ol>
+                        <p class="queue-empty" data-empty hidden>Brak wyników w kolejce. Usuń filtr lub dodaj nowe utwory.</p>
                     </div>
                 </aside>
-                <div class="music-content">
-                    <h2>Galeria okładek</h2>
-                    <div class="music-section" id="music-section"></div>
-                </div>
             </div>
         </section>
     </main>
 
-    <footer class="music-footer">
-        <div class="music-player" id="player">
-            <div class="track-info">
-                <span id="track-title">Tytuł utworu</span>
-                <span id="track-artist">Artysta</span>
+    <div class="library-drawer" data-library-drawer aria-hidden="true">
+        <div class="library-drawer__backdrop" data-action="close-library" aria-hidden="true"></div>
+        <div
+            class="library-drawer__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="library-drawer-title"
+            data-library-drawer-panel
+        >
+            <header class="library-drawer__header">
+                <div>
+                    <span class="eyebrow">Pełna biblioteka</span>
+                    <h2 id="library-drawer-title">Wszystkie utwory pod ręką</h2>
+                    <p>Przeglądaj, wyszukuj i odtwarzaj dowolny kawałek jednym kliknięciem.</p>
+                </div>
+                <div class="library-drawer__actions">
+                    <label class="visually-hidden" for="library-drawer-search">Filtruj utwory w bibliotece</label>
+                    <input
+                        id="library-drawer-search"
+                        class="input"
+                        type="search"
+                        placeholder="Szukaj po tytule, artyście lub albumie"
+                        data-library-drawer-search
+                    />
+                    <button class="tag-btn" type="button" data-action="close-library">Zamknij</button>
+                </div>
+            </header>
+            <div class="library-drawer__content">
+                <ul class="drawer-track-list" data-library-drawer-list role="listbox" aria-label="Pełna lista utworów"></ul>
+                <p class="drawer-empty" data-library-drawer-empty hidden>Brak wyników. Spróbuj innego hasła.</p>
             </div>
-            <div class="controls">
-                <button id="prev" onclick="prevTrack()" aria-label="Poprzedni utwór">&#9664;&#9664;</button>
-                <button id="rewind" onclick="rewind15()" aria-label="Przewiń 15 sekund do tyłu">&#8630; 15s</button>
-                <button id="play-pause" onclick="togglePlay()" aria-label="Odtwórz lub wstrzymaj">&#9654;</button>
-                <button id="forward" onclick="forward15()" aria-label="Przewiń 15 sekund do przodu">15s &#8631;</button>
-                <button id="next" onclick="nextTrack()" aria-label="Następny utwór">&#9654;&#9654;</button>
-                <button id="loop" onclick="toggleLoop()" aria-label="Przełącz pętlę"><img src="loop_off.png" id="loop-icon" alt="Loop"></button>
-                <button id="autoplay" onclick="toggleAutoplay()">Włącz autoodtwarzanie</button>
-                <div class="speed-control">
-                    <label for="speed">Tempo:</label>
-                    <select id="speed" onchange="changeSpeed(event)">
-                        <option value="0.25">0.25x</option>
-                        <option value="0.5">0.5x</option>
-                        <option value="0.75">0.75x</option>
-                        <option value="1" selected>1x</option>
-                        <option value="1.25">1.25x</option>
-                        <option value="1.5">1.5x</option>
-                        <option value="2">2x</option>
-                        <option value="3">3x</option>
-                    </select>
+        </div>
+    </div>
+
+    <footer class="player-footer" aria-label="Panel sterowania odtwarzaczem">
+        <div class="spotify-player" data-player-bar>
+            <div class="player-bar-left">
+                <div class="bar-cover" data-bar-cover data-has-image="false" data-initial="M"></div>
+                <div class="bar-meta">
+                    <span class="bar-title" data-bar-title>Wybierz utwór</span>
+                    <span class="bar-artist" data-bar-artist>Rozpocznij odtwarzanie, aby zobaczyć szczegóły</span>
+                </div>
+                <button class="player-btn player-btn--ghost" data-action="like" data-bar-like aria-pressed="false" aria-label="Dodaj do ulubionych">♡</button>
+            </div>
+            <div class="player-bar-center">
+                <div class="player-bar-controls">
+                    <button class="player-btn" data-action="shuffle" aria-pressed="false" aria-label="Przełącz losowe odtwarzanie">🔀</button>
+                    <button class="player-btn" data-action="prev" aria-label="Poprzedni utwór">⏮</button>
+                    <button class="player-btn player-btn--main" data-action="play" aria-label="Odtwórz">▶</button>
+                    <button class="player-btn" data-action="next" aria-label="Następny utwór">⏭</button>
+                    <button class="player-btn" data-action="loop" aria-label="Zmień tryb powtarzania">🔁</button>
+                </div>
+                <div class="player-bar-timeline">
+                    <span data-current-time>0:00</span>
+                    <input type="range" min="0" max="1000" value="0" step="1" data-progress aria-label="Pozycja utworu" />
+                    <span data-duration>0:00</span>
                 </div>
             </div>
-            <div class="progress-container">
-                <span id="current-time">0:00</span>
-                <input type="range" id="progress" value="0" max="100" onchange="seek(event)" aria-label="Postęp odtwarzania">
-                <span id="total-time">0:00</span>
-            </div>
-            <div class="volume-control">
-                <img src="volume_on.png" id="volume-icon" onclick="toggleMute()" alt="Głośność">
-                <input type="range" id="volume" value="100" max="100" onchange="changeVolume(event)" aria-label="Ustaw głośność">
+            <div class="player-bar-right">
+                <button class="player-btn" type="button" data-action="open-library" aria-label="Otwórz bibliotekę">📚</button>
+                <button class="player-btn" data-action="mute" aria-label="Wycisz lub włącz dźwięk">🔊</button>
+                <input type="range" min="0" max="100" value="80" data-volume aria-label="Głośność" />
+                <div class="loop-indicator" data-loop-indicator>Tryb: brak powtarzania</div>
             </div>
         </div>
     </footer>
