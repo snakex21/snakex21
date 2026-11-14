@@ -71,7 +71,16 @@ test('catalog: Connect4 and Wheel describe implemented modes accurately',()=>{
  const p=catalog({games:true});const data=p.window.gamesCatalog;
  const connect=data.find(g=>g.slug==='connect4');assert.deepEqual([...connect.modes],['Dwóch graczy']);assert.doesNotMatch(connect.description,/AI/);
  const wheel=data.find(g=>g.slug==='wheel');assert.match(wheel.description,/wylosować/);assert.doesNotMatch(wheel.description,/odgadnij|hasło/);
- assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261010-games2/);
+ assert.match(fs.readFileSync(path.join(root,'gry/gry.html'),'utf8'),/games-data\.js\?v=20261114-gry/);
+});
+
+test('catalog: merged Ping-pong and tic-tac-toe entries point at the single game pages',()=>{
+ const p=catalog({games:true});const data=p.window.gamesCatalog;
+ const pong=data.find(g=>g.slug==='pong');assert.equal(pong.title,'Ping-pong');assert.equal(pong.url,'pong/pong.html');
+ assert.deepEqual([...pong.modes],['Solo','Dwóch graczy','Wspólna gra']);
+ assert.equal(data.filter(g=>/ping|pong/i.test(g.url)).length,1);
+ assert.equal(data.filter(g=>/kolkos|kolkokrzy/.test(g.url)).length,1);
+ for(const g of data)assert.ok(fs.existsSync(path.join(root,'gry',g.url))&&!/http-equiv=["']refresh/i.test(fs.readFileSync(path.join(root,'gry',g.url),'utf8')),g.url);
 });
 
 function gamesWithArt(options = {}) {
