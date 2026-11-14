@@ -1,46 +1,49 @@
-const escapeHtml = function (value) {
-  var safeValue = value == null ? "" : value;
-  return String(safeValue)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-};
+(function () {
+  "use strict";
 
-const escapeAttribute = function (value) {
-  return escapeHtml(value).replace(/`/g, "&#96;");
-};
+  const escapeHtml = function (value) {
+    var safeValue = value == null ? "" : value;
+    return String(safeValue)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  };
 
-const escapeForSelector = function (value) {
-  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
-    return CSS.escape(String(value == null ? "" : value));
-  }
-  return String(value == null ? "" : value).replace(/([.*+?^${}()|\[\]\\])/g, "\\$1");
-};
+  const escapeAttribute = function (value) {
+    return escapeHtml(value).replace(/`/g, "&#96;");
+  };
 
-const gamesCatalog = Array.isArray(window.gamesCatalog) ? window.gamesCatalog : [];
-const difficultyScale = window.gamesDifficultyScale || {};
-const durationScale = window.gamesDurationScale || {};
+  const escapeForSelector = function (value) {
+    if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+      return CSS.escape(String(value == null ? "" : value));
+    }
+    return String(value == null ? "" : value).replace(/([.*+?^${}()|\[\]\\])/g, "\\$1");
+  };
 
-document.addEventListener("DOMContentLoaded", function () {
-  const gameGrid = document.querySelector("[data-game-grid]");
-  if (!gameGrid) return;
+  const gamesCatalog = Array.isArray(window.gamesCatalog) ? window.gamesCatalog : [];
+  const difficultyScale = window.gamesDifficultyScale || {};
+  const durationScale = window.gamesDurationScale || {};
 
-  const searchInput = document.querySelector("[data-game-search-input]");
-  const randomButton = document.querySelector("[data-random-game]");
-  const emptyState = document.querySelector("[data-empty-state]");
-  const filtersContainer = document.querySelector("[data-game-filters]");
-  const featuredContainer = document.querySelector("[data-game-featured]");
-  const collectionsContainer = document.querySelector("[data-game-collections]");
-  const activeCountEl = document.querySelector("[data-game-active-count]");
-  const statsTotalEl = document.querySelector("[data-games-count]");
-  const statsSoloEl = document.querySelector("[data-games-solo]");
-  const statsMultiEl = document.querySelector("[data-games-multi]");
-  const statsDifficultyEl = document.querySelector("[data-games-difficulty]");
-  const statsDifficultyNoteEl = document.querySelector("[data-games-difficulty-note]");
-  const statsDurationEl = document.querySelector("[data-games-duration]");
-  const statsDurationNoteEl = document.querySelector("[data-games-duration-note]");
+  const initializeGameLibrary = function () {
+    const gameGrid = document.querySelector("[data-game-grid]");
+    if (!gameGrid) return;
+
+    const searchInput = document.querySelector("[data-game-search-input]");
+    const randomButton = document.querySelector("[data-random-game]");
+    const emptyState = document.querySelector("[data-empty-state]");
+    const filtersContainer = document.querySelector("[data-game-filters]");
+    const featuredContainer = document.querySelector("[data-game-featured]");
+    const collectionsContainer = document.querySelector("[data-game-collections]");
+    const activeCountEl = document.querySelector("[data-game-active-count]");
+    const statsTotalEl = document.querySelector("[data-games-count]");
+    const statsSoloEl = document.querySelector("[data-games-solo]");
+    const statsMultiEl = document.querySelector("[data-games-multi]");
+    const statsDifficultyEl = document.querySelector("[data-games-difficulty]");
+    const statsDifficultyNoteEl = document.querySelector("[data-games-difficulty-note]");
+    const statsDurationEl = document.querySelector("[data-games-duration]");
+    const statsDurationNoteEl = document.querySelector("[data-games-duration-note]");
 
   const catalog = gamesCatalog.map(function (game) {
     const searchableParts = [];
@@ -432,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
           chip.classList.remove("is-active");
         }
       });
-      applyFilters();
+    applyFilters();
     });
   }
 
@@ -449,5 +452,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  applyFilters();
-});
+    applyFilters();
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeGameLibrary);
+  } else {
+    initializeGameLibrary();
+  }
+})();

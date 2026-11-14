@@ -41,39 +41,43 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Retro logiczna</span>
-                <h1>Tetris</h1>
-                <p>Ustawiaj spadające klocki, twórz pełne linie i czyść planszę. Klasyczna rozgrywka, która wciąga na długie minuty.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryb:</strong><br/>Solo</div>
-                    <div class="game-meta__item"><strong>Tempo:</strong><br/>Przyspiesza z każdą kolejną linią</div>
-                    <div class="game-meta__item"><strong>Cel:</strong><br/>Zdobywaj punkty i unikaj wypełnienia planszy</div>
-                    <div class="game-meta__item"><strong>Umiejętności:</strong><br/>Planowanie i szybkie reakcje</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Zagraj</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Strategie</h2>
-                <ul>
-                    <li>Zostaw jeden wąski kanał, aby wpasować długi klocek i zdobyć Tetris.</li>
-                    <li>Nie przyspieszaj od razu – daj sobie czas na planowanie kolejnych ruchów.</li>
-                    <li>Pracuj nad czterema liniami naraz, aby mnożyć punkty.</li>
-                </ul>
-            </aside>
-        </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Tetris</h1>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-tetris-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="Tetris – zagraj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Steruj precyzyjnie – spadające klocki reagują na szybkie decyzje. Spacja obraca klocek natychmiast.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-tetris-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Ustawiaj spadające klocki, twórz pełne linie i czyść planszę. Klasyczna rozgrywka, która wciąga na długie minuty.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryb</dt>
+                            <dd>Solo</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Tempo</dt>
+                            <dd>Przyspiesza z każdą kolejną linią</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Cel</dt>
+                            <dd>Zdobywaj punkty i unikaj wypełnienia planszy</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Umiejętności</dt>
+                            <dd>Planowanie i szybkie reakcje</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -81,13 +85,16 @@
                         <li>Strzałka w dół – szybsze opadanie.</li>
                         <li>Spacja – obrót klocka.</li>
                     </ul>
+                    <p>Steruj precyzyjnie – spadające klocki reagują na szybkie decyzje. Spacja obraca klocek natychmiast.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Wyśrubuj rekord</h2>
+                    <h2>Strategie</h2>
+                    <ul class="game-list">
+                        <li>Zostaw jeden wąski kanał, aby wpasować długi klocek i zdobyć Tetris.</li>
+                        <li>Nie przyspieszaj od razu – daj sobie czas na planowanie kolejnych ruchów.</li>
+                        <li>Pracuj nad czterema liniami naraz, aby mnożyć punkty.</li>
+                    </ul>
                     <p>Próbuj wyczyścić jak najwięcej linii w jednej partii. Zapisuj wyniki i walcz o podium z przyjaciółmi.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
                 </div>
             </aside>
         </section>

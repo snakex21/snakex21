@@ -41,39 +41,43 @@
         </nav>
     </header>
     <main>
-        <section class="game-hero">
-            <div class="game-hero__content">
-                <span class="badge">Quiz</span>
-                <h1>Quiz wiedzy</h1>
-                <p>Losowe pytania, dwa tryby gry i natychmiastowa informacja zwrotna. Świetny sposób, aby sprawdzić się po lekcjach albo przygotować do klasówki.</p>
-                <div class="game-meta">
-                    <div class="game-meta__item"><strong>Tryby:</strong><br/>Jedno pytanie lub cała seria</div>
-                    <div class="game-meta__item"><strong>Trening:</strong><br/>Ogólna wiedza i szybkie myślenie</div>
-                    <div class="game-meta__item"><strong>Udogodnienia:</strong><br/>Przejrzysty podgląd wyniku końcowego</div>
-                    <div class="game-meta__item"><strong>Idealny na:</strong><br/>Krótkie sesje nauki</div>
-                </div>
-                <div class="game-hero__actions">
-                    <a class="btn btn-primary" href="#play">Rozpocznij quiz</a>
-                    <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
-                </div>
-            </div>
-            <aside class="game-hero__aside">
-                <h2>Jak zdobyć więcej punktów?</h2>
-                <ul>
-                    <li>Wybierz tryb wielopytaniowy i zapisuj wyniki w tabeli.</li>
-                    <li>Ćwicz regularnie – kilka krótkich serii dziennie działa lepiej niż długa raz na tydzień.</li>
-                    <li>Po zakończeniu rundy przeanalizuj pytania, które sprawiły trudność.</li>
-                </ul>
-            </aside>
-        </section>
-        <section class="game-layout" id="play">
+        <section class="game-layout" id="play" data-instructions-layout>
+            <h1 class="visually-hidden">Quiz wiedzy</h1>
             <div class="game-layout__main">
+                <div class="game-layout__controls">
+                    <button class="btn btn-ghost game-layout__toggle" type="button" data-instructions-toggle aria-expanded="false" aria-controls="game-quiz-instructions" data-open-label="📘 Pokaż opis i sterowanie" data-close-label="📕 Ukryj opis i sterowanie">📘 Pokaż opis i sterowanie</button>
+                </div>
                 <div class="game-frame">
                     <iframe src="play.html" title="Quiz wiedzy – zagraj" loading="lazy"></iframe>
                 </div>
-                <p class="game-note">Spróbuj rozwiązać quiz bez błędnej odpowiedzi. Po uzyskaniu 100% wyników zwiększ tempo lub poproś znajomych o wspólne rozgrywki.</p>
             </div>
-            <aside class="game-layout__aside">
+            <aside class="game-layout__aside" id="game-quiz-instructions" data-instructions-panel hidden tabindex="-1">
+                <div class="game-card">
+                    <h2>Opis gry</h2>
+                    <p>Losowe pytania, dwa tryby gry i natychmiastowa informacja zwrotna. Świetny sposób, aby sprawdzić się po lekcjach albo przygotować do klasówki.</p>
+                    <dl class="game-details">
+                        <div class="game-details__item">
+                            <dt>Tryby</dt>
+                            <dd>Jedno pytanie lub cała seria</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Trening</dt>
+                            <dd>Ogólna wiedza i szybkie myślenie</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Udogodnienia</dt>
+                            <dd>Przejrzysty podgląd wyniku końcowego</dd>
+                        </div>
+                        <div class="game-details__item">
+                            <dt>Idealny na</dt>
+                            <dd>Krótkie sesje nauki</dd>
+                        </div>
+                    </dl>
+                    <div class="game-shortcuts">
+                        <a class="btn btn-secondary" href="../gry.html">← Wróć do biblioteki</a>
+                        <a class="btn btn-primary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
+                    </div>
+                </div>
                 <div class="game-card">
                     <h2>Sterowanie</h2>
                     <ul class="game-list">
@@ -81,13 +85,16 @@
                         <li>Kliknij odpowiedź, aby przejść dalej – gra natychmiast pokaże, czy była poprawna.</li>
                         <li>Na końcu rundy otrzymasz podsumowanie poprawnych odpowiedzi.</li>
                     </ul>
+                    <p>Spróbuj rozwiązać quiz bez błędnej odpowiedzi. Po uzyskaniu 100% wyników zwiększ tempo lub poproś znajomych o wspólne rozgrywki.</p>
                 </div>
                 <div class="game-card">
-                    <h2>Własne pytania</h2>
+                    <h2>Jak zdobyć więcej punktów?</h2>
+                    <ul class="game-list">
+                        <li>Wybierz tryb wielopytaniowy i zapisuj wyniki w tabeli.</li>
+                        <li>Ćwicz regularnie – kilka krótkich serii dziennie działa lepiej niż długa raz na tydzień.</li>
+                        <li>Po zakończeniu rundy przeanalizuj pytania, które sprawiły trudność.</li>
+                    </ul>
                     <p>Zapisuj inspirujące pytania i dodaj je do domowej wersji quizu. Możesz też rywalizować z przyjaciółmi, przygotowując własne zestawy.</p>
-                    <div class="game-shortcuts">
-                        <a class="btn btn-secondary" href="play.html" target="_blank" rel="noopener">Pełny ekran</a>
-                    </div>
                 </div>
             </aside>
         </section>
