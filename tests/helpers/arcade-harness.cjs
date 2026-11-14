@@ -32,7 +32,7 @@ function loadGame(file, options = {}) {
   const window = {innerWidth:options.width || 800,innerHeight:options.height || 800,scrollY:0,document,performance:{now:()=>now},requestAnimationFrame,addEventListener(type,cb){(events[type] ||= []).push(cb);},getComputedStyle:computed};
   const matchMedia = () => ({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}});
   Object.assign(window,{parent:window,matchMedia,removeEventListener(){},scrollTo(){},devicePixelRatio:1});
-  const context = vm.createContext({document,window,console,Event,HTMLElement,Image:class{},getComputedStyle:computed,matchMedia,addEventListener:window.addEventListener,removeEventListener(){},devicePixelRatio:1,navigator:{userAgent:'Test',vendor:''},performance:window.performance,
+  const context = vm.createContext({document,window,console,Event,HTMLElement,Image:class{},getComputedStyle:computed,matchMedia,innerWidth:window.innerWidth,innerHeight:window.innerHeight,scrollY:0,addEventListener:window.addEventListener,removeEventListener(){},devicePixelRatio:1,navigator:{userAgent:'Test',vendor:''},performance:window.performance,
     location:{search:'',href:'https://example.test/'+file},URLSearchParams,
     alert(){},confirm:()=>true,
     Math:Object.assign(Object.create(Math),{random:options.random || (()=>0.5)}),
@@ -41,7 +41,9 @@ function loadGame(file, options = {}) {
   });
   Object.assign(window,{setTimeout:context.setTimeout,clearTimeout:context.clearTimeout,setInterval:context.setInterval,clearInterval:context.clearInterval});
   const run = js => vm.runInContext(js,context,{timeout:2000});
-  for(const node of document.querySelectorAll('script')) {
+  // Like a browser: classic scripts in document order, then deferred scripts.
+  const scripts=[...document.querySelectorAll('script')];
+  for(const node of [...scripts.filter(n=>!n.hasAttribute('defer')),...scripts.filter(n=>n.hasAttribute('defer'))]) {
     const src=node.getAttribute('src');
     if(src) {
       const clean=src.split(/[?#]/)[0];
