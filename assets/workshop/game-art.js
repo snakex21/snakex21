@@ -51,10 +51,11 @@
     'space-invaders': svg(C.night,
       [30, 62, 94, 126].map(x => `<path d="M${x} 20h4v4h-4zM${x + 12} 20h4v4h-4zM${x} 24h16v4h-16zM${x - 4} 28h24v4h-24zM${x - 4} 32h4v4h-4zM${x + 16} 32h4v4h-4z" fill="${C.lime}"/>`).join('') +
       `<path d="M74 72h12v6H74zM78 66h4v6h-4z" fill="${C.yellow}"/><rect x="79" y="46" width="2" height="12" fill="${C.yellow}"/>`),
-    pong: svg(C.ink,
-      `<path d="M80 6v78" stroke="${C.cream}" stroke-width="2" stroke-dasharray="5 5" opacity=".5"/>` +
-      `<rect x="20" y="26" width="6" height="26" rx="2" fill="${C.cream}"/><rect x="134" y="40" width="6" height="26" rx="2" fill="${C.lime}"/>` +
-      `<circle cx="100" cy="36" r="4" fill="${C.yellow}"/>`),
+    pong: svg('#1d5683',
+      `<rect x="10" y="8" width="140" height="74" rx="4" fill="none" stroke="${C.cream}" stroke-width="2" opacity=".85"/>` +
+      `<path d="M80 8v74" stroke="${C.cream}" stroke-width="2" opacity=".5"/><path d="M10 45h140" stroke="${C.cream}" stroke-width="1" opacity=".35"/>` +
+      `<rect x="18" y="24" width="7" height="26" rx="3.5" fill="${C.orange}"/><rect x="135" y="40" width="7" height="26" rx="3.5" fill="${C.lime}"/>` +
+      `<circle cx="88" cy="40" r="3" fill="${C.cream}" opacity=".25"/><circle cx="94" cy="38" r="3.5" fill="${C.cream}" opacity=".45"/><circle cx="101" cy="36" r="4.5" fill="${C.cream}"/>`),
     'tic-tac-toe': svg(C.cream,
       `<path d="M66 12v66M94 12v66M46 34h68M46 56h68" stroke="${C.ink}" stroke-width="3" stroke-linecap="round"/>` +
       `<path d="M50 16l12 12M62 16L50 28M98 60l12 12M110 60L98 72" stroke="${C.red}" stroke-width="4" stroke-linecap="round"/>` +
@@ -87,12 +88,12 @@
       `<rect x="104" y="60" width="22" height="30" fill="${C.green}"/><rect x="100" y="56" width="30" height="8" rx="2" fill="${C.green}"/>` +
       `<ellipse cx="62" cy="44" rx="13" ry="10" fill="${C.yellow}"/><circle cx="67" cy="41" r="3" fill="${C.cream}"/><circle cx="68" cy="41" r="1.5" fill="${C.ink}"/><path d="M74 45l7 2-7 3z" fill="${C.orange}"/><ellipse cx="57" cy="46" rx="6" ry="3.5" fill="${C.cream}"/>` +
       `<rect y="82" width="160" height="8" fill="${C.lime}"/>`),
-    snake: svg(C.ink,
-      grid(36, 18, 9, 5, 8, 2, (c, r) => {
-        const body = ['.........', '.SSSSS...', '.S...S...', 'HS...SSS.', '.......S.'];
-        return body[r][c] === 'S' ? C.lime : body[r][c] === 'H' ? C.green : null;
-      }) +
-      `<rect x="116" y="58" width="8" height="8" rx="4" fill="${C.red}"/>`),
+    snake: svg('#17251f',
+      `<path d="M30 66C30 40 58 40 66 52S92 70 104 52S120 30 108 26" fill="none" stroke="#2f7a55" stroke-width="13" stroke-linecap="round"/>` +
+      `<path d="M30 66C30 40 58 40 66 52S92 70 104 52S120 30 108 26" fill="none" stroke="${C.lime}" stroke-width="9" stroke-linecap="round"/>` +
+      `<ellipse cx="106" cy="25" rx="9" ry="8" fill="#a8dc7f"/><circle cx="104" cy="21" r="2.6" fill="${C.cream}"/><circle cx="110" cy="23" r="2.6" fill="${C.cream}"/>` +
+      `<circle cx="104.6" cy="21" r="1.2" fill="${C.ink}"/><circle cx="110.6" cy="23" r="1.2" fill="${C.ink}"/>` +
+      `<circle cx="132" cy="58" r="7" fill="${C.orange}"/><path d="M132 51q2-5 6-5" stroke="#7cc46b" stroke-width="2.5" fill="none" stroke-linecap="round"/>`),
     'hacker-tycoon': svg(C.night,
       `<rect x="30" y="14" width="100" height="58" rx="6" fill="#0d1612" stroke="${C.green}" stroke-width="2"/>` +
       `<text x="40" y="34" font-size="9" font-family="monospace" fill="${C.lime}">&gt; hack --all</text>` +

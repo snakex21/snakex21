@@ -132,24 +132,24 @@ const gamesCatalog = [
   },
   {
     slug: "pong",
-    title: "Pong",
+    title: "Ping-pong",
     description:
-      "Kultowa gra arcade w dwóch trybach: zagraj solo przeciwko AI lub we dwóch przeciwko sobie. Odbijaj piłkę i zdobywaj punkty!",
-    coverAlt: "Klasyczna gra Pong z paletkami i piłką",
+      "Stół, dwie paletki i piłka w trzech trybach: mecz z komputerem (trzy poziomy), pojedynek we dwóch na jednej klawiaturze albo współpraca – razem utrzymajcie jak najdłuższą wymianę.",
+    coverAlt: "Niebieski stół do ping-ponga z dwiema paletkami i piłką",
     url: "pong/pong.html",
     genres: ["Arcade", "Retro"],
-    modes: ["Solo", "Dwóch graczy"],
-    tags: ["vs AI", "Rywalizacja", "Refleks"],
+    modes: ["Solo", "Dwóch graczy", "Wspólna gra"],
+    tags: ["vs AI", "Rywalizacja", "Współpraca", "Refleks"],
     difficulty: "casual",
     duration: "quick",
     spotlight:
-      "Wybierz tryb: zagraj sam przeciwko AI lub we dwóch na jednej klawiaturze. Klasyka w najczystszej postaci!"
+      "Jedna gra zamiast trzech dawnych wersji: wybierz tryb na starcie, a rekord najdłuższej wymiany zapisze się osobno."
   },
   {
     slug: "tic-tac-toe",
     title: "Kółko i krzyżyk",
     description:
-      "Wybierz tryb: zagraj przeciwko AI lub ze znajomym przy jednym ekranie. Rywalizuj w klasycznym pojedynku X kontra O!",
+      "Zagraj z komputerem (trzy poziomy trudności) albo ze znajomym przy jednym ekranie. Klasyczny pojedynek X kontra O z licznikiem wygranych.",
     cover: "kolkokrzyrzykc/kókokrzyżyk.JPG",
     coverAlt: "Plansza 3x3 w grze kółko i krzyżyk z zaznaczonymi symbolami",
     url: "kolkokrzyrzykc/kolkokrzyzykc.html",
@@ -182,7 +182,6 @@ const gamesCatalog = [
     title: "Quiz o podzespołach",
     description:
       "Sprawdź swoją wiedzę o sprzęcie komputerowym. Losowe pytania i szybkie odpowiedzi pokazują, gdzie masz braki.",
-    cover: "quiz/CEIk9kuTURBXy9jNmFjZDg1MS1jM2JjLTQ2M2EtOTE2Zi1hOWVmMjRjNTUxNzIuanBlZ5DeAAGhMAU.webp",
     coverAlt: "Pytania testowe na ekranie quizu o podzespołach komputerowych",
     url: "quiz/quiz.html",
     genres: ["Quiz", "Edukacyjne"],
@@ -257,7 +256,7 @@ const gamesCatalog = [
     slug: "snake",
     title: "Snake",
     description:
-      "Nieśmiertelny Wąż powraca. Zbieraj punkty, rośnij w siłę i unikaj zderzenia z własnym ogonem lub ścianą.",
+      "Nieśmiertelny Wąż powraca. Zbieraj owoce i złote gwiazdki, rośnij w siłę i unikaj zderzenia z własnym ogonem lub ścianą.",
     coverAlt: "Zielony wąż w stylu retro",
     url: "snakex21/snake.html",
     genres: ["Retro", "Zręcznościowa"],
